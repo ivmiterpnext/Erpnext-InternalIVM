@@ -1,0 +1,14 @@
+trigger:
+- develop
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: SSH@0
+  inputs:
+    sshEndpoint: 'ssh-ivm-dev'
+    commands: |
+      cd frappe-bench && bench update --pull
+  displayName: 'Deploy'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
