@@ -1,0 +1,62 @@
+[
+ {
+  "campaign_name": "June 2009 WebEx Webinar",
+  "campaign_schedules": [],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Campaign",
+  "modified": "2023-07-31 14:37:28.975347",
+  "name": "June 2009 WebEx Webinar",
+  "naming_series": "SAL-CAM-.YYYY.-"
+ },
+ {
+  "campaign_name": "ASSE Tradeshow",
+  "campaign_schedules": [],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Campaign",
+  "modified": "2023-07-31 14:38:05.718710",
+  "name": "ASSE Tradeshow",
+  "naming_series": "SAL-CAM-.YYYY.-"
+ },
+ {
+  "campaign_name": "NSE Tradeshow",
+  "campaign_schedules": [],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Campaign",
+  "modified": "2023-07-31 14:38:21.490668",
+  "name": "NSE Tradeshow",
+  "naming_series": "SAL-CAM-.YYYY.-"
+ },
+ {
+  "campaign_name": "Other",
+  "campaign_schedules": [],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Campaign",
+  "modified": "2023-07-31 14:38:38.690663",
+  "name": "Other",
+  "naming_series": "SAL-CAM-.YYYY.-"
+ },
+ {
+  "campaign_name": "Steel Industry Campaign",
+  "campaign_schedules": [],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Campaign",
+  "modified": "2023-07-31 14:39:05.111777",
+  "name": "Steel Industry Campaign",
+  "naming_series": "SAL-CAM-.YYYY.-"
+ },
+ {
+  "campaign_name": "Supplier/Distributor Webinar",
+  "campaign_schedules": [],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Campaign",
+  "modified": "2023-07-31 14:39:59.489537",
+  "name": "Supplier/Distributor Webinar",
+  "naming_series": "SAL-CAM-.YYYY.-"
+ }
+]
