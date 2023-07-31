@@ -9,7 +9,6 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 # app_include_js = "/assets/ivm/js/ivm.js"
@@ -31,7 +30,7 @@ app_license = "MIT"
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {"Lead" : "public/js/Lead.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {"Lead" : "public/js/Lead_listview.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 

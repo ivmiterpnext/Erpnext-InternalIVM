@@ -114,6 +114,14 @@ function checkSalesLoftUser(email) {
   
   // Frappe form event handling for the Lead doctype
   frappe.ui.form.on("Lead", {
+    onload: function(frm){
+      $(document).ready(function(){
+            $(".section-head").css({"color":"#7a2a96",'font-size': '20px'});
+              $("#lead-__details").css({"background-color":"gainsboro"})
+              $('button[data-label="Save"]').css("background-color","#7f249e")
+              
+      })
+  },
     validate: function (frm) {
       var email = frm.doc.email_id;
       var name = frm.doc.first_name;
