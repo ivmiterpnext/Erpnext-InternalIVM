@@ -10,6 +10,6 @@ steps:
     sshEndpoint: 'ssh-ivm-dev'
     commands: |
       cd /home/ivm-admin/frappe-bench/apps/ivm && git pull origin develop && cd /home/ivm-admin/frappe-bench && bench build && bench migrate && bench restart
-  failOnStderr: false
+    failOnStderr: false
   displayName: 'Deploy'
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
