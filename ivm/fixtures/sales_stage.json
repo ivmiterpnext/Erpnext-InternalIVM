@@ -1,0 +1,58 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Sales Stage",
+  "modified": "2023-07-31 12:01:25.577130",
+  "name": "Discovery",
+  "stage_name": "Discovery"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Sales Stage",
+  "modified": "2023-07-31 12:02:31.307537",
+  "name": "Begining Stages",
+  "stage_name": "Begining Stages"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Sales Stage",
+  "modified": "2023-07-31 12:02:45.029967",
+  "name": "Active Dialogue",
+  "stage_name": "Active Dialogue"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Sales Stage",
+  "modified": "2023-07-31 12:03:02.445662",
+  "name": "Pending Contract",
+  "stage_name": "Pending Contract"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Sales Stage",
+  "modified": "2023-07-31 12:04:08.700921",
+  "name": "Contract Sent",
+  "stage_name": "Contract Sent"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Sales Stage",
+  "modified": "2023-07-31 12:04:20.701597",
+  "name": "Redline/PO",
+  "stage_name": "Redline/PO"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Sales Stage",
+  "modified": "2023-07-31 12:04:34.807377",
+  "name": "Closed Won",
+  "stage_name": "Closed Won"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Sales Stage",
+  "modified": "2023-07-31 12:04:44.867670",
+  "name": "Closed Lost",
+  "stage_name": "Closed Lost"
+ }
+]

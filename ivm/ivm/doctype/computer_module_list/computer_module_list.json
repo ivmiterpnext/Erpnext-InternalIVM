@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-07-29 15:41:30.065842",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "module_list"
+ ],
+ "fields": [
+  {
+   "fieldname": "module_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Module List",
+   "options": "Computer Interface Module"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-08-01 10:31:15.312811",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Computer Module List",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
