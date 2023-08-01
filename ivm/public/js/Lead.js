@@ -116,9 +116,7 @@ function checkSalesLoftUser(email) {
   frappe.ui.form.on("Lead", {
     onload: function(frm){
       $(document).ready(function(){
-            $(".section-head").css({"color":"#7a2a96",'font-size': '20px'});
-              $("#lead-__details").css({"background-color":"gainsboro"})
-              $('button[data-label="Save"]').css("background-color","#7f249e")
+            $(".section-head").css({"color":"#2490EF",'font-size': '20px'});
               
       })
   },
