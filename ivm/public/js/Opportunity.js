@@ -18,18 +18,20 @@ frappe.ui.form.on("Opportunity", {
     cur_frm.set_value('equipment_total', equipment_total)
   },
   probability: function (frm) {
-    // On probabilityfield trigger calculting the forecast_revenue
+    // On probability field trigger calculting the forecast_revenue
 
     let number_of_machines = frm.doc.number_of_machines ? frm.doc.number_of_machines : 1
     let number_of_primary_lockers = frm.doc.number_of_primary_lockers ? frm.doc.number_of_primary_lockers : 1
     let number_of_secondary_lockers = frm.doc.number_of_secondary_lockers ? frm.doc.number_of_secondary_lockers : 1
     let sv_term = Number(frm.doc.sv_term.slice(0, 2)) + 1
 
-    let total_forecast_revenue = frm.doc.per_machine_mthly_lease_fee * number_of_machines + frm.doc.per_primary_locker_mthly_lease_fee * number_of_primary_lockers + frm.doc.per_secondary_locker_mthly_lease_fee * number_of_secondary_lockers * sv_term
-    console.log(total_forecast_revenue, "total_forecast_revenue")
+    let val1 = frm.doc.per_machine_mthly_lease_fee * number_of_machines
+    let val2 = frm.doc.per_primary_locker_mthly_lease_fee * number_of_primary_lockers
+    let val3 = frm.doc.per_secondary_locker_mthly_lease_fee * number_of_secondary_lockers
+    let total = val1 + val2 + val3
+    let sv_term_mul = total * sv_term
 
-
-    let forecast_revenue = total_forecast_revenue / 100 * frm.doc.probability
+    let forecast_revenue = sv_term_mul / 100 * frm.doc.probability
     cur_frm.set_value('forecast_revenue', forecast_revenue)
   }
 
