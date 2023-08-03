@@ -1,0 +1,199 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Opportunity",
+  "is_active": 1,
+  "modified": "2023-08-03 15:17:47.712664",
+  "name": "Opportunity Stages",
+  "override_status": 0,
+  "send_email_alert": 0,
+  "states": [
+   {
+    "allow_edit": "All",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Opportunity Stages",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Discovery",
+    "update_field": "",
+    "update_value": null
+   },
+   {
+    "allow_edit": "All",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Opportunity Stages",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Beginning Stages",
+    "update_field": "",
+    "update_value": null
+   },
+   {
+    "allow_edit": "All",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Opportunity Stages",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Active Dialogue",
+    "update_field": "",
+    "update_value": null
+   },
+   {
+    "allow_edit": "All",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Opportunity Stages",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Pending Contract",
+    "update_field": "",
+    "update_value": null
+   },
+   {
+    "allow_edit": "All",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Opportunity Stages",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Contract Sent",
+    "update_field": "",
+    "update_value": null
+   },
+   {
+    "allow_edit": "All",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Opportunity Stages",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Redline/PO",
+    "update_field": "",
+    "update_value": null
+   },
+   {
+    "allow_edit": "All",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Opportunity Stages",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Closed Lost",
+    "update_field": "",
+    "update_value": null
+   },
+   {
+    "allow_edit": "All",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Opportunity Stages",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Closed Won",
+    "update_field": "",
+    "update_value": null
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Set As Beginning Stage",
+    "allow_self_approval": 1,
+    "allowed": "All",
+    "condition": null,
+    "next_state": "Beginning Stages",
+    "parent": "Opportunity Stages",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Discovery"
+   },
+   {
+    "action": "Set As Active Dialogue",
+    "allow_self_approval": 1,
+    "allowed": "All",
+    "condition": null,
+    "next_state": "Active Dialogue",
+    "parent": "Opportunity Stages",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Beginning Stages"
+   },
+   {
+    "action": "Set As Pending Contract",
+    "allow_self_approval": 1,
+    "allowed": "All",
+    "condition": null,
+    "next_state": "Pending Contract",
+    "parent": "Opportunity Stages",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Active Dialogue"
+   },
+   {
+    "action": "Set As Contract Sent",
+    "allow_self_approval": 1,
+    "allowed": "All",
+    "condition": null,
+    "next_state": "Contract Sent",
+    "parent": "Opportunity Stages",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Pending Contract"
+   },
+   {
+    "action": "Set As Redline/PO",
+    "allow_self_approval": 1,
+    "allowed": "All",
+    "condition": null,
+    "next_state": "Redline/PO",
+    "parent": "Opportunity Stages",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Contract Sent"
+   },
+   {
+    "action": "Set As Closed Lost",
+    "allow_self_approval": 1,
+    "allowed": "All",
+    "condition": null,
+    "next_state": "Closed Lost",
+    "parent": "Opportunity Stages",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Redline/PO"
+   },
+   {
+    "action": "Set As Closed Won",
+    "allow_self_approval": 1,
+    "allowed": "All",
+    "condition": null,
+    "next_state": "Closed Won",
+    "parent": "Opportunity Stages",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Closed Lost"
+   }
+  ],
+  "workflow_name": "Opportunity Stages",
+  "workflow_state_field": "workflow_state"
+ }
+]

@@ -227,7 +227,7 @@
    "name": "Opportunity-contract",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "Customer",
+   "options": "Contract",
    "owner": "Administrator",
    "permlevel": 0,
    "precision": "",
