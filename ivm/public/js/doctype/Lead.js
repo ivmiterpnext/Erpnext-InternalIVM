@@ -119,7 +119,7 @@ function checkSalesLoftUser(email) {
             $(".section-head").css({"color":"#2490EF",'font-size': '16px'});
               
       })
-      console.log(frm.doc.email_id)
+      if (frm.doc.email_id){
       checkSalesLoftUser(frm.doc.email_id)
       .then((data) => {
         if (data) {
@@ -146,7 +146,7 @@ function checkSalesLoftUser(email) {
           3
         );
         console.error(error);
-      });
+      });}
   },
     validate: function (frm) {
       if (frm.doc.__islocal) {
