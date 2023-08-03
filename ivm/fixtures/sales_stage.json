@@ -4,55 +4,63 @@
   "doctype": "Sales Stage",
   "modified": "2023-07-31 12:01:25.577130",
   "name": "Discovery",
+  "percentage": 0.0,
   "stage_name": "Discovery"
  },
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-07-31 12:02:31.307537",
-  "name": "Begining Stages",
-  "stage_name": "Begining Stages"
+  "modified": "2023-08-03 12:55:08.112655",
+  "name": "Beginning Stages",
+  "percentage": 10.0,
+  "stage_name": "Beginning Stages"
  },
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-07-31 12:02:45.029967",
+  "modified": "2023-08-03 12:54:55.819404",
   "name": "Active Dialogue",
+  "percentage": 30.0,
   "stage_name": "Active Dialogue"
  },
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-07-31 12:03:02.445662",
+  "modified": "2023-08-03 12:54:44.659176",
   "name": "Pending Contract",
+  "percentage": 50.0,
   "stage_name": "Pending Contract"
  },
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-07-31 12:04:08.700921",
+  "modified": "2023-08-03 12:54:27.781009",
   "name": "Contract Sent",
+  "percentage": 75.0,
   "stage_name": "Contract Sent"
  },
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-07-31 12:04:20.701597",
+  "modified": "2023-08-03 12:54:17.111024",
   "name": "Redline/PO",
+  "percentage": 90.0,
   "stage_name": "Redline/PO"
  },
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-07-31 12:04:34.807377",
+  "modified": "2023-08-03 12:54:06.518566",
   "name": "Closed Won",
+  "percentage": 100.0,
   "stage_name": "Closed Won"
  },
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-07-31 12:04:44.867670",
+  "modified": "2023-08-03 12:53:56.729637",
   "name": "Closed Lost",
+  "percentage": 50.0,
   "stage_name": "Closed Lost"
  }
 ]

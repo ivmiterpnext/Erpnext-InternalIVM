@@ -119,8 +119,37 @@ function checkSalesLoftUser(email) {
             $(".section-head").css({"color":"#2490EF",'font-size': '16px'});
               
       })
+      console.log(frm.doc.email_id)
+      checkSalesLoftUser(frm.doc.email_id)
+      .then((data) => {
+        if (data) {
+          // If the user exists, show the link and details below the email field
+          var salesloftLink = `<a href="https://app.salesloft.com/app/people/${data.id}" target="_blank" rel="noopener noreferrer">SalesLoft ID: ${data.id}</a>`;
+          var description = `
+            <p style="margin-top: 10px; margin-bottom: 5px; color: #3366CC;">
+              SalesLoft Link:
+              ${salesloftLink}
+            </p>
+          `;
+  
+          // Set the SalesLoft link description for the email_id field
+          frm.set_df_property("email_id", "description", description);
+        } else {
+          // If the user doesn't exist, clear the link and details below the email field
+          frm.set_df_property("email_id", "description", "");
+        }
+      })
+      .catch((error) => {
+        // Handle error if the API call fails
+        frappe.show_alert(
+          "An error occurred while checking SalesLoft user. Please try again.",
+          3
+        );
+        console.error(error);
+      });
   },
     validate: function (frm) {
+      if (frm.doc.__islocal) {
       var email = frm.doc.email_id;
       var name = frm.doc.first_name;
   
@@ -143,7 +172,7 @@ function checkSalesLoftUser(email) {
             3
           );
           console.error(error);
-        });
+        });}
     },
     email_id: function (frm, cdt, cdn) {
       var email = frm.doc.email_id;
