@@ -72,13 +72,25 @@ function checkSalesLoftUser(email) {
   
   
   // Function to create a new SalesLoft person
-  function createSalesLoftPerson(email, name, frm) {
+  function createSalesLoftPerson( frm) {
+    console.log(frm.doc.first_name)
     frappe.call({
       method: "ivm.api.create_salesloft_person",
       args: {
-        email: email,
-        name: name,
-      },
+        email: frm.doc.email_id,
+        first_name: frm.doc.first_name,
+        last_name: frm.doc.last_name,
+        job_title: frm.doc.job_title,
+        city: frm.doc.city,
+        state: frm.doc.state,
+        country: frm.doc.country,
+        company: frm.doc.company_name,
+        website: frm.doc.website,
+        phone:frm.doc.phone,
+        phone_ext:frm.doc.phone_ext,
+        mobile_no:frm.doc.mobile_no
+     
+      }, 
       callback: function (response) {
         if (response.message) {
           var salesloftLink = `<a href="https://app.salesloft.com/app/people/${response.message}" target="_blank" rel="noopener noreferrer">SalesLoft ID: ${response.message}</a>`;
@@ -88,7 +100,7 @@ function checkSalesLoftUser(email) {
               ${salesloftLink}
             </p>
           `;
-  
+          
           // Set the SalesLoft link description for the email_id field
           frm.set_df_property("email_id", "description", description);
           frappe.show_alert("Lead created and SalesLoft user added.", 3);
@@ -111,10 +123,17 @@ function checkSalesLoftUser(email) {
       },
     });
   }
-  
+  var CheckboxStatus = false; 
   // Frappe form event handling for the Lead doctype
   frappe.ui.form.on("Lead", {
+    
     onload: function(frm){
+      frappe.call({
+        method: "ivm.api.getCheckboxStatus",
+        callback: function(response) {
+      CheckboxStatus = response.message
+        }
+    });
       $(document).ready(function(){
             $(".section-head").css({"color":"#2490EF",'font-size': '16px'});
               
@@ -149,9 +168,10 @@ function checkSalesLoftUser(email) {
       });}
   },
     validate: function (frm) {
-      if (frm.doc.__islocal) {
+      if (frm.doc.__islocal && CheckboxStatus) {
       var email = frm.doc.email_id;
       var name = frm.doc.first_name;
+      console.log(name,'uma')
   
       // Check if the SalesLoft user already exists
       checkSalesLoftUser(email)
@@ -162,7 +182,7 @@ function checkSalesLoftUser(email) {
             showSalesLoftUserDetails(data);
           } else {
             // If the user doesn't exist, create a new SalesLoft person
-            createSalesLoftPerson(email, name, frm);
+            createSalesLoftPerson(frm);
           }
         })
         .catch((error) => {
@@ -175,6 +195,8 @@ function checkSalesLoftUser(email) {
         });}
     },
     email_id: function (frm, cdt, cdn) {
+      console.log(CheckboxStatus)
+      if (CheckboxStatus){
       var email = frm.doc.email_id;
   
       // Check if the SalesLoft user already exists when email field changes
@@ -208,7 +230,7 @@ function checkSalesLoftUser(email) {
             3
           );
           console.error(error);
-        });
+        });}
     },
   });
   

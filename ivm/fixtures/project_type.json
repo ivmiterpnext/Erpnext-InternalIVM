@@ -1,0 +1,98 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-26 12:00:58.491037",
+  "name": "External",
+  "project_type": "External"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:25:38.931595",
+  "name": "Support",
+  "project_type": "Support"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:26:15.606140",
+  "name": "Change Request",
+  "project_type": "Change Request"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:27:10.902968",
+  "name": "Deployment",
+  "project_type": "Deployment"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:27:32.504285",
+  "name": "Desktop Support",
+  "project_type": "Desktop Support"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:27:47.736143",
+  "name": "IT",
+  "project_type": "IT"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:28:53.917651",
+  "name": "Offboarding",
+  "project_type": "Offboarding"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:29:22.988532",
+  "name": "Onboarding",
+  "project_type": "Onboarding"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:29:46.614029",
+  "name": "Permission Change",
+  "project_type": "Permission Change"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:30:08.497556",
+  "name": "Receivable",
+  "project_type": "Receivable"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-28 11:30:32.217803",
+  "name": "Reconfiguration",
+  "project_type": "Reconfiguration"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-07-29 16:00:52.904248",
+  "name": "Vending Management",
+  "project_type": "Vending Management"
+ }
+]
