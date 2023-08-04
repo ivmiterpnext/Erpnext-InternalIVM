@@ -45,16 +45,25 @@ def check_salesloft_user(email):
 
 # Function to create a new SalesLoft person
 
-
 @frappe.whitelist(allow_guest=True)
-def create_salesloft_person(email, name):
+def create_salesloft_person(email, first_name='',last_name='',job_title='',city='',state='',country='',company='',website='',phone='',phone_ext='',mobile_no=''):
+    
     url = "https://api.salesloft.com/v2/people"
     payload = {
         "email_address": email,
-        "first_name": name,
-        # Add any additional fields as per your requirements
+        "first_name": first_name,
+        'last_name':last_name,
+        'title':job_title,
+        'city':city,
+        'state':state,
+        'country':country,
+        'person_company_name':company,
+        'person_company_website':website,
+        'phone':phone,
+        'phone_extension':phone_ext,
+        'mobile_phone':mobile_no
     }
-
+    print(payload)
     response = make_salesloft_api_call(url, method="POST", payload=payload)
 
     if response.status_code == 201:
@@ -112,3 +121,7 @@ def get_data(data):
             {"label": ("Events"), "items": ["Event"]},
         ],
     }
+
+@frappe.whitelist()
+def getCheckboxStatus():
+    return frappe.get_doc("SalesLoft Settings").enable_salesloft_integration
