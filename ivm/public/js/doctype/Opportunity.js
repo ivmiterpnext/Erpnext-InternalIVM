@@ -14,7 +14,7 @@ frappe.ui.form.on("Opportunity", {
   before_save: function (frm) {
     // Claculating the equipment_total value 
 
-    let equipment_total = frm.doc.number_of_machines + frm.doc.number_of_primary_lockers + frm.doc.number_of_secondary_lockers
+    let equipment_total = frm.doc.number_of_machines + frm.doc.number_of_primary_lockers + frm.doc.number_of_secondary_lockers + frm.doc.number_of_kiosks + frm.doc.number_of_vaults
     cur_frm.set_value('equipment_total', equipment_total)
   },
   probability: function (frm) {
