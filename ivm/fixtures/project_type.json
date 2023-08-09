@@ -4,31 +4,31 @@
   "case_origin": [
    {
     "case_origin": "--None--",
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "case_origin",
     "parenttype": "Project Type"
    },
    {
     "case_origin": "Email",
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "case_origin",
     "parenttype": "Project Type"
    },
    {
-    "case_origin": "Phone",
-    "parent": "Support",
+    "case_origin": "Escalation",
+    "parent": "Onboarding",
     "parentfield": "case_origin",
     "parenttype": "Project Type"
    },
    {
-    "case_origin": "Web",
-    "parent": "Support",
+    "case_origin": "Sales",
+    "parent": "Onboarding",
     "parentfield": "case_origin",
     "parenttype": "Project Type"
    },
    {
     "case_origin": "Internal",
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "case_origin",
     "parenttype": "Project Type"
    }
@@ -36,79 +36,61 @@
   "case_reason": [
    {
     "case_reason": "--None--",
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
-    "case_reason": "Data Update",
-    "parent": "Support",
+    "case_reason": "Client Call",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
     "case_reason": "Remove Vend",
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
-    "case_reason": "Receivable",
-    "parent": "Support",
+    "case_reason": "Change Request",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
-    "case_reason": "Miscellaneous Issues",
-    "parent": "Support",
+    "case_reason": "Information",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
-    "case_reason": "Other",
-    "parent": "Support",
+    "case_reason": "Tasks",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
-    "case_reason": "Reconfiguration",
-    "parent": "Support",
+    "case_reason": "Issues",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
-    "case_reason": "Related to Existing Case",
-    "parent": "Support",
+    "case_reason": "Product Innovation",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
-    "case_reason": "VM Support",
-    "parent": "Support",
+    "case_reason": "Salesforce",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    },
    {
-    "case_reason": "Website",
-    "parent": "Support",
-    "parentfield": "case_reason",
-    "parenttype": "Project Type"
-   },
-   {
-    "case_reason": "Equipment Issue",
-    "parent": "Support",
-    "parentfield": "case_reason",
-    "parenttype": "Project Type"
-   },
-   {
-    "case_reason": "PO Request",
-    "parent": "Support",
-    "parentfield": "case_reason",
-    "parenttype": "Project Type"
-   },
-   {
-    "case_reason": "Technical",
-    "parent": "Support",
+    "case_reason": "Sales Support",
+    "parent": "Onboarding",
     "parentfield": "case_reason",
     "parenttype": "Project Type"
    }
@@ -116,132 +98,165 @@
   "description": null,
   "docstatus": 0,
   "doctype": "Project Type",
-  "modified": "2023-08-09 14:41:18.631057",
-  "name": "Support",
+  "modified": "2023-08-09 16:22:49.511250",
+  "name": "Onboarding",
   "project_status": [
    {
-    "parent": "Support",
+    "parent": "Onboarding",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "--None--"
+   },
+   {
+    "parent": "Onboarding",
     "parentfield": "project_status",
     "parenttype": "Project Type",
     "status": "New"
    },
    {
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "project_status",
     "parenttype": "Project Type",
     "status": "Open"
    },
    {
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "project_status",
     "parenttype": "Project Type",
     "status": "Pending"
    },
    {
-    "parent": "Support",
-    "parentfield": "project_status",
-    "parenttype": "Project Type",
-    "status": "Escalated"
-   },
-   {
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "project_status",
     "parenttype": "Project Type",
     "status": "Resolved"
    },
    {
-    "parent": "Support",
+    "parent": "Onboarding",
     "parentfield": "project_status",
     "parenttype": "Project Type",
     "status": "Closed"
    }
   ],
-  "project_type": "Support",
-  "stage": [
+  "project_type": "Onboarding",
+  "stage": []
+ },
+ {
+  "card_reader_type": [],
+  "case_origin": [
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "--None--"
+    "case_origin": "--None--",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    },
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "In Progress"
+    "case_origin": "Email",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    },
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Request Completed"
+    "case_origin": "Phone",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    },
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "No Action Taken"
+    "case_origin": "Web",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    },
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Waiting Auto Close"
+    "case_origin": "Escalation",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    },
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Waiting Client Response"
+    "case_origin": "Sales",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    },
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Waiting Internal Response"
+    "case_origin": "Internal",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    },
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Waiting Vendor Response"
+    "case_origin": "IT",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    },
    {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Waiting Internal Response IT"
-   },
-   {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Waiting Internal Response S&I"
-   },
-   {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Waiting Internal Response Sales"
-   },
-   {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Waiting Internal Response Mgmt"
-   },
-   {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "S&O Follow-up"
-   },
-   {
-    "parent": "Support",
-    "parentfield": "stage",
-    "parenttype": "Project Type",
-    "stage": "Duplicate"
+    "case_origin": "S&O",
+    "parent": "Permission Change",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
    }
-  ]
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--",
+    "parent": "Permission Change",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Permissions",
+    "parent": "Permission Change",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-08-09 16:24:31.824049",
+  "name": "Permission Change",
+  "project_status": [
+   {
+    "parent": "Permission Change",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "--None--"
+   },
+   {
+    "parent": "Permission Change",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "New"
+   },
+   {
+    "parent": "Permission Change",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Open"
+   },
+   {
+    "parent": "Permission Change",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Pending"
+   },
+   {
+    "parent": "Permission Change",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Resolved"
+   },
+   {
+    "parent": "Permission Change",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Closed"
+   }
+  ],
+  "project_type": "Permission Change",
+  "stage": []
  }
 ]
