@@ -1,12 +1,122 @@
 [
  {
   "card_reader_type": [],
-  "case_origin": [],
-  "case_reason": [],
+  "case_origin": [
+   {
+    "case_origin": "--None--",
+    "parent": "Support",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_origin": "Email",
+    "parent": "Support",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_origin": "Phone",
+    "parent": "Support",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_origin": "Web",
+    "parent": "Support",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_origin": "Internal",
+    "parent": "Support",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Data Update",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Remove Vend",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Receivable",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Miscellaneous Issues",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Other",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Reconfiguration",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Related to Existing Case",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "VM Support",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Website",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Equipment Issue",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "PO Request",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Technical",
+    "parent": "Support",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   }
+  ],
   "description": null,
   "docstatus": 0,
   "doctype": "Project Type",
-  "modified": "2023-08-09 14:02:37.520530",
+  "modified": "2023-08-09 14:41:18.631057",
   "name": "Support",
   "project_status": [
    {
@@ -26,9 +136,112 @@
     "parentfield": "project_status",
     "parenttype": "Project Type",
     "status": "Pending"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Escalated"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Resolved"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Closed"
    }
   ],
   "project_type": "Support",
-  "stage": []
+  "stage": [
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "--None--"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "In Progress"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Request Completed"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "No Action Taken"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Auto Close"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Client Response"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Internal Response"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Vendor Response"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Internal Response IT"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Internal Response S&I"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Internal Response Sales"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Internal Response Mgmt"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "S&O Follow-up"
+   },
+   {
+    "parent": "Support",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Duplicate"
+   }
+  ]
  }
 ]
