@@ -2,7 +2,7 @@
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-07-31 12:01:25.577130",
+  "modified": "2023-08-10 14:44:54.200012",
   "name": "Discovery",
   "percentage": 0.0,
   "stage_name": "Discovery"
@@ -10,7 +10,7 @@
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-08-03 12:55:08.112655",
+  "modified": "2023-08-10 14:45:45.954393",
   "name": "Beginning Stages",
   "percentage": 10.0,
   "stage_name": "Beginning Stages"
@@ -18,7 +18,7 @@
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-08-03 12:54:55.819404",
+  "modified": "2023-08-10 14:46:16.770314",
   "name": "Active Dialogue",
   "percentage": 30.0,
   "stage_name": "Active Dialogue"
@@ -26,7 +26,7 @@
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-08-03 12:54:44.659176",
+  "modified": "2023-08-10 14:46:44.677103",
   "name": "Pending Contract",
   "percentage": 50.0,
   "stage_name": "Pending Contract"
@@ -34,7 +34,7 @@
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-08-03 12:54:27.781009",
+  "modified": "2023-08-10 14:47:18.958157",
   "name": "Contract Sent",
   "percentage": 75.0,
   "stage_name": "Contract Sent"
@@ -42,7 +42,7 @@
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-08-03 12:54:17.111024",
+  "modified": "2023-08-10 14:47:47.962841",
   "name": "Redline/PO",
   "percentage": 90.0,
   "stage_name": "Redline/PO"
@@ -50,17 +50,17 @@
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-08-03 12:54:06.518566",
-  "name": "Closed Won",
-  "percentage": 100.0,
-  "stage_name": "Closed Won"
+  "modified": "2023-08-10 14:48:13.518163",
+  "name": "Closed Lost",
+  "percentage": 50.0,
+  "stage_name": "Closed Lost"
  },
  {
   "docstatus": 0,
   "doctype": "Sales Stage",
-  "modified": "2023-08-03 12:53:56.729637",
-  "name": "Closed Lost",
-  "percentage": 50.0,
-  "stage_name": "Closed Lost"
+  "modified": "2023-08-10 14:48:29.302225",
+  "name": "Closed Won",
+  "percentage": 100.0,
+  "stage_name": "Closed Won"
  }
 ]
