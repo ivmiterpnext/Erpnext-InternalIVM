@@ -6,6 +6,11 @@ frappe.ui.form.on("Opportunity", {
     })
   },
   onload: function (frm) {
+    frm.fields_dict['sales_stage'].get_query = function (doc, cdt, cdn) {
+      return {
+        query: 'ivm.api.arrangeing_records',
+      }
+    }
     $(document).ready(function () {
       $(".section-head").css({ "color": "#2490EF", 'font-size': '20px' });
 
