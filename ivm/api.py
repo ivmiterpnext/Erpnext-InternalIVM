@@ -111,7 +111,7 @@ def get_data(data):
         "transactions": [
             {
                 "label": _("Project"),
-                "items": ["Task", "Timesheet", "Issue", "Project Update", "idfbgi"],
+                "items": ["Task", "Timesheet", "Issue", "Project Update"],
             },
             {"label": _("Material"), "items": [
                 "Material Request", "BOM", "Stock Entry"]},
@@ -131,4 +131,4 @@ def getCheckboxStatus():
 
 @frappe.whitelist()
 def arrangeing_records(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql(""" select stage_name from `tabSales Stage` ORDER BY  modified DESC""")
+    return frappe.db.sql(""" select stage_name from `tabSales Stage` ORDER BY  creation ASC""")
