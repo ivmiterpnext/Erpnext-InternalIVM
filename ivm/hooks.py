@@ -150,7 +150,7 @@ doctype_list_js = {"Lead": "public/js/listview/Lead_listview.js", "Opportunity":
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
-    "Task": "ivm.api.get_dashboard_data"
+    "Task": "ivm.api.get_data"
 }
 
 # exempt linked doctypes from being automatically cancelled
