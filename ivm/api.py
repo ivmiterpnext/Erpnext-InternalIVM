@@ -132,3 +132,8 @@ def getCheckboxStatus():
 @frappe.whitelist()
 def arrangeing_records(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql(""" select stage_name from `tabSales Stage` ORDER BY  creation ASC""")
+
+@frappe.whitelist()
+def set_cell_Carrier(option):
+    doc = frappe.get_doc("Connectivity Type", option)
+    return doc.cell_carrier
