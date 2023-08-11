@@ -9,7 +9,7 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-fixtures = [{"doctype": "Project Type", "filters": {"name": ["in", ["Deployment"]]}}]
+fixtures = [{"doctype": "Property Setter", "filters": {"name": ["in", ["Project-status-options"]]}}]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 # app_include_js = "/assets/ivm/js/ivm.js"
