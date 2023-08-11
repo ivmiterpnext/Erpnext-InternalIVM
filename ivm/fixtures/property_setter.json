@@ -1,18 +1,18 @@
 [
  {
   "default_value": null,
-  "doc_type": "Project",
+  "doc_type": "Address",
   "docstatus": 0,
   "doctype": "Property Setter",
   "doctype_or_field": "DocField",
-  "field_name": "status",
+  "field_name": "address_type",
   "is_system_generated": 0,
-  "modified": "2023-08-11 00:21:19.958004",
+  "modified": "2023-08-11 01:53:29.812272",
   "module": null,
-  "name": "Project-status-options",
+  "name": "Address-address_type-options",
   "property": "options",
   "property_type": "Select",
   "row_name": null,
-  "value": "Open\nIn Progress\nOn Hold\nDelivered\nInstalled\nCompleted\nCancelled"
+  "value": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther\nDeployment"
  }
 ]
