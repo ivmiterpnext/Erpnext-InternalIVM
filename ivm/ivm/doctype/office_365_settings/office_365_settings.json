@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-08-10 22:00:42.059161",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "client_id",
+  "column_break_3zdq9",
+  "enable",
+  "section_break_ymzfm",
+  "client_secret",
+  "tenet_id",
+  "user_id",
+  "access_token"
+ ],
+ "fields": [
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "label": "Client Id"
+  },
+  {
+   "fieldname": "column_break_3zdq9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable"
+  },
+  {
+   "fieldname": "section_break_ymzfm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "client_secret",
+   "fieldtype": "Data",
+   "label": "Client Secret"
+  },
+  {
+   "fieldname": "tenet_id",
+   "fieldtype": "Data",
+   "label": "Tenet Id"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "label": "User Id"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Small Text",
+   "label": "Access Token"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-08-10 22:00:42.059161",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Office 365 Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
