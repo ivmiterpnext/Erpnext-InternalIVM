@@ -142,3 +142,15 @@ def set_cell_Carrier(option):
 def get_issue_type_record(record_name):
     doc = frappe.get_doc("Issue Type", record_name)
     return doc.as_dict()
+@frappe.whitelist()
+def get_connectivity_type_record(record_name):
+    doc = frappe.get_doc("Connectivity Type", record_name)
+    return doc.as_dict()
+
+#ram
+@frappe.whitelist(allow_guest=True)
+def get_case_sub_reason_options(case_reason="VM Support"):
+    doc = frappe.get_doc("Case Reason",case_reason)
+    child_table_records = doc.get("case_sub_reason")
+    child_field_values = [child_record.get("case_sub_reason") for child_record in child_table_records]
+    return child_field_values

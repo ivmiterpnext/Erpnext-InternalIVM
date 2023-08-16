@@ -1,10 +1,295 @@
 [
  {
+  "card_reader_type": [],
+  "case_origin": [
+   {
+    "case_origin": "--None--",
+    "parent": "IT",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_origin": "Email",
+    "parent": "IT",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_origin": "Escalation",
+    "parent": "IT",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_origin": "Sales",
+    "parent": "IT",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_origin": "Internal",
+    "parent": "IT",
+    "parentfield": "case_origin",
+    "parenttype": "Project Type"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Client Call",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Virtual Install Call",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Travel Install",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Remove Vend",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Change Request",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Information",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Tasks",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Issues",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Product Innovation",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Salesforce",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   },
+   {
+    "case_reason": "Sales Support",
+    "parent": "IT",
+    "parentfield": "case_reason",
+    "parenttype": "Project Type"
+   }
+  ],
   "description": null,
   "docstatus": 0,
   "doctype": "Project Type",
-  "modified": "2023-08-09 15:17:17.138036",
-  "name": "Deployment",
-  "project_type": "Deployment"
+  "modified": "2023-08-16 16:35:27.018293",
+  "name": "IT",
+  "project_status": [
+   {
+    "parent": "IT",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "--None--"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "New"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Open"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Pending"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Resolved"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "project_status",
+    "parenttype": "Project Type",
+    "status": "Closed"
+   }
+  ],
+  "project_type": "IT",
+  "stage": [
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "--None--"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Review"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Assigned"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Troubleshooting"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Incomplete"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "In Progress"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Code Commited"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Merged - Building"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "SIT Ready"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "SIT Passed"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "SIT Failed"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Client Response"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Internal Response"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Waiting Vendor Response"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Release Ready"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Released"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "DevOps"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "S&O Testing - SH"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "S&O Testing - iCrop"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "S&O Passed"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Rejected"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Duplicate"
+   },
+   {
+    "parent": "IT",
+    "parentfield": "stage",
+    "parenttype": "Project Type",
+    "stage": "Complete"
+   }
+  ]
  }
 ]
