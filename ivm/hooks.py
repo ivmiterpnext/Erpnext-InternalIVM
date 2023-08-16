@@ -31,7 +31,8 @@ fixtures = [{"doctype": "Property Setter", "filters": {"name": ["in", ["Project-
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {"Lead": "public/js/doctype/Lead.js", "Opportunity": "public/js/doctype/Opportunity.js",
-              "Customer": "public/js/doctype/Customer.js", "User": "public/js/doctype/user.js", "Task": "public/js/doctype/Task.js","Project":"public/js/doctype/Project.js"}
+              "Customer": "public/js/doctype/Customer.js", "User": "public/js/doctype/user.js", "Task": "public/js/doctype/Task.js","Project":"public/js/doctype/Project.js",
+              "Issue":"public/js/doctype/Issue.js"}
 doctype_list_js = {"Lead": "public/js/listview/Lead_listview.js", "Opportunity": "public/js/listview/Opportunity_listview.js",
                    "Customer": "public/js/listview/Customer_listview.js", "User": "public/js/listview/user_listview.js",
                    "Calendar Events" : "public/js/calendar.js"

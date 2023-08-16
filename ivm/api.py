@@ -137,3 +137,8 @@ def arrangeing_records(doctype, txt, searchfield, start, page_len, filters):
 def set_cell_Carrier(option):
     doc = frappe.get_doc("Connectivity Type", option)
     return doc.cell_carrier
+
+@frappe.whitelist()
+def get_issue_type_record(record_name):
+    doc = frappe.get_doc("Issue Type", record_name)
+    return doc.as_dict()
