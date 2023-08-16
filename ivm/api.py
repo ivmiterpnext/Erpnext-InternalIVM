@@ -133,24 +133,29 @@ def getCheckboxStatus():
 def arrangeing_records(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql(""" select stage_name from `tabSales Stage` ORDER BY  creation ASC""")
 
+
 @frappe.whitelist()
 def set_cell_Carrier(option):
     doc = frappe.get_doc("Connectivity Type", option)
     return doc.cell_carrier
 
+
 @frappe.whitelist()
 def get_issue_type_record(record_name):
     doc = frappe.get_doc("Issue Type", record_name)
     return doc.as_dict()
+
+
 @frappe.whitelist()
 def get_connectivity_type_record(record_name):
     doc = frappe.get_doc("Connectivity Type", record_name)
     return doc.as_dict()
 
-#ram
+
 @frappe.whitelist(allow_guest=True)
 def get_case_sub_reason_options(case_reason="VM Support"):
-    doc = frappe.get_doc("Case Reason",case_reason)
+    doc = frappe.get_doc("Case Reason", case_reason)
     child_table_records = doc.get("case_sub_reason")
-    child_field_values = [child_record.get("case_sub_reason") for child_record in child_table_records]
+    child_field_values = [child_record.get(
+        "case_sub_reason") for child_record in child_table_records]
     return child_field_values

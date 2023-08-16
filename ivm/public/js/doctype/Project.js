@@ -23,13 +23,10 @@ frappe.ui.form.on("Project", {
         });
     },
     customer: function (frm) {
-        frm.set_query('opportunity', function () {
-            return {
-                "filters": [
-                    ["Opportunity", "party_name", "=", frm.doc.customer],
-                ]
-            }
-        });
+        frappe.db.get_doc("Customer", frm.doc.customer).then(r => {
+            frm.set_value('opportunity', r.opportunity_name);
+
+        })
     },
     project_type: function (frm) {
         frappe.call({
@@ -78,7 +75,6 @@ frappe.ui.form.on("Project", {
         })
     },
     connectivity_type: function (frm) {
-        if (frm.doc.connectivity_type){
         frappe.call({
             method: 'ivm.api.set_cell_Carrier',
             args: {
@@ -123,7 +119,7 @@ frappe.ui.form.on("Project", {
                 frm.fields_dict['cell_carrier'].wrapper.appendChild(selectElement);
             }
         })
-    }}
+    }
 
 });
 
