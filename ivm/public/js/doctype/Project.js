@@ -78,6 +78,7 @@ frappe.ui.form.on("Project", {
         })
     },
     connectivity_type: function (frm) {
+        if (frm.doc.connectivity_type){
         frappe.call({
             method: 'ivm.api.set_cell_Carrier',
             args: {
@@ -122,7 +123,7 @@ frappe.ui.form.on("Project", {
                 frm.fields_dict['cell_carrier'].wrapper.appendChild(selectElement);
             }
         })
-    }
+    }}
 
 });
 

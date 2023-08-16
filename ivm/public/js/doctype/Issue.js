@@ -1,5 +1,6 @@
 frappe.ui.form.on("Issue", {
     issue_type: function(frm) {
+        if (frm.doc.issue_type){
         frappe.call({
             method: 'ivm.api.get_issue_type_record',
             args: {
@@ -23,7 +24,36 @@ frappe.ui.form.on("Issue", {
                 }
             }
         });
+    }},
+    connectivity_type:function(frm){
+        if (frm.doc.connectivity_type){
+            frappe.call({
+                method: 'ivm.api.get_connectivity_type_record',
+                args: {
+                    record_name: frm.doc.connectivity_type
+                },
+                callback: function(r) {
+                    const message = r.message;
+                    if (message) {
+                        if (message.cell_carrier) {
+                            updateSelectFieldOptions(frm, 'cell_carrier', message.cell_carrier);
+                        }
+                    }
+                }
+            });
+        }
+    },
+    //ram
+    case_reason: function(frm){
+        frappe.call({
+            method:"ivm.api.get_case_sub_reason_options",
+            args:{"case_reason":frm.doc.case_reason}
+        }).done((r)=>{
+            let li = r.message
+            set_field_options("case_sub_reason",li)
+        });
     }
+
 });
 
 function updateSelectFieldOptions(frm, fieldname, optionsData) {
