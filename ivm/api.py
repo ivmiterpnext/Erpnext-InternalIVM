@@ -153,9 +153,26 @@ def get_connectivity_type_record(record_name):
 
 
 @frappe.whitelist(allow_guest=True)
-def get_case_sub_reason_options(case_reason="VM Support"):
+def get_case_sub_reason_options(case_reason):
+    if case_reason=="":
+        return []
     doc = frappe.get_doc("Case Reason", case_reason)
     child_table_records = doc.get("case_sub_reason")
     child_field_values = [child_record.get(
         "case_sub_reason") for child_record in child_table_records]
     return child_field_values
+
+@frappe.whitelist(allow_guest=True)
+def get_contact_name(name):
+    if name =="":
+        return []
+    docs = frappe.db.get_list("Contact",pluck="name")
+    list_of_records = []
+    for i in docs:
+        doc = frappe.get_doc("Contact", i)
+        doc = doc.as_dict()
+        child_records = doc.links
+        if len(child_records)>0:
+            if child_records[0]['link_doctype']=="Customer" and child_records[0]["link_title"]==name:
+                list_of_records.append(i)
+    return list_of_records
