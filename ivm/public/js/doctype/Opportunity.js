@@ -6,6 +6,13 @@ frappe.ui.form.on("Opportunity", {
     })
   },
   onload: function (frm) {
+    frm.set_query("deployment_address", function () {
+      return {
+        "filters": [
+          ["Address", "address_type", "=", "Deployment"],
+        ]
+      }
+    });
     frm.fields_dict['sales_stage'].get_query = function (doc, cdt, cdn) {
       return {
         query: 'ivm.api.arrangeing_records',
