@@ -1,6 +1,14 @@
 frappe.ui.form.on("Issue", {
     issue_type: function(frm) {
         if (frm.doc.issue_type){
+        frm.set_value("status", 'New');
+        frm.refresh_field("status");
+        frm.set_value("stage", '--None--');
+        frm.refresh_field("stage");
+        frm.set_value("case_origin", '--None--');
+        frm.refresh_field("case_origin");
+        frm.set_value("case_reason", '--None--');
+        frm.refresh_field("case_reason");
         frappe.call({
             method: 'ivm.api.get_issue_type_record',
             args: {
@@ -43,7 +51,6 @@ frappe.ui.form.on("Issue", {
             });
         }
     },
-    //ram
     case_reason: function(frm){
         frappe.call({
             method:"ivm.api.get_case_sub_reason_options",
@@ -52,18 +59,32 @@ frappe.ui.form.on("Issue", {
             let li = r.message
             set_field_options("case_sub_reason",li)
         });
+    },
+    customer: function(frm){
+        if (frm.doc.customer==""){
+            frm.set_value("contact_name","")
+        }
+
+        frappe.call({
+            method: "ivm.api.get_contact_name",
+            args: {'name':frm.doc.customer}
+        }).done((r)=>{
+            let list_of_records = r.message
+            cur_frm.set_query("contact_name", function() {
+                return {
+                    filters: {
+                        "name":['in',list_of_records]
+                    }
+                }
+            });
+        })
     }
 
 });
 
 function updateSelectFieldOptions(frm, fieldname, optionsData) {
     const optionsList = optionsData.map(option => option[fieldname]);
-    frm.set_df_property(fieldname, 'options', optionsList);
-    
-    if (optionsList.length > 0) {
-        frm.set_value(fieldname, optionsList[0]);
-    }
-    
+    frm.set_df_property(fieldname, 'options', optionsList); 
     frm.refresh_field(fieldname);
 }
 
