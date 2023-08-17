@@ -3,31 +3,25 @@
   "case_origin": [
    {
     "case_origin": "--None--",
-    "parent": "IT",
-    "parentfield": "case_origin",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_origin": "Email",
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "case_origin",
     "parenttype": "Issue Type"
    },
    {
     "case_origin": "Escalation",
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "case_origin",
     "parenttype": "Issue Type"
    },
    {
     "case_origin": "Sales",
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "case_origin",
     "parenttype": "Issue Type"
    },
    {
     "case_origin": "Internal",
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "case_origin",
     "parenttype": "Issue Type"
    }
@@ -35,73 +29,19 @@
   "case_reason": [
    {
     "case_reason": "--None--",
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "case_reason",
     "parenttype": "Issue Type"
    },
    {
     "case_reason": "Client Call",
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "case_reason",
     "parenttype": "Issue Type"
    },
    {
-    "case_reason": "Virtual Install Call",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Travel Install",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Remove Vend",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Change Request",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Information",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Tasks",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Issues",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Product Innovation",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Salesforce",
-    "parent": "IT",
-    "parentfield": "case_reason",
-    "parenttype": "Issue Type"
-   },
-   {
-    "case_reason": "Sales Support",
-    "parent": "IT",
+    "case_reason": "Desktop Support",
+    "parent": "Desktop Support",
     "parentfield": "case_reason",
     "parenttype": "Issue Type"
    }
@@ -109,41 +49,41 @@
   "description": null,
   "docstatus": 0,
   "doctype": "Issue Type",
-  "modified": "2023-08-16 17:29:34.632379",
-  "name": "IT",
+  "modified": "2023-08-16 23:59:34.523022",
+  "name": "Desktop Support",
   "project_status": [
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "project_status",
     "parenttype": "Issue Type",
     "status": "--None--"
    },
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "project_status",
     "parenttype": "Issue Type",
     "status": "New"
    },
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "project_status",
     "parenttype": "Issue Type",
     "status": "Open"
    },
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "project_status",
     "parenttype": "Issue Type",
     "status": "Pending"
    },
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "project_status",
     "parenttype": "Issue Type",
     "status": "Resolved"
    },
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "project_status",
     "parenttype": "Issue Type",
     "status": "Closed"
@@ -151,139 +91,49 @@
   ],
   "stage": [
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "stage",
     "parenttype": "Issue Type",
     "stage": "--None--"
    },
    {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "Waiting Review"
-   },
-   {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "stage",
     "parenttype": "Issue Type",
     "stage": "Assigned"
    },
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "stage",
     "parenttype": "Issue Type",
     "stage": "Troubleshooting"
    },
    {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "Incomplete"
-   },
-   {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "stage",
     "parenttype": "Issue Type",
     "stage": "In Progress"
    },
    {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "Code Commited"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "Merged - Building"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "SIT Ready"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "SIT Passed"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "SIT Failed"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "Waiting Client Response"
-   },
-   {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "stage",
     "parenttype": "Issue Type",
     "stage": "Waiting Internal Response"
    },
    {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "Waiting Vendor Response"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "Release Ready"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "Released"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "DevOps"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "S&O Testing - SH"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "S&O Testing - iCrop"
-   },
-   {
-    "parent": "IT",
-    "parentfield": "stage",
-    "parenttype": "Issue Type",
-    "stage": "S&O Passed"
-   },
-   {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "stage",
     "parenttype": "Issue Type",
     "stage": "Rejected"
    },
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "stage",
     "parenttype": "Issue Type",
     "stage": "Duplicate"
    },
    {
-    "parent": "IT",
+    "parent": "Desktop Support",
     "parentfield": "stage",
     "parenttype": "Issue Type",
     "stage": "Complete"
