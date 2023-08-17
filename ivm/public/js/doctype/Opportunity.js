@@ -1,7 +1,7 @@
 frappe.ui.form.on("Opportunity", {
   refresh: function(frm) {
     if (frm.doc.sales_stage =='Closed Won'){
-      frm.add_custom_button(__('Create Case'),
+      frm.add_custom_button(__('Create Deployment'),
 				function() {
         frm.trigger("create_project")
         }, __('Create'));
@@ -72,7 +72,8 @@ frappe.ui.form.on("Opportunity", {
             "countertop_color":frm.doc.countertop_color,
             "ada_side_table":frm.doc.ada_side_table,
             "description":frm.doc.description,
-            "customer":frm.doc.customer
+            "customer":frm.doc.customer,
+            "deployment_address":frm.doc.associated_deployment_location
 
         };
         console.log(projectValues)
