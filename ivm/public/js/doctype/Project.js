@@ -75,6 +75,7 @@ frappe.ui.form.on("Project", {
         })
     },
     connectivity_type: function (frm) {
+        if (frm.doc.connectivity_type){
         frappe.call({
             method: 'ivm.api.set_cell_Carrier',
             args: {
@@ -119,8 +120,36 @@ frappe.ui.form.on("Project", {
                 frm.fields_dict['cell_carrier'].wrapper.appendChild(selectElement);
             }
         })
+    }},
+    opportunity: function(frm){
+        frappe.call({
+            method: "frappe.client.get",
+            args: {
+                doctype: "Opportunity", 
+                name: frm.doc.opportunity  
+            },
+            callback: function(response) {
+                var doc = response.message;
+                frm.set_value("number_of_kiosks",doc.number_of_kiosks)
+                frm.set_value("enhanced_lockers",doc.enhanced_lockers)
+                frm.set_value("expedited_delivery",doc.expedited_delivery)
+                frm.set_value("expedited_delivery_details",doc.expedited_delivery_details)
+                frm.set_value("install_type",doc.install_type)
+                frm.set_value("po_and_tracking",doc.po_and_tracking)
+                frm.set_value("vault_size",doc.vault_size)
+                frm.set_value("vault_power_configuration_details",doc.vault_power_configuration_details)
+                frm.set_value("kiosk_options",doc.kiosk_options)
+                frm.set_value("kvm_switch_options",doc.kvm_switch_options)
+                frm.set_value("network_options",doc.network_options)
+                frm.set_value("countertop_color",doc.countertop_color)
+                frm.set_value("ada_side_table",doc.ada_side_table)
+                frm.set_value("description",doc.description)
+                frm.set_value("associated_deployment_location",doc.deployment_address)
+                frm.set_value("customer",doc.customer_name)
+            }
+        });
+        
     }
-
 });
 
 
