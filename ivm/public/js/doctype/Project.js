@@ -145,7 +145,24 @@ frappe.ui.form.on("Project", {
                 frm.set_value("ada_side_table",doc.ada_side_table)
                 frm.set_value("description",doc.description)
                 frm.set_value("associated_deployment_location",doc.deployment_address)
-                frm.set_value("customer",doc.customer_name)
+                if (doc.customer_name) {
+                    frappe.call({
+                        method: "frappe.client.get_value",
+                        args: {
+                            doctype: "Customer",
+                            filters: {
+                                name: doc.customer_name
+                            },
+                            fieldname: "name"
+                        },
+                        callback: function(customer_response) {
+                            console.log(customer_response.message.name)
+                            if (customer_response.message && customer_response.message.name) {
+                                frm.set_value("customer", doc.customer_name);
+                            }
+                        }
+                    });
+                }
             }
         });
         
