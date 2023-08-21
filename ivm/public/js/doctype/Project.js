@@ -21,6 +21,46 @@ frappe.ui.form.on("Project", {
                 ]
             }
         });
+
+        $(document).ready(function() {
+            let Num_of_kios = $('input[data-fieldname="number_of_kiosks"]')
+            Num_of_kios.css('background','#e1f0f0')
+            let Opp = $('input[data-fieldname="opportunity"]')
+            Opp.css('background-color','#e1f0f0')
+            let Enhanced_lo = $('div[data-fieldname="enhanced_lockers"]')
+            Enhanced_lo.find(".label-area").css('background-color','#e1f0f0')
+            let Expected_Delivery = $('div[data-fieldname="expedited_delivery"]')
+            Expected_Delivery.find(".label-area").css('background-color','#e1f0f0')
+            let Expected_deli = $('textarea[data-fieldname="expedited_delivery_details"]')
+            Expected_deli.css('background-color','#e1f0f0')
+            let Install_Type = $('select[data-fieldname="install_type"]')
+            Install_Type.css('background-color','#e1f0f0')
+            let Po_Tracking = $('input[data-fieldname="po_and_tracking"]')
+            Po_Tracking.css('background-color','#e1f0f0')
+            let Vault_Size = $('select[data-fieldname="vault_size"]')
+            Vault_Size.css('background-color','#e1f0f0')
+            let Vault_power = $('textarea[data-fieldname="vault_power_configuration_details"]')
+            Vault_power.css('background-color','#e1f0f0')
+            let Associated_Deployment_Loc = $('input[data-fieldname="associated_deployment_location"]')
+            Associated_Deployment_Loc.css('background-color','#e1f0f0')
+            let Kiosk_Options = $('select[data-fieldname="kiosk_options"]')
+            Kiosk_Options.css('background-color','#e1f0f0')
+            let Kvm_switch_Options = $('select[data-fieldname="kvm_switch_options"]')
+            Kvm_switch_Options.css('background-color','#e1f0f0')
+            let Network_Options = $('select[data-fieldname="network_options"]')
+            Network_Options.css('background-color','#e1f0f0')
+            let Countertop_Color = $('select[data-fieldname="countertop_color"]')
+            Countertop_Color.css('background-color','#e1f0f0')
+            let Ada_Side_Table = $('select[data-fieldname="ada_side_table"]')
+            Ada_Side_Table.css('background-color','#e1f0f0')
+            let Kiosk_Side_Table = $('select[data-fieldname="kiosk_side_for_table"]')
+            Kiosk_Side_Table.css('background-color','#e1f0f0')
+            let Description = $('textarea[data-fieldname="description"]')
+            Description.css('background-color','#e1f0f0')
+            let Customer_1 = $('input[data-fieldname="customer"]')
+            Customer_1.css('background-color','#e1f0f0') 
+        });
+
     },
     customer: function (frm) {
         frappe.db.get_doc("Customer", frm.doc.customer).then(r => {
