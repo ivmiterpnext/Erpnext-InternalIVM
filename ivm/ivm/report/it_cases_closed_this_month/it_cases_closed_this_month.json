@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-08-17 14:21:51.540837",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2023-08-21 10:24:44.757917",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "IT Cases Closed This Month",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT\n    i.case_owner, \n    u.full_name AS User_Full_Name,\n    SUM(CASE WHEN i.case_reason = 'Client Call' THEN 1 ELSE 0 END) AS Client_Call,\n    SUM(CASE WHEN i.case_reason = '--None--' THEN 1 ELSE 0 END) AS None,\n    SUM(CASE WHEN i.case_reason = 'Issues' THEN 1 ELSE 0 END) AS Issues,\n    SUM(CASE WHEN i.case_reason = 'Tasks' THEN 1 ELSE 0 END) AS Tasks,\n    SUM(CASE WHEN i.case_reason = 'Information' THEN 1 ELSE 0 END) AS Information,\n    SUM(CASE WHEN i.case_reason = 'Virtual Install Call' THEN 1 ELSE 0 END) AS Virtual_Install_Call\nFROM\n    `tabIssue` i\nJOIN\n    `tabUser` u ON i.case_owner = u.email\nWHERE\n    issue_type = 'IT'\n    AND case_reason IN ('Client Call', '--None--', 'Issues', 'Tasks', 'Information', 'Virtual Install Call')\n    AND YEAR(i.creation) = YEAR(CURDATE()) AND MONTH(i.creation) = MONTH(CURDATE())\nGROUP BY\n    i.case_owner, u.full_name;\n",
+ "ref_doctype": "Issue",
+ "report_name": "IT Cases Closed This Month",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "Support Team"
+  }
+ ]
+}

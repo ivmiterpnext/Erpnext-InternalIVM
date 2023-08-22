@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-08-16 17:16:47.223522",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2023-08-21 10:23:51.719103",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Open Cases by Type and Reason",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT\n    issue_type,\n    COUNT(*) AS Issue_Count\nFROM\n    `tabIssue`\nGROUP BY\n    issue_type\nORDER BY\n    Issue_Count DESC;",
+ "ref_doctype": "Issue",
+ "report_name": "Open Cases by Type and Reason",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "Support Team"
+  }
+ ]
+}
