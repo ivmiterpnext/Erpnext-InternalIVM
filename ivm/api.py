@@ -2,6 +2,7 @@ import frappe
 import requests
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
 
 # Function to get the SalesLoft API token from the "SalesLoft Settings" doctype
 
@@ -178,3 +179,29 @@ def get_contact_name(name):
                 if child_records[j]['link_doctype']=="Customer" and child_records[j]["link_title"]==name:
                     list_of_records.append(i)
     return list_of_records
+
+@frappe.whitelist()
+def make_project(source_name, target_doc=None):
+    customer_name = frappe.db.get_value('Opportunity', source_name, 'customer_name')
+    customer_exists = frappe.db.exists("Customer", customer_name, cache=True)
+    def set_missing_values(source, target):
+        target.opportunity_name = source.name
+    field_mappings = {
+        "deployment_address": "associated_deployment_location",
+        "sv_term": "opportunity_term",
+    }
+    if customer_exists:
+        field_mappings["customer_name"] = "customer"
+    doclist = get_mapped_doc(
+        "Opportunity",
+        source_name,
+        {
+            "Opportunity": {
+                "doctype": "Project",
+                "field_map": field_mappings
+            }
+        },
+        target_doc,
+        set_missing_values
+    )
+    return doclist

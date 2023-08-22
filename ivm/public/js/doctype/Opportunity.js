@@ -3,7 +3,10 @@ frappe.ui.form.on("Opportunity", {
     if (frm.doc.sales_stage =='Closed Won'){
       frm.add_custom_button(__('Create Deployment'),
 				function() {
-        frm.trigger("create_project")
+          frappe.model.open_mapped_doc({
+            method:"ivm.api.make_project",
+            frm:frm
+          })
         }, __('Create'));
     }
 		},
@@ -54,30 +57,4 @@ frappe.ui.form.on("Opportunity", {
     let forecast_revenue = sv_term_mul / 100 * frm.doc.probability
     cur_frm.set_value('forecast_revenue', forecast_revenue)
   },
-  create_project : function(frm){
-    console.log("uma")
-      var projectValues = {
-            "opportunity": frm.doc.name,
-            "number_of_kiosks":frm.doc.number_of_kiosks,
-            "enhanced_lockers":frm.doc.enhanced_lockers,
-            "expedited_delivery":frm.doc.expedited_delivery,
-            "expedited_delivery_details":frm.doc.expedited_delivery_details,
-            "install_type":frm.doc.install_type,
-            "po_and_tracking":frm.doc.po_and_tracking,
-            "vault_size":frm.doc.vault_size,
-            "vault_power_configuration_details":frm.doc.vault_power_configuration_details,
-            "kiosk_options":frm.doc.kiosk_options,
-            "kvm_switch_options":frm.doc.kvm_switch_options,
-            "network_options":frm.doc.network_options,
-            "countertop_color":frm.doc.countertop_color,
-            "ada_side_table":frm.doc.ada_side_table,
-            "description":frm.doc.description,
-            "customer":frm.doc.customer,
-            "deployment_address":frm.doc.associated_deployment_location
-
-        };
-        console.log(projectValues)
-
-          frappe.new_doc("Project",projectValues);  }
-
-})
+})   
