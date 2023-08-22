@@ -60,13 +60,26 @@ frappe.ui.form.on("Project", {
             let Customer_1 = $('input[data-fieldname="customer"]')
             Customer_1.css('background-color','#e1f0f0') 
         });
-
+        if (frm.doc.__islocal){
+            if (frm.doc.customer){
+                frm.set_value("project_type","");
+                frappe.db.get_doc("Customer", frm.doc.customer).then(r => {
+                if (r.opportunity_name){
+                    frm.set_value('opportunity', r.opportunity_name);
+                    }
+                })
+            }
+           frm.set_value("number_of_lockers", (frm.doc.number_of_primary_lockers || 0) + (frm.doc.number_of_secondary_lockers || 0));
+        }
     },
     customer: function (frm) {
-        frappe.db.get_doc("Customer", frm.doc.customer).then(r => {
-            frm.set_value('opportunity', r.opportunity_name);
-
-        })
+        if (frm.doc.customer){
+            frappe.db.get_doc("Customer", frm.doc.customer).then(r => {
+            if(r.opportunity_name){
+                frm.set_value('opportunity', r.opportunity_name);
+            }
+            })
+        }
     },
     project_type: function (frm) {
         frappe.call({
@@ -185,6 +198,13 @@ frappe.ui.form.on("Project", {
                 frm.set_value("ada_side_table",doc.ada_side_table)
                 frm.set_value("description",doc.description)
                 frm.set_value("associated_deployment_location",doc.deployment_address)
+                frm.set_value("number_of_machines",doc.number_of_machines)
+                frm.set_value("number_of_primary_lockers",doc.number_of_primary_lockers)
+                frm.set_value("number_of_secondary_lockers",doc.number_of_secondary_lockers)
+                frm.set_value("number_of_vaults",doc.number_of_vaults)
+                frm.set_value("kiosk_side_for_table",doc.kiosk_side_for_table)
+                frm.set_value("number_of_lockers", (doc.number_of_primary_lockers || 0) + (doc.number_of_secondary_lockers || 0));
+                frm.set_value("opportunity_term",doc.sv_term)
                 if (doc.customer_name) {
                     frappe.call({
                         method: "frappe.client.get_value",
@@ -206,7 +226,59 @@ frappe.ui.form.on("Project", {
             }
         });
         
+    },
+    customs_contact: function(frm) {
+        fetchContactDetails(frm, "customs_contact", "customs_contact_phone", "customs_contact_email");
+    },
+    install_contact: function(frm) {
+        fetchContactDetails(frm, "install_contact", "install_contact_phone", "install_contact_email");
+    },
+    delivery_contact: function(frm) {
+        fetchContactDetails(frm, "delivery_contact", "delivery_contact_phone", "delivery_contact_email");
+    },
+    contact_name: function(frm) {
+        fetchContactDetails(frm, "contact_name", "contact_phone", "contact_email");
     }
 });
 
 
+function fetchContactDetails(frm, contactField, phoneField, emailField) {
+    var contact = frm.doc[contactField];
+    if (contact) {
+        frappe.call({
+            method: "frappe.client.get_value",
+            args: {
+                doctype: "Contact",
+                filters: {
+                    name: contact
+                },
+                fieldname: ["email_id", "phone"]
+            },
+            callback: function(response) {
+                if (!response.exc) {
+                    var contactDetails = response.message;
+                    // Set the phone field
+                    if (contactDetails && contactDetails.phone) {
+                        frm.set_value(phoneField, contactDetails.phone);
+                    } else {
+                        frm.set_value(phoneField, "");
+                    }
+                    // Set the email field
+                    if (contactDetails && contactDetails.email_id) {
+                        frm.set_value(emailField, contactDetails.email_id);
+                    } else {
+                        frm.set_value(emailField, "");
+                    }
+                } else {
+                    // Handle errors if any
+                    frappe.msgprint(__("Error fetching contact details."));
+                    console.error(response.exc);
+                }
+            }
+        });
+    } else {
+        // Clear fields if contact is not selected
+        frm.set_value(phoneField, "");
+        frm.set_value(emailField, "");
+    }
+}
