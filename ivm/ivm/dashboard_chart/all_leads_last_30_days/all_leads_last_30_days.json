@@ -1,0 +1,35 @@
+{
+ "chart_name": "All Leads Last 30 Days",
+ "chart_type": "Report",
+ "creation": "2023-08-17 15:59:35.097650",
+ "custom_options": "{\"x_field\": \"lead_owner\", \"chart_type\": \"Bar\", \"y_axis_fields\": [{\"idx\": 1, \"__islocal\": true, \"name\": \"row 1\", \"y_field\": \"qualified\"}, {\"idx\": 2, \"__islocal\": true, \"name\": \"row 2\", \"y_field\": \"assigned\"}], \"y_fields\": [\"qualified\", \"assigned\"], \"colors\": [null, null]}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "filters_json": "{}",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 0,
+ "is_standard": 1,
+ "modified": "2023-08-22 11:43:02.233481",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "All Leads Last 30 Days",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "report_name": "All Leads Last 30 Days",
+ "roles": [],
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "x_field": "lead_owner",
+ "y_axis": [
+  {
+   "y_field": "qualified"
+  },
+  {
+   "y_field": "assigned"
+  }
+ ]
+}
