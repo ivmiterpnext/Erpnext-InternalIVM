@@ -78,7 +78,43 @@ frappe.ui.form.on("Issue", {
                 }
             });
         })
+    },
+
+
+    before_save: function(frm) {
+        if (!frm.doc.case_number) {
+            
+            // Get the last case number from the database
+            frappe.call({
+                method: 'frappe.client.get_list',
+                args: {
+                    doctype: 'Issue',
+                    fields: ['case_number'],
+                    filters: [['case_number', '!=', '']],
+                    order_by: 'case_number desc',
+                    limit_page_length: 1
+                },
+                callback: function(response) {
+                    if (response && response.message && response.message.length > 0) {
+                        const lastCaseNumber = response.message[0].case_number;
+                        const newCaseNumber = String(Number(lastCaseNumber) + 1).padStart(5, '0');
+                        frm.doc.case_number = newCaseNumber;
+                        frm.set_value('case_number', newCaseNumber);
+                        frm.refresh_field('case_number');
+                    }
+                    else {
+                        // If no previous case numbers exist, start with 00001
+                        const newCaseNumber = '00001';
+                        frm.set_value('case_number', newCaseNumber);
+                        frm.refresh_field('case_number');
+                    }
+                    
+                }
+            });
+        }
     }
+    
+
 
 });
 
@@ -102,3 +138,4 @@ function filterLinkFieldOptions(frm, fieldname, optionsData) {
     
     frm.refresh_field(fieldname);
 }
+
