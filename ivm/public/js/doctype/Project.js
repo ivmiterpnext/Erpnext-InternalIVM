@@ -59,6 +59,16 @@ frappe.ui.form.on("Project", {
             Description.css('background-color', '#e1f0f0')
             let Customer_1 = $('input[data-fieldname="customer"]')
             Customer_1.css('background-color', '#e1f0f0')
+            let Number_of_Machines = $('div[data-fieldname="number_of_machines"]')
+            Number_of_Machines.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            let Number_of_primary_Lockers = $('[data-fieldname="number_of_primary_lockers"]')
+            Number_of_primary_Lockers.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            let Number_of_secondary_Lockers = $('[data-fieldname="number_of_secondary_lockers"]')
+            Number_of_secondary_Lockers.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            let Number_of_Vaults = $('[data-fieldname="number_of_vaults"]')
+            Number_of_Vaults.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            let Opportunity_Term = $('[data-fieldname="opportunity_term"]')
+            Opportunity_Term.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
         });
         if (frm.doc.__islocal) {
             if (frm.doc.customer) {
