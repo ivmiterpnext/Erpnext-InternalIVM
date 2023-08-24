@@ -8,7 +8,10 @@
  "engine": "InnoDB",
  "field_order": [
   "salesloft_api_token",
-  "enable_salesloft_integration"
+  "enable_salesloft_integration",
+  "salesloft_user_email",
+  "guid",
+  "your_site_url"
  ],
  "fields": [
   {
@@ -22,12 +25,28 @@
    "fieldname": "enable_salesloft_integration",
    "fieldtype": "Check",
    "label": "Enable Salesloft Integration"
+  },
+  {
+   "fieldname": "salesloft_user_email",
+   "fieldtype": "Data",
+   "label": "SalesLoft User Email"
+  },
+  {
+   "fieldname": "guid",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "GUID"
+  },
+  {
+   "fieldname": "your_site_url",
+   "fieldtype": "Data",
+   "label": "Your Site URL"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-08-03 16:09:17.969598",
+ "modified": "2023-08-23 16:27:59.404434",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "SalesLoft Settings",
