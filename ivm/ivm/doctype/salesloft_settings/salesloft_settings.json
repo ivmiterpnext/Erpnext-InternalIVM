@@ -11,7 +11,8 @@
   "enable_salesloft_integration",
   "salesloft_user_email",
   "guid",
-  "your_site_url"
+  "your_site_url",
+  "user_id"
  ],
  "fields": [
   {
@@ -41,12 +42,18 @@
    "fieldname": "your_site_url",
    "fieldtype": "Data",
    "label": "Your Site URL"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "User ID"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-08-23 16:27:59.404434",
+ "modified": "2023-08-24 18:01:45.387555",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "SalesLoft Settings",

@@ -4,6 +4,73 @@ import requests
 import json
 from datetime import datetime
 
+@frappe.whitelist(allow_guest=True)
+def task_creation():
+    data = frappe.request.get_json()
+    salesloft_doc = frappe.get_doc("SalesLoft Settings")
+    user_id = salesloft_doc.user_id
+    created_by_user = data["created_by_user"]["id"]
+    if created_by_user == user_id:
+        description = data["description"]
+        person_id = data["person"]["id"]
+        task_id = data["id"]
+        date_string = data["due_date"]
+        date_object = datetime.strptime(date_string, '%Y-%m-%d').date()
+        person_email_id = get_person_id_or_email(personid=person_id)
+        if person_email_id:
+            person_email_id = person_email_id.strip()
+            doc = frappe.new_doc("ToDo")
+            doc.reference_type = "Lead"
+            q = '''select name from tabLead where email_id = %s;'''
+            res = frappe.db.sql(q,person_email_id,as_list=True)
+            reference_name = res[0][0]
+            doc.description = description
+            doc.date = date_object
+            doc.reference_type = "Lead"
+            doc.reference_name = reference_name
+            doc.task_id = task_id
+            doc.insert(ignore_permissions=True)
+
+
+
+@frappe.whitelist(allow_guest=True)
+def task_updation():
+    data = frappe.request.get_json()
+    salesloft_doc = frappe.get_doc("SalesLoft Settings")
+    user_id = salesloft_doc.user_id
+    created_by_user = data["created_by_user"]["id"]
+    if created_by_user == user_id:
+        description = data["description"]
+        person_id = data["person"]["id"]
+        task_id = data["id"]
+        date_string = data["due_date"]
+        date_object = datetime.strptime(date_string, '%Y-%m-%d').date()
+        q = '''select name from tabToDo where task_id = %s;'''
+        res = frappe.db.sql(q,task_id,as_list=True)
+        if not res:
+            person_email_id = get_person_id_or_email(personid=person_id)
+            if person_email_id:
+                person_email_id = person_email_id.strip()
+                doc = frappe.new_doc("ToDo")
+                doc.reference_type = "Lead"
+                q = '''select name from tabLead where email_id = %s;'''
+                res = frappe.db.sql(q,person_email_id,as_list=True)
+                reference_name = res[0][0]
+                doc.description = description
+                doc.date = date_object
+                doc.reference_type = "Lead"
+                doc.reference_name = reference_name
+                doc.task_id = task_id
+                doc.insert(ignore_permissions=True)
+                
+        else:
+            name = res[0][0]
+            doc = frappe.get_doc("ToDo",name)
+            doc.description = description
+            doc.date = date_object
+            doc.save(ignore_permissions=True)
+        
+
 
 @frappe.whitelist(allow_guest=True)
 def note_creation():
@@ -11,9 +78,9 @@ def note_creation():
     person_id= data["associated_with"]["id"]
     if person_id:
         note = data["content"]
-        person_full_name = get_person_id_or_name(personid=person_id)
-        q = '''select name from tabLead where lead_name = %s;'''
-        res = frappe.db.sql(q,person_full_name,as_list=True)
+        person_email_id = get_person_id_or_email(personid=person_id)
+        q = '''select name from tabLead where email_id = %s;'''
+        res = frappe.db.sql(q,person_email_id,as_list=True)
         name = res[0][0]
         if name:
             doc = frappe.get_doc("Lead",name)
@@ -32,9 +99,9 @@ def note_updation():
     person_id= data["associated_with"]["id"]
     if person_id:
         note = data["content"]
-        person_full_name = get_person_id_or_name(personid=person_id)
-        q = '''select name from tabLead where lead_name = %s;'''
-        res = frappe.db.sql(q,person_full_name,as_list=True)
+        person_email_id = get_person_id_or_email(personid=person_id)
+        q = '''select name from tabLead where email_id = %s;'''
+        res = frappe.db.sql(q,person_email_id,as_list=True)
         name = res[0][0]
         if name:
             doc = frappe.get_doc('Lead', name)
@@ -95,12 +162,13 @@ def set_guid():
         data = response["data"]
         for i in data:
             if i['email'].strip()==email.strip():
+                salesloft_doc.user_id = i["id"]
                 salesloft_doc.guid = i["guid"]
                 salesloft_doc.save(ignore_permissions=True)
                 break
 
 
-def get_person_id_or_name(firstname="",personid=0):
+def get_person_id_or_email(firstname="",personid=0):
     salesloft_doc = frappe.get_doc("SalesLoft Settings")
     access_token = salesloft_doc.salesloft_api_token
     guid = salesloft_doc.guid
@@ -124,9 +192,9 @@ def get_person_id_or_name(firstname="",personid=0):
     if personid !=0:
         for i in data:
             if i['id']==personid:
-                name = i["first_name"]+" "+i["last_name"]
-                name = name.strip()
-                return  name
+                email = i["email_address"]
+                email = email.strip()
+                return  email
     
     else:
         return
@@ -135,7 +203,7 @@ def get_person_id_or_name(firstname="",personid=0):
 
 @frappe.whitelist(allow_guest=True)
 def create_webhooks():
-    event_types = {"note_created": "note_creation","note_updated":"note_updation"}
+    event_types = {"note_created": "note_creation","note_updated":"note_updation","task_created":"task_creation","task_updated":"task_updation"}
     salesloft_doc = frappe.get_doc("SalesLoft Settings")
     access_token = salesloft_doc.salesloft_api_token
     site_url = salesloft_doc.your_site_url
