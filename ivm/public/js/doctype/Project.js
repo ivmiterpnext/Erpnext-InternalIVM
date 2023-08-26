@@ -1,4 +1,20 @@
 frappe.ui.form.on("Project", {
+    validate: function (frm) {
+        frappe.call({
+            method: "ivm.api.delivery_and_install_contact_due_customs",
+            args: {
+                "placement_agreement": frm.doc.placement_agreement,
+                "added_days": frm.doc.added_days ? frm.doc.added_days : 0,
+                "expedited_delivery": frm.doc.expedited_delivery ? frm.doc.expedited_delivery : ""
+            },
+            callback: function (response) {
+                frm.set_value('delivery_and_install_contact_due_customs', response.message.delivery_and_install_contact_due_customs)
+                frm.set_value('delivery_install_and_coi_requirements', response.message.delivery_and_install_contact_due_customs)
+                frm.set_value('user_and_restriction_requirements_due', response.message.user_and_restriction_requirements_due)
+
+            }
+        });
+    },
     onload: function (frm) {
         frm.set_query("shipping_address", function () {
             return {
@@ -60,15 +76,15 @@ frappe.ui.form.on("Project", {
             let Customer_1 = $('input[data-fieldname="customer"]')
             Customer_1.css('background-color', '#e1f0f0')
             let Number_of_Machines = $('div[data-fieldname="number_of_machines"]')
-            Number_of_Machines.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            Number_of_Machines.find('.control-value.like-disabled-input').css('background-color', '#e1f0f0')
             let Number_of_primary_Lockers = $('[data-fieldname="number_of_primary_lockers"]')
-            Number_of_primary_Lockers.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            Number_of_primary_Lockers.find('.control-value.like-disabled-input').css('background-color', '#e1f0f0')
             let Number_of_secondary_Lockers = $('[data-fieldname="number_of_secondary_lockers"]')
-            Number_of_secondary_Lockers.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            Number_of_secondary_Lockers.find('.control-value.like-disabled-input').css('background-color', '#e1f0f0')
             let Number_of_Vaults = $('[data-fieldname="number_of_vaults"]')
-            Number_of_Vaults.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            Number_of_Vaults.find('.control-value.like-disabled-input').css('background-color', '#e1f0f0')
             let Opportunity_Term = $('[data-fieldname="opportunity_term"]')
-            Opportunity_Term.find('.control-value.like-disabled-input').css('background-color','#e1f0f0')
+            Opportunity_Term.find('.control-value.like-disabled-input').css('background-color', '#e1f0f0')
         });
         if (frm.doc.__islocal) {
             if (frm.doc.customer) {
@@ -91,99 +107,100 @@ frappe.ui.form.on("Project", {
             })
         }
     },
-    // project_type: function (frm) {
-    //     frappe.call({
-    //         method: 'ivm.api.set_cell_Carrier',
-    //         args: {
-    //             option: frm.doc.connectivity_type
-    //         },
-    //         callback: function (r) {
-    //             var options = []
-    //             for (let i = 0; i < r.message.length; i++) {
-    //                 console.log(r.message[i]["cell_carrier"])
-    //                 options.push(r.message[i]["cell_carrier"])
-    //             }
+    project_type: function (frm) {
+        frappe.call({
+            method: 'ivm.api.set_cell_Carrier',
+            args: {
+                option: frm.doc.connectivity_type
+            },
+            callback: function (r) {
+                var options = []
+                for (let i = 0; i < r.message.length; i++) {
+                    console.log(r.message[i]["cell_carrier"])
+                    options.push(r.message[i]["cell_carrier"])
+                }
 
 
-    //             frm.fields_dict['cell_carrier'].wrapper.innerHTML = '';
+                frm.fields_dict['cell_carrier'].wrapper.innerHTML = '';
 
 
-    //             // Create a label for the custom field
-    //             var labelElement = document.createElement('label');
-    //             labelElement.innerHTML = 'Cell Carrier'; // Change this to your desired label
+                // Create a label for the custom field
+                var labelElement = document.createElement('label');
+                labelElement.innerHTML = 'Cell Carrier'; // Change this to your desired label
 
 
-    //             // Create a custom HTML select element
-    //             var selectElement = document.createElement('select');
-    //             selectElement.className = 'input-with-feedback form-control';
-    //             selectElement.id = 'custom-sales-stage';
-    //             selectElement.style.marginBottom = '10px';
+                // Create a custom HTML select element
+                var selectElement = document.createElement('select');
+                selectElement.className = 'input-with-feedback form-control';
+                selectElement.id = 'custom-sales-stage';
+                selectElement.style.marginBottom = '10px';
 
 
-    //             // Populate options in your desired order
-    //             options.forEach(function (option) {
-    //                 var optionElement = document.createElement('option');
-    //                 optionElement.value = option;
-    //                 optionElement.text = option;
-    //                 optionElement.style.fontSize = "18px"
-    //                 optionElement.style.margin = "5px"
-    //                 selectElement.appendChild(optionElement);
-    //             });
+                // Populate options in your desired order
+                options.forEach(function (option) {
+                    var optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.text = option;
+                    optionElement.style.fontSize = "18px"
+                    optionElement.style.margin = "5px"
+                    selectElement.appendChild(optionElement);
+                });
 
 
-    //             // Append the label and select elements to the field wrapper
-    //             frm.fields_dict['cell_carrier'].wrapper.appendChild(labelElement);
-    //             frm.fields_dict['cell_carrier'].wrapper.appendChild(selectElement);
-    //         }
-    //     })
-    // },
-    // connectivity_type: function (frm) {
-    //     if (frm.doc.connectivity_type){
-    //     frappe.call({
-    //         method: 'ivm.api.set_cell_Carrier',
-    //         args: {
-    //             option: frm.doc.connectivity_type
-    //         },
-    //         callback: function (r) {
-    //             var options = []
-    //             for (let i = 0; i < r.message.length; i++) {
-    //                 console.log(r.message[i]["cell_carrier"])
-    //                 options.push(r.message[i]["cell_carrier"])
-    //             }
+                // Append the label and select elements to the field wrapper
+                frm.fields_dict['cell_carrier'].wrapper.appendChild(labelElement);
+                frm.fields_dict['cell_carrier'].wrapper.appendChild(selectElement);
+            }
+        })
+    },
+    connectivity_type: function (frm) {
+        if (frm.doc.connectivity_type) {
+            frappe.call({
+                method: 'ivm.api.set_cell_Carrier',
+                args: {
+                    option: frm.doc.connectivity_type
+                },
+                callback: function (r) {
+                    var options = []
+                    for (let i = 0; i < r.message.length; i++) {
+                        console.log(r.message[i]["cell_carrier"])
+                        options.push(r.message[i]["cell_carrier"])
+                    }
 
 
-    //             frm.fields_dict['cell_carrier'].wrapper.innerHTML = '';
+                    frm.fields_dict['cell_carrier'].wrapper.innerHTML = '';
 
 
-    //             // Create a label for the custom field
-    //             var labelElement = document.createElement('label');
-    //             labelElement.innerHTML = 'Cell Carrier'; // Change this to your desired label
+                    // Create a label for the custom field
+                    var labelElement = document.createElement('label');
+                    labelElement.innerHTML = 'Cell Carrier'; // Change this to your desired label
 
 
-    //             // Create a custom HTML select element
-    //             var selectElement = document.createElement('select');
-    //             selectElement.className = 'input-with-feedback form-control';
-    //             selectElement.id = 'custom-sales-stage';
-    //             selectElement.style.marginBottom = '12px';
+                    // Create a custom HTML select element
+                    var selectElement = document.createElement('select');
+                    selectElement.className = 'input-with-feedback form-control';
+                    selectElement.id = 'custom-sales-stage';
+                    selectElement.style.marginBottom = '12px';
 
 
-    //             // Populate options in your desired order
-    //             options.forEach(function (option) {
-    //                 var optionElement = document.createElement('option');
-    //                 optionElement.value = option;
-    //                 optionElement.text = option;
-    //                 optionElement.style.fontSize = "18px"
-    //                 optionElement.style.margin = "5px"
-    //                 selectElement.appendChild(optionElement);
-    //             });
+                    // Populate options in your desired order
+                    options.forEach(function (option) {
+                        var optionElement = document.createElement('option');
+                        optionElement.value = option;
+                        optionElement.text = option;
+                        optionElement.style.fontSize = "18px"
+                        optionElement.style.margin = "5px"
+                        selectElement.appendChild(optionElement);
+                    });
 
 
-    //             // Append the label and select elements to the field wrapper
-    //             frm.fields_dict['cell_carrier'].wrapper.appendChild(labelElement);
-    //             frm.fields_dict['cell_carrier'].wrapper.appendChild(selectElement);
-    //         }
-    //     })
-    // }},
+                    // Append the label and select elements to the field wrapper
+                    frm.fields_dict['cell_carrier'].wrapper.appendChild(labelElement);
+                    frm.fields_dict['cell_carrier'].wrapper.appendChild(selectElement);
+                }
+            })
+        }
+    },
     opportunity: function (frm) {
         frappe.call({
             method: "frappe.client.get",
@@ -248,7 +265,7 @@ frappe.ui.form.on("Project", {
     },
     contact_name: function (frm) {
         fetchContactDetails(frm, "contact_name", "contact_phone", "contact_email");
-    }
+    },
 });
 
 
