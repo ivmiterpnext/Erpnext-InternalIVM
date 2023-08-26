@@ -1,8 +1,9 @@
 import frappe
 import requests
-from frappe.model.mapper import get_mapped_doc
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils.data import getdate, add_days
+import math
 
 # Function to get the SalesLoft API token from the "SalesLoft Settings" doctype
 
@@ -155,20 +156,21 @@ def get_connectivity_type_record(record_name):
 
 @frappe.whitelist(allow_guest=True)
 def get_case_sub_reason_options(case_reason):
-    if case_reason=="":
+    if case_reason == "":
         return []
     doc = frappe.get_doc("Case Reason", case_reason)
     child_table_records = doc.get("case_sub_reason")
-    child_field_values = [child_record.get("case_sub_reason") for child_record in child_table_records]
+    child_field_values = [child_record.get(
+        "case_sub_reason") for child_record in child_table_records]
     return child_field_values
 
 
 @frappe.whitelist(allow_guest=True)
 def get_contact_name(name):
-    if name =="":
+    if name == "":
         return []
-    
-    docs = frappe.db.get_list("Contact",pluck="name")
+
+    docs = frappe.db.get_list("Contact", pluck="name")
     list_of_records = []
     for i in docs:
         doc = frappe.get_doc("Contact", i)
@@ -176,14 +178,17 @@ def get_contact_name(name):
         child_records = doc.links
         if len(child_records) > 0:
             for j in range(len(child_records)):
-                if child_records[j]['link_doctype']=="Customer" and child_records[j]["link_title"]==name:
+                if child_records[j]['link_doctype'] == "Customer" and child_records[j]["link_title"] == name:
                     list_of_records.append(i)
     return list_of_records
 
+
 @frappe.whitelist()
 def make_project(source_name, target_doc=None):
-    customer_name = frappe.db.get_value('Opportunity', source_name, 'customer_name')
+    customer_name = frappe.db.get_value(
+        'Opportunity', source_name, 'customer_name')
     customer_exists = frappe.db.exists("Customer", customer_name, cache=True)
+
     def set_missing_values(source, target):
         target.opportunity_name = source.name
     field_mappings = {
@@ -205,3 +210,45 @@ def make_project(source_name, target_doc=None):
         set_missing_values
     )
     return doclist
+
+
+@frappe.whitelist()
+def delivery_and_install_contact_due_customs(placement_agreement, added_days, expedited_delivery):
+    user_and_restriction_requirements = user_and_restriction_requirements_due(placement_agreement, added_days, expedited_delivery)
+    weekday = getdate(placement_agreement).weekday()
+    if expedited_delivery:
+        base_days = 9
+        days = calculate_days(int(added_days), weekday, base_days)
+        return {"delivery_and_install_contact_due_customs": add_days(placement_agreement, days), "user_and_restriction_requirements_due": user_and_restriction_requirements}
+    else:
+        base_days = 10
+        days = calculate_days(int(added_days), weekday, base_days)
+        return {"delivery_and_install_contact_due_customs": add_days(placement_agreement, days), "user_and_restriction_requirements_due": user_and_restriction_requirements}
+
+
+def user_and_restriction_requirements_due(placement_agreement, added_days, expedited_delivery):
+    weekday = getdate(placement_agreement).weekday()
+    if expedited_delivery:
+        base_days = 14
+        days = calculate_days(int(added_days), weekday, base_days)
+        return add_days(placement_agreement, days)
+    else:
+        base_days = 20
+        days = calculate_days(int(added_days), weekday, base_days)
+        return add_days(placement_agreement, days)
+
+
+def calculate_days(added_days, weekday, base_days):
+    if weekday == 4:  # Friday
+        days = base_days + added_days + \
+            int(math.ceil(((base_days + added_days) / 5) * 2))
+    elif weekday == 5:  # Saturday
+        days = -1 + base_days + added_days + \
+            int(math.ceil(((base_days + added_days) / 5) * 2))
+    elif weekday == 6:  # Sunday
+        days = base_days + added_days + \
+            int(math.floor(((base_days + added_days - 1) / 5) * 2))
+    else:
+        days = base_days + added_days + \
+            int(math.floor(((base_days + added_days + weekday) / 5) * 2))
+    return days
