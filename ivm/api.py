@@ -219,11 +219,13 @@ def delivery_and_install_contact_due_customs(placement_agreement, added_days, ex
     if expedited_delivery:
         base_days = 9
         days = calculate_days(int(added_days), weekday, base_days)
-        return {"delivery_and_install_contact_due_customs": add_days(placement_agreement, days), "user_and_restriction_requirements_due": user_and_restriction_requirements}
+        return {"graphic_approval_due_date":add_days(placement_agreement, days),"delivery_and_install_contact_due_customs": add_days(placement_agreement, days), "user_and_restriction_requirements_due": user_and_restriction_requirements}
     else:
         base_days = 10
         days = calculate_days(int(added_days), weekday, base_days)
-        return {"delivery_and_install_contact_due_customs": add_days(placement_agreement, days), "user_and_restriction_requirements_due": user_and_restriction_requirements}
+        base_days1 = 20
+        days1= calculate_days(int(added_days), weekday, base_days1)
+        return {"graphic_approval_due_date":add_days(placement_agreement, days1),"delivery_and_install_contact_due_customs": add_days(placement_agreement, days), "user_and_restriction_requirements_due": user_and_restriction_requirements}
 
 
 def user_and_restriction_requirements_due(placement_agreement, added_days, expedited_delivery):
