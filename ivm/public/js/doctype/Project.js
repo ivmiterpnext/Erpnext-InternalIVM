@@ -8,6 +8,7 @@ frappe.ui.form.on("Project", {
                 "expedited_delivery": frm.doc.expedited_delivery ? frm.doc.expedited_delivery : ""
             },
             callback: function (response) {
+                frm.set_value('graphic_design_approval_due',response.message.graphic_approval_due_date)
                 frm.set_value('delivery_and_install_contact_due_customs', response.message.delivery_and_install_contact_due_customs)
                 frm.set_value('delivery_install_and_coi_requirements', response.message.delivery_and_install_contact_due_customs)
                 frm.set_value('user_and_restriction_requirements_due', response.message.user_and_restriction_requirements_due)
