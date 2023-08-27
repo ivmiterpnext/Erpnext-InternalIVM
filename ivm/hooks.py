@@ -30,13 +30,23 @@ fixtures = ["Custom Field"]
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
-doctype_js = {"Lead": "public/js/doctype/Lead.js", "Opportunity": "public/js/doctype/Opportunity.js",
-              "Customer": "public/js/doctype/Customer.js", "User": "public/js/doctype/user.js", "Task": "public/js/doctype/Task.js","Project":"public/js/doctype/Project.js",
-              "Issue":"public/js/doctype/Issue.js"}
-doctype_list_js = {"Lead": "public/js/listview/Lead_listview.js", "Opportunity": "public/js/listview/Opportunity_listview.js",
-                   "Customer": "public/js/listview/Customer_listview.js", "User": "public/js/listview/user_listview.js",
-                   "Calendar Events" : "public/js/calendar.js"
-                   }
+doctype_js = {
+	"Lead": "public/js/doctype/Lead.js",
+	"Opportunity": "public/js/doctype/Opportunity.js",
+	"Customer": "public/js/doctype/Customer.js",
+	"User": "public/js/doctype/user.js",
+	"Task": "public/js/doctype/Task.js",
+	"Project":"public/js/doctype/Project.js",
+	"Issue":"public/js/doctype/Issue.js"
+}
+
+doctype_list_js = {
+	"Lead": "public/js/listview/Lead_listview.js",
+	"Opportunity": "public/js/listview/Opportunity_listview.js",
+	"Customer": "public/js/listview/Customer_listview.js", 
+	"User": "public/js/listview/user_listview.js",
+	"Calendar Events" : "public/js/calendar.js"
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -103,7 +113,9 @@ doctype_list_js = {"Lead": "public/js/listview/Lead_listview.js", "Opportunity":
 # override_doctype_class = {
 # "ToDo": "custom_app.overrides.CustomToDo"
 # }
-
+override_doctype_class = {
+    "Project": "ivm.controllers.project.CustomProjectController"
+}
 # Document Events
 # ---------------
 # Hook on document methods and events
@@ -153,7 +165,7 @@ doctype_list_js = {"Lead": "public/js/listview/Lead_listview.js", "Opportunity":
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
-    "Task": "ivm.api.get_data"
+	"Task": "ivm.api.get_data"
 }
 
 # exempt linked doctypes from being automatically cancelled
