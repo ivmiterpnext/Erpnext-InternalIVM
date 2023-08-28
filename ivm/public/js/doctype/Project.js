@@ -104,8 +104,8 @@ frappe.ui.form.on("Project", {
 }
   },
   opportunity: function (frm) {
-    frappe.db.get_value("Opportunity", frm.doc.opportunity, "*", (response) => {
-      var doc = response.message;
+    frappe.db.get_value("Opportunity", frm.doc.opportunity, "*",  (response) =>  {
+      var doc = response;
       var fieldsToSet = [
         "number_of_kiosks",
         "enhanced_lockers",
@@ -121,7 +121,6 @@ frappe.ui.form.on("Project", {
         "countertop_color",
         "ada_side_table",
         "description",
-        "deployment_address",
         "number_of_machines",
         "number_of_primary_lockers",
         "number_of_secondary_lockers",
@@ -130,7 +129,7 @@ frappe.ui.form.on("Project", {
         "customer",
       ];
       for (var field of fieldsToSet) {
-        if (doc[field] !== undefined) {
+        if (doc[field]!== undefined) {
           frm.set_value(field, doc[field]);
         }
       }
@@ -140,6 +139,7 @@ frappe.ui.form.on("Project", {
           (doc.number_of_secondary_lockers || 0)
       );
       frm.set_value("opportunity_term", doc.sv_term);
+      frm.set_value("associated_deployment_location",doc.deployment_address)
 
       if (doc.customer_name) {
         frappe.db.get_value(
@@ -147,8 +147,7 @@ frappe.ui.form.on("Project", {
           { name: doc.customer_name },
           "name",
           function (customer_response) {
-            console.log(customer_response.message.name);
-            if (customer_response.message && customer_response.message.name) {
+            if (customer_response && customer_response.name) {
               frm.set_value("customer", doc.customer_name);
             }
           }
