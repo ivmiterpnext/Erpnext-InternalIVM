@@ -17,76 +17,30 @@ frappe.ui.form.on("Project", {
     });
 
     $(document).ready(function () {
-      let Num_of_kios = $('input[data-fieldname="number_of_kiosks"]');
-      Num_of_kios.css("background", "#e1f0f0");
-      let Opp = $('input[data-fieldname="opportunity"]');
-      Opp.css("background-color", "#e1f0f0");
-      let Enhanced_lo = $('div[data-fieldname="enhanced_lockers"]');
-      Enhanced_lo.find(".label-area").css("background-color", "#e1f0f0");
-      let Expected_Delivery = $('div[data-fieldname="expedited_delivery"]');
-      Expected_Delivery.find(".label-area").css("background-color", "#e1f0f0");
-      let Expected_deli = $(
-        'textarea[data-fieldname="expedited_delivery_details"]'
-      );
-      Expected_deli.css("background-color", "#e1f0f0");
-      let Install_Type = $('select[data-fieldname="install_type"]');
-      Install_Type.css("background-color", "#e1f0f0");
-      let Po_Tracking = $('input[data-fieldname="po_and_tracking"]');
-      Po_Tracking.css("background-color", "#e1f0f0");
-      let Vault_Size = $('select[data-fieldname="vault_size"]');
-      Vault_Size.css("background-color", "#e1f0f0");
-      let Vault_power = $(
-        'textarea[data-fieldname="vault_power_configuration_details"]'
-      );
-      Vault_power.css("background-color", "#e1f0f0");
-      let Associated_Deployment_Loc = $(
-        'input[data-fieldname="associated_deployment_location"]'
-      );
-      Associated_Deployment_Loc.css("background-color", "#e1f0f0");
-      let Kiosk_Options = $('select[data-fieldname="kiosk_options"]');
-      Kiosk_Options.css("background-color", "#e1f0f0");
-      let Kvm_switch_Options = $('select[data-fieldname="kvm_switch_options"]');
-      Kvm_switch_Options.css("background-color", "#e1f0f0");
-      let Network_Options = $('select[data-fieldname="network_options"]');
-      Network_Options.css("background-color", "#e1f0f0");
-      let Countertop_Color = $('select[data-fieldname="countertop_color"]');
-      Countertop_Color.css("background-color", "#e1f0f0");
-      let Ada_Side_Table = $('select[data-fieldname="ada_side_table"]');
-      Ada_Side_Table.css("background-color", "#e1f0f0");
-      let Kiosk_Side_Table = $('select[data-fieldname="kiosk_side_for_table"]');
-      Kiosk_Side_Table.css("background-color", "#e1f0f0");
-      let Description = $('textarea[data-fieldname="description"]');
-      Description.css("background-color", "#e1f0f0");
-      let Customer_1 = $('input[data-fieldname="customer"]');
-      Customer_1.css("background-color", "#e1f0f0");
-      let Number_of_Machines = $('div[data-fieldname="number_of_machines"]');
-      Number_of_Machines.find(".control-value.like-disabled-input").css(
-        "background-color",
-        "#e1f0f0"
-      );
-      let Number_of_primary_Lockers = $(
-        '[data-fieldname="number_of_primary_lockers"]'
-      );
-      Number_of_primary_Lockers.find(".control-value.like-disabled-input").css(
-        "background-color",
-        "#e1f0f0"
-      );
-      let Number_of_secondary_Lockers = $(
-        '[data-fieldname="number_of_secondary_lockers"]'
-      );
-      Number_of_secondary_Lockers.find(
-        ".control-value.like-disabled-input"
-      ).css("background-color", "#e1f0f0");
-      let Number_of_Vaults = $('[data-fieldname="number_of_vaults"]');
-      Number_of_Vaults.find(".control-value.like-disabled-input").css(
-        "background-color",
-        "#e1f0f0"
-      );
-      let Opportunity_Term = $('[data-fieldname="opportunity_term"]');
-      Opportunity_Term.find(".control-value.like-disabled-input").css(
-        "background-color",
-        "#e1f0f0"
-      );
+      const fieldGroups = {
+                      input: ['number_of_kiosks', 'opportunity', "po_and_tracking", "associated_deployment_location", "customer"],
+                      select: ["install_type", "vault_size", "kiosk_options", "kvm_switch_options", "network_options", "countertop_color", "ada_side_table", "kiosk_side_for_table"],
+                      div: ["expedited_delivery", "enhanced_lockers", "number_of_machines", "number_of_primary_lockers", "number_of_secondary_lockers", "number_of_vaults", "opportunity_term"],
+                      textarea: ["description", "vault_power_configuration_details", "expedited_delivery_details"]
+                    };
+                    
+                    Object.keys(fieldGroups).forEach(group => {
+                      fieldGroups[group].forEach(field => {
+                        let selector;
+                        let backgroundColor = '#e1f0f0';
+                    
+                        if (group === 'div' && (field === "expedited_delivery" || field === "enhanced_lockers")) {
+                          selector = `div[data-fieldname="${field}"] .label-area`;
+                        } else {
+                          selector = `${group}[data-fieldname="${field}"]`;
+                          if (group === 'div' && field !== "expedited_delivery" && field !== "enhanced_lockers") {
+                            selector = `div[data-fieldname="${field}"] .control-value.like-disabled-input`;
+                          }
+                        }
+                    
+                        $(selector).css('background-color', backgroundColor);
+                      });
+                    });
     });
     if (frm.doc.__islocal) {
       if (frm.doc.customer) {
@@ -114,88 +68,40 @@ frappe.ui.form.on("Project", {
     }
   },
   project_type: function (frm) {
-    frappe.call({
-      method: "ivm.api.set_cell_Carrier",
-      args: {
-        option: frm.doc.connectivity_type,
-      },
-      callback: function (r) {
-        var options = [];
-        for (let i = 0; i < r.message.length; i++) {
-          console.log(r.message[i]["cell_carrier"]);
-          options.push(r.message[i]["cell_carrier"]);
-        }
-
-        frm.fields_dict["cell_carrier"].wrapper.innerHTML = "";
-
-        // Create a label for the custom field
-        var labelElement = document.createElement("label");
-        labelElement.innerHTML = "Cell Carrier"; // Change this to your desired label
-
-        // Create a custom HTML select element
-        var selectElement = document.createElement("select");
-        selectElement.className = "input-with-feedback form-control";
-        selectElement.id = "custom-sales-stage";
-        selectElement.style.marginBottom = "10px";
-
-        // Populate options in your desired order
-        options.forEach(function (option) {
-          var optionElement = document.createElement("option");
-          optionElement.value = option;
-          optionElement.text = option;
-          optionElement.style.fontSize = "18px";
-          optionElement.style.margin = "5px";
-          selectElement.appendChild(optionElement);
-        });
-
-        // Append the label and select elements to the field wrapper
-        frm.fields_dict["cell_carrier"].wrapper.appendChild(labelElement);
-        frm.fields_dict["cell_carrier"].wrapper.appendChild(selectElement);
-      },
-    });
+    if (frm.doc.connectivity_type){
+      frappe.call({
+          method: 'ivm.api.get_connectivity_type_record',
+          args: {
+              record_name: frm.doc.connectivity_type
+          },
+          callback: function(r) {
+              const message = r.message;
+              if (message) {
+                  if (message.cell_carrier) {
+                      updateSelectFieldOptions(frm, 'cell_carrier', message.cell_carrier);
+                  }
+              }
+          }
+      });
+  }
   },
   connectivity_type: function (frm) {
-    if (frm.doc.connectivity_type) {
-      frappe.call({
-        method: "ivm.api.set_cell_Carrier",
-        args: {
-          option: frm.doc.connectivity_type,
-        },
-        callback: function (r) {
-          var options = [];
-          for (let i = 0; i < r.message.length; i++) {
-            console.log(r.message[i]["cell_carrier"]);
-            options.push(r.message[i]["cell_carrier"]);
+  if (frm.doc.connectivity_type){
+  frappe.call({
+      method: 'ivm.api.get_connectivity_type_record',
+      args: {
+          record_name: frm.doc.connectivity_type
+      },
+      callback: function(r) {
+          const message = r.message;
+          if (message) {
+              if (message.cell_carrier) {
+                  updateSelectFieldOptions(frm, 'cell_carrier', message.cell_carrier);
+              }
           }
-
-          frm.fields_dict["cell_carrier"].wrapper.innerHTML = "";
-
-          // Create a label for the custom field
-          var labelElement = document.createElement("label");
-          labelElement.innerHTML = "Cell Carrier"; // Change this to your desired label
-
-          // Create a custom HTML select element
-          var selectElement = document.createElement("select");
-          selectElement.className = "input-with-feedback form-control";
-          selectElement.id = "custom-sales-stage";
-          selectElement.style.marginBottom = "12px";
-
-          // Populate options in your desired order
-          options.forEach(function (option) {
-            var optionElement = document.createElement("option");
-            optionElement.value = option;
-            optionElement.text = option;
-            optionElement.style.fontSize = "18px";
-            optionElement.style.margin = "5px";
-            selectElement.appendChild(optionElement);
-          });
-
-          // Append the label and select elements to the field wrapper
-          frm.fields_dict["cell_carrier"].wrapper.appendChild(labelElement);
-          frm.fields_dict["cell_carrier"].wrapper.appendChild(selectElement);
-        },
-      });
-    }
+      }
+  });
+}
   },
   opportunity: function (frm) {
     frappe.db.get_value("Opportunity", frm.doc.opportunity, "*", (response) => {
@@ -319,4 +225,10 @@ function fetchContactDetails(frm, contactField, phoneField, emailField) {
     frm.set_value(phoneField, "");
     frm.set_value(emailField, "");
   }
+}
+
+function updateSelectFieldOptions(frm, fieldname, optionsData) {
+  const optionsList = optionsData.map(option => option[fieldname]);
+  frm.set_df_property(fieldname, 'options', optionsList); 
+  frm.refresh_field(fieldname);
 }
