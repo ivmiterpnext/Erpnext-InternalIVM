@@ -288,7 +288,7 @@
    "name": "Opportunity-countertop_color",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "--None--\nBlue\nBlack\nLight Grey\nDark Grey",
+   "options": "--None--\nBlue\nBlack\nLight Gray\nDark Gray",
    "owner": "Administrator",
    "permlevel": 0,
    "precision": "",
