@@ -15,6 +15,10 @@ class CustomProjectController(OriginalProjectController):
         self.update_delivery_and_install_contact_due()
     def update_delivery_and_install_contact_due(self):
         if not self.placement_agreement:
+            self.graphic_design_approval_due = ""
+            self.delivery_and_install_contact_due_customs =""
+            self.delivery_install_and_coi_requirements=""
+            self.user_and_restriction_requirements_due = ""
             return
         user_and_restriction_requirements = user_and_restriction_requirements_due(self.placement_agreement, self.added_days, self.expedited_delivery)
         weekday = getdate(self.placement_agreement).weekday()
@@ -40,6 +44,8 @@ class CustomProjectController(OriginalProjectController):
 
     def update_sample_products_due(self):
         if not self.placement_agreement:
+            self.sample_products_due = ''
+            self.sample_badge_due = ''
             return
         base_days = 2 if (self.expedited_delivery) else (7 if self.locale and self.locale == "Domestic" else 13)
         added_days = int(self.added_days) if self.added_days else 0

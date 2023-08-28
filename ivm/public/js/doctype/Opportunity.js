@@ -1,7 +1,7 @@
 frappe.ui.form.on("Opportunity", {
   refresh: function(frm) {
     if (frm.doc.sales_stage =='Closed Won'){
-      frm.add_custom_button(__('Create Deployment'),
+      frm.add_custom_button(__('Deployment'),
 				function() {
           frappe.model.open_mapped_doc({
             method:"ivm.api.make_project",
