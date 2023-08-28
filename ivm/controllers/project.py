@@ -11,6 +11,15 @@ class CustomProjectController(OriginalProjectController):
         self.update_provide_planogram_due_date()
         self.update_approve_planogram_and_locker_config_due()
         self.update_pog_created_in_database_due()
+        self.update_sample_products_due()
+    def update_sample_products_due(self):
+        if not self.placement_agreement:
+            return
+        base_days = 2 if (self.expedited_delivery) else (7 if self.locale and self.locale == "Domestic" else 13)
+        added_days = int(self.added_days) if self.added_days else 0
+        due_date = get_sample_products_due_date(self.placement_agreement, base_days, added_days)
+        self.sample_products_due = due_date
+        self.sample_badge_due = due_date
 
     def update_provide_planogram_due_date(self):
         if not self.placement_agreement:
@@ -56,4 +65,13 @@ def get_no_days(date, base_days, added_days):
         days_maps = {0: -1, 1: 0, 2: 1, 3: 2, 4:3}
         return int((math.floor(base_days + added_days + days_maps.get(weekday))/5)*2)
 
+def get_sample_products_due_date(placement_agreement, base_days, added_days):
+    weekday = getdate(placement_agreement).weekday()
+    if weekday == 5:
+        return add_days(placement_agreement, base_days + added_days + math.ceil(((base_days + added_days) / 5) * 2))
+    elif weekday == 6:
+        return add_days(placement_agreement, - base_days - added_days -0 + base_days + math.ceil(((base_days + added_days) / 5) * 2))
+    else:
+        return add_days(placement_agreement, base_days + added_days + int(math.floor((base_days + added_days + {0: -1, 1: 0, 2: 1, 3: 2, 4: 3}.get(weekday, 0)) / 5) * 2))
+    
 ############################# end of calculations ################################
