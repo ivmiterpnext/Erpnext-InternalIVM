@@ -74,9 +74,9 @@ class CustomProjectController(OriginalProjectController):
 
 def get_sample_products_due_date(placement_agreement, base_days, added_days):
     weekday = getdate(placement_agreement).weekday()
-    if weekday == 5:
+    if weekday == 6:
         return add_days(placement_agreement, base_days + added_days + math.ceil(((base_days + added_days) / 5) * 2))
-    elif weekday == 6:
+    elif weekday == 5:
         return add_days(placement_agreement, - base_days - added_days -0 + base_days + math.ceil(((base_days + added_days) / 5) * 2))
     else:
         return add_days(placement_agreement, base_days + added_days + int(math.floor((base_days + added_days + {0: -1, 1: 0, 2: 1, 3: 2, 4: 3}.get(weekday, 0)) / 5) * 2))
