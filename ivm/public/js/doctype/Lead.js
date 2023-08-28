@@ -73,7 +73,6 @@ function checkSalesLoftUser(email) {
   
   // Function to create a new SalesLoft person
   function createSalesLoftPerson( frm) {
-    console.log(frm.doc.first_name)
     frappe.call({
       method: "ivm.api.create_salesloft_person",
       args: {
@@ -171,7 +170,6 @@ function checkSalesLoftUser(email) {
       if (frm.doc.__islocal && CheckboxStatus) {
       var email = frm.doc.email_id;
       var name = frm.doc.first_name;
-      console.log(name,'uma')
   
       // Check if the SalesLoft user already exists
       checkSalesLoftUser(email)
@@ -195,7 +193,6 @@ function checkSalesLoftUser(email) {
         });}
     },
     email_id: function (frm, cdt, cdn) {
-      console.log(CheckboxStatus)
       if (CheckboxStatus){
       var email = frm.doc.email_id;
   
