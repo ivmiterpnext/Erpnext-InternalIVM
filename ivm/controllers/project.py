@@ -59,7 +59,7 @@ class CustomProjectController(OriginalProjectController):
 
 	def update_provide_planogram_due_date(self):
 		if not self.placement_agreement:
-			self.provide_planogram_due = ''
+			self.provide_planogram_due = None
 			return
 
 		base_days = 7 if (self.expedited_delivery) else (17 if self.locale and self.locale == "Domestic" else 23)
@@ -68,24 +68,24 @@ class CustomProjectController(OriginalProjectController):
 
 	def update_approve_planogram_and_locker_config_due(self):
 		if not self.placement_agreement:
-			self.approve_planogram_and_locker_config_due = ''
+			self.approve_planogram_and_locker_config_due = None
 			return
 
-		base_days = 11 if (self.expedited_delivery) else (25 if self.locale and self.locale == "Domestic" else 31)
+		base_days = 11 if (self.expedited_delivery) else (24 if self.locale and self.locale == "Domestic" else 27)
 		added_days = int(self.added_days) if self.added_days else 0
 		self.approve_planogram_and_locker_config_due = get_provide_planogram_base_date(self.placement_agreement, base_days, added_days)
 
 	def update_pog_created_in_database_due(self):
 		if not self.placement_agreement:
-			self.pog_created_in_database_due = ''
+			self.pog_created_in_database_due = None
 			return
 
-		base_days = 10 if (self.expedited_delivery) else (24 if self.locale and self.locale == "Domestic" else 27)
+		base_days = 10 if (self.expedited_delivery) else (25 if self.locale and self.locale == "Domestic" else 31)
 		added_days = int(self.added_days) if self.added_days else 0
 		self.pog_created_in_database_due = get_provide_planogram_base_date(self.placement_agreement, base_days, added_days)
 
 
-def get_sample_products_due_date(placement_agreement, base_days, added_days):
+def get_sample_products_due_date(placement_agreement, base_days, added_days, expedited_delivery=0):
 	weekday = getdate(placement_agreement).weekday()
 	if weekday == 6:
 		return add_days(placement_agreement, base_days + added_days + math.ceil(((base_days + added_days) / 5) * 2))
@@ -117,12 +117,12 @@ def get_provide_planogram_base_date(date, base_days, added_days):
 def get_no_days(date, base_days, added_days):
 	weekday = getdate(date).weekday()
 
-	if (weekday == 5):
+	if (weekday == 6):
 		return int(math.ceil(((base_days + added_days)/5)*2))
-	elif (weekday == 6):
-		return (- base_days - added_days - 1 + base_days + int(math.ceil(((base_days + added_days)/5)*2)))
+	elif (weekday == 5):
+		return (- base_days - added_days - 1 + base_days) + (int(math.ceil(((base_days + added_days)/5))*2))
 	else:
-		days_maps = {0: -1, 1: 0, 2: 1, 3: 2, 4:3}
+		days_maps = {0: -1, 1: 0, 2: 1, 3: 2, 4: 3}
 		return int((math.floor(base_days + added_days + days_maps.get(weekday))/5)*2)
 
 def calculate_days(added_days, weekday, base_days):
