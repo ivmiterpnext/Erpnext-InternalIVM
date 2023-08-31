@@ -57,7 +57,7 @@ class CustomProjectController(OriginalProjectController):
 		
 		base_days = 2 if (self.expedited_delivery) else (7 if self.locale and self.locale == "Domestic" else 13)
 		added_days = int(self.added_days) if self.added_days else 0
-		due_date = get_sample_products_due_date(self.placement_agreement, base_days, added_days)
+		due_date = get_provide_planogram_base_date(self.placement_agreement, base_days, added_days)
 		self.sample_products_due = due_date
 		self.sample_badge_due = due_date
 
