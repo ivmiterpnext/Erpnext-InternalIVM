@@ -13,6 +13,10 @@ class CustomProjectController(OriginalProjectController):
 		self.update_pog_created_in_database_due()
 		self.update_sample_products_due()
 		self.update_delivery_and_install_contact_due()
+		self.update_install_checklist_due()
+
+	def update_install_checklist_due(self):
+		self.install_checklist_due = self.approve_travel_cost_due
 
 	def update_delivery_and_install_contact_due(self):
 		if not self.placement_agreement:
