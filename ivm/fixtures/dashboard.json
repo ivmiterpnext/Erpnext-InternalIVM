@@ -1,0 +1,65 @@
+[
+ {
+  "cards": [],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Open Opportunities by Rep",
+    "parent": "CRM",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "All Leads Last 30 Days",
+    "parent": "CRM",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Desktop Support Cases Closed This Month",
+    "parent": "CRM",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Open Cases by Type",
+    "parent": "CRM",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Closed Cases Total",
+    "parent": "CRM",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Support Cases Closed This Month",
+    "parent": "CRM",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "IT Cases Closed This Month",
+    "parent": "CRM",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   }
+  ],
+  "dashboard_name": "CRM",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 1,
+  "modified": "2023-08-31 21:53:12.897165",
+  "module": "CRM",
+  "name": "CRM"
+ }
+]
