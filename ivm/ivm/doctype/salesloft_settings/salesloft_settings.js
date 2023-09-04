@@ -8,11 +8,11 @@ frappe.ui.form.on('SalesLoft Settings', {
 			let url = frm.doc.your_site_url
 			let access_token = frm.doc.salesloft_api_token
 			if (email =="" || email.length===0 || email===undefined || email===null){
-				frappe.msgprint("Please enter email address and try again")
+				
 			}else if (url =="" || url.length===0 || url===undefined || url===null){
-				frappe.msgprint("Please enter url and try again")
+				
 			}else if(access_token =="" || access_token.length===0 || access_token===undefined || access_token===null){
-				frappe.msgprint("Please enter API Token and try again")
+				
 			}
 			else{
 				frappe.call({

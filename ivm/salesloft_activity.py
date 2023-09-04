@@ -15,6 +15,7 @@ def task_creation():
         person_id = data["person"]["id"]
         task_id = data["id"]
         date_string = data["due_date"]
+        subject = data["subject"]
         date_object = datetime.strptime(date_string, '%Y-%m-%d').date()
         person_email_id = get_person_id_or_email(personid=person_id)
         if person_email_id:
@@ -24,7 +25,9 @@ def task_creation():
             q = '''select name from tabLead where email_id = %s;'''
             res = frappe.db.sql(q,person_email_id,as_list=True)
             reference_name = res[0][0]
-            doc.description = description
+            if description == None:
+                description = "None"
+            doc.description = f'subject : {subject}<br/> description : {description}'
             doc.date = date_object
             doc.reference_type = "Lead"
             doc.reference_name = reference_name
@@ -44,6 +47,7 @@ def task_updation():
         person_id = data["person"]["id"]
         task_id = data["id"]
         date_string = data["due_date"]
+        subject = data["subject"]
         date_object = datetime.strptime(date_string, '%Y-%m-%d').date()
         q = '''select name from tabToDo where task_id = %s;'''
         res = frappe.db.sql(q,task_id,as_list=True)
@@ -56,7 +60,9 @@ def task_updation():
                 q = '''select name from tabLead where email_id = %s;'''
                 res = frappe.db.sql(q,person_email_id,as_list=True)
                 reference_name = res[0][0]
-                doc.description = description
+                if description == None:
+                    description = "None"
+                doc.description = f'subject : {subject}<br/> description : {description}'
                 doc.date = date_object
                 doc.reference_type = "Lead"
                 doc.reference_name = reference_name
@@ -66,7 +72,9 @@ def task_updation():
         else:
             name = res[0][0]
             doc = frappe.get_doc("ToDo",name)
-            doc.description = description
+            if description == None:
+                description = "None"
+            doc.description = f'subject : {subject}<br/> description : {description}'
             doc.date = date_object
             doc.save(ignore_permissions=True)
         
@@ -212,7 +220,7 @@ def create_webhooks():
         index_of_app= callback_url.index("api")
         callback_url=callback_url[0:index_of_app-1]
     if site_url[-1]=="/":
-        site_url = site_url[::-1]
+        site_url = site_url[:-1]
     
     if not ids_of_webhooks:
         for i in event_types:
@@ -254,7 +262,7 @@ def delete_webhooks():
 
         payload={}
         headers = {
-        'Authorization': 'Bearer v2_ak_107856_71aca77914881c37ad73f2af96f588a7a6e1ceda162ca916093046730e4e0eae'
+        'Authorization': f'Bearer {access_token}'
         }
 
         response = requests.request("DELETE", url, headers=headers, data=payload)
@@ -263,4 +271,4 @@ def delete_webhooks():
         for i in ids_of_webhooks:
             delete(i)
 
- 
+
