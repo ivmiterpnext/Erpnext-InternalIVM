@@ -7913,7 +7913,7 @@
    "name": "Project-card_reader_type",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "--None--\nBarcode\nBarcode Reader\n2-D Barcode Reader\nStandard Barcode Reader\nCredit Card\nCredit Card Reader\nDelta3\nHID iCLASS SE\nHID MultiCLASS SE\nHID P300HA\nHID Multi Class\nHID Multiclass\nprox\nProx - HID Iclass SE \nP300 HA\nProx - P300\nP-300AH\nProx - P300 - AH\nP300AH\nP300 - AH\np-300\nFOB - P300 AH\nPin Pad\nQR Code\nQR Code Reader  \nWave\nWave ID reader\nIndala\ntbd\nOther\nNot Needed",
+   "options": "--None--\nBarcode\nBarcode Reader\n2-D Barcode Reader\nStandard Barcode Reader\nCredit Card\nCredit Card Reader\nDelta3\nHID iCLASS SE\nHID MultiCLASS SE\nHID P300HA\nHID Multi Class\nHID Multiclass\nprox\nProx - HID Iclass SE \nP300 HA\nProx - P300\nP-300AH\nProx - P300 - AH\nP300AH\nP300 - AH\np-300\nFOB - P300 AH\nPin Pad\nQR Code\nQR Code Reader  \nWave\nWave ID reader\nMifare\nIndala\ntbd\nOther\nNot Needed",
    "owner": "Administrator",
    "permlevel": 0,
    "precision": "",
