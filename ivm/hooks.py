@@ -9,7 +9,7 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-fixtures = [ { "doctype": "Custom DocPerm", "filters": { "role": [ "in", ["Graphic Designer"] ] } }]
+fixtures = [ { "doctype": "Custom DocPerm", "filters": { "role": [ "in", ["Graphic Designer","Support","Sales Representatives","President","Warehouse","Operations","S&I Manager","Management","CTO","COO","CEO","ITAdmin","Regional Sales Director"] ] } }]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 # app_include_js = "/assets/ivm/js/ivm.js"
