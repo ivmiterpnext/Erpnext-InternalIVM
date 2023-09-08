@@ -9,7 +9,8 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-fixtures = [ { "doctype": "Custom DocPerm", "filters": { "role": [ "in", ["Graphic Designer","Support","Sales Representatives","President","Warehouse","Operations","S&I Manager","Management","CTO","COO","CEO","ITAdmin","Regional Sales Director"] ] } }]
+fixtures = [{"doctype": "Custom DocPerm", "filters": {"role": ["in", ["Graphic Designer", "Support", "Sales Representatives",
+                                                                      "President", "Warehouse", "Operations", "S&I Manager", "Management", "CTO", "COO", "CEO", "ITAdmin", "Regional Sales Director"]]}}]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 # app_include_js = "/assets/ivm/js/ivm.js"
@@ -31,21 +32,21 @@ fixtures = [ { "doctype": "Custom DocPerm", "filters": { "role": [ "in", ["Graph
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {
-	"Lead": "public/js/doctype/Lead.js",
-	"Opportunity": "public/js/doctype/Opportunity.js",
-	"Customer": "public/js/doctype/Customer.js",
-	"User": "public/js/doctype/user.js",
-	"Task": "public/js/doctype/Task.js",
-	"Project":"public/js/doctype/Project.js",
-	"Issue":"public/js/doctype/Issue.js"
+    "Lead": "public/js/doctype/Lead.js",
+    "Opportunity": "public/js/doctype/Opportunity.js",
+    "Customer": "public/js/doctype/Customer.js",
+    "User": "public/js/doctype/user.js",
+    "Task": "public/js/doctype/Task.js",
+    "Project": "public/js/doctype/Project.js",
+    "Issue": "public/js/doctype/Issue.js"
 }
 
 doctype_list_js = {
-	"Lead": "public/js/listview/Lead_listview.js",
-	"Opportunity": "public/js/listview/Opportunity_listview.js",
-	"Customer": "public/js/listview/Customer_listview.js", 
-	"User": "public/js/listview/user_listview.js",
-	"Calendar Events" : "public/js/calendar.js"
+    "Lead": "public/js/listview/Lead_listview.js",
+    "Opportunity": "public/js/listview/Opportunity_listview.js",
+    "Customer": "public/js/listview/Customer_listview.js",
+    "User": "public/js/listview/user_listview.js",
+    "Calendar Events": "public/js/calendar.js"
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -61,6 +62,10 @@ doctype_list_js = {
 # "Role": "home_page"
 # }
 
+# Session Creation
+on_session_creation = [
+    "ivm.api.on_session_creation"
+]
 # Generators
 # ----------
 
@@ -165,7 +170,7 @@ override_doctype_class = {
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
-	"Task": "ivm.api.get_data"
+    "Task": "ivm.api.get_data"
 }
 
 # exempt linked doctypes from being automatically cancelled

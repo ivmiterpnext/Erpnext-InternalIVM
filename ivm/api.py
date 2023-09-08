@@ -211,3 +211,27 @@ def make_project(source_name, target_doc=None):
     )
     return doclist
 
+
+@frappe.whitelist()
+def on_session_creation():
+    modules = ['CRM', 'Projects', 'Support', 'Users']
+    if 'Admin' not in frappe.get_roles(frappe.session.user):
+        workspaces = frappe.get_list("Workspace", fields=["name"])
+        for workspace in workspaces:
+            workspace_name = workspace.get("name")
+            if workspace_name in modules:
+                data = frappe.get_doc("Workspace", workspace_name)
+                data.is_hidden = 0  # Set is_hidden to 0 for matching modules
+            else:
+                data = frappe.get_doc("Workspace", workspace_name)
+                data.is_hidden = 1  # Set is_hidden to 1 for non-matching modules
+            data.save()
+            frappe.db.commit()
+    else:
+        workspaces = frappe.get_list("Workspace", fields=["name"])
+        for workspace in workspaces:
+            workspace_name = workspace.get("name")
+            data = frappe.get_doc("Workspace", workspace_name)
+            data.is_hidden = 0  # Set is_hidden to 1 for non-matching modules
+            data.save()
+            frappe.db.commit()
