@@ -262,6 +262,9 @@ def delete_webhooks():
     if site_url[-1]=="/":
         site_url = site_url[:-1]
     ids_of_webhooks,callback_url=list_webhooks()
+    if callback_url !="":
+        index_of_app= callback_url.index("api")
+        callback_url=callback_url[0:index_of_app-1]
     def delete(id):
         url = f"https://api.salesloft.com/v2/webhook_subscriptions/{id}"
 
@@ -275,5 +278,5 @@ def delete_webhooks():
     if ids_of_webhooks and (site_url == callback_url):
         for i in ids_of_webhooks:
             delete(i)
-
+    return site_url,callback_url
 

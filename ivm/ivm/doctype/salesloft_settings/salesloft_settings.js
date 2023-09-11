@@ -3,15 +3,16 @@
 
 frappe.ui.form.on('SalesLoft Settings', {
 	after_save: function(frm){
+		let email = frm.doc.salesloft_user_email
+		let url = frm.doc.your_site_url
+		let access_token = frm.doc.salesloft_api_token
 		if (frm.doc.enable_salesloft_integration===1){
-			let email = frm.doc.salesloft_user_email
-			let url = frm.doc.your_site_url
-			let access_token = frm.doc.salesloft_api_token
-			if (email =="" || email.length===0 || email===undefined || email===null){
+			
+			if (email ==""){
 				
-			}else if (url =="" || url.length===0 || url===undefined || url===null){
+			}else if (url ==""){
 				
-			}else if(access_token =="" || access_token.length===0 || access_token===undefined || access_token===null){
+			}else if(access_token ==""){
 				
 			}
 			else{
@@ -23,7 +24,7 @@ frappe.ui.form.on('SalesLoft Settings', {
 				})
 			}
 			
-		}else if(frm.doc.enable_salesloft_integration===0 && (url =="" || url.length===0 || url===undefined || url===null)){
+		}else if(frm.doc.enable_salesloft_integration===0 && url !==""){
 			frappe.call({
 				method: "ivm.salesloft_activity.delete_webhooks",
 				args:{}
