@@ -48,7 +48,7 @@ frappe.ui.form.on("Opportunity", {
     let number_of_secondary_lockers = frm.doc.number_of_secondary_lockers ? frm.doc.number_of_secondary_lockers : 1
     let sv_term = Number(frm.doc.sv_term.slice(0, 2)) + 1
 
-    let val1 = frm.doc.per_machine_mthly_lease_fee * number_of_machines
+    let val1 = frm.doc.per_machine_monthly_lease_feeee * number_of_machines
     let val2 = frm.doc.per_primary_locker_mthly_lease_fee * number_of_primary_lockers
     let val3 = frm.doc.per_secondary_locker_mthly_lease_fee * number_of_secondary_lockers
     let total = val1 + val2 + val3
