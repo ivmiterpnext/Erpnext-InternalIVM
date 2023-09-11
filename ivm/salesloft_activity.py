@@ -183,6 +183,8 @@ def get_person_id_or_email(firstname="",personid=0):
     url = "https://api.salesloft.com/v2/people"
 
     payload={"owned_by_guid":[guid]}
+    if personid !=0:
+        payload = {"owned_by_guid":[guid],"ids":[personid]}
     headers = {
     'Accept': 'application/json',
     'Authorization': f'Bearer {access_token}'
@@ -256,6 +258,9 @@ def create_webhooks():
 def delete_webhooks():
     salesloft_doc = frappe.get_doc("SalesLoft Settings")
     access_token = salesloft_doc.salesloft_api_token
+    site_url = salesloft_doc.your_site_url
+    if site_url[-1]=="/":
+        site_url = site_url[:-1]
     ids_of_webhooks,callback_url=list_webhooks()
     def delete(id):
         url = f"https://api.salesloft.com/v2/webhook_subscriptions/{id}"
@@ -267,7 +272,7 @@ def delete_webhooks():
 
         response = requests.request("DELETE", url, headers=headers, data=payload)
         
-    if ids_of_webhooks:
+    if ids_of_webhooks and (site_url == callback_url):
         for i in ids_of_webhooks:
             delete(i)
 

@@ -23,7 +23,7 @@ frappe.ui.form.on('SalesLoft Settings', {
 				})
 			}
 			
-		}else{
+		}else if(frm.doc.enable_salesloft_integration===0 && (url =="" || url.length===0 || url===undefined || url===null)){
 			frappe.call({
 				method: "ivm.salesloft_activity.delete_webhooks",
 				args:{}
