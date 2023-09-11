@@ -35,7 +35,7 @@ def make_salesloft_api_call(url, method="GET", payload=None):
 
 
 @frappe.whitelist(allow_guest=True)
-def check_salesloft_user(email="nitin@korecent.com"):
+def check_salesloft_user(email):
     url = "https://api.salesloft.com/v2/people"
     salesloft_doc = frappe.get_doc("SalesLoft Settings")
     guid = salesloft_doc.guid
