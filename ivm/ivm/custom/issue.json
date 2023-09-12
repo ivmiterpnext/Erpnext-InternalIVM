@@ -1691,7 +1691,7 @@
    "name": "Issue-card_reader_type",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "--None--\nBarcode\nCredit Card\nCredit Card Reader\nDelta3\nHID iCLASS SE\nHID MultiCLASS SE\nHID Multiclass\nHID I Class SE\nHID multiCLASS SE RP40\nP300 HA\nPin Pad\nQR Code\nQR Code Reader\nWave\none please\nOther",
+   "options": "--None--\nBarcode\nCredit Card\nCredit Card Reader\nCredit Card reader for series 2 board\nDelta3\nHID iCLASS SE\nHID MultiCLASS SE\nHID Multiclass\nHID I Class SE\nHID multiCLASS SE RP40\nP300 HA\nPin Pad\nQR Code\nQR Code Reader\nStandard Barcode Reader\nWave\none please\nNeed a new verizon cellular device\nOther",
    "owner": "Administrator",
    "permlevel": 0,
    "precision": "",
