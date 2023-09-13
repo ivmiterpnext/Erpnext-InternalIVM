@@ -4497,7 +4497,7 @@
    "name": "Issue-type",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "Problem\nFeature Request\nQuestion",
+   "options": "Problem\nFeature Request\nQuestion\nTask",
    "owner": "Administrator",
    "permlevel": 0,
    "precision": "",
