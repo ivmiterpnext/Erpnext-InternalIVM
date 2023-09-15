@@ -44,7 +44,7 @@
    "name": "Warehouse Request-request_reason",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "--None--\nProduct Testing\nBuild Machine\nBuild Locker\nBuild Kiosk\nBuild Vault\nWrap Ready\nPrint Labels\nDevice Request\t\nShipping Request\nReader Request\nTransport/Relocate Equipment\nShipping Quote\t\nOther",
+   "options": "--None--\nProduct Testing\nBuild Machine\nBuild Locker\nBuild Kiosk\nBuild Vault\nWrap Ready\nPrint Labels\nDevice Request\nShipping Request\nReader Request\nTransport/Relocate Equipment\nShipping Quote\nOther",
    "owner": "Administrator",
    "permlevel": 0,
    "precision": "",
