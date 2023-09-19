@@ -227,7 +227,7 @@
    "name": "Issue-case_sub_reason",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "",
+   "options": "--None--\nFill Machine\nSend Vendor\nService Required\nProcess Batch\nAPI Call\nSecurity Request\nSecurity Call\nMisc\nMisc Control Board Issue\nMisc Card Reader Issue\nMisc Connectivity Issue\nReports not Generated/Emailed\nVends Not Recording\nRealTime\nCSS\nSmartHub\nImporter\nSalesforce\nInventory\nInventory Request\nInventory Alerts\nOrder Inventory\nEnable Vend Reciepts\nImport Issue\nVend Reciepts Issue\nParts Request\nMachine Status Change\nAssignments\nReport Issue\nBilling Inquiry\nCreate SFTP\nCustom Report\nCreate Reports\nConnectivity\nReader\nKeypad\nDisplay\nMachine User Not Authenticating\nSelf Install\nSmartHub\nFirmware\nMachine/ Locker Damaged\nRestrictions Not Enforced\nProduct Not Vending\nAdd/Modify Access\nReset Password\nWebsite Training\nEnable Enhanced Locker Features\nReconfiguration by Client\nReconfiguration by Vendor\nReconfiguration by IVM\nLocker Reconfiguration\nChange Machine/Locker Graphics\nRelocate Machine\nOther\nAdd or Modify Product Infornamtion\nAdd or Update Location/Information\nAdd or Update Machine Users\nAdd or Update Billing Information\nAdd or Update Restrictions\n",
    "owner": "Administrator",
    "permlevel": 0,
    "precision": "",
