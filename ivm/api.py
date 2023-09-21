@@ -40,10 +40,10 @@ def check_salesloft_user(email):
     salesloft_doc = frappe.get_doc("SalesLoft Settings")
     guid = salesloft_doc.guid
     if guid:
-        payload = {"owned_by_guid":[guid],"email_addresses":[email]}
+        payload = {"owned_by_guid": [guid], "email_addresses": [email]}
     else:
-        payload = {"email_addresses":[email]}
-    response = make_salesloft_api_call(url,payload=payload)
+        payload = {"email_addresses": [email]}
+    response = make_salesloft_api_call(url, payload=payload)
 
     for person in response.json().get("data", []):
         if person.get("email_address") == email:
@@ -222,7 +222,7 @@ def make_project(source_name, target_doc=None):
 def on_session_creation():
     modules = ['CRM', 'Projects', 'Support', 'Users']
     if 'Admin' not in frappe.get_roles(frappe.session.user):
-        workspaces = frappe.get_list("Workspace", fields=["name"])
+        workspaces = frappe.get_list("Workspace", fields=["name"],ignore_permissions=True)
         for workspace in workspaces:
             workspace_name = workspace.get("name")
             if workspace_name in modules:
@@ -231,8 +231,9 @@ def on_session_creation():
             else:
                 data = frappe.get_doc("Workspace", workspace_name)
                 data.is_hidden = 1  # Set is_hidden to 1 for non-matching modules
-            data.save()
+            data.save(ignore_permissions=True)
             frappe.db.commit()
+
     else:
         workspaces = frappe.get_list("Workspace", fields=["name"])
         for workspace in workspaces:
