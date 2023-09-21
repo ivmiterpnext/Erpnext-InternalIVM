@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-09-20 19:56:35.541903",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2023-09-21 02:52:17.058244",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Warehouse Requests Closed This Month",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT\n    owner_name,\n    SUM(CASE WHEN request_reason = '--None--' THEN 1 ELSE 0 END) AS None_Count,\n    SUM(CASE WHEN request_reason = 'Product Testing' THEN 1 ELSE 0 END) AS Product_Testing_Count,\n    SUM(CASE WHEN request_reason = 'Build Machine' THEN 1 ELSE 0 END) AS Build_Machine_Count,\n    SUM(CASE WHEN request_reason = 'Build Locker' THEN 1 ELSE 0 END) AS Build_Locker_Count,\n    SUM(CASE WHEN request_reason = 'Build Kiosk' THEN 1 ELSE 0 END) AS Build_Kiosk_Count,\n    SUM(CASE WHEN request_reason = 'Build Vault' THEN 1 ELSE 0 END) AS Build_Vault_Count,\n    SUM(CASE WHEN request_reason = 'Wrap Ready' THEN 1 ELSE 0 END) AS Wrap_Ready_Count,\n    SUM(CASE WHEN request_reason = 'Print Labels' THEN 1 ELSE 0 END) AS Print_Labels_Count,\n    SUM(CASE WHEN request_reason = 'Device Request' THEN 1 ELSE 0 END) AS Device_Request_Count,\n    SUM(CASE WHEN request_reason = 'Shipping Request' THEN 1 ELSE 0 END) AS Shipping_Request_Count,\n    SUM(CASE WHEN request_reason = 'Reader Request' THEN 1 ELSE 0 END) AS Reader_Request_Count,\n    SUM(CASE WHEN request_reason = 'Transport/Relocate Equipment' THEN 1 ELSE 0 END) AS Transport_Relocate_Equipment_Count,\n    SUM(CASE WHEN request_reason = 'Shipping Quote' THEN 1 ELSE 0 END) AS Shipping_Quote_Count,\n    SUM(CASE WHEN request_reason = 'Other' THEN 1 ELSE 0 END) AS Other_Count\nFROM\n    `tabWarehouse Request` \nWHERE\n    status = 'Closed'\n    AND YEAR(modified) = YEAR(CURRENT_DATE())\n    AND MONTH(modified) = MONTH(CURRENT_DATE())\nGROUP BY\n    owner_name;\n",
+ "ref_doctype": "Warehouse Request",
+ "report_name": "Warehouse Requests Closed This Month",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

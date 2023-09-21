@@ -1,0 +1,109 @@
+{
+ "charts": [
+  {
+   "chart_name": "Closed Cases Total",
+   "label": "Closed Cases Total"
+  },
+  {
+   "chart_name": "Warehouse Requests Closed This Month",
+   "label": "Warehouse Requests Closed This Month"
+  },
+  {
+   "chart_name": "Monthly Sales Forecast",
+   "label": "Monthly Sales Forecast"
+  },
+  {
+   "chart_name": "Open Opportunities by Rep",
+   "label": "Open Opportunities by Rep"
+  },
+  {
+   "chart_name": "Deployment Cases Closed This FY",
+   "label": "Deployment Cases Closed This FY"
+  },
+  {
+   "chart_name": "All Leads Last 30 Days",
+   "label": "All Leads Last 30 Days"
+  },
+  {
+   "chart_name": "Open Cases by Type",
+   "label": "Open Cases by Type"
+  },
+  {
+   "chart_name": "Support Cases Closed This Month",
+   "label": "Support Cases Closed This Month"
+  },
+  {
+   "chart_name": "Desktop Support Cases Closed This Month",
+   "label": "Desktop Support Cases Closed This Month"
+  },
+  {
+   "chart_name": "IT Cases Closed This Month",
+   "label": "IT Cases Closed This Month"
+  }
+ ],
+ "content": "[{\"id\":\"MJKEOoD8IX\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Global IVM Dashboards</span>\",\"col\":12}},{\"id\":\"riduleknzY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Last Activity On Deployments\",\"col\":3}},{\"id\":\"8jD5OQXkYo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Audit\",\"col\":3}},{\"id\":\"rQ8izQD4Wq\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Open Warehouse Requests\",\"col\":3}},{\"id\":\"D5W1ylTfDL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Warehouse Requests Closed This Month\",\"col\":3}},{\"id\":\"U72Tfk72y8\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Warehouse Requests Closed This Month\",\"col\":12}},{\"id\":\"ytIi6Da7-3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Open Warehouse Requests\",\"col\":12}},{\"id\":\"iPgVneww7a\",\"type\":\"chart\",\"data\":{\"chart_name\":\"All Leads Last 30 Days\",\"col\":12}},{\"id\":\"jHxcbqHuWf\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Closed Cases Total\",\"col\":12}},{\"id\":\"2NoABqIcLr\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Sales Forecast\",\"col\":12}},{\"id\":\"kneAialZ53\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Open Opportunities by Rep\",\"col\":12}},{\"id\":\"F6g5BUkXjU\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Deployment Cases Closed This FY\",\"col\":12}},{\"id\":\"e0Odviauxx\",\"type\":\"chart\",\"data\":{\"chart_name\":\"All Leads Last 30 Days\",\"col\":12}},{\"id\":\"Ou259zKpZs\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Open Cases by Type\",\"col\":12}},{\"id\":\"ph1fdC7bn3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Support Cases Closed This Month\",\"col\":12}},{\"id\":\"IEaYTtQmQ6\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Desktop Support Cases Closed This Month\",\"col\":12}},{\"id\":\"4SPpK0gMlr\",\"type\":\"chart\",\"data\":{\"chart_name\":\"IT Cases Closed This Month\",\"col\":12}},{\"id\":\"675f4O8GzV\",\"type\":\"spacer\",\"data\":{\"col\":12}}]",
+ "creation": "2023-09-21 00:20:02.981634",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "right",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Global IVM Dashboards",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Accounts Audit",
+   "link_count": 0,
+   "link_to": "Accounts Audit",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2023-09-21 03:29:17.651837",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Global IVM Dashboards",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 30.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Last Activity On Deployments",
+   "link_to": "Last Activity on Deployments",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Accounts Audit",
+   "link_to": "Accounts Audit",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Open Warehouse Requests",
+   "link_to": "Open Warehouse Requests",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Warehouse Requests Closed This Month",
+   "link_to": "Warehouse Requests Closed This Month",
+   "type": "Report"
+  }
+ ],
+ "title": "Global IVM Dashboards"
+}
