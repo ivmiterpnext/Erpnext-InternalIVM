@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-09-20 19:57:41.785320",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2023-09-21 02:51:44.112648",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Open Warehouse Requests",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT\r    owner_name,\r    SUM(CASE WHEN request_reason = '--None--' THEN 1 ELSE 0 END) AS None_Count,\r    SUM(CASE WHEN request_reason = 'Product Testing' THEN 1 ELSE 0 END) AS Product_Testing_Count,\r    SUM(CASE WHEN request_reason = 'Build Machine' THEN 1 ELSE 0 END) AS Build_Machine_Count,\r    SUM(CASE WHEN request_reason = 'Build Locker' THEN 1 ELSE 0 END) AS Build_Locker_Count,\r    SUM(CASE WHEN request_reason = 'Build Kiosk' THEN 1 ELSE 0 END) AS Build_Kiosk_Count,\r    SUM(CASE WHEN request_reason = 'Build Vault' THEN 1 ELSE 0 END) AS Build_Vault_Count,\r    SUM(CASE WHEN request_reason = 'Wrap Ready' THEN 1 ELSE 0 END) AS Wrap_Ready_Count,\r    SUM(CASE WHEN request_reason = 'Print Labels' THEN 1 ELSE 0 END) AS Print_Labels_Count,\r    SUM(CASE WHEN request_reason = 'Device Request' THEN 1 ELSE 0 END) AS Device_Request_Count,\r    SUM(CASE WHEN request_reason = 'Shipping Request' THEN 1 ELSE 0 END) AS Shipping_Request_Count,\r    SUM(CASE WHEN request_reason = 'Reader Request' THEN 1 ELSE 0 END) AS Reader_Request_Count,\r    SUM(CASE WHEN request_reason = 'Transport/Relocate Equipment' THEN 1 ELSE 0 END) AS Transport_Relocate_Equipment_Count,\r    SUM(CASE WHEN request_reason = 'Shipping Quote' THEN 1 ELSE 0 END) AS Shipping_Quote_Count,\r    SUM(CASE WHEN request_reason = 'Other' THEN 1 ELSE 0 END) AS Other_Count\rFROM\r    `tabWarehouse Request` \rWHERE\r    status IN ('New', 'In Progress') -- Add this condition\rGROUP BY\r    owner_name",
+ "ref_doctype": "Warehouse Request",
+ "report_name": "Open Warehouse Requests",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

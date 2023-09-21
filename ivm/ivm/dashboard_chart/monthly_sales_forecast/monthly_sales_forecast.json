@@ -9,9 +9,9 @@
  "filters_json": "{}",
  "group_by_type": "Count",
  "idx": 0,
- "is_public": 0,
+ "is_public": 1,
  "is_standard": 1,
- "modified": "2023-08-22 11:52:08.075500",
+ "modified": "2023-09-21 03:26:28.976886",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Monthly Sales Forecast",
@@ -24,13 +24,10 @@
  "timespan": "Last Year",
  "type": "Bar",
  "use_report_chart": 0,
- "x_field": "close_date",
+ "x_field": "closed_date",
  "y_axis": [
   {
-   "y_field": "qualified"
-  },
-  {
-   "y_field": "assigned"
+   "y_field": "forecast_revenue"
   }
  ]
 }
