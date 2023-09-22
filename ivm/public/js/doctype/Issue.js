@@ -1,4 +1,11 @@
 frappe.ui.form.on("Issue", {
+
+    onload:function(frm){
+        frappe.call({
+            method: 'ivm.adding_email.seting_to_email',
+        });
+    },
+
     issue_type: function(frm) {
         if (frm.doc.issue_type){
         frm.set_value("status", 'New');
