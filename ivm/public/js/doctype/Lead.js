@@ -170,27 +170,30 @@ function checkSalesLoftUser(email) {
       if (frm.doc.__islocal && CheckboxStatus) {
       var email = frm.doc.email_id;
       var name = frm.doc.first_name;
-  
-      // Check if the SalesLoft user already exists
-      checkSalesLoftUser(email)
-        .then((data) => {
-          if (data) {
-            // If the user exists, prevent saving the lead and show the details popup
-            frappe.validated = false;
-            showSalesLoftUserDetails(data);
-          } else {
-            // If the user doesn't exist, create a new SalesLoft person
-            createSalesLoftPerson(frm);
-          }
-        })
-        .catch((error) => {
-          // Handle error if the API call fails
-          frappe.show_alert(
-            "An error occurred while checking SalesLoft user. Please try again.",
-            3
-          );
-          console.error(error);
-        });}
+      
+      if (email){
+        // Check if the SalesLoft user already exists
+        checkSalesLoftUser(email)
+          .then((data) => {
+            if (data) {
+              // If the user exists, prevent saving the lead and show the details popup
+              frappe.validated = false;
+              showSalesLoftUserDetails(data);
+            } else {
+              // If the user doesn't exist, create a new SalesLoft person
+              createSalesLoftPerson(frm);
+            }
+          })
+          .catch((error) => {
+            // Handle error if the API call fails
+            frappe.show_alert(
+              "An error occurred while checking SalesLoft user. Please try again.",
+              3
+            );
+            console.error(error);
+        });
+      }
+      }
     },
     email_id: function (frm, cdt, cdn) {
       if (CheckboxStatus){
