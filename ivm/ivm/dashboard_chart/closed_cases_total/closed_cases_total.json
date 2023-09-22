@@ -8,9 +8,9 @@
  "filters_json": "{}",
  "group_by_type": "Count",
  "idx": 0,
- "is_public": 0,
+ "is_public": 1,
  "is_standard": 1,
- "modified": "2023-08-22 11:44:11.820391",
+ "modified": "2023-09-22 06:10:01.443847",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Closed Cases Total",
@@ -26,8 +26,7 @@
  "x_field": "case_owner",
  "y_axis": [
   {
-   "color": "#EC864B",
-   "y_field": "closed_issue"
+   "y_field": "closed_issue_count"
   }
  ]
 }

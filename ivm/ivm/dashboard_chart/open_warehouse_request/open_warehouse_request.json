@@ -1,0 +1,85 @@
+{
+ "chart_name": "Open Warehouse Request",
+ "chart_type": "Report",
+ "creation": "2023-09-22 05:55:29.093975",
+ "custom_options": "{\"x_field\": \"owner_name\", \"chart_type\": \"Donut\", \"y_axis_fields\": [{\"idx\": 1, \"__islocal\": true, \"name\": \"row 1\", \"y_field\": \"none_count\", \"color\": \"#449CF0\"}, {\"idx\": 2, \"__islocal\": true, \"name\": \"row 2\", \"y_field\": \"product_testing_count\", \"color\": \"#ECAD4B\"}, {\"idx\": 3, \"__islocal\": true, \"name\": \"row 3\", \"y_field\": \"build_machine_count\"}, {\"idx\": 4, \"__islocal\": true, \"name\": \"row 4\", \"y_field\": \"build_locker_count\"}, {\"idx\": 5, \"__islocal\": true, \"name\": \"row 5\", \"y_field\": \"build_kiosk_count\"}, {\"idx\": 6, \"__islocal\": true, \"name\": \"row 6\", \"y_field\": \"build_vault_count\"}, {\"idx\": 7, \"__islocal\": true, \"name\": \"row 7\", \"y_field\": \"wrap_ready_count\"}, {\"idx\": 8, \"__islocal\": true, \"name\": \"row 8\", \"y_field\": \"print_labels_count\"}, {\"idx\": 9, \"__islocal\": true, \"name\": \"row 9\", \"y_field\": \"device_request_count\"}, {\"idx\": 10, \"__islocal\": true, \"name\": \"row 10\", \"y_field\": \"shipping_request_count\"}, {\"idx\": 11, \"__islocal\": true, \"name\": \"row 11\", \"y_field\": \"reader_request_count\"}, {\"idx\": 12, \"__islocal\": true, \"name\": \"row 12\", \"y_field\": \"transport_relocate_equipment_count\"}, {\"idx\": 13, \"__islocal\": true, \"name\": \"row 13\", \"y_field\": \"shipping_quote_count\"}, {\"idx\": 14, \"__islocal\": true, \"name\": \"row 14\", \"y_field\": \"other_count\"}], \"y_fields\": [\"none_count\", \"product_testing_count\", \"build_machine_count\", \"build_locker_count\", \"build_kiosk_count\", \"build_vault_count\", \"wrap_ready_count\", \"print_labels_count\", \"device_request_count\", \"shipping_request_count\", \"reader_request_count\", \"transport_relocate_equipment_count\", \"shipping_quote_count\", \"other_count\"], \"colors\": [\"#449CF0\", \"#ECAD4B\", null, null, null, null, null, null, null, null, null, null, null, null]}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "filters_json": "{}",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2023-09-22 05:55:29.093975",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Open Warehouse Request",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "report_name": "Open Warehouse Requests",
+ "roles": [],
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Donut",
+ "use_report_chart": 0,
+ "x_field": "owner_name",
+ "y_axis": [
+  {
+   "color": "#449CF0",
+   "y_field": "none_count"
+  },
+  {
+   "color": "#ECAD4B",
+   "y_field": "product_testing_count"
+  },
+  {
+   "color": "#29CD42",
+   "y_field": "build_machine_count"
+  },
+  {
+   "color": "#761ACB",
+   "y_field": "build_locker_count"
+  },
+  {
+   "color": "#CB2929",
+   "y_field": "build_kiosk_count"
+  },
+  {
+   "color": "#4463F0",
+   "y_field": "build_vault_count"
+  },
+  {
+   "color": "#4F9DD9",
+   "y_field": "wrap_ready_count"
+  },
+  {
+   "color": "#0d0c0c",
+   "y_field": "print_labels_count"
+  },
+  {
+   "color": "#bee3aa",
+   "y_field": "device_request_count"
+  },
+  {
+   "color": "#175475",
+   "y_field": "shipping_request_count"
+  },
+  {
+   "color": "#bd16f0",
+   "y_field": "reader_request_count"
+  },
+  {
+   "color": "#4a15e8",
+   "y_field": "transport_relocate_equipment_count"
+  },
+  {
+   "color": "#33e310",
+   "y_field": "shipping_quote_count"
+  },
+  {
+   "color": "#9c3333",
+   "y_field": "other_count"
+  }
+ ]
+}
