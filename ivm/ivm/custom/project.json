@@ -715,7 +715,7 @@
    "name": "Project-case_origin",
    "no_copy": 0,
    "non_negative": 0,
-   "options": "Email\nPhone\nWeb\nInternal",
+   "options": "Email\nPhone\nWeb\nInternal\nSales",
    "owner": "Administrator",
    "permlevel": 0,
    "precision": "",
