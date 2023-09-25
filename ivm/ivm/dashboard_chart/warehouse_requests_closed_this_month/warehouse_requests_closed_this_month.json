@@ -10,7 +10,7 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2023-09-22 05:58:48.304692",
+ "modified": "2023-09-24 21:06:01.551571",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Warehouse Requests Closed This Month",
@@ -23,7 +23,7 @@
  "timespan": "Last Year",
  "type": "Bar",
  "use_report_chart": 0,
- "x_field": "owner_name",
+ "x_field": "owner_full_name",
  "y_axis": [
   {
    "color": "#449CF0",
