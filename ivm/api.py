@@ -39,10 +39,8 @@ def check_salesloft_user(email):
     url = "https://api.salesloft.com/v2/people"
     salesloft_doc = frappe.get_doc("SalesLoft Settings")
     guid = salesloft_doc.guid
-    if guid:
-        payload = {"owned_by_guid": [guid], "email_addresses": [email]}
-    else:
-        payload = {"email_addresses": [email]}
+    
+    payload = {"email_addresses": [email]}
     response = make_salesloft_api_call(url, payload=payload)
 
     for person in response.json().get("data", []):
