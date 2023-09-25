@@ -7,7 +7,8 @@ let issuetypes = {
     "Reconfiguration": "Reconfiguration",
     "Vending Management": "Vending Management",
     "Change Request": "Change Request",
-    "Desktop Support": "Desktop Support"
+    "Desktop Support": "Desktop Support",
+    "Support Queue": "Support Queue"
 };
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
@@ -19,9 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function handleItemClick() {
     let dynamicTitle = $(this).find(".item-anchor").attr("title");
-
-    // Redirect to the 'Issue' list view with the issue_type filter
-    if (issuetypes[dynamicTitle]) {
+    if (issuetypes[dynamicTitle] == "Support Queue") {
+        let support = dynamicTitle.substring(0, 7)
+        window.location.href = `/app/issue?issue_type=${support}`;
+    }
+    else {
         window.location.href = `/app/issue?issue_type=${issuetypes[dynamicTitle]}`;
     }
 }
