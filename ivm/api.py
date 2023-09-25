@@ -218,7 +218,7 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def on_session_creation():
-    modules = ['CRM', 'Projects', 'Support', 'Users']
+    modules = ['CRM', 'Projects', 'Support', 'Users','IT','Permission Change','Onboarding','Receivable','Offboarding','Reconfiguration','Change Request','Vending Management','Desktop Support']
     if 'Admin' not in frappe.get_roles(frappe.session.user):
         workspaces = frappe.get_list("Workspace", fields=["name"],ignore_permissions=True)
         for workspace in workspaces:
