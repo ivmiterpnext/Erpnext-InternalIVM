@@ -9,7 +9,7 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-fixtures = [{"doctype": "Property Setter", "filters": {"name": ["in", ["Task-subject-fieldtype"]]}}]
+fixtures = [{"doctype": "Workspace", "filters": {"name": ["in", ["Support"]]}}]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 # app_include_js = "/assets/ivm/js/ivm.js"
@@ -45,7 +45,8 @@ doctype_list_js = {
     "Opportunity": "public/js/listview/Opportunity_listview.js",
     "Customer": "public/js/listview/Customer_listview.js",
     "User": "public/js/listview/user_listview.js",
-    "Calendar Events": "public/js/calendar.js"
+    "Calendar Events": "public/js/calendar.js",
+    "Issue": "public/js/listview/issue_listview.js"
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
