@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-24 20:15:06.634818",
+ "modified": "2023-09-25 02:16:40.978532",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Open Opportunities by Rep",
@@ -21,10 +21,10 @@
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Sales User"
+   "role": "System Manager"
   },
   {
-   "role": "Sales Manager"
+   "role": "Workspace Manager"
   }
  ]
 }

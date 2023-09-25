@@ -10,14 +10,21 @@
  "idx": 1,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2023-09-22 05:39:47.491784",
+ "modified": "2023-09-25 02:03:39.172790",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "IT Cases Closed This Month",
  "number_of_groups": 0,
  "owner": "Administrator",
  "report_name": "IT Cases Closed This Month",
- "roles": [],
+ "roles": [
+  {
+   "role": "Workspace Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
  "time_interval": "Yearly",
  "timeseries": 0,
  "timespan": "Last Year",

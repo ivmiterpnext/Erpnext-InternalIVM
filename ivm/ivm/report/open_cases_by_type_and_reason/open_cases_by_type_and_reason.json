@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-22 05:34:43.242874",
+ "modified": "2023-09-25 02:09:14.913599",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Open Cases by Type and Reason",
@@ -22,6 +22,9 @@
  "roles": [
   {
    "role": "Support Team"
+  },
+  {
+   "role": "Workspace Manager"
   }
  ]
 }

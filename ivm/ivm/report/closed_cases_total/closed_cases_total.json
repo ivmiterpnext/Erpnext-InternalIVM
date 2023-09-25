@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-25 01:10:46.315860",
+ "modified": "2023-09-25 02:15:18.529538",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Closed Cases Total",
@@ -21,7 +21,10 @@
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Support Team"
+   "role": "System Manager"
+  },
+  {
+   "role": "Workspace Manager"
   }
  ]
 }

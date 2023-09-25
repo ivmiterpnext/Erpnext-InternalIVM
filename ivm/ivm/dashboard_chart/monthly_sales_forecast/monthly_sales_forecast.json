@@ -11,14 +11,21 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2023-09-21 03:26:28.976886",
+ "modified": "2023-09-25 02:04:19.635613",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Monthly Sales Forecast",
  "number_of_groups": 0,
  "owner": "Administrator",
  "report_name": "Monthly Sales Forecast",
- "roles": [],
+ "roles": [
+  {
+   "role": "Workspace Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
  "time_interval": "Yearly",
  "timeseries": 0,
  "timespan": "Last Year",

@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-25 01:16:31.625843",
+ "modified": "2023-09-25 02:11:50.469771",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Accounts Audit",
@@ -21,67 +21,10 @@
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Accounts Manager"
+   "role": "System Manager"
   },
   {
-   "role": "Sales Master Manager"
-  },
-  {
-   "role": "Sales User"
-  },
-  {
-   "role": "Stock Manager"
-  },
-  {
-   "role": "Stock User"
-  },
-  {
-   "role": "Accounts User"
-  },
-  {
-   "role": "Sales Manager"
-  },
-  {
-   "role": "Employee Self Service"
-  },
-  {
-   "role": "Graphic Designer"
-  },
-  {
-   "role": "Support"
-  },
-  {
-   "role": "Sales Representatives"
-  },
-  {
-   "role": "President"
-  },
-  {
-   "role": "Warehouse"
-  },
-  {
-   "role": "Operations"
-  },
-  {
-   "role": "S&I Manager"
-  },
-  {
-   "role": "Management"
-  },
-  {
-   "role": "CTO"
-  },
-  {
-   "role": "COO"
-  },
-  {
-   "role": "CEO"
-  },
-  {
-   "role": "ITAdmin"
-  },
-  {
-   "role": "Regional Sales Director"
+   "role": "Workspace Manager"
   }
  ]
 }
