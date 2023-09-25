@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-25 01:12:33.431526",
+ "modified": "2023-09-25 02:13:44.077320",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "All Leads Last 30 Days",
@@ -21,13 +21,10 @@
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Sales User"
-  },
-  {
-   "role": "Sales Manager"
-  },
-  {
    "role": "System Manager"
+  },
+  {
+   "role": "Workspace Manager"
   }
  ]
 }

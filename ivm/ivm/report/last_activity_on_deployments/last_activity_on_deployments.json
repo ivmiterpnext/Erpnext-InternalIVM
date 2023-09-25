@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-25 01:15:42.359689",
+ "modified": "2023-09-25 02:12:36.523427",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Last Activity on Deployments",
@@ -21,13 +21,10 @@
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Projects Manager"
+   "role": "System Manager"
   },
   {
-   "role": "Projects User"
-  },
-  {
-   "role": "Employee Self Service"
+   "role": "Workspace Manager"
   }
  ]
 }

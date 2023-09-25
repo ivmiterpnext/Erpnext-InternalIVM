@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-25 01:10:02.710737",
+ "modified": "2023-09-25 02:15:41.106652",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Deployment Cases Closed This FY",
@@ -21,10 +21,10 @@
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Projects User"
+   "role": "System Manager"
   },
   {
-   "role": "Projects Manager"
+   "role": "Workspace Manager"
   }
  ]
 }

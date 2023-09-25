@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-24 20:28:54.684354",
+ "modified": "2023-09-25 02:08:33.868348",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Open Warehouse Requests",
@@ -22,6 +22,9 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Workspace Manager"
   }
  ]
 }

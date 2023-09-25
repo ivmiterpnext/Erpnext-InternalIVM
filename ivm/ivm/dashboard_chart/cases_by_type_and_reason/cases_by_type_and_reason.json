@@ -10,14 +10,21 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2023-09-22 05:37:50.349388",
+ "modified": "2023-09-25 02:03:58.635459",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Cases by Type and Reason",
  "number_of_groups": 0,
  "owner": "Administrator",
  "report_name": "Open Cases by Type and Reason",
- "roles": [],
+ "roles": [
+  {
+   "role": "Workspace Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
  "time_interval": "Yearly",
  "timeseries": 0,
  "timespan": "Last Year",

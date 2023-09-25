@@ -9,22 +9,22 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-09-25 01:14:23.558016",
+ "modified": "2023-09-25 02:11:08.992903",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Monthly Sales Forecast",
  "owner": "Administrator",
  "prepared_report": 0,
- "query": "SELECT\r    DATE(close_date) as \"Closed Date\",\r    SUM(forecast_revenue) as \"Forecast Revenue\" \rFROM \r    `tabOpportunity`\rWHERE \r    YEAR(close_date) = YEAR(CURDATE()) AND MONTH(close_date) = MONTH(CURDATE()) AND u.enabled = 1\rGROUP BY close_date;\r",
+ "query": "SELECT\n    DATE(o.close_date) as \"Closed Date\",\n    SUM(o.forecast_revenue) as \"Forecast Revenue\" \nFROM \n    `tabOpportunity` o\nJOIN\n    `tabUser` u\nON\n    o.opportunity_owner = u.email\nWHERE \n    YEAR(o.close_date) = YEAR(CURDATE()) AND MONTH(o.close_date) = MONTH(CURDATE()) AND u.enabled = 1\nGROUP BY\n    o.close_date;\n",
  "ref_doctype": "Opportunity",
  "report_name": "Monthly Sales Forecast",
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Sales User"
+   "role": "Workspace Manager"
   },
   {
-   "role": "Sales Manager"
+   "role": "System Manager"
   }
  ]
 }
