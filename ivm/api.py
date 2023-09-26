@@ -39,7 +39,7 @@ def check_salesloft_user(email):
     url = "https://api.salesloft.com/v2/people"
     salesloft_doc = frappe.get_doc("SalesLoft Settings")
     guid = salesloft_doc.guid
-    
+
     payload = {"email_addresses": [email]}
     response = make_salesloft_api_call(url, payload=payload)
 
@@ -218,20 +218,36 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def on_session_creation():
-    modules = ['CRM', 'Projects', 'Support', 'Users','IT','Permission Change','Onboarding','Receivable','Offboarding','Reconfiguration','Change Request','Vending Management','Desktop Support']
+    login_user_email = frappe.session.user
+    modules = ['CRM', 'Projects', 'Support', 'Users', 'IT', 'Permission Change', 'Onboarding', 'Receivable',
+               'Offboarding', 'Reconfiguration', 'Change Request', 'Vending Management', 'Desktop Support']
+    # This part of code is for the user who is not having admin role----------------------------
     if 'Admin' not in frappe.get_roles(frappe.session.user):
-        workspaces = frappe.get_list("Workspace", fields=["name"],ignore_permissions=True)
+        workspaces = frappe.get_list(
+            "Workspace", fields=["name"], ignore_permissions=True)
         for workspace in workspaces:
             workspace_name = workspace.get("name")
+
             if workspace_name in modules:
+                # This if statement is for this particular user wbender@ivminc.com that Users module will be shown only to this user 
+                if login_user_email == 'wbender@ivminc.com':
+                    data = frappe.get_doc("Workspace", "Users")
+                    data.is_hidden = 0
+                else:
+                    data = frappe.get_doc("Workspace", "Users")
+                    data.is_hidden = 1
+                    data.save(ignore_permissions=True)
+                    frappe.db.commit()
+
                 data = frappe.get_doc("Workspace", workspace_name)
                 data.is_hidden = 0  # Set is_hidden to 0 for matching modules
+
             else:
                 data = frappe.get_doc("Workspace", workspace_name)
                 data.is_hidden = 1  # Set is_hidden to 1 for non-matching modules
             data.save(ignore_permissions=True)
             frappe.db.commit()
-
+    # This part of code is for the user who is having admin role-------------------------
     else:
         workspaces = frappe.get_list("Workspace", fields=["name"])
         for workspace in workspaces:
