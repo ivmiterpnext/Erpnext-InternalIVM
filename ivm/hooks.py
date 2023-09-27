@@ -9,7 +9,8 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-fixtures = [{"doctype": "Workspace", "filters": {"parent_page": ["in", ["Support"]]}}]
+fixtures = [{"doctype": "Workspace", "filters": {
+    "parent_page": ["in", ["Support"]]}}]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 app_include_js = "/assets/ivm/js/workspace.js"
@@ -125,13 +126,11 @@ on_session_creation = [
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# "*": {
-# "on_update": "method",
-# "on_cancel": "method",
-# "on_trash": "method"
-# }
-# }
+doc_events = {
+    "Communication": {
+        "after_insert": "ivm.api.creating_issue",
+    }
+}
 
 # Scheduled Tasks
 # ---------------

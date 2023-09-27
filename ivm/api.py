@@ -229,7 +229,7 @@ def on_session_creation():
             workspace_name = workspace.get("name")
 
             if workspace_name in modules:
-                # This if statement is for this particular user wbender@ivminc.com that Users module will be shown only to this user 
+                # This if statement is for this particular user wbender@ivminc.com that Users module will be shown only to this user
                 if login_user_email == 'wbender@ivminc.com':
                     data = frappe.get_doc("Workspace", "Users")
                     data.is_hidden = 0
@@ -256,3 +256,19 @@ def on_session_creation():
             data.is_hidden = 0  # Set is_hidden to 1 for non-matching modules
             data.save()
             frappe.db.commit()
+
+
+@frappe.whitelist()
+def creating_issue(doc, method):
+    message=doc.content
+    #getting record matching to email received
+    email = frappe.db.get_value('Email Account', {'email_id': doc.recipients})
+    email_Account=frappe.get_doc("Email Account",email)
+    #getting issue type from email account doctype
+    issue_type=email_Account.imap_folder[0].custom_issue_type
+    issue= frappe.db.get_value('Issue', {'name': doc.reference_name})
+    issue_name=frappe.get_doc("Issue",issue)
+    issue_name.issue_type=issue_type
+    issue_name.description=message
+    issue_name.save()
+    frappe.db.commit()
