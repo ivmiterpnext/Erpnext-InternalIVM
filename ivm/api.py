@@ -218,9 +218,7 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def on_session_creation():
-    login_user_email = frappe.session.user
-    modules = ['CRM', 'Projects', 'Support', 'Users', 'IT', 'Permission Change', 'Onboarding', 'Receivable',
-               'Offboarding', 'Reconfiguration', 'Change Request', 'Vending Management', 'Desktop Support']
+    modules = ['IVM', 'CRM', 'Projects','Warehouse Requests', 'Tickets', 'Receivables', 'Vending Management']
     # This part of code is for the user who is not having admin role----------------------------
     if 'Admin' not in frappe.get_roles(frappe.session.user):
         workspaces = frappe.get_list(
@@ -229,16 +227,6 @@ def on_session_creation():
             workspace_name = workspace.get("name")
 
             if workspace_name in modules:
-                # This if statement is for this particular user wbender@ivminc.com that Users module will be shown only to this user
-                if login_user_email == 'wbender@ivminc.com':
-                    data = frappe.get_doc("Workspace", "Users")
-                    data.is_hidden = 0
-                else:
-                    data = frappe.get_doc("Workspace", "Users")
-                    data.is_hidden = 1
-                    data.save(ignore_permissions=True)
-                    frappe.db.commit()
-
                 data = frappe.get_doc("Workspace", workspace_name)
                 data.is_hidden = 0  # Set is_hidden to 0 for matching modules
 
@@ -260,15 +248,15 @@ def on_session_creation():
 
 @frappe.whitelist()
 def creating_issue(doc, method):
-    message=doc.content
-    #getting record matching to email received
+    message = doc.content
+    # getting record matching to email received
     email = frappe.db.get_value('Email Account', {'email_id': doc.recipients})
-    email_Account=frappe.get_doc("Email Account",email)
-    #getting issue type from email account doctype
-    issue_type=email_Account.imap_folder[0].custom_issue_type
-    issue= frappe.db.get_value('Issue', {'name': doc.reference_name})
-    issue_name=frappe.get_doc("Issue",issue)
-    issue_name.issue_type=issue_type
-    issue_name.description=message
+    email_Account = frappe.get_doc("Email Account", email)
+    # getting issue type from email account doctype
+    issue_type = email_Account.imap_folder[0].custom_issue_type
+    issue = frappe.db.get_value('Issue', {'name': doc.reference_name})
+    issue_name = frappe.get_doc("Issue", issue)
+    issue_name.issue_type = issue_type
+    issue_name.description = message
     issue_name.save()
     frappe.db.commit()
