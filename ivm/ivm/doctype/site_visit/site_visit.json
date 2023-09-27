@@ -8,7 +8,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "related_to",
+  "reference_document_type",
+  "reference_related_to",
   "assigned_to",
   "column_break_6at3h",
   "status",
@@ -49,14 +50,6 @@
   "last_modified_date"
  ],
  "fields": [
-  {
-   "fieldname": "related_to",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Related To",
-   "options": "Issue",
-   "reqd": 1
-  },
   {
    "fieldname": "status",
    "fieldtype": "Select",
@@ -256,11 +249,23 @@
    "fieldname": "system_details_section",
    "fieldtype": "Section Break",
    "label": "System Details"
+  },
+  {
+   "fieldname": "reference_document_type",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_related_to",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Related To",
+   "options": "reference_document_type"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-09-25 22:20:32.629680",
+ "modified": "2023-09-27 11:22:09.353584",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Site Visit",
