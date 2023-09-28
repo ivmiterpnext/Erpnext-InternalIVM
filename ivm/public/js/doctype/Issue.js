@@ -1,4 +1,8 @@
 frappe.ui.form.on("Issue", {
+    refresh:function(frm){
+        $(".badge-link:contains('Ticket')").closest(".document-link").find(".icon-btn").hide();
+        $(".badge-link:contains('Warehouse Request')").closest(".document-link").find(".icon-btn").hide();
+    },
     issue_type: function (frm) {
         if (frm.doc.issue_type) {
             frm.set_value("status", 'New');

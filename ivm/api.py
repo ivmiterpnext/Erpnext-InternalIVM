@@ -109,25 +109,15 @@ def create_case(source_name, target_doc=None):
         return doclist
 
 
+    
 def get_data(data):
-    return {
-        "heatmap": True,
-        "heatmap_message": _("This is based on the Time Sheets created against this project"),
-        "fieldname": "project",
+	return {
+        "fieldname": "issue", 
+        "non_standard_fieldnames": {"Warehouse Request": "related_case","Issue":"parent_case"},
         "transactions": [
-            {
-                "label": _("Project"),
-                "items": ["Task", "Timesheet", "Issue", "Project Update"],
-            },
-            {"label": _("Material"), "items": [
-                "Material Request", "BOM", "Stock Entry"]},
-            {"label": _("Sales"), "items": [
-                "Sales Order", "Delivery Note", "Sales Invoice"]},
-            {"label": _("Purchase"), "items": [
-                "Purchase Order", "Purchase Receipt", "Purchase Invoice"]},
-            {"label": ("Events"), "items": ["Event"]},
-        ],
-    }
+            {"label": _("Activity"), "items": ["Task"]},
+            {"label": _("Warehouse Request"), "items": ["Warehouse Request"]},
+            {"label": _("Related Cases"), "items": ["Issue"]}]}
 
 
 @frappe.whitelist()
