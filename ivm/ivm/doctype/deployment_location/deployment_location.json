@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:DLN-{######}",
  "creation": "2023-09-27 02:15:37.863710",
  "default_view": "List",
  "doctype": "DocType",
@@ -81,7 +82,7 @@
   {
    "fieldname": "last_modified_by",
    "fieldtype": "Datetime",
-   "label": "Last Modified By"
+   "label": "Last Modified"
   },
   {
    "fieldname": "column_break_vuqbf",
@@ -95,10 +96,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-09-27 22:32:50.906713",
+ "modified": "2023-09-28 14:43:38.388044",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Deployment Location",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
