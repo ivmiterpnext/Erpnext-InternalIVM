@@ -180,7 +180,7 @@
     "type": "Link"
    }
   ],
-  "modified": "2023-09-27 20:11:26.993613",
+  "modified": "2023-09-27 20:36:11.833000",
   "module": "Support",
   "name": "Tickets",
   "number_cards": [],
@@ -203,7 +203,7 @@
     "parentfield": "shortcuts",
     "parenttype": "Workspace",
     "restrict_to_domain": null,
-    "stats_filter": null,
+    "stats_filter": "{\"status\":[\"not in\",[\"Closed\",\"Resolved\",null]],\"owner\":[\"like\",frappe.session.user]}",
     "type": "DocType",
     "url": null
    },
