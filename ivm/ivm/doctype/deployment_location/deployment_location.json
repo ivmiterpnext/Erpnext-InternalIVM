@@ -71,7 +71,7 @@
   },
   {
    "fieldname": "shipping_address",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "label": "Shipping Address"
   },
   {
@@ -95,7 +95,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-09-27 02:17:23.348437",
+ "modified": "2023-09-27 21:34:21.170495",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Deployment Location",
