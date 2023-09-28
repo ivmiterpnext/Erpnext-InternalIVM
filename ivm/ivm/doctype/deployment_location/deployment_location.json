@@ -70,11 +70,6 @@
    "label": "Number of Vaults"
   },
   {
-   "fieldname": "shipping_address",
-   "fieldtype": "Long Text",
-   "label": "Shipping Address"
-  },
-  {
    "fieldname": "section_break_oiiax",
    "fieldtype": "Section Break"
   },
@@ -91,11 +86,16 @@
   {
    "fieldname": "column_break_vuqbf",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Long Text",
+   "label": "Shipping Address"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-09-27 21:34:21.170495",
+ "modified": "2023-09-27 22:32:50.906713",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Deployment Location",
