@@ -10,7 +10,7 @@ app_license = "MIT"
 # Includes in <head>
 # ------------------
 fixtures = [{"doctype": "Workspace", "filters": {
-    "parent_page": ["in", ["Support"]]}}]
+    "name": ["in", ["Tickets"]]}}]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 app_include_js = "/assets/ivm/js/workspace.js"
