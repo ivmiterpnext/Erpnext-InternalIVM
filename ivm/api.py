@@ -218,8 +218,7 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def on_session_creation():
-    modules = ['IVM', 'CRM', 'Projects', 'Warehouse Requests',
-               'Tickets', 'Receivables', 'Vending Management']
+    modules = ['IVM', 'CRM', 'Projects','Warehouse Requests', 'Tickets', 'Receivables', 'Vending Management']
     # This part of code is for the user who is not having admin role----------------------------
     if 'Admin' not in frappe.get_roles(frappe.session.user):
         workspaces = frappe.get_list(
@@ -249,26 +248,19 @@ def on_session_creation():
 
 @frappe.whitelist()
 def creating_issue(doc, method):
-    message = doc.content
-
     try:
-        # Getting record matching the email received
-        email = frappe.db.get_value(
-            'Email Account', {'email_id': doc.recipients})
-        email_Account = frappe.get_doc("Email Account", email)
-
-        # Getting issue type from email account doctype
-        issue_type = email_Account.imap_folder[0].custom_issue_type
-
-        # Getting the issue by reference name
-        issue = frappe.get_value('Issue', {'name': doc.reference_name})
-        issue_name = frappe.get_doc("Issue", issue)
-
-        # Update issue type and description
-        issue_name.issue_type = issue_type
-        issue_name.description = message
-        issue_name.save()
-        frappe.db.commit()
+        message = doc.content
+        # getting record matching to email received
+        email = frappe.db.get_value('Email Account', {'email_id': doc.recipients})
+        if  email:
+            email_Account = frappe.get_doc("Email Account", email)
+            # getting issue type from email account doctype
+            issue_type = email_Account.imap_folder[0].custom_issue_type
+            issue = frappe.db.get_value('Issue', {'name': doc.reference_name})
+            issue_name = frappe.get_doc("Issue", issue)
+            issue_name.issue_type = issue_type
+            issue_name.description = message
+            issue_name.save()
+            frappe.db.commit()
     except Exception as e:
-        # Handle the exception here, you can print or log the error message
-        frappe.log_error(f"Error in creating_issue: {str(e)}")
+        pass
