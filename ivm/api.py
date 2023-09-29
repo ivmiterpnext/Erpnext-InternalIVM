@@ -302,7 +302,6 @@ def calculate_closed_opportunity_total(customer_name):
             (opportunity.custom_number_of_lockers * opportunity.per_locker_monthly_lease_feeee) * sv_term_numeric +
             (opportunity.number_of_secondary_lockers * opportunity.per_secondary_locker_monthly_lease_feeee) * sv_term_numeric
         )
-    
     return total_value
 
 @frappe.whitelist()
