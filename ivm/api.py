@@ -254,3 +254,64 @@ def creating_issue(doc, method):
             frappe.db.commit()
     except Exception as e:
         pass
+
+
+
+@frappe.whitelist()
+def calculate_closed_opportunity_total(customer_name):
+    # Initialize the total value
+    total_value = 0
+    equipment_total = 0
+
+
+    month_mapping = {
+        'None': 0,
+        '12 Months': 12,
+        '18 Months': 18,
+        '24 Months': 24,
+        '36 Months': 36,
+        '48 Months': 48,
+        '60 Months': 60,
+        '72 Months': 72
+    }
+
+    # Fetch all closed opportunities for the given customer
+    opportunities = frappe.get_all(
+        "Opportunity",
+        filters={
+            "customer_name": customer_name,
+            "sales_stage": "Closed Won"  # Assuming "Closed" is the status for closed opportunities
+        },
+        fields=["name", "number_of_machines", "per_machine_purchase_valueee","number_of_primary_lockers",
+                "custom_number_of_lockers", "per_locker_purchase_valuee",  # Corrected field name
+                 "per_secondary_locker_purchase_valueee",  # Corrected field name
+                "per_machine_monthly_lease_feeee", "per_locker_monthly_lease_feeee",  # Corrected field name
+                "number_of_secondary_lockers", "per_secondary_locker_monthly_lease_feeee","sv_term",'equipment_total']
+    )
+
+    # Loop through each closed opportunity and calculate the total
+    for opportunity in opportunities:
+        opportunity.custom_number_of_lockers = opportunity.number_of_primary_lockers + opportunity.number_of_secondary_lockers
+        sv_term_numeric = month_mapping.get(opportunity.sv_term, 0)
+        
+        total_value += (
+            opportunity.number_of_machines * opportunity.per_machine_purchase_valueee +
+            opportunity.custom_number_of_lockers * opportunity.per_locker_purchase_valuee +
+            opportunity.number_of_secondary_lockers * opportunity.per_secondary_locker_purchase_valueee +
+            (opportunity.per_machine_monthly_lease_feeee * opportunity.number_of_machines) * sv_term_numeric +
+            (opportunity.custom_number_of_lockers * opportunity.per_locker_monthly_lease_feeee) * sv_term_numeric +
+            (opportunity.number_of_secondary_lockers * opportunity.per_secondary_locker_monthly_lease_feeee) * sv_term_numeric
+        )
+    
+    return total_value
+
+@frappe.whitelist()
+def deployment_location_equipments(opportunity, machines, lockers):
+    doc = frappe.get_doc("Opportunity",opportunity)
+    doc.custom_total_machines_from_dls = machines 
+    doc.custom_total_lockers_from_dls = lockers
+    machines = int(machines)
+    lockers = int(lockers)
+    doc.equipment_total = machines+lockers   
+
+    doc.save(ignore_permissions = True)
