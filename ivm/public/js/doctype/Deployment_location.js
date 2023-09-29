@@ -1,6 +1,5 @@
 frappe.ui.form.on('Deployment Location', {
     after_save: async function (frm) {
-        print("mnbvc")
         if (frm.doc.opportunity) {
             frappe.call({
                 method: 'ivm.api.deployment_location_equipments',
