@@ -35,6 +35,7 @@ doctype_js = {
     "Lead": "public/js/doctype/Lead.js",
     "Opportunity": "public/js/doctype/Opportunity.js",
     "Customer": "public/js/doctype/Customer.js",
+    "Deployment Location": "public/js/doctype/Deployment_location.js",
     "User": "public/js/doctype/user.js",
     "Task": "public/js/doctype/Task.js",
     "Project": "public/js/doctype/Project.js",
