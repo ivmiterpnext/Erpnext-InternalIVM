@@ -438,21 +438,6 @@
   "name": "Technical"
  },
  {
-  "case_reason": "--None--",
-  "case_sub_reason": [
-   {
-    "case_sub_reason": "--None--",
-    "parent": "--None--",
-    "parentfield": "case_sub_reason",
-    "parenttype": "Case Reason"
-   }
-  ],
-  "docstatus": 0,
-  "doctype": "Case Reason",
-  "modified": "2023-08-16 10:51:01.396538",
-  "name": "--None--"
- },
- {
   "case_reason": "Change Request",
   "case_sub_reason": [
    {
@@ -881,5 +866,20 @@
   "doctype": "Case Reason",
   "modified": "2023-08-16 11:18:32.515261",
   "name": "Permissions"
+ },
+ {
+  "case_reason": "--None--",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--",
+    "parent": "--None--",
+    "parentfield": "case_sub_reason",
+    "parenttype": "Case Reason"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:51:01.396538",
+  "name": "--None--"
  }
 ]

@@ -241,8 +241,11 @@ def creating_issue(doc, method):
     try:
         message = doc.content
         # getting record matching to email received
-        email = frappe.db.get_value('Email Account', {'email_id': doc.recipients})
-        if  email:
+        email = None
+        if (doc.email_account):
+            email = frappe.db.get_value('Email Account', {'name': doc.email_account}, "name")
+
+        if email:
             email_Account = frappe.get_doc("Email Account", email)
             # getting issue type from email account doctype
             issue_type = email_Account.imap_folder[0].custom_issue_type
@@ -254,7 +257,6 @@ def creating_issue(doc, method):
             frappe.db.commit()
     except Exception as e:
         pass
-
 
 
 @frappe.whitelist()

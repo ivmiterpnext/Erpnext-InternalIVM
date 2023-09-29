@@ -1,5 +1,15 @@
 [
  {
+  "campaign_name": "NSC Tradeshow",
+  "campaign_schedules": [],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Campaign",
+  "modified": "2023-09-19 03:52:59.614936",
+  "name": "NSC Tradeshow",
+  "naming_series": "SAL-CAM-.YYYY.-"
+ },
+ {
   "campaign_name": "June 2009 WebEx Webinar",
   "campaign_schedules": [],
   "description": null,

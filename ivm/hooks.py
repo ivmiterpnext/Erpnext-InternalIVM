@@ -9,8 +9,10 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-fixtures = [{"doctype": "Workspace", "filters": {
-    "name": ["in", ["Tickets"]]}}]
+fixtures = [
+        "Workspace", "Dashboard", "Issue Type", "Campaign", "Sales Stage", "Case Reason", "Lead Source", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
+        "Opportunity Type", "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role"
+]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 app_include_js = "/assets/ivm/js/workspace.js"
@@ -120,9 +122,9 @@ on_session_creation = [
 # override_doctype_class = {
 # "ToDo": "custom_app.overrides.CustomToDo"
 # }
-# override_doctype_class = {
-#     "Project": "ivm.controllers.project.CustomProjectController"
-# }
+override_doctype_class = {
+     "Project": "ivm.controllers.project.CustomProjectController"
+}
 # Document Events
 # ---------------
 # Hook on document methods and events
