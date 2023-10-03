@@ -132,6 +132,9 @@ override_doctype_class = {
 doc_events = {
     "Communication": {
         "after_insert": "ivm.api.creating_issue",
+    },
+    "Project": {
+        "on_update": "ivm.api.deployment_to_warehouse"
     }
 }
 
@@ -172,7 +175,8 @@ doc_events = {
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
-    "Issue": "ivm.api.get_data"
+    "Issue": "ivm.api.get_data",
+    "Project": "ivm.api.override_project_dashboard",
 }
 
 # exempt linked doctypes from being automatically cancelled
