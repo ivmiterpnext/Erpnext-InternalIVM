@@ -265,7 +265,6 @@ def calculate_closed_opportunity_total(customer_name):
     total_value = 0
     equipment_total = 0
 
-
     month_mapping = {
         'None': 0,
         '12 Months': 12,
@@ -316,3 +315,62 @@ def deployment_location_equipments(opportunity, machines, lockers):
     doc.equipment_total = machines+lockers   
 
     doc.save(ignore_permissions = True)
+
+@frappe.whitelist()
+def create_warehouse_request(doc):
+    # Check if a warehouse request already exists for the project_name
+    existing_request = frappe.get_all("Warehouse Request", filters={"custom_related_deployment": doc.name})
+    if not existing_request:
+        # Create a new dictionary for warehouse_request
+        warehouse = {}
+        fields_to_copy = ['vat','subject','description','internal_notes','locker_configuration_details','additional_locker_information','vault_power_configuration_details',
+                          'rfid_1_settings','rfid_2_settings','card_reader_type','shipping_company','kiosk_options','kvm_switch_options','monitor_options','network_options',
+                          'electrical_outlet_in_bins','network_port_in_bins','interior_kiosk_lighting','locker_bin_door_type','countertop_color','ada_side_table',
+                          'kiosk_side_for_table','monitor_mount']
+
+        # Loop through the fields and copy them from doc to warehouse_request
+        for field in fields_to_copy:
+            warehouse[field] = doc.get(field)
+
+        warehouse_request = frappe.new_doc("Warehouse Request")
+        for field, value in warehouse.items():
+            setattr(warehouse_request, field, value)
+        warehouse_request.custom_related_deployment = doc.name
+        warehouse_request.machine_names = doc.machine_numbers
+        warehouse_request.connectivity = doc.connectivity_type
+        warehouse_request.carrier = doc.cell_carrier
+        warehouse_request.contact = doc.contact_name
+        warehouse_request.tracking_number =  doc.shipping_tracking_number
+        warehouse_request.owner_name = doc.users[0].user
+        warehouse_request.account = doc.customer
+        warehouse_request.created_by = frappe.session.user
+        warehouse_request.created_date = frappe.utils.nowdate()
+        warehouse_request.insert(ignore_permissions = True)
+        warehouse_request.save(ignore_permissions = True)
+        frappe.db.commit()
+
+@frappe.whitelist()
+def deployment_to_warehouse(doc, method):
+    if all([doc.planogram_approved_date,doc.graphic_design_approved_date, doc.kiosk_configuration_approved_date, doc.locker_configuration_approved_date, doc.vault_configuration_approved_date]):
+        create_warehouse_request(doc)
+
+@frappe.whitelist()
+def override_project_dashboard(data):
+    return {
+		"heatmap": True,
+		"heatmap_message": _("This is based on the Time Sheets created against this project"),
+		"fieldname": "project",
+        "non_standard_fieldnames": {"Warehouse Request": "custom_related_deployment"},
+		"transactions": [
+			{
+				"label": _("Project"),
+				"items": ["Task", "Timesheet", "Issue", "Project Update"],
+			},
+			{"label": _("Material"), "items": ["Material Request", "BOM", "Stock Entry"]},
+			{"label": _("Sales"), "items": ["Sales Order", "Delivery Note", "Sales Invoice"]},
+			{"label": _("Purchase"), "items": ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]},
+            {"label": _("Warehouse Request"), "items": ["Warehouse Request"]},
+            {"label": _("Claim"), "items": ["Expense Claim"]}
+		],
+	}
+    
