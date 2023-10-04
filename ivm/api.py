@@ -335,7 +335,7 @@ def create_warehouse_request(doc):
         warehouse_request = frappe.new_doc("Warehouse Request")
         for field, value in warehouse.items():
             setattr(warehouse_request, field, value)
-        warehouse_request.custom_related_deployment = doc.name
+        # warehouse_request.custom_related_deployment = doc.name
         warehouse_request.machine_names = doc.machine_numbers
         warehouse_request.connectivity = doc.connectivity_type
         warehouse_request.carrier = doc.cell_carrier
@@ -360,7 +360,7 @@ def override_project_dashboard(data):
 		"heatmap": True,
 		"heatmap_message": _("This is based on the Time Sheets created against this project"),
 		"fieldname": "project",
-        "non_standard_fieldnames": {"Warehouse Request": "custom_related_deployment"},
+        # "non_standard_fieldnames": {"Warehouse Request": "custom_related_deployment"},
 		"transactions": [
 			{
 				"label": _("Project"),
