@@ -319,7 +319,7 @@ def deployment_location_equipments(opportunity, machines, lockers):
 @frappe.whitelist()
 def create_warehouse_request(doc):
     # Check if a warehouse request already exists for the project_name
-    existing_request = frappe.get_all("Warehouse Request", filters={"custom_related_deployment": doc.name})
+    existing_request = frappe.get_all("Warehouse Request", filters={"related_project": doc.name})
     if not existing_request:
         # Create a new dictionary for warehouse_request
         warehouse = {}
@@ -335,7 +335,7 @@ def create_warehouse_request(doc):
         warehouse_request = frappe.new_doc("Warehouse Request")
         for field, value in warehouse.items():
             setattr(warehouse_request, field, value)
-        # warehouse_request.custom_related_deployment = doc.name
+        warehouse_request.related_project = doc.name
         warehouse_request.machine_names = doc.machine_numbers
         warehouse_request.connectivity = doc.connectivity_type
         warehouse_request.carrier = doc.cell_carrier
@@ -360,7 +360,7 @@ def override_project_dashboard(data):
 		"heatmap": True,
 		"heatmap_message": _("This is based on the Time Sheets created against this project"),
 		"fieldname": "project",
-        # "non_standard_fieldnames": {"Warehouse Request": "custom_related_deployment"},
+        "non_standard_fieldnames": {"Warehouse Request": "related_project"},
 		"transactions": [
 			{
 				"label": _("Project"),
