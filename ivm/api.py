@@ -109,11 +109,10 @@ def create_case(source_name, target_doc=None):
         return doclist
 
 
-    
 def get_data(data):
-	return {
-        "fieldname": "issue", 
-        "non_standard_fieldnames": {"Warehouse Request": "related_case","Issue":"parent_case"},
+    return {
+        "fieldname": "issue",
+        "non_standard_fieldnames": {"Warehouse Request": "related_case", "Issue": "parent_case"},
         "transactions": [
             {"label": _("Activity"), "items": ["Task"]},
             {"label": _("Warehouse Request"), "items": ["Warehouse Request"]},
@@ -208,7 +207,8 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def on_session_creation():
-    modules = ['IVM', 'CRM', 'Projects','Warehouse Requests', 'Tickets', 'Receivables', 'Vending Management']
+    modules = ['IVM', 'CRM', 'Projects', 'Warehouse Requests',
+               'Tickets', 'Receivables', 'Vending Management']
     # This part of code is for the user who is not having admin role----------------------------
     if 'Admin' not in frappe.get_roles(frappe.session.user):
         workspaces = frappe.get_list(
@@ -243,7 +243,8 @@ def creating_issue(doc, method):
         # getting record matching to email received
         email = None
         if (doc.email_account):
-            email = frappe.db.get_value('Email Account', {'name': doc.email_account}, "name")
+            email = frappe.db.get_value(
+                'Email Account', {'name': doc.email_account}, "name")
 
         if email:
             email_Account = frappe.get_doc("Email Account", email)
@@ -283,50 +284,56 @@ def calculate_closed_opportunity_total(customer_name):
             "customer_name": customer_name,
             "sales_stage": "Closed Won"  # Assuming "Closed" is the status for closed opportunities
         },
-        fields=["name", "number_of_machines", "per_machine_purchase_valueee","number_of_primary_lockers",
+        fields=["name", "number_of_machines", "per_machine_purchase_valueee", "number_of_primary_lockers",
                 "custom_number_of_lockers", "per_locker_purchase_valuee",  # Corrected field name
-                 "per_secondary_locker_purchase_valueee",  # Corrected field name
-                "per_machine_monthly_lease_feeee", "per_locker_monthly_lease_feeee",  # Corrected field name
-                "number_of_secondary_lockers", "per_secondary_locker_monthly_lease_feeee","sv_term",'equipment_total']
+                "per_secondary_locker_purchase_valueee",  # Corrected field name
+                # Corrected field name
+                "per_machine_monthly_lease_feeee", "per_locker_monthly_lease_feeee",
+                "number_of_secondary_lockers", "per_secondary_locker_monthly_lease_feeee", "sv_term", 'equipment_total']
     )
 
     # Loop through each closed opportunity and calculate the total
     for opportunity in opportunities:
-        opportunity.custom_number_of_lockers = opportunity.number_of_primary_lockers + opportunity.number_of_secondary_lockers
+        opportunity.custom_number_of_lockers = opportunity.number_of_primary_lockers + \
+            opportunity.number_of_secondary_lockers
         sv_term_numeric = month_mapping.get(opportunity.sv_term, 0)
-        
+
         total_value += (
             opportunity.number_of_machines * opportunity.per_machine_purchase_valueee +
             opportunity.custom_number_of_lockers * opportunity.per_locker_purchase_valuee +
             opportunity.number_of_secondary_lockers * opportunity.per_secondary_locker_purchase_valueee +
             (opportunity.per_machine_monthly_lease_feeee * opportunity.number_of_machines) * sv_term_numeric +
             (opportunity.custom_number_of_lockers * opportunity.per_locker_monthly_lease_feeee) * sv_term_numeric +
-            (opportunity.number_of_secondary_lockers * opportunity.per_secondary_locker_monthly_lease_feeee) * sv_term_numeric
+            (opportunity.number_of_secondary_lockers *
+             opportunity.per_secondary_locker_monthly_lease_feeee) * sv_term_numeric
         )
     return total_value
 
+
 @frappe.whitelist()
 def deployment_location_equipments(opportunity, machines, lockers):
-    doc = frappe.get_doc("Opportunity",opportunity)
-    doc.custom_total_machines_from_dls = machines 
+    doc = frappe.get_doc("Opportunity", opportunity)
+    doc.custom_total_machines_from_dls = machines
     doc.custom_total_lockers_from_dls = lockers
     machines = int(machines)
     lockers = int(lockers)
-    doc.equipment_total = machines+lockers   
+    doc.equipment_total = machines+lockers
 
-    doc.save(ignore_permissions = True)
+    doc.save(ignore_permissions=True)
+
 
 @frappe.whitelist()
 def create_warehouse_request(doc):
     # Check if a warehouse request already exists for the project_name
-    existing_request = frappe.get_all("Warehouse Request", filters={"related_project": doc.name})
+    existing_request = frappe.get_all("Warehouse Request", filters={
+                                      "related_project": doc.name})
     if not existing_request:
         # Create a new dictionary for warehouse_request
         warehouse = {}
-        fields_to_copy = ['vat','subject','description','internal_notes','locker_configuration_details','additional_locker_information','vault_power_configuration_details',
-                          'rfid_1_settings','rfid_2_settings','card_reader_type','shipping_company','kiosk_options','kvm_switch_options','monitor_options','network_options',
-                          'electrical_outlet_in_bins','network_port_in_bins','interior_kiosk_lighting','locker_bin_door_type','countertop_color','ada_side_table',
-                          'kiosk_side_for_table','monitor_mount']
+        fields_to_copy = ['vat', 'subject', 'description', 'internal_notes', 'locker_configuration_details', 'additional_locker_information', 'vault_power_configuration_details',
+                          'rfid_1_settings', 'rfid_2_settings', 'card_reader_type', 'shipping_company', 'kiosk_options', 'kvm_switch_options', 'monitor_options', 'network_options',
+                          'electrical_outlet_in_bins', 'network_port_in_bins', 'interior_kiosk_lighting', 'locker_bin_door_type', 'countertop_color', 'ada_side_table',
+                          'kiosk_side_for_table', 'monitor_mount']
 
         # Loop through the fields and copy them from doc to warehouse_request
         for field in fields_to_copy:
@@ -340,37 +347,50 @@ def create_warehouse_request(doc):
         warehouse_request.connectivity = doc.connectivity_type
         warehouse_request.carrier = doc.cell_carrier
         warehouse_request.contact = doc.contact_name
-        warehouse_request.tracking_number =  doc.shipping_tracking_number
+        warehouse_request.tracking_number = doc.shipping_tracking_number
         warehouse_request.owner_name = doc.users[0].user
         warehouse_request.account = doc.customer
         warehouse_request.created_by = frappe.session.user
         warehouse_request.created_date = frappe.utils.nowdate()
-        warehouse_request.insert(ignore_permissions = True)
-        warehouse_request.save(ignore_permissions = True)
+        warehouse_request.insert(ignore_permissions=True)
+        warehouse_request.save(ignore_permissions=True)
         frappe.db.commit()
+
 
 @frappe.whitelist()
 def deployment_to_warehouse(doc, method):
-    if all([doc.planogram_approved_date,doc.graphic_design_approved_date, doc.kiosk_configuration_approved_date, doc.locker_configuration_approved_date, doc.vault_configuration_approved_date]):
+    if all([doc.planogram_approved_date, doc.graphic_design_approved_date, doc.kiosk_configuration_approved_date, doc.locker_configuration_approved_date, doc.vault_configuration_approved_date]):
         create_warehouse_request(doc)
+
 
 @frappe.whitelist()
 def override_project_dashboard(data):
     return {
-		"heatmap": True,
-		"heatmap_message": _("This is based on the Time Sheets created against this project"),
-		"fieldname": "project",
+        "heatmap": True,
+        "heatmap_message": _("This is based on the Time Sheets created against this project"),
+        "fieldname": "project",
         "non_standard_fieldnames": {"Warehouse Request": "related_project"},
-		"transactions": [
-			{
-				"label": _("Project"),
-				"items": ["Task", "Timesheet", "Issue", "Project Update"],
-			},
-			{"label": _("Material"), "items": ["Material Request", "BOM", "Stock Entry"]},
-			{"label": _("Sales"), "items": ["Sales Order", "Delivery Note", "Sales Invoice"]},
-			{"label": _("Purchase"), "items": ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]},
+        "transactions": [
+            {
+                "label": _("Project"),
+                "items": ["Task", "Timesheet", "Issue", "Project Update"],
+            },
+            {"label": _("Material"), "items": [
+                "Material Request", "BOM", "Stock Entry"]},
+            {"label": _("Sales"), "items": [
+                "Sales Order", "Delivery Note", "Sales Invoice"]},
+            {"label": _("Purchase"), "items": [
+                "Purchase Order", "Purchase Receipt", "Purchase Invoice"]},
             {"label": _("Warehouse Request"), "items": ["Warehouse Request"]},
             {"label": _("Claim"), "items": ["Expense Claim"]}
-		],
-	}
-    
+        ],
+    }
+
+
+@frappe.whitelist()
+def fetching_dates(doc, method):
+    doc.db_set('created_date', doc.creation)
+    doc.db_set('custom_modified_date', doc.modified)
+    doc.db_set('custom_created_by', doc.owner)
+    doc.db_set('custom_modified_by', doc.modified_by)
+    doc.reload()
