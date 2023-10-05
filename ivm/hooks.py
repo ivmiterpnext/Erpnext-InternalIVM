@@ -10,8 +10,8 @@ app_license = "MIT"
 # Includes in <head>
 # ------------------
 fixtures = [
-        "Workspace", "Dashboard", "Issue Type", "Campaign", "Sales Stage", "Case Reason", "Lead Source", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
-        "Opportunity Type", "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role"
+    "Workspace", "Dashboard", "Issue Type", "Campaign", "Sales Stage", "Case Reason", "Lead Source", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
+    "Opportunity Type", "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role"
 ]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
@@ -123,7 +123,7 @@ on_session_creation = [
 # "ToDo": "custom_app.overrides.CustomToDo"
 # }
 override_doctype_class = {
-     "Project": "ivm.controllers.project.CustomProjectController"
+    "Project": "ivm.controllers.project.CustomProjectController"
 }
 # Document Events
 # ---------------
@@ -135,6 +135,9 @@ doc_events = {
     },
     "Project": {
         "on_update": "ivm.api.deployment_to_warehouse"
+    },
+    "Issue": {
+        "on_update": "ivm.api.fetching_dates"
     }
 }
 
