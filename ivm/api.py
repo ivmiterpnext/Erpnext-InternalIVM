@@ -159,20 +159,15 @@ def get_case_sub_reason_options(case_reason):
 
 
 @frappe.whitelist(allow_guest=True)
-def get_contact_name(name):
-    if name == "":
+def get_contact_name(doctype, txt, searchfield, start, page_len, filters):
+    names = filters.get('name')
+    if names == "":
         return []
+    list_of_records = frappe.db.sql("""SELECT DISTINCT c.name
+        FROM `tabContact` c
+        INNER JOIN `tabDynamic Link` dl ON c.name = dl.parent
+        WHERE dl.link_doctype = 'Customer' AND dl.link_title = '{0}' """.format(names))
 
-    docs = frappe.db.get_list("Contact", pluck="name")
-    list_of_records = []
-    for i in docs:
-        doc = frappe.get_doc("Contact", i)
-        doc = doc.as_dict()
-        child_records = doc.links
-        if len(child_records) > 0:
-            for j in range(len(child_records)):
-                if child_records[j]['link_doctype'] == "Customer" and child_records[j]["link_title"] == name:
-                    list_of_records.append(i)
     return list_of_records
 
 
