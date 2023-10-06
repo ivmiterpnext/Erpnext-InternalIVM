@@ -15,7 +15,7 @@ fixtures = [
 ]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
-app_include_js = "/assets/ivm/js/workspace.js"
+app_include_js = ["/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/ivm/css/ivm.css"

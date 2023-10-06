@@ -394,3 +394,40 @@ def fetching_dates(doc, method):
     doc.db_set('custom_created_by', doc.owner)
     doc.db_set('custom_modified_by', doc.modified_by)
     doc.reload()
+
+
+@frappe.whitelist()
+def search_machine_numbers(machine_no):
+    issue_doc = frappe.db.sql(
+        """SELECT name FROM `tabIssue` WHERE machine_number LIKE %s""",
+        (f"%{machine_no}%",),
+        as_dict=True
+    )
+
+    project_doc = frappe.db.sql(
+        """SELECT name FROM `tabProject` WHERE machine_numbers LIKE %s""",
+        (f"%{machine_no}%",),
+        as_dict=True
+    )
+
+    warehouse_request_doc = frappe.db.sql(
+        """
+        SELECT name
+        FROM `tabWarehouse Request`
+        WHERE
+            1_machine_number LIKE %s
+            OR 2_machine_number LIKE %s
+            OR 3_machine_number LIKE %s
+            OR 4_machine_number LIKE %s
+            OR 5_machine_number LIKE %s
+            OR 6_machine_number LIKE %s
+            OR 7_machine_number LIKE %s
+            OR 8_machine_number LIKE %s
+            OR 9_machine_number LIKE %s
+            OR 10_machine_number LIKE %s
+        """,
+        tuple([f"%{machine_no}%"] * 10),
+        as_dict=True
+    )
+
+    return {"issue": issue_doc, "project": project_doc, "warehouse-request": warehouse_request_doc}
