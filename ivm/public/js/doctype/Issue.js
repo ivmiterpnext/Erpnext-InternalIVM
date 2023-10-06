@@ -1,5 +1,5 @@
 frappe.ui.form.on("Issue", {
-    refresh:function(frm){
+    refresh: function (frm) {
         $(".badge-link:contains('Ticket')").closest(".document-link").find(".icon-btn").hide();
         $(".badge-link:contains('Warehouse Request')").closest(".document-link").find(".icon-btn").hide();
     },
@@ -69,20 +69,12 @@ frappe.ui.form.on("Issue", {
         if (frm.doc.customer == "") {
             frm.set_value("contact_name", "")
         }
-
-        frappe.call({
-            method: "ivm.api.get_contact_name",
-            args: { 'name': frm.doc.customer }
-        }).done((r) => {
-            let list_of_records = r.message
-            cur_frm.set_query("contact_name", function () {
-                return {
-                    filters: {
-                        "name": ['in', list_of_records]
-                    }
-                }
-            });
-        })
+        frm.set_query("contact_name", function () {
+            return {
+                query: "ivm.api.get_contact_name",
+                filters: { "name": frm.doc.customer }
+            };
+        });
     },
 
 
