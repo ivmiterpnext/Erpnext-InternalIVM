@@ -251,19 +251,17 @@ def creating_issue(doc, method):
             issue_name.issue_type = issue_type
             issue_name.description = message
             issue_name.save()
-            frappe.db.commit()
-            # if attachments are in received emails then moving it to linked issue record-----------------
             if (attachments):
                 file_urls = [url['file_url'] for url in attachments]
-                for links in file_urls:
-                    doc = frappe.get_doc({
-                        'doctype': 'File',
-                        'is_private': 1,
-                        'file_url': links,
-                        'attached_to_doctype': 'Issue',
-                        'attached_to_name': doc.reference_name
-                    }).save()
-                    frappe.db.commit()
+            for links in file_urls:
+                doc = frappe.get_doc({
+                    'doctype': 'File',
+                    'is_private': 1,
+                    'file_url': links,
+                    'attached_to_doctype': 'Issue',
+                    'attached_to_name': doc.reference_name
+                }).save()
+            frappe.db.commit()
     except Exception as e:
         pass
 
