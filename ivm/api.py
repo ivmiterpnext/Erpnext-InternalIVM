@@ -252,15 +252,17 @@ def creating_issue(doc, method):
             issue_name.description = message
             issue_name.save()
             if (attachments):
+                frappe.log_error("attachments",attachments)
                 file_urls = [url['file_url'] for url in attachments]
-            for links in file_urls:
-                doc = frappe.get_doc({
-                    'doctype': 'File',
-                    'is_private': 1,
-                    'file_url': links,
-                    'attached_to_doctype': 'Issue',
-                    'attached_to_name': doc.reference_name
-                }).save()
+                for links in file_urls:
+                    file = frappe.get_doc({
+                        'doctype': 'File',
+                        'is_private': 1,
+                        'file_url': links,
+                        'attached_to_doctype': 'Issue',
+                        'attached_to_name': doc.reference_name
+                    })
+                    file.save()
             frappe.db.commit()
     except Exception as e:
         pass
