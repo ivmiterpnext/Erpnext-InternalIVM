@@ -131,7 +131,7 @@ override_doctype_class = {
 
 doc_events = {
     "Communication": {
-        "after_insert": "ivm.api.creating_issue",
+        "on_update": "ivm.api.creating_issue",
     },
     "Project": {
         "on_update": "ivm.api.deployment_to_warehouse"
