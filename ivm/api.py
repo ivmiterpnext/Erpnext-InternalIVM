@@ -5,6 +5,29 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils.data import getdate, add_days
 import math
 
+# function to get user id from salesloft
+def get_user_id(lead_owener):
+    salesloft_doc = frappe.get_doc("SalesLoft Settings")
+    access_token = salesloft_doc.salesloft_api_token
+    
+    if lead_owener:
+        url = "https://api.salesloft.com/v2/users"
+        payload={}
+        headers = {
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {access_token}'
+        }
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+        response = response.json()
+        data = response["data"]
+        for i in data:
+            if i['email'].strip()==lead_owener.strip():
+                user_id =  i["id"]
+                return user_id
+        return False
+
+
 # Function to get the SalesLoft API token from the "SalesLoft Settings" doctype
 
 
@@ -53,7 +76,7 @@ def check_salesloft_user(email):
 
 
 @frappe.whitelist(allow_guest=True)
-def create_salesloft_person(email, first_name='', last_name='', job_title='', city='', state='', country='', company='', website='', phone='', phone_ext='', mobile_no=''):
+def create_salesloft_person(email, first_name='', last_name='', job_title='', city='', state='', country='', company='', website='', phone='', phone_ext='', mobile_no='',lead_owner=""):
 
     url = "https://api.salesloft.com/v2/people"
     payload = {
@@ -71,13 +94,20 @@ def create_salesloft_person(email, first_name='', last_name='', job_title='', ci
         'mobile_phone': mobile_no
     }
     print(payload)
-    response = make_salesloft_api_call(url, method="POST", payload=payload)
+    
+    if lead_owner and lead_owner !="Administrator":
+        user_id = get_user_id(lead_owner)
+        if user_id:
+            payload["owner_id"] = user_id
+            response = make_salesloft_api_call(url, method="POST", payload=payload)
 
-    if response.status_code == 201:
-        created_person = response.json()
-        return created_person["data"]["id"]
-    else:
-        return None
+            if response.status_code == 201:
+                created_person = response.json()
+                return created_person["data"]["id"]
+            else:
+                return None
+        return "noUserFound"
+    return None
 
 
 @frappe.whitelist()

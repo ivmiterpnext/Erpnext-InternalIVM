@@ -6,14 +6,12 @@ frappe.ui.form.on('SalesLoft Settings', {
 		let email = frm.doc.salesloft_user_email
 		let url = frm.doc.your_site_url
 		let access_token = frm.doc.salesloft_api_token
+		let arr = ["",undefined,null]
 		if (frm.doc.enable_salesloft_integration===1){
 			
-			if (email ==""){
-				
-			}else if (url ==""){
-				
-			}else if(access_token ==""){
-				
+			if (arr.includes(email) || arr.includes(url) || arr.includes(access_token)) {
+				// Exit the function early if any of the required fields are empty
+				return;
 			}
 			else{
 				frappe.call({
@@ -24,7 +22,7 @@ frappe.ui.form.on('SalesLoft Settings', {
 				})
 			}
 			
-		}else if(frm.doc.enable_salesloft_integration===0 && url !==""){
+		}else if(frm.doc.enable_salesloft_integration===0 && !arr.includes(url)){
 			frappe.call({
 				method: "ivm.salesloft_activity.delete_webhooks",
 				args:{}
