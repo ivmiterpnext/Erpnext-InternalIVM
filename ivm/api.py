@@ -278,6 +278,11 @@ def creating_issue(doc, method):
             issue_type = email_Account.imap_folder[0].custom_issue_type
             issue = frappe.db.get_value('Issue', {'name': doc.reference_name})
             issue_name = frappe.get_doc("Issue", issue)
+            if(issue_type in ['IT','Support','Receivable','Reconfiguration','Vending Management']):
+                customer=fetch_customer_name_and_contact(doc.sender)
+                frappe.log_error('customer',customer)
+                issue_name.customer = customer.get('customer_name')
+                issue_name.contact_name = customer.get('contact_name')
             issue_name.issue_type = issue_type
             issue_name.description = message
             issue_name.save()
@@ -297,6 +302,16 @@ def creating_issue(doc, method):
     except Exception as e:
         pass
 
+def fetch_customer_name_and_contact(sender_name):
+    try:
+        contact_name=frappe.db.sql("""SELECT DISTINCT c.name AS contact_name, dl.link_name AS customer_name
+                                   FROM `tabContact` c
+                                   INNER JOIN `tabContact Email` ce ON c.name = ce.parent
+                                   LEFT JOIN `tabDynamic Link` dl ON c.name = dl.parent AND dl.link_doctype = 'Customer'
+                                   WHERE ce.email_id = '{0}' """.format(sender_name),as_dict=True)
+        return contact_name[0]
+    except Exception as e:
+        pass
 
 @frappe.whitelist()
 def calculate_closed_opportunity_total(customer_name):
