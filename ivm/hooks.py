@@ -133,9 +133,6 @@ doc_events = {
     "Communication": {
         "on_update": "ivm.api.creating_issue",
     },
-    "Project": {
-        "on_update": "ivm.api.deployment_to_warehouse"
-    },
     "Issue": {
         "on_update": "ivm.api.fetching_dates"
     }

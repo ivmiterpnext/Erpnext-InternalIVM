@@ -231,3 +231,86 @@ function updateSelectFieldOptions(frm, fieldname, optionsData) {
   frm.set_df_property(fieldname, 'options', optionsList); 
   frm.refresh_field(fieldname);
 }
+
+frappe.ui.form.on('Project', {
+  before_save(frm) {
+    console.log("srdtyfugkiy")
+    if (frm.doc.graphic_design_approved_date) {
+      show_Dialog('Wrap Ready',frm);
+    }
+    if (frm.doc.planogram_approved_date) {
+      createWarehouseRequest('Build Machine', null, frm);
+    }
+    if (frm.doc.locker_configuration_approved_date) {
+      createWarehouseRequest('Build Locker', null, frm);
+    }
+    if (frm.doc.kiosk_configuration_approved_date) {
+      createWarehouseRequest('Build Kiosk', null, frm);
+    }
+    if (frm.doc.vault_configuration_approved_date) {
+      createWarehouseRequest('Build Vault', null, frm);
+    }
+  },
+});
+
+function show_Dialog(reason, frm) {
+  const dialog = new frappe.ui.Dialog({
+    title: 'Add Attachments',
+    fields: [
+      {
+        label: 'Do you want to add attachments?',
+        fieldname: 'add_attachments',
+        fieldtype: 'Select',
+        options: 'Yes\nNo',
+        default: 'No',
+      },
+    ],
+    primary_action_label: 'Submit',
+    primary_action(values) {
+      const addAttachments = values.add_attachments;
+      dialog.hide();
+
+      if (addAttachments === 'Yes') {
+        show_Attachment_Dialog(reason, frm);
+      } else {
+        createWarehouseRequest(frm,reason, null);
+      }
+    },
+  });
+
+  dialog.show();
+}
+
+function show_Attachment_Dialog(reason, frm) {
+  const attachmentDialog = new frappe.ui.Dialog({
+    title: 'Attach Files',
+    fields: [
+      {
+        label: 'Attach Files',
+        fieldname: 'attach_files',
+        fieldtype: 'Attach',
+      },
+    ],
+    primary_action_label: 'Submit',
+    primary_action(values) {
+      const attachedFiles = values.attach_files;
+      attachmentDialog.hide();
+      createWarehouseRequest(frm, reason, attachedFiles);
+    },
+  });
+
+  attachmentDialog.show();
+}
+
+function createWarehouseRequest(reason, attachedFiles, frm) {
+  const doc = frm.doc;
+
+  frappe.call({
+    method: 'ivm.api.create_warehouse_request',
+    args: {
+      doc: doc,
+      reason: reason,
+      attached_files: attachedFiles,
+    }
+  });
+}
