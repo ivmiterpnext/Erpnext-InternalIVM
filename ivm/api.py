@@ -4,6 +4,8 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.data import getdate, add_days
 import math
+import json
+import time
 
 # function to get user id from salesloft
 def get_user_id(lead_owener):
@@ -376,45 +378,83 @@ def deployment_location_equipments(opportunity, machines, lockers):
 
 
 @frappe.whitelist()
-def create_warehouse_request(doc):
-    # Check if a warehouse request already exists for the project_name
-    existing_request = frappe.get_all("Warehouse Request", filters={
-                                      "related_project": doc.name})
-    if not existing_request:
-        # Create a new dictionary for warehouse_request
-        warehouse = {}
-        fields_to_copy = ['vat', 'subject', 'description', 'internal_notes', 'locker_configuration_details', 'additional_locker_information', 'vault_power_configuration_details',
-                          'rfid_1_settings', 'rfid_2_settings', 'card_reader_type', 'shipping_company', 'kiosk_options', 'kvm_switch_options', 'monitor_options', 'network_options',
-                          'electrical_outlet_in_bins', 'network_port_in_bins', 'interior_kiosk_lighting', 'locker_bin_door_type', 'countertop_color', 'ada_side_table',
-                          'kiosk_side_for_table', 'monitor_mount']
+def create_warehouse_request(doc,reason, attached_files=None):
+    # Check if doc is a dictionary
+    doc = json.loads(doc)
+    print(doc, attached_files)
+    if isinstance(doc, dict):
+        # Check if a warehouse request already exists for the project_name
+        if 'name' in doc:
+            existing_request = frappe.get_all("Warehouse Request", filters={
+                "related_project": doc['name'],"request_reason":reason})
+            print(existing_request)
+            if not existing_request:
+                # Create a new dictionary for warehouse_request
+                warehouse = {}
+                fields_to_copy = ['vat', 'subject', 'description', 'internal_notes', 'locker_configuration_details', 'additional_locker_information', 'vault_power_configuration_details',
+                                  'rfid_1_settings', 'rfid_2_settings', 'card_reader_type', 'shipping_company', 'kiosk_options', 'kvm_switch_options', "monitor_options", 'network_options',
+                                  'electrical_outlet_in_bins', 'network_port_in_bins', 'interior_kiosk_lighting', 'locker_bin_door_type', 'countertop_color', 'ada_side_table',
+                                  'kiosk_side_for_table', 'monitor_mount']
 
-        # Loop through the fields and copy them from doc to warehouse_request
-        for field in fields_to_copy:
-            warehouse[field] = doc.get(field)
+                # Loop through the fields and copy them from doc to warehouse_request
+                for field in fields_to_copy:
+                    print(doc.get(field))
+                    warehouse[field] = doc.get(field)
 
-        warehouse_request = frappe.new_doc("Warehouse Request")
-        for field, value in warehouse.items():
-            setattr(warehouse_request, field, value)
-        warehouse_request.related_project = doc.name
-        warehouse_request.machine_names = doc.machine_numbers
-        warehouse_request.connectivity = doc.connectivity_type
-        warehouse_request.carrier = doc.cell_carrier
-        warehouse_request.contact = doc.contact_name
-        warehouse_request.tracking_number = doc.shipping_tracking_number
-        warehouse_request.owner_name = doc.users[0].user
-        warehouse_request.account = doc.customer
-        warehouse_request.created_by = frappe.session.user
-        warehouse_request.created_date = frappe.utils.nowdate()
-        warehouse_request.insert(ignore_permissions=True)
-        warehouse_request.save(ignore_permissions=True)
-        frappe.db.commit()
+                warehouse_request = frappe.new_doc("Warehouse Request")
+                for field, value in warehouse.items():
+                    setattr(warehouse_request, field, value)
+                warehouse_request.machine_key = doc.get('machine_key')
+                warehouse_request.locale = doc.get('locale')
+                warehouse_request.machine_ownership_status = doc.get('machine_ownership_status')
+                warehouse_request.request_reason = reason
+                warehouse_request.related_project = doc.get('name')
+                warehouse_request.machine_names = doc.get('machine_numbers')
+                warehouse_request.connectivity = doc.get('connectivity_type')
+                warehouse_request.carrier = doc.get('cell_carrier')
+                warehouse_request.contact = doc.get('contact_name')
+                warehouse_request.tracking_number = doc.get('shipping_tracking_number')
 
+                # Check if users and user are available in doc
+                if doc.get('users') and doc['users'][0].get('user'):
+                    warehouse_request.owner_name = doc['users'][0]['user']
+                else:
+                    warehouse_request.owner_name = None
 
-@frappe.whitelist()
-def deployment_to_warehouse(doc, method):
-    if all([doc.planogram_approved_date, doc.graphic_design_approved_date, doc.kiosk_configuration_approved_date, doc.locker_configuration_approved_date, doc.vault_configuration_approved_date]):
-        create_warehouse_request(doc)
+                warehouse_request.account = doc.get('customer')
+                warehouse_request.created_by = frappe.session.user
+                warehouse_request.created_date = frappe.utils.nowdate()
+                warehouse_request.insert(ignore_permissions=True)
+                warehouse_request.save(ignore_permissions=True)
+        
+                # Sleep for 3 seconds
+                time.sleep(3)
 
+                # Attach files only if attached_files is not None and not an empty string
+                warehouse_request.warehouse_request_name = warehouse_request.name
+                if attached_files:
+                    doc = frappe.get_doc({'doctype': 'File',
+                                          'is_private': 1,
+                                          'file_url': attached_files,
+                                          'attached_to_doctype': 'Warehouse Request',
+                                          'attached_to_name': warehouse_request.name
+                                          })
+                    doc.save()
+    
+                    # if attached_files and isinstance(attached_files, list):
+                    # for file_url in attached_files:
+                    #     doc = frappe.get_doc({'doctype': 'File',
+                    #                           'is_private': 1,
+                    #                           'file_url': file_url,
+                    #                           'attached_to_doctype': 'Warehouse Request',
+                    #                           'attached_to_name': warehouse_request.name
+                    #                           })
+                    #     doc.save()
+
+            else:
+                pass
+
+    frappe.db.commit()
 
 @frappe.whitelist()
 def override_project_dashboard(data):
