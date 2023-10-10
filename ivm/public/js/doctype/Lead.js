@@ -87,22 +87,28 @@ function checkSalesLoftUser(email) {
         website: frm.doc.website,
         phone:frm.doc.phone,
         phone_ext:frm.doc.phone_ext,
-        mobile_no:frm.doc.mobile_no
+        mobile_no:frm.doc.mobile_no,
+        lead_owner : frm.doc.lead_owner
      
       }, 
       callback: function (response) {
         if (response.message) {
-          var salesloftLink = `<a href="https://app.salesloft.com/app/people/${response.message}" target="_blank" rel="noopener noreferrer">SalesLoft ID: ${response.message}</a>`;
-          var description = `
-            <p style="margin-top: 10px; margin-bottom: 5px; color: #3366CC;">
-              SalesLoft Link:
-              ${salesloftLink}
-            </p>
-          `;
-          
-          // Set the SalesLoft link description for the email_id field
-          frm.set_df_property("email_id", "description", description);
-          frappe.show_alert("Lead created and SalesLoft user added.", 3);
+          if (response.message==="noUserFound"){
+            setTimeout(() => frappe.msgprint(`${frm.doc.lead_owner} not listed in salesloft userslist`), 1000);
+          } else{
+
+            var salesloftLink = `<a href="https://app.salesloft.com/app/people/${response.message}" target="_blank" rel="noopener noreferrer">SalesLoft ID: ${response.message}</a>`;
+            var description = `
+              <p style="margin-top: 10px; margin-bottom: 5px; color: #3366CC;">
+                SalesLoft Link:
+                ${salesloftLink}
+              </p>
+            `;
+            
+            // Set the SalesLoft link description for the email_id field
+            frm.set_df_property("email_id", "description", description);
+            frappe.show_alert("Lead created and SalesLoft user added.", 3);
+          }
         } else {
           // Clear the SalesLoft link description if the creation fails
           frm.set_df_property("email_id", "description", "");
