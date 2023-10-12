@@ -381,13 +381,11 @@ def deployment_location_equipments(opportunity, machines, lockers):
 def create_warehouse_request(doc,reason, attached_files=None):
     # Check if doc is a dictionary
     doc = json.loads(doc)
-    print(doc, attached_files)
     if isinstance(doc, dict):
         # Check if a warehouse request already exists for the project_name
         if 'name' in doc:
             existing_request = frappe.get_all("Warehouse Request", filters={
                 "related_project": doc['name'],"request_reason":reason})
-            print(existing_request)
             if not existing_request:
                 # Create a new dictionary for warehouse_request
                 warehouse = {}
@@ -398,7 +396,6 @@ def create_warehouse_request(doc,reason, attached_files=None):
 
                 # Loop through the fields and copy them from doc to warehouse_request
                 for field in fields_to_copy:
-                    print(doc.get(field))
                     warehouse[field] = doc.get(field)
 
                 warehouse_request = frappe.new_doc("Warehouse Request")
@@ -427,8 +424,8 @@ def create_warehouse_request(doc,reason, attached_files=None):
                 warehouse_request.insert(ignore_permissions=True)
                 warehouse_request.save(ignore_permissions=True)
         
-                # Sleep for 3 seconds
-                time.sleep(3)
+                # Sleep for 2 seconds
+                time.sleep(2)
 
                 # Attach files only if attached_files is not None and not an empty string
                 warehouse_request.warehouse_request_name = warehouse_request.name
@@ -440,16 +437,7 @@ def create_warehouse_request(doc,reason, attached_files=None):
                                           'attached_to_name': warehouse_request.name
                                           })
                     doc.save()
-    
-                    # if attached_files and isinstance(attached_files, list):
-                    # for file_url in attached_files:
-                    #     doc = frappe.get_doc({'doctype': 'File',
-                    #                           'is_private': 1,
-                    #                           'file_url': file_url,
-                    #                           'attached_to_doctype': 'Warehouse Request',
-                    #                           'attached_to_name': warehouse_request.name
-                    #                           })
-                    #     doc.save()
+                return reason
 
             else:
                 pass
