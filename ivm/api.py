@@ -6,26 +6,29 @@ from frappe.utils.data import getdate, add_days
 import math
 import json
 import time
+from frappe.utils.jinja import render_template
 
 # function to get user id from salesloft
+
+
 def get_user_id(lead_owener):
     salesloft_doc = frappe.get_doc("SalesLoft Settings")
     access_token = salesloft_doc.salesloft_api_token
-    
+
     if lead_owener:
         url = "https://api.salesloft.com/v2/users"
-        payload={}
+        payload = {}
         headers = {
-        'Accept': 'application/json',
-        'Authorization': f'Bearer {access_token}'
+            'Accept': 'application/json',
+            'Authorization': f'Bearer {access_token}'
         }
 
         response = requests.request("GET", url, headers=headers, data=payload)
         response = response.json()
         data = response["data"]
         for i in data:
-            if i['email'].strip()==lead_owener.strip():
-                user_id =  i["id"]
+            if i['email'].strip() == lead_owener.strip():
+                user_id = i["id"]
                 return user_id
         return False
 
@@ -78,7 +81,7 @@ def check_salesloft_user(email):
 
 
 @frappe.whitelist(allow_guest=True)
-def create_salesloft_person(email, first_name='', last_name='', job_title='', city='', state='', country='', company='', website='', phone='', phone_ext='', mobile_no='',lead_owner=""):
+def create_salesloft_person(email, first_name='', last_name='', job_title='', city='', state='', country='', company='', website='', phone='', phone_ext='', mobile_no='', lead_owner=""):
 
     url = "https://api.salesloft.com/v2/people"
     payload = {
@@ -96,12 +99,13 @@ def create_salesloft_person(email, first_name='', last_name='', job_title='', ci
         'mobile_phone': mobile_no
     }
     print(payload)
-    
-    if lead_owner and lead_owner !="Administrator":
+
+    if lead_owner and lead_owner != "Administrator":
         user_id = get_user_id(lead_owner)
         if user_id:
             payload["owner_id"] = user_id
-            response = make_salesloft_api_call(url, method="POST", payload=payload)
+            response = make_salesloft_api_call(
+                url, method="POST", payload=payload)
 
             if response.status_code == 201:
                 created_person = response.json()
@@ -267,7 +271,7 @@ def on_session_creation():
 def creating_issue(doc, method):
     try:
         attachments = doc.get_attachments()
-        message = doc.content
+        reference_name = frappe.get_all('Communication', filters={'reference_name': doc.reference_name}, fields=['reference_name'])
         # getting record matching to email received
         email = None
         if (doc.email_account):
@@ -280,16 +284,16 @@ def creating_issue(doc, method):
             issue_type = email_Account.imap_folder[0].custom_issue_type
             issue = frappe.db.get_value('Issue', {'name': doc.reference_name})
             issue_name = frappe.get_doc("Issue", issue)
-            if(issue_type in ['IT','Support','Receivable','Reconfiguration','Vending Management']):
-                customer=fetch_customer_name_and_contact(doc.sender)
-                frappe.log_error('customer',customer)
+            if (issue_type in ['IT', 'Support', 'Receivable', 'Reconfiguration', 'Vending Management']):
+                customer = fetch_customer_name_and_contact(doc.sender)
                 issue_name.customer = customer.get('customer_name')
                 issue_name.contact_name = customer.get('contact_name')
             issue_name.issue_type = issue_type
-            issue_name.description = message
+            if (len(reference_name) <= 1):
+                issue_name.description = doc.content
             issue_name.save()
             if (attachments):
-                frappe.log_error("attachments",attachments)
+                frappe.log_error("attachments", attachments)
                 file_urls = [url['file_url'] for url in attachments]
                 for links in file_urls:
                     file = frappe.get_doc({
@@ -304,16 +308,18 @@ def creating_issue(doc, method):
     except Exception as e:
         pass
 
+
 def fetch_customer_name_and_contact(sender_name):
     try:
-        contact_name=frappe.db.sql("""SELECT DISTINCT c.name AS contact_name, dl.link_name AS customer_name
+        contact_name = frappe.db.sql("""SELECT DISTINCT c.name AS contact_name, dl.link_name AS customer_name
                                    FROM `tabContact` c
                                    INNER JOIN `tabContact Email` ce ON c.name = ce.parent
                                    LEFT JOIN `tabDynamic Link` dl ON c.name = dl.parent AND dl.link_doctype = 'Customer'
-                                   WHERE ce.email_id = '{0}' """.format(sender_name),as_dict=True)
+                                   WHERE ce.email_id = '{0}' """.format(sender_name), as_dict=True)
         return contact_name[0]
     except Exception as e:
         pass
+
 
 @frappe.whitelist()
 def calculate_closed_opportunity_total(customer_name):
@@ -378,14 +384,14 @@ def deployment_location_equipments(opportunity, machines, lockers):
 
 
 @frappe.whitelist()
-def create_warehouse_request(doc,reason, attached_files=None):
+def create_warehouse_request(doc, reason, attached_files=None):
     # Check if doc is a dictionary
     doc = json.loads(doc)
     if isinstance(doc, dict):
         # Check if a warehouse request already exists for the project_name
         if 'name' in doc:
             existing_request = frappe.get_all("Warehouse Request", filters={
-                "related_project": doc['name'],"request_reason":reason})
+                "related_project": doc['name'], "request_reason": reason})
             if not existing_request:
                 # Create a new dictionary for warehouse_request
                 warehouse = {}
@@ -403,14 +409,16 @@ def create_warehouse_request(doc,reason, attached_files=None):
                     setattr(warehouse_request, field, value)
                 warehouse_request.machine_key = doc.get('machine_key')
                 warehouse_request.locale = doc.get('locale')
-                warehouse_request.machine_ownership_status = doc.get('machine_ownership_status')
+                warehouse_request.machine_ownership_status = doc.get(
+                    'machine_ownership_status')
                 warehouse_request.request_reason = reason
                 warehouse_request.related_project = doc.get('name')
                 warehouse_request.machine_names = doc.get('machine_numbers')
                 warehouse_request.connectivity = doc.get('connectivity_type')
                 warehouse_request.carrier = doc.get('cell_carrier')
                 warehouse_request.contact = doc.get('contact_name')
-                warehouse_request.tracking_number = doc.get('shipping_tracking_number')
+                warehouse_request.tracking_number = doc.get(
+                    'shipping_tracking_number')
 
                 # Check if users and user are available in doc
                 if doc.get('users') and doc['users'][0].get('user'):
@@ -423,7 +431,7 @@ def create_warehouse_request(doc,reason, attached_files=None):
                 warehouse_request.created_date = frappe.utils.nowdate()
                 warehouse_request.insert(ignore_permissions=True)
                 warehouse_request.save(ignore_permissions=True)
-        
+
                 # Sleep for 2 seconds
                 time.sleep(2)
 
@@ -443,6 +451,7 @@ def create_warehouse_request(doc,reason, attached_files=None):
                 pass
 
     frappe.db.commit()
+
 
 @frappe.whitelist()
 def override_project_dashboard(data):
@@ -512,3 +521,34 @@ def search_machine_numbers(machine_no):
     )
 
     return {"issue": issue_doc, "project": project_doc, "warehouse-request": warehouse_request_doc}
+
+
+def send_auto_reply(self, communication, email):
+    frappe.log_error('email.from_email',email.from_email)
+    """Send auto reply if set."""
+    from frappe.core.doctype.communication.email import set_incoming_outgoing_accounts
+
+    if self.enable_auto_reply:
+
+        set_incoming_outgoing_accounts(communication)
+
+        unsubscribe_message = (self.send_unsubscribe_message and _(
+            "Leave this conversation")) or ""
+        issue_name = frappe.get_all('Communication', filters={
+                                    'reference_name': communication.reference_name}, fields=['reference_name'])
+        if (len(issue_name) <= 1):
+            frappe.sendmail(
+                recipients=[email.from_email],
+                sender=self.email_id,
+                reply_to=communication.incoming_email_account,
+                subject=" ".join([_("Re:"), communication.subject]),
+                content=render_template(
+                    self.auto_reply_message or "", communication.as_dict())
+                or frappe.get_template("templates/emails/auto_reply.html").render(communication.as_dict()),
+                reference_doctype=communication.reference_doctype,
+                reference_name=communication.reference_name,
+                # send back the Message-Id as In-Reply-To
+                in_reply_to=email.mail.get(
+                    "Message-Id"),
+                unsubscribe_message=unsubscribe_message,
+            )
