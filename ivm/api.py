@@ -419,6 +419,8 @@ def create_warehouse_request(doc, reason, attached_files=None):
                 warehouse_request.contact = doc.get('contact_name')
                 warehouse_request.tracking_number = doc.get(
                     'shipping_tracking_number')
+                warehouse_request.shipping_address = doc.get(
+                    'address')
 
                 # Check if users and user are available in doc
                 if doc.get('users') and doc['users'][0].get('user'):
