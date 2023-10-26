@@ -554,3 +554,88 @@ def send_auto_reply(self, communication, email):
                     "Message-Id"),
                 unsubscribe_message=unsubscribe_message,
             )
+@frappe.whitelist()
+def fetch_contacts_from_apollo(page,searchKeyword):   
+   url = "https://api.apollo.io/v1/contacts/search"
+
+
+   data = {
+       "api_key": frappe.get_single('Apollo  Integration Settings').api_key,
+       "page": page,
+   }
+   if searchKeyword:
+       data = {
+       "api_key": frappe.get_single('Apollo  Integration Settings').api_key,
+       "q_keywords": searchKeyword,
+   }
+
+
+
+
+   headers = {
+       'Cache-Control': 'no-cache',
+       'Content-Type': 'application/json'
+   }
+
+
+   response = requests.request("POST", url, headers=headers, json=data)
+  
+   if response.status_code == 200:
+       apollo_data = response.json()
+      
+      
+       for contact in apollo_data.get("contacts", []):
+           contact['disabled'] = frappe.db.exists({"doctype": "Lead", "email_id":contact.get('email')})
+
+
+
+
+       return apollo_data
+   else:
+       return {
+           'error': 'Failed to fetch data from Apollo.io'
+       }
+
+
+@frappe.whitelist()
+def createLeads(selectedContacts):
+   contacts_data = json.loads(selectedContacts)
+
+
+   for contact in contacts_data:
+       lead = frappe.new_doc("Lead")
+       lead.first_name = contact.get("first_name")
+       lead.last_name = contact.get("last_name")
+       lead.email_id = contact.get("email")
+       lead.mobile_no = contact.get("sanitized_phone")
+       lead.title = contact.get("title")
+       lead.city = contact.get("city")
+       lead.state = contact.get("state")
+       lead.country = contact.get("country")
+       lead.website = contact.get("website_url")
+       lead.insert()
+       lead.save()
+      
+       salesloft_user = check_salesloft_user(contact.get("email"))
+      
+       if not salesloft_user:
+           payload = {
+               "email_address": contact.get("email"),
+               "first_name": contact.get("first_name"),
+               "last_name": contact.get("last_name"),
+               "title": contact.get("title"),
+               "city": contact.get("city"),
+               "state": contact.get("state"),
+               "country": contact.get("country"),
+               "person_company_website": contact.get("website_url"),
+               "phone": contact.get("sanitized_phone"),
+           }
+          
+           salesloft_url = "https://api.salesloft.com/v2/people"
+           response = make_salesloft_api_call(salesloft_url, method="POST", payload=payload)
+
+
+   return "Leads created successfully."
+
+
+
