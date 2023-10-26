@@ -619,23 +619,7 @@ def createLeads(selectedContacts):
        salesloft_user = check_salesloft_user(contact.get("email"))
       
        if not salesloft_user:
-           payload = {
-               "email_address": contact.get("email"),
-               "first_name": contact.get("first_name"),
-               "last_name": contact.get("last_name"),
-               "title": contact.get("title"),
-               "city": contact.get("city"),
-               "state": contact.get("state"),
-               "country": contact.get("country"),
-               "person_company_website": contact.get("website_url"),
-               "phone": contact.get("sanitized_phone"),
-           }
-          
-           salesloft_url = "https://api.salesloft.com/v2/people"
-           response = make_salesloft_api_call(salesloft_url, method="POST", payload=payload)
-
-
-   return "Leads created successfully."
+           create_salesloft_person(email=contact.get("email"), first_name=contact.get("first_name"), last_name= contact.get("last_name"), job_title=contact.get("title"), city= contact.get("city"), state=contact.get("state"), country=contact.get("country"), company='', website=contact.get("website_url"), phone='', phone_ext='', mobile_no=contact.get("sanitized_phone"), lead_owner=frappe.session.user)
 
 
 

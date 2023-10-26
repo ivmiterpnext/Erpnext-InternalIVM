@@ -3,8 +3,14 @@ frappe.listview_settings["Lead"] = {
   onload: function (me) {
     me.$page.find(`div[data-fieldname='name']`).addClass("hide");
     me.$page.find(`div[data-fieldname='title']`).addClass("hide");
-    me.page.add_inner_button("Import from Apollo.io", function () {
+    me.page.add_inner_button("Import from Apollo", function () {
       importLeads();
+    }).css({
+      'background-color': '#4CAF50', 
+      'color': 'white', 
+      'border': 'none',
+      'text-align': 'center',
+      'cursor': 'pointer',
     });
   },
 };
