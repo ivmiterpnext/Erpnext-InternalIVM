@@ -1,41 +1,41 @@
 {
  "actions": [],
- "autoname": "prompt",
- "creation": "2025-06-23 13:09:59.442934",
+ "allow_rename": 1,
+ "autoname": "field:code",
+ "creation": "2025-08-18 14:30:34.763798",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "code",
+  "id",
   "description"
  ],
  "fields": [
   {
    "fieldname": "code",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Code",
-   "read_only": 1,
-   "reqd": 1
+   "unique": 1
+  },
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "Id"
   },
   {
    "fieldname": "description",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Description",
-   "read_only": 1,
-   "reqd": 1
+   "label": "Description"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
- "is_virtual": 1,
  "links": [],
- "modified": "2025-08-18 13:19:32.830474",
+ "modified": "2025-08-18 14:47:54.548831",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Hardware Availability Type",
- "naming_rule": "Set by user",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -52,27 +52,9 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "description",
  "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [
-  {
-   "color": "Green",
-   "title": "AVL"
-  },
-  {
-   "color": "Gray",
-   "title": "OUT"
-  },
-  {
-   "color": "Yellow",
-   "title": "QRN"
-  },
-  {
-   "color": "Red",
-   "title": "REV"
-  }
- ],
+ "states": [],
  "title_field": "description"
 }
