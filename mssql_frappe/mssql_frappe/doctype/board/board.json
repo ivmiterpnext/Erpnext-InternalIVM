@@ -15,7 +15,7 @@
   "section_tyfg",
   "serial_number",
   "hardware_availability_type_code",
-  "board_firmware_version",
+  "board_firmware_id",
   "effective_date",
   "column_break_wnrr",
   "board_manufacturer_name",
@@ -108,7 +108,7 @@
   "setting5_employee_id_length",
   "setting5_bit_size",
   "data_hidden_section",
-  "board_firmware_id",
+  "board_firmware_id_old",
   "board_manufacturer_id",
   "primary_board_connection_id",
   "secondary_board_connection_id",
@@ -489,11 +489,6 @@
    "label": "Bit Size"
   },
   {
-   "fieldname": "board_firmware_id",
-   "fieldtype": "Data",
-   "label": "Firmware Id"
-  },
-  {
    "fieldname": "primary_board_connection_id",
    "fieldtype": "Int",
    "label": "Primary Board Connection Id"
@@ -502,14 +497,6 @@
    "fieldname": "secondary_board_connection_id",
    "fieldtype": "Int",
    "label": "Secondary Board Connection Id"
-  },
-  {
-   "fieldname": "board_firmware_version",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Firmware Version",
-   "reqd": 1
   },
   {
    "fieldname": "data_hidden_section",
@@ -729,6 +716,20 @@
    "label": "Hardware Availability",
    "options": "Hardware Availability Type",
    "reqd": 1
+  },
+  {
+   "fieldname": "board_firmware_id_old",
+   "fieldtype": "Data",
+   "label": "Firmware Id"
+  },
+  {
+   "fieldname": "board_firmware_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Firmware Version",
+   "options": "Board Firmware",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -740,7 +741,7 @@
    "link_fieldname": "code"
   }
  ],
- "modified": "2025-08-18 14:22:47.785527",
+ "modified": "2025-08-21 08:59:03.469143",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Board",
@@ -761,6 +762,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "serial_number"

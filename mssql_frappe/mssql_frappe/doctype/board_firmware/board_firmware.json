@@ -1,39 +1,53 @@
 {
  "actions": [],
- "autoname": "field:code",
- "creation": "2025-08-18 14:30:34.763798",
+ "autoname": "field:id",
+ "creation": "2025-08-18 15:53:20.935984",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "code",
   "id",
-  "description"
+  "board_manufacturer_id",
+  "version",
+  "is_active",
+  "comment"
  ],
  "fields": [
   {
-   "fieldname": "code",
+   "fieldname": "board_manufacturer_id",
    "fieldtype": "Data",
-   "label": "Code",
+   "label": "Board Manufacturer"
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Data",
+   "label": "Version",
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "comment",
+   "fieldtype": "Small Text",
+   "label": "Comment"
   },
   {
    "fieldname": "id",
    "fieldtype": "Data",
-   "label": "Id"
-  },
-  {
-   "fieldname": "description",
-   "fieldtype": "Data",
-   "label": "Description"
+   "label": "Id",
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-21 09:01:09.274472",
+ "modified": "2025-08-21 09:00:58.833494",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
- "name": "Hardware Availability Type",
+ "name": "Board Firmware",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -55,5 +69,5 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "title_field": "description"
+ "title_field": "version"
 }

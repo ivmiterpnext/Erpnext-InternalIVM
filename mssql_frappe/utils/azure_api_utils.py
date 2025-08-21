@@ -3,6 +3,8 @@ from mssql_frappe.utils.case_utils import dict_keys_to_snake_case, dict_keys_to_
 import requests
 import json
 
+API_BASE_URL = "https://dev.icorpapi.ivminc.com/SV"
+
 TENANT_ID = "5464da95-5a54-4466-8dde-04bd9e7f49da"
 API_SCOPE = "api://74c6b7f8-98fe-4907-8fac-93ebc38fc521/.default"
 client_id = "74c6b7f8-98fe-4907-8fac-93ebc38fc521"

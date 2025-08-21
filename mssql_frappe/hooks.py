@@ -143,11 +143,13 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-scheduler_events = {
-    "all": [
-        "mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type.sync"
-    ],
-}
+# scheduler_events = {
+#     "all": [ # This needs to be changed!
+#         "mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type.sync",
+#         "mssql_frappe.mssql_frappe.doctype.board_firmware.board_firmware.sync",
+#         
+#     ],
+# }
 
 # scheduler_events = {
 # 	"all": [
