@@ -1,44 +1,51 @@
 import frappe
-from mssql_frappe.utils.azure_api_utils import azure_api_get
+from mssql_frappe.utils.api_utils import headwind_api_get, icorp_api_get
 
-def sync_doctype_from_api(doctype, api_url, key_field, api_fields):
+def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, field_map=None):
     try:
-        frappe.logger().info(f"Syncing {doctype} from api")
-
-        data = azure_api_get(api_url)
+        frappe.logger().info(f"Syncing {doctype}")
+        if api_type == "headwind":
+            data = headwind_api_get(endpoint)
+        elif api_type == "icorp":
+            data = icorp_api_get(endpoint)
         items = data.get("data", [])
-
+  
         for item in items:
             filters = { "name": item[key_field] }
             docs = frappe.get_all(doctype, filters=filters, fields=["*"])
-            print(item)
+
             if docs:
                 doc = docs[0]
                 updated_fields = {}
+
                 for key in api_fields:
+                    frappe_field = field_map[key] if field_map and key in field_map else key
                     api_value = str(item.get(key)).strip()
-                    doc_value = str(doc.get(key)).strip()
+                    doc_value = str(doc.get(frappe_field)).strip()
                     if doc_value != api_value:
-                        updated_fields[key] = item.get(key)
+                        updated_fields[frappe_field] = item.get(key)
 
                 if updated_fields:
                     frappe.db.set_value(doctype, item[key_field], updated_fields)
-                    if updated_fields:
-                        frappe.logger().info(f"Updated {item[key_field]}: {updated_fields}")
-                    else:
-                        frappe.logger().info(f"No changes for {item[key_field]}")
+                    frappe.logger().info(f"Updated {item[key_field]}: {updated_fields}")
+                else:
+                    frappe.logger().info(f"No changes for {item[key_field]}")
 
             else:
-                new_doc = frappe.get_doc({
+                doc_fields = {
                     "doctype": doctype,
-                    "name": item[key_field],
-                    **item
-                })
+                    "name": item[key_field]
+                }
 
+                for key in api_fields:
+                    frappe_field = field_map[key] if field_map and key in field_map else key
+                    doc_fields[frappe_field] = item.get(key)
+
+                new_doc = frappe.get_doc(doc_fields)
                 new_doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
-    except Exception:
+    except Exception as e:
         frappe.log_error(frappe.get_traceback(), f"{doctype}.sync error")
 
     return "Sync complete"

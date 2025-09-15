@@ -4,7 +4,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_general",
+  "update_flags_section",
   "is_update_firmware",
   "column_break_osbt",
   "is_update_connection",
@@ -12,24 +12,24 @@
   "is_update_rfid",
   "column_break_zfui",
   "is_update_machine_motor_info",
-  "section_tyfg",
+  "general_section",
   "serial_number",
+  "board_manufacturer_id",
   "hardware_availability_type_code",
   "board_firmware_id",
-  "effective_date",
   "column_break_wnrr",
-  "board_manufacturer_name",
-  "board_type_description",
   "mac_address",
+  "effective_date",
+  "board_type_code",
   "purchase_price",
-  "ip__connection_section",
-  "primary_board_connection_name",
+  "ip_connection_section",
+  "primary_board_connection_id",
   "custom_message",
+  "offline_vend_storage",
   "column_break_dgxa",
-  "secondary_board_connection_name",
+  "secondary_board_connection_id",
   "offline_sales_mode_description",
   "is_dhcp",
-  "offline_vend_storage",
   "is_pin_entry_enabled",
   "keypad_id_entry",
   "machine_motor_section",
@@ -109,10 +109,10 @@
   "setting5_bit_size",
   "data_hidden_section",
   "board_firmware_id_old",
-  "board_manufacturer_id",
-  "primary_board_connection_id",
-  "secondary_board_connection_id",
-  "board_type_code",
+  "board_manufacturer_id_old",
+  "primary_board_connection_id_old",
+  "secondary_board_connection_id_old",
+  "board_type_code_old",
   "hardware_availability_type_codeold",
   "column_break_tvzc",
   "offline_sales_mode",
@@ -121,19 +121,25 @@
   "setting3_target_number_base_code",
   "setting4_target_number_base_code",
   "setting5_target_number_base_code",
+  "data_hidden_new_section",
+  "in_use_machine_name",
   "vendnovation_configurations_tab",
   "vendnovation_configurations"
  ],
  "fields": [
   {
    "fieldname": "board_type_code",
-   "fieldtype": "Data",
-   "label": "Board Type Code"
+   "fieldtype": "Link",
+   "label": "Board Type",
+   "options": "Board Type"
   },
   {
    "fieldname": "board_manufacturer_id",
-   "fieldtype": "Int",
-   "label": "Board Manufacturer Id"
+   "fieldtype": "Link",
+   "label": "Board Manufacturer",
+   "options": "Board Manufacturer",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "serial_number",
@@ -194,11 +200,6 @@
    "fieldname": "purchase_price",
    "fieldtype": "Currency",
    "label": "Purchase Price"
-  },
-  {
-   "fieldname": "ip__connection_section",
-   "fieldtype": "Section Break",
-   "label": "IP / Connection"
   },
   {
    "fieldname": "column_break_dgxa",
@@ -490,36 +491,22 @@
   },
   {
    "fieldname": "primary_board_connection_id",
-   "fieldtype": "Int",
-   "label": "Primary Board Connection Id"
+   "fieldtype": "Link",
+   "label": "Primary Connection",
+   "options": "Board Connection",
+   "reqd": 1
   },
   {
    "fieldname": "secondary_board_connection_id",
-   "fieldtype": "Int",
-   "label": "Secondary Board Connection Id"
+   "fieldtype": "Link",
+   "label": "Secondary Connection",
+   "options": "Board Connection"
   },
   {
    "fieldname": "data_hidden_section",
    "fieldtype": "Section Break",
    "hidden": 1,
    "label": "Data (Hidden)"
-  },
-  {
-   "fieldname": "board_manufacturer_name",
-   "fieldtype": "Data",
-   "label": "Board Manufacturer",
-   "reqd": 1
-  },
-  {
-   "fieldname": "primary_board_connection_name",
-   "fieldtype": "Select",
-   "label": "Primary Connection",
-   "reqd": 1
-  },
-  {
-   "fieldname": "secondary_board_connection_name",
-   "fieldtype": "Select",
-   "label": "Secondary Connection"
   },
   {
    "default": "0",
@@ -611,11 +598,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "board_type_description",
-   "fieldtype": "Select",
-   "label": "Board Type"
-  },
-  {
    "fieldname": "offline_sales_mode_description",
    "fieldtype": "Select",
    "label": "Offline Sales Mode"
@@ -676,16 +658,6 @@
    "label": "Bit Reverse Feature?"
   },
   {
-   "fieldname": "section_general",
-   "fieldtype": "Section Break",
-   "hide_border": 1,
-   "label": "General"
-  },
-  {
-   "fieldname": "section_tyfg",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "program_type_code",
    "fieldtype": "Select",
    "label": "Program Type",
@@ -730,6 +702,53 @@
    "label": "Firmware Version",
    "options": "Board Firmware",
    "reqd": 1
+  },
+  {
+   "fieldname": "board_manufacturer_id_old",
+   "fieldtype": "Int",
+   "label": "Board Manufacturer Id"
+  },
+  {
+   "fieldname": "board_type_code_old",
+   "fieldtype": "Data",
+   "label": "Board Type Code"
+  },
+  {
+   "fieldname": "update_flags_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Update Flags"
+  },
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "ip_connection_section",
+   "fieldtype": "Section Break",
+   "label": "IP / Connection"
+  },
+  {
+   "fieldname": "primary_board_connection_id_old",
+   "fieldtype": "Int",
+   "label": "Primary Board Connection Id"
+  },
+  {
+   "fieldname": "secondary_board_connection_id_old",
+   "fieldtype": "Int",
+   "label": "Secondary Board Connection Id"
+  },
+  {
+   "fieldname": "data_hidden_new_section",
+   "fieldtype": "Section Break",
+   "label": "Data (HIdden) new"
+  },
+  {
+   "fieldname": "in_use_machine_name",
+   "fieldtype": "Data",
+   "label": "Current Machine",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -737,11 +756,11 @@
  "is_virtual": 1,
  "links": [
   {
-   "link_doctype": "Hardware Availability Type",
-   "link_fieldname": "code"
+   "link_doctype": "Machine Locker Configuration",
+   "link_fieldname": "in_use_machine_name"
   }
  ],
- "modified": "2025-08-21 08:59:03.469143",
+ "modified": "2025-09-15 09:03:00.637688",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Board",

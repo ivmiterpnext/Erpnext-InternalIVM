@@ -3,12 +3,12 @@
 
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.utils.azure_api_utils import azure_api_get, azure_api_post
-from mssql_frappe.utils.case_utils import dict_keys_to_snake_case, api_items_to_frappe_dict
+from mssql_frappe.utils.api_utils import *
+from mssql_frappe.utils.case_utils import api_items_to_frappe_dict
 from mssql_frappe.utils.filter_utils import filters_to_query_params
-import datetime
+from mssql_frappe.utils.data_utils import set_attrs_from_dict
 
-API_BASE_URL = "https://dev.icorpapi.ivminc.com"
+import datetime
 
 _board_total_count = None
 
@@ -47,10 +47,8 @@ class Board(Document):
 				dt = datetime.datetime.fromisoformat(data["effective_date"])
 				data["effective_date"] = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
 
-			url = f"{API_BASE_URL}/SV/Board"
-			print("program_type before API:", data.get("program_type"))
-			print("program_type_code before API:", data.get("program_type_code"))
-			response = azure_api_post(url, data)
+			endpoint = f"SV/Board"
+			response = icorp_api_post(endpoint, data)
 			board_data = response.get("data")
 
 			if not board_data or "id" not in board_data:
@@ -67,43 +65,28 @@ class Board(Document):
 
 	def load_from_db(self):
 		try:
-			url = f"{API_BASE_URL}/SV/Board/GetById?Id={self.name}"
-
-			item = azure_api_get(url)
+			endpoint = f"SV/Board/GetById?Id={self.name}"
+			item = icorp_api_get(endpoint)
 			board_data = item.get("data", {})
 
 			# If board_data is a list, get the first item
 			if isinstance(board_data, list):
 				if not board_data:
-					return  # No data found
+					return
 				board_data = board_data[0]
 
-			for k, v in board_data.items():
-				# Set ids to string
-				if k.endswith('id'):
-					v = str(v) if v is not None else ''
-				# Set None to empty string for all fields except numbers/bools
-				elif v is None:
-					v = ''
-				# Convert complex types to string for frappe safety
-				elif not isinstance(v, (str, int, float, bool)):
-					v = str(v)
-				setattr(self, k, v)
+			set_attrs_from_dict(self, board_data)
 
 			# Merge BoardVendnovationConfiguration and Board Data
 			try:
 				board_id = getattr(self, "id", None)
 				if board_id:
-					url = f"{API_BASE_URL}/SV/BoardVendnovationConfiguration/GetEffectiveConfiguration?Id={board_id}"
-					item = azure_api_get(url)
+					endpoint = f"SV/BoardVendnovationConfiguration/GetEffectiveConfiguration?Id={board_id}"
+					item = icorp_api_get(endpoint)
 					item = item.get("data", {})
 					print(item)
-					for k, v in item.items():
-						if k.endswith('id'):
-							v = str(v) if v is not None else ''
-						elif not isinstance(v, (str, int, float, bool, type(None))):
-							v = str(v)
-						setattr(self, k, v)
+
+					set_attrs_from_dict(self, item)
 
 					if getattr(self, "board_rfid_configuration_id", None) not in (None, '', 'null'):
 						self.has_rfid_configuration = 1
@@ -112,9 +95,9 @@ class Board(Document):
 
 				serial_number = getattr(self, "serial_number", None)
 				if serial_number:
-					url = f"{API_BASE_URL}/SV/BoardVendnovationConfiguration/GetByBoardSerialNumber?SerialNumber={serial_number}"
-					result = azure_api_get(url)
-	
+					endpoint = f"SV/BoardVendnovationConfiguration/GetByBoardSerialNumber?SerialNumber={serial_number}"
+					result = icorp_api_get(endpoint)
+
 					configs = sorted(
 						result.get("data", []),
 						key=lambda c: c.get("effective_date") or "",
@@ -141,9 +124,6 @@ class Board(Document):
 			frappe.log_error(frappe.get_traceback(), "Board.load_from_db error")
 			raise
 
-			
-		
-
 	def db_update(self, *args, **kwargs):
 		# Board insert and update are the same api endpoint
 		self.db_insert(*args, **kwargs)
@@ -159,14 +139,14 @@ class Board(Document):
 		filter_query = filters_to_query_params(filters)
 		cache_key = f"board_list_cache_{page}_{page_length}_{filter_query}"
 		cached = frappe.cache().get_value(cache_key)
-		if cached:
-			return cached
+		# if cached:
+		# 	return cached
 
 		try:
-			url = f"{API_BASE_URL}/SV/Board?page={page}&pageSize={page_length}"
+			endpoint = f"SV/Board?page={page}&pageSize={page_length}"
 			if filter_query:
-				url += f"&{filter_query}"
-			result = azure_api_get(url)
+				endpoint += f"&{filter_query}"
+			result = icorp_api_get(endpoint)
 
 			items = result.get("data", [])
 			pagination = result.get("pagination", {})
@@ -174,7 +154,13 @@ class Board(Document):
 
 			if total_records is not None:
 				_board_total_count = int(total_records)
-			value = api_items_to_frappe_dict(items, name_field="id")
+
+			value = api_items_to_frappe_dict(
+				items,
+				key_field="id",
+				title_field="serial_number"
+			)
+
 			frappe.cache().set_value(cache_key, value, expires_in_sec=300)
 			return value
 		except Exception:
@@ -187,8 +173,8 @@ class Board(Document):
 		if _board_total_count is not None:
 			return _board_total_count
 		try:
-			url = f"{API_BASE_URL}/SV/Board?page=1&pageSize=1"
-			result = azure_api_get(url)
+			endpoint = f"SV/Board?page=1&pageSize=1"
+			result = icorp_api_get(endpoint)
 			pagination = result.get("pagination", {})
 			total_records = pagination.get("total_records")
 			if total_records is not None:
@@ -210,27 +196,10 @@ class Board(Document):
 
 # Dropdown logic
 @frappe.whitelist()
-def get_board_types():
-    url = f"{API_BASE_URL}/SV/BoardType"
-
-    response = azure_api_get(url)
-    items = response.get("data", [])
-
-    options = [
-        {
-            "name": str(item.get("id")),
-			"code": item.get("code"),
-            "description": item.get("description")
-        }
-        for item in items
-    ]
-    return options
-
-@frappe.whitelist()
 def get_rfid_target_number_base_types():
-    url = f"{API_BASE_URL}/SV/BoardRFIDTargetNumberBaseType"
+    endpoint = f"SV/BoardRFIDTargetNumberBaseType"
 
-    response = azure_api_get(url)
+    response = icorp_api_get(endpoint)
     items = response.get("data", [])
 
     options = [
@@ -242,64 +211,12 @@ def get_rfid_target_number_base_types():
         for item in items
     ]
     return options
-
-@frappe.whitelist()
-def get_board_firmware_versions(board_manufacturer_id=None):
-    url = f"{API_BASE_URL}/SV/BoardFirmware?pageSize=999&page=1"
-
-    response = azure_api_get(url)
-    items = response.get("data", [])
-
-    if board_manufacturer_id:
-        items = [item for item in items if str(item.get("board_manufacturer_id")) == str(board_manufacturer_id)]
-
-    options = [
-        {
-            "name": str(item.get("id")),
-            "version": item.get("version")
-        }
-        for item in items
-    ]
-    return options
-
-@frappe.whitelist()
-def get_board_connections():
-    url = f"{API_BASE_URL}/SV/BoardConnection"
-
-    response = azure_api_get(url)
-    items = response.get("data", [])
-
-    options = [
-        {
-            "name": str(item.get("id")),
-            "connection_name": item.get("name")
-        }
-        for item in items
-    ]
-    return options
-
-@frappe.whitelist()
-def get_hardware_availability_types():
-	url = f"{API_BASE_URL}/SV/HardwareAvailabilityType"
-
-	response = azure_api_get(url)
-	items = response.get("data", [])
-	
-	options = [
-        {
-            "name": str(item.get("id")),
-            "code": item.get("code"),
-            "description": item.get("description")
-        }
-        for item in items
-    ]
-	return options
 
 @frappe.whitelist()
 def get_manufacturer_by_serial_number(board_serial_number):
-    url = f"https://dev.icorpapi.ivminc.com/SV/BoardManufacturer/GetByBoardSerialNumber?boardSerialNumber={board_serial_number}"
+    endpoint = f"SV/BoardManufacturer/GetByBoardSerialNumber?boardSerialNumber={board_serial_number}"
     try:
-        data = azure_api_get(url)
+        data = icorp_api_get(endpoint)
         result = data.get("data", {})
         if result:
             return {

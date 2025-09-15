@@ -19,30 +19,24 @@ def dict_keys_to_snake_case(obj):
     else:
         return obj
 
-def api_items_to_frappe_dict(items, name_field):
+def api_items_to_frappe_dict(items, key_field, title_field=None, title_map=None):
     import frappe
-
     result = []
-    for item in items:
-        d = frappe._dict({k: v for k, v in item.items()})
-        d.name = str(item[name_field])
-        result.append(d)
-        
-    return result
+    title_map = title_map or {}
 
+    for item in (items or []):
+        d = frappe._dict(item)
+        rid = str(item.get(key_field))
+        d.name = rid
 
-def api_items_to_frappe_dict(items, name_field, search_txt=None):
-    import frappe
+        title = title_map.get(rid)
+        if not title and title_field and title_field in item:
+            title = item.get(title_field)
+        if not title:
+            title = rid
 
-    result = []
-    for item in items:
+        d["_title"] = title
+        d["title"] = title
 
-        d = frappe._dict({k: v for k, v in item.items()})
-        d.name = str(item[name_field])
-
-        # # Filter here if search_txt is provided
-        # if search_txt:
-        #     if d.text and search_txt.lower() not in d.text.lower():
-        #         continue
         result.append(d)
     return result

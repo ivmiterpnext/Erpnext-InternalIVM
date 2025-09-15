@@ -14,8 +14,9 @@
  "fields": [
   {
    "fieldname": "board_manufacturer_id",
-   "fieldtype": "Data",
-   "label": "Board Manufacturer"
+   "fieldtype": "Link",
+   "label": "Board Manufacturer",
+   "options": "Board Manufacturer"
   },
   {
    "fieldname": "version",
@@ -42,9 +43,10 @@
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-21 09:00:58.833494",
+ "modified": "2025-08-21 12:05:20.576203",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Board Firmware",
@@ -66,7 +68,7 @@
  ],
  "row_format": "Dynamic",
  "show_title_field_in_link": 1,
- "sort_field": "creation",
+ "sort_field": "is_active",
  "sort_order": "DESC",
  "states": [],
  "title_field": "version"

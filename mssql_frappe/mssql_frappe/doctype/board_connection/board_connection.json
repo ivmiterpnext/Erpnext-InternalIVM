@@ -1,15 +1,23 @@
 {
  "actions": [],
- "creation": "2025-07-01 10:09:56.352081",
+ "allow_copy": 1,
+ "autoname": "field:id",
+ "creation": "2025-08-21 13:07:30.618494",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "id",
   "connection_name",
   "ip_address",
-  "port",
-  "is_active"
+  "port"
  ],
  "fields": [
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "Id",
+   "unique": 1
+  },
   {
    "fieldname": "connection_name",
    "fieldtype": "Data",
@@ -18,28 +26,23 @@
   {
    "fieldname": "ip_address",
    "fieldtype": "Data",
-   "label": "IP Address"
+   "label": "Ip Address"
   },
   {
    "fieldname": "port",
    "fieldtype": "Data",
    "label": "Port"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_active",
-   "fieldtype": "Check",
-   "label": "Is Active?"
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
- "is_virtual": 1,
  "links": [],
- "modified": "2025-07-28 14:04:38.043950",
+ "modified": "2025-08-21 13:11:33.711245",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Board Connection",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -56,7 +59,8 @@
   }
  ],
  "row_format": "Dynamic",
- "sort_field": "creation",
+ "show_title_field_in_link": 1,
+ "sort_field": "connection_name",
  "sort_order": "DESC",
  "states": [],
  "title_field": "connection_name"

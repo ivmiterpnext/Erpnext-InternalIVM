@@ -1,28 +1,42 @@
 {
  "actions": [],
- "creation": "2025-06-23 13:08:18.556552",
+ "autoname": "field:id",
+ "creation": "2025-08-21 10:00:28.568575",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "manufacturer_name"
+  "id",
+  "manufacturer_name",
+  "is_active"
  ],
  "fields": [
   {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "Id",
+   "unique": 1
+  },
+  {
    "fieldname": "manufacturer_name",
    "fieldtype": "Data",
-   "label": "Name",
-   "length": 50
+   "label": "Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
- "is_virtual": 1,
  "links": [],
- "modified": "2025-07-28 13:14:39.065023",
+ "modified": "2025-08-21 11:55:51.670490",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Board Manufacturer",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -40,7 +54,7 @@
  ],
  "row_format": "Dynamic",
  "show_title_field_in_link": 1,
- "sort_field": "name",
+ "sort_field": "id",
  "sort_order": "DESC",
  "states": [],
  "title_field": "manufacturer_name"

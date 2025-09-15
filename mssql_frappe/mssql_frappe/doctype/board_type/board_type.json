@@ -1,36 +1,42 @@
 {
  "actions": [],
- "autoname": "prompt",
- "creation": "2025-06-23 13:04:52.575017",
+ "allow_copy": 1,
+ "autoname": "field:code",
+ "creation": "2025-08-21 12:13:30.948888",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "description",
-  "is_active"
+  "id",
+  "code",
+  "description"
  ],
  "fields": [
   {
-   "default": "0",
-   "fieldname": "is_active",
-   "fieldtype": "Check",
-   "label": "Is Active?"
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "Id"
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Code",
+   "unique": 1
   },
   {
    "fieldname": "description",
-   "fieldtype": "Small Text",
-   "label": "Description",
-   "read_only": 1
+   "fieldtype": "Data",
+   "label": "Description"
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
- "is_virtual": 1,
  "links": [],
- "modified": "2025-07-10 11:51:21.671859",
+ "modified": "2025-08-21 12:19:47.255290",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Board Type",
- "naming_rule": "Set by user",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -47,7 +53,9 @@
   }
  ],
  "row_format": "Dynamic",
- "sort_field": "creation",
+ "show_title_field_in_link": 1,
+ "sort_field": "code",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "description"
 }

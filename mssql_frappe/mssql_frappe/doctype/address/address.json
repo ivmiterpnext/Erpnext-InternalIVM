@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "creation": "2025-09-03 09:30:17.742199",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "id",
+  "address_line_one",
+  "address_line_two",
+  "address_line_three",
+  "address_line_four",
+  "column_break_feyn",
+  "city",
+  "state_code",
+  "country_code",
+  "postal_code",
+  "is_active",
+  "hidden_section",
+  "full_address",
+  "machine_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "Id"
+  },
+  {
+   "fieldname": "address_line_one",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "fieldname": "address_line_two",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
+  },
+  {
+   "fieldname": "address_line_three",
+   "fieldtype": "Data",
+   "label": "Address Line 3"
+  },
+  {
+   "fieldname": "address_line_four",
+   "fieldtype": "Data",
+   "label": "Address Line 4"
+  },
+  {
+   "fieldname": "column_break_feyn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "state_code",
+   "fieldtype": "Data",
+   "label": "State Code"
+  },
+  {
+   "fieldname": "country_code",
+   "fieldtype": "Data",
+   "label": "Country Code"
+  },
+  {
+   "fieldname": "postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "full_address",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Full Address"
+  },
+  {
+   "fieldname": "machine_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Machine Id"
+  },
+  {
+   "fieldname": "hidden_section",
+   "fieldtype": "Section Break",
+   "label": "Hidden"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_virtual": 1,
+ "links": [],
+ "modified": "2025-09-11 14:11:18.853248",
+ "modified_by": "Administrator",
+ "module": "MSSQL Frappe",
+ "name": "Address",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "full_address"
+}

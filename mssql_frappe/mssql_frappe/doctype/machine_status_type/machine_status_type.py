@@ -1,0 +1,19 @@
+# Copyright (c) 2025, Dev and contributors
+# For license information, please see license.txt
+
+import frappe
+from frappe.model.document import Document
+from mssql_frappe.utils.sync_util import sync_doctype_from_api
+
+class MachineStatusType(Document):
+	pass
+
+@frappe.whitelist()
+def sync():
+    return sync_doctype_from_api(
+        doctype="Machine Status Type",
+        api_type="icorp",
+        endpoint=f"MachineStatusType",
+        key_field="code",
+        api_fields=["id", "code", "description"]
+    )

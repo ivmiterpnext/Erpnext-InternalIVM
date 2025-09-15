@@ -147,6 +147,8 @@ app_license = "mit"
 #     "all": [ # This needs to be changed!
 #         "mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type.sync",
 #         "mssql_frappe.mssql_frappe.doctype.board_firmware.board_firmware.sync",
+#         "mssql_frappe.mssql_frappe.doctype.board_manufacturer.board_manufacturer.sync",
+#         "mssql_frappe.mssql_frappe.doctype.board_type.board_type.sync",
 #         
 #     ],
 # }
