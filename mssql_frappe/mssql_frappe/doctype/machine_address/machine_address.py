@@ -3,13 +3,12 @@
 
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
+from mssql_frappe.utils.case_utils import convert_fields_to_bool
 from mssql_frappe.utils.api_utils import icorp_api_get, icorp_api_post
 from mssql_frappe.utils.data_utils import build_sort_params
 from mssql_frappe.utils.filter_utils import filters_to_query_params
-from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache_by_prefix
+from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES
 from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
-
 
 
 class MachineAddress(Document):
@@ -53,7 +52,6 @@ class MachineAddress(Document):
 			frappe.log_error(frappe.get_traceback(), "MachineAddress.db_insert error")
 			raise
 
-
 	def load_from_db(self):
 		if self.name and self.name.startswith("new-"):
 			return
@@ -74,8 +72,8 @@ class MachineAddress(Document):
 
 		cache_key = f"machine_address_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		# 	return cached
+		if cached:
+			return cached
 
 		endpoint = "SV/Machine/Address?"
 		if filter_query:

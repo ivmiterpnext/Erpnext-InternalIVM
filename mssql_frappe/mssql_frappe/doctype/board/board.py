@@ -62,14 +62,7 @@ class Board(Document):
 			response = icorp_api_get(endpoint)
 			data = response.get("data", {})
 
-			# # If data is a list, get the first item
-			# if isinstance(data, list):
-			# 	if not data:
-			# 		return
-			# 	data = data[0]
-
 			set_attrs_from_dict(self, data)
-
 			self._set_vendnovation_configurations()
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Board.load_from_db error")

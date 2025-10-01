@@ -14,7 +14,6 @@ class Address(Document):
 	_total_count = None
 
 	KEY_FIELD = "id"
-	#BOOL_FIELDS = ["is_in_effect"]
 	SORT_FIELD_MAP = { "name": "id" }
 	
 	def check_if_latest(self):
@@ -37,11 +36,6 @@ class Address(Document):
 			item = icorp_api_get(endpoint)
 			data = item.get("data", {})
 
-			# if isinstance(data, list):
-			# 	if not data:
-			# 		return
-			# 	data = data[0]
-
 			set_attrs_from_dict(self, data)
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Address.load_from_db error")
@@ -62,8 +56,8 @@ class Address(Document):
 
 		cache_key = f"address_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		# 	return cached
+		if cached:
+			return cached
 
 		try:
 			endpoint = f"Address?ActiveStatus=All&page={page}&pageSize={page_length}"
@@ -73,7 +67,6 @@ class Address(Document):
 				for k, v in sort_query:
 					endpoint += f"&{k}={v}"
 
-			print("Endpoint:", endpoint)
 			response = icorp_api_get(endpoint)
 			data = response.get("data", [])
 			pagination = response.get("pagination", {})

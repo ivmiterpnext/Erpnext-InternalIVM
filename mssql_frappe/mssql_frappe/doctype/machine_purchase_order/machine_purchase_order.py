@@ -49,11 +49,6 @@ class MachinePurchaseOrder(Document):
 			response = icorp_api_get(endpoint)
 			data = response.get("data", {})
 
-			# if isinstance(data, list):
-			# 	if not data:
-			# 		return
-			# 	data = data[0]
-
 			set_attrs_from_dict(self, data)
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "MachinePurchaseOrder.load_from_db error")
@@ -75,7 +70,7 @@ class MachinePurchaseOrder(Document):
 			for k, v in data.items():
 				setattr(self, k, v)
 
-			# self.clear_machine_hardware_config_cache()
+			self.clear_machine_hardware_config_cache()
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "MachinePurchaseOrder.db_update error")
 			raise
@@ -104,8 +99,8 @@ class MachinePurchaseOrder(Document):
 
 		cache_key = f"mhc_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		#   return cached
+		if cached:
+			return cached
 
 		try:
 			endpoint = f"PurchaseOrder/Machines?ActiveStatus=All&page={page}&pageSize={page_length}"

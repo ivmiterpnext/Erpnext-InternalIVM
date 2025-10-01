@@ -6,8 +6,7 @@ from frappe.model.document import Document
 from mssql_frappe.utils.api_utils import headwind_api_request
 from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
-from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict
-from mssql_frappe.utils.filter_utils import filters_to_query_params
+from mssql_frappe.utils.data_utils import set_attrs_from_dict
 
 
 class SmartScreen(Document):
@@ -53,8 +52,8 @@ class SmartScreen(Document):
 
 		cache_key = f"smart_screen_list_cache_{page}_{page_length}_{filters}"
 		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		# 	return cached
+		if cached:
+			return cached
 
 		data = {
 			"pageNum": page,
@@ -83,7 +82,7 @@ class SmartScreen(Document):
 			return SmartScreen._total_count
 
 		data = { "pageNum": 1, "pageSize": 1 }
-		try:		
+		try:	
 			response = headwind_api_request("POST", "private/devices/search", data=data)
 			return response.get("data", {}).get("devices", {}).get("total_items_count", 0)
 		except Exception:

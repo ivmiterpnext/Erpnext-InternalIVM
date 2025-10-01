@@ -39,8 +39,8 @@ class MachineActivityLog(Document):
 
 		cache_key = f"machine_activity_log_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		# 	return cached
+		if cached:
+			return cached
 
 		endpoint = f"SV/MachineActivityLog?page={page}&pageSize={page_length}"
 		if filter_query:

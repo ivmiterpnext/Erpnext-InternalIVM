@@ -1,12 +1,9 @@
-import frappe
 import hashlib
-import os
+import requests
+import frappe
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from mssql_frappe.utils.case_utils import dict_keys_to_snake_case, dict_keys_to_camel_case
-import requests
-import json
-
 from mssql_frappe.utils.filter_utils import filters_to_query_params
 
 ICORP_API_BASE_URL = "https://dev.icorpapi.ivminc.com" # os.environ.get("ICORP_API_BASE_URL")
@@ -40,13 +37,11 @@ def _get_icorp_headers():
 def icorp_api_get(endpoint):
     try:
         headers = _get_icorp_headers()
-        response = requests.get(f"{ICORP_API_BASE_URL}/{endpoint}", headers=headers)
+        response = requests.get(f"{ICORP_API_BASE_URL}/{endpoint}", headers=headers, timeout=10)
         response.raise_for_status()
         return dict_keys_to_snake_case(response.json())
-    
-    except Exception as e:
+    except Exception:
         frappe.log_error(frappe.get_traceback(), "icorp_api_get error")
-        #print(e)
 
 def icorp_api_post(endpoint, data):
     headers = _get_icorp_headers()
@@ -57,11 +52,9 @@ def icorp_api_post(endpoint, data):
         except Exception:
             data["created_by"] = "system-frappe"
 
-
     data = dict_keys_to_camel_case(data)
-    data = remove_empty_fields(data)
-    # data = convert_bools_to_bits(data)
-    print("ICORP POST JSON:", json.dumps(data))
+    data = _remove_empty_fields(data)
+
     response = requests.post(f"{ICORP_API_BASE_URL}/{endpoint}", json=data, headers=headers, timeout=10)
     response.raise_for_status()
     return response.json()
@@ -71,26 +64,23 @@ def icorp_api_put(endpoint, data):
 
     if "modified_by" not in data or not data["modified_by"]:
         try:
-            import frappe
             data["modified_by"] = frappe.session.user
         except Exception:
             data["modified_by"] = "system-frappe"
 
-
     data = dict_keys_to_camel_case(data)
-    data = remove_empty_fields(data)
-    print("ICORP PUT JSON:", json.dumps(data))
-    print("ICORP PUT HEADERS:", headers)
+    data = _remove_empty_fields(data)
+
     response = requests.put(f"{ICORP_API_BASE_URL}/{endpoint}", json=data, headers=headers, timeout=10)
     response.raise_for_status()
     return response.json()
 
-def icorp_api_delete(endpoint, data=None): # Take a second look
+def icorp_api_delete(endpoint, data=None):
     headers = _get_icorp_headers()
 
     if data:
         data = dict_keys_to_camel_case(data)
-        data = remove_empty_fields(data)
+        data = _remove_empty_fields(data)
         response = requests.delete(f"{ICORP_API_BASE_URL}/{endpoint}", json=data, headers=headers, timeout=10)
     else:
         response = requests.delete(f"{ICORP_API_BASE_URL}/{endpoint}", headers=headers, timeout=10)
@@ -111,12 +101,12 @@ def icorp_get_count(endpoint, filters=None):
         result = icorp_api_get(url)
         pagination = result.get("pagination", {})
         total_records = pagination.get("total_records")
-        
+ 
         return int(total_records) if total_records is not None else 0
     except Exception:
         frappe.log_error(frappe.get_traceback(), "get_icorp_count error")
         return 0
-    
+
 # Headwind
 def _fetch_headwind_token():
     login = _client.get_secret("Headwind-Privileged-Api-User").value
@@ -153,6 +143,5 @@ def headwind_api_request(method, endpoint, data=None, params=None):
     response.raise_for_status()
     return dict_keys_to_snake_case(response.json())
 
-def remove_empty_fields(data): # This should be moved out of here
-    """Remove keys with None, empty string, or empty list values."""
+def _remove_empty_fields(data):
     return {k: v for k, v in data.items() if v not in (None, "", [])}

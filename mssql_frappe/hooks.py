@@ -143,15 +143,31 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-#     "all": [ # This needs to be changed!
-#         "mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type.sync",
-#         "mssql_frappe.mssql_frappe.doctype.board_firmware.board_firmware.sync",
-#         "mssql_frappe.mssql_frappe.doctype.board_manufacturer.board_manufacturer.sync",
-#         "mssql_frappe.mssql_frappe.doctype.board_type.board_type.sync",
-#         
-#     ],
-# }
+scheduler_events = {
+    "weekly": [
+        "mssql_frappe.mssql_frappe.doctype.address_link.address_link.sync",
+        "mssql_frappe.mssql_frappe.doctype.agreement_fee_type.agreement_fee_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.board_link.board_link.sync",
+        "mssql_frappe.mssql_frappe.doctype.board_connection.board_connection.sync",
+        "mssql_frappe.mssql_frappe.doctype.board_firmware.board_firmware.sync",
+        "mssql_frappe.mssql_frappe.doctype.board_manufacturer.board_manufacturer.sync",
+        "mssql_frappe.mssql_frappe.doctype.board_type.board_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.client_link.client_link.sync",
+        "mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.hardware_connectivity_type.hardware_connectivity_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.location_link.location_link.sync",
+        "mssql_frappe.mssql_frappe.doctype.machine_authorization_type.machine_authorization_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.machine_contract_length_type.machine_contract_length_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.machine_link.machine_link.sync",
+        "mssql_frappe.mssql_frappe.doctype.machine_purpose.machine_purpose.sync",
+        "mssql_frappe.mssql_frappe.doctype.machine_status_type.machine_status_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.machine_type.machine_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.push_message_type.push_message_type.sync",
+        "mssql_frappe.mssql_frappe.doctype.smart_screen_configuration.smart_screen_configuration.sync",
+        "mssql_frappe.mssql_frappe.doctype.smart_screen_group.smart_screen_group.sync",
+        "mssql_frappe.mssql_frappe.doctype.vendor_link.vendor_link.sync"
+    ],
+}
 
 # scheduler_events = {
 # 	"all": [

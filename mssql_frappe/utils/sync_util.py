@@ -14,7 +14,7 @@ def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, fi
             return f"Unknown api_type: {api_type}"
 
         items = data.get("data", [])
-  
+
         for item in items:
             filters = { "name": item[key_field] }
             docs = frappe.get_all(doctype, filters=filters, fields=["*"])
@@ -50,7 +50,7 @@ def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, fi
                 new_doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
-    except Exception as e:
+    except Exception:
         frappe.log_error(frappe.get_traceback(), f"{doctype}.sync error")
 
     return "Sync complete"

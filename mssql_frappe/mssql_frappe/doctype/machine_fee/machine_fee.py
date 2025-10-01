@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.utils.api_utils import icorp_api_delete, icorp_api_get, icorp_api_post, icorp_api_put, icorp_api_put, icorp_get_count
+from mssql_frappe.utils.api_utils import icorp_api_delete, icorp_api_get, icorp_api_post, icorp_api_put, icorp_get_count
 from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache_by_prefix
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
 from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict
@@ -14,7 +14,6 @@ class MachineFee(Document):
 	_total_count = None
 
 	KEY_FIELD = "id"
-	#BOOL_FIELDS = ["is_in_effect"]
 	SORT_FIELD_MAP = { "name": "id" }
 
 	def check_if_latest(self):
@@ -55,11 +54,6 @@ class MachineFee(Document):
 			item = icorp_api_get(endpoint)
 			data = item.get("data", {})
 
-			# if isinstance(data, list):
-			# 	if not data:
-			# 		return
-			# 	data = data[0]
-
 			set_attrs_from_dict(self, data)
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "MachineFee.load_from_db error")
@@ -98,14 +92,14 @@ class MachineFee(Document):
 	@staticmethod
 	def get_list(filters=None, page_length=30, start=0, order_by=None, **kwargs):
 		page = (start // page_length) + 1
-				
+
 		filter_query = filters_to_query_params(filters)
 		sort_query = build_sort_params(order_by, MachineFee.SORT_FIELD_MAP) if order_by else []
 
 		cache_key = f"machine_fee_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		# 	return cached
+		if cached:
+			return cached
 
 		endpoint = "ClientContract/Fee/MachineFee?"
 		if filter_query:

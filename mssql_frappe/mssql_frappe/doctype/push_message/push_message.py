@@ -1,7 +1,6 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from warnings import filters
 import frappe
 from frappe.model.document import Document
 
@@ -53,8 +52,8 @@ class PushMessage(Document):
 
 		cache_key = f"push_message_list_cache_{page}_{page_length}_{filters}"
 		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		# 	return cached
+		if cached:
+			return cached
 
 		device_filter = None
 		if isinstance(filters, list):
@@ -73,7 +72,6 @@ class PushMessage(Document):
 			data["deviceFilter"] = device_filter
 
 		try:
-			print("PushMessage.get_list data:", data)
 			response = headwind_api_request("POST", "plugins/push/private/search", data=data)
 			data = response.get("data", {}).get("items", [])
 			total_records = response.get("data", {}).get("total_items_count", 0)
@@ -124,4 +122,3 @@ class PushMessage(Document):
 	@staticmethod
 	def get_stats(**kwargs):
 		pass
-

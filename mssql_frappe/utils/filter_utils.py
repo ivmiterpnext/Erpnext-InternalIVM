@@ -1,5 +1,7 @@
 import re
 from datetime import datetime, date
+from urllib.parse import urlencode
+from mssql_frappe.utils.case_utils import to_camel_case
 from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 
 _LIKE_META = re.compile(r'([.^$+?{}[\]\\|()])')  # escape regex metachars
@@ -75,7 +77,8 @@ def match_filter(item, flt):
         # value expected: [lo, hi]
         try:
             lo, hi = value
-            lo = _coerce(lo); hi = _coerce(hi)
+            lo = _coerce(lo)
+            hi = _coerce(hi)
             return (a is not None and lo is not None and hi is not None) and (lo <= a <= hi)
         except Exception:
             return True
@@ -109,8 +112,7 @@ def _norm_sort_val(v):
         return (0, v)
     # datetimes / dates – stringify ISO safely
     try:
-        import datetime as _dt
-        if isinstance(v, (_dt.date, _dt.datetime)):
+        if isinstance(v, (date, datetime)):
             return (0, v.isoformat())
     except Exception:
         pass
@@ -134,9 +136,6 @@ def apply_multi_field_sort(result, order_by):
     for field_snake, reverse in reversed(sort_instructions):
         result.sort(key=lambda x: _norm_sort_val(x.get(field_snake)), reverse=reverse)
     return result
-
-from urllib.parse import urlencode
-from mssql_frappe.utils.case_utils import to_camel_case
 
 def filters_to_query_params(filters):
     params = {}
@@ -187,4 +186,3 @@ def replace_machine_id_with_name(filters):
         else:
             new_filters.append(f)
     return new_filters
-

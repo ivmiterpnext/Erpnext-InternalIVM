@@ -1,3 +1,6 @@
+import re
+import frappe
+
 def to_camel_case(s):
     parts = s.split('_')
     return parts[0] + ''.join(word.capitalize() for word in parts[1:])
@@ -6,8 +9,6 @@ def dict_keys_to_camel_case(d):
     return {to_camel_case(k): v for k, v in d.items()}
 
 def dict_keys_to_snake_case(obj):
-    import re
-
     def camel_to_snake(name):
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -20,7 +21,6 @@ def dict_keys_to_snake_case(obj):
         return obj
 
 def api_data_to_frappe_dict(data, key_field, title_field=None, title_map=None):
-    import frappe
     result = []
     title_map = title_map or {}
 
