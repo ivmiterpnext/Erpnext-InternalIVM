@@ -1,0 +1,4 @@
+[FORMAT]
+max-line-length=125
+[MESSAGES CONTROL]
+disable=no-member,import-error,no-name-in-module,bad-indentation,missing-module-docstring,missing-class-docstring,missing-function-docstring,attribute-defined-outside-init,broad-exception-caught,too-few-public-methods

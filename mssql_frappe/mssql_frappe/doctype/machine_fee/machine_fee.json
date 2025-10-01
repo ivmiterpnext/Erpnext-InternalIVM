@@ -6,7 +6,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "id",
   "fee_type_description",
   "is_override_contract_amount",
   "amount",
@@ -16,11 +15,6 @@
   "machine_id"
  ],
  "fields": [
-  {
-   "fieldname": "id",
-   "fieldtype": "Data",
-   "label": "Id"
-  },
   {
    "fieldname": "fee_type_description",
    "fieldtype": "Data",
@@ -62,7 +56,7 @@
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2025-09-11 14:41:41.359933",
+ "modified": "2025-09-30 15:18:14.156179",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine Fee",

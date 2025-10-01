@@ -5,11 +5,12 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "device_details_tab",
   "number",
-  "machine_name",
-  "machine_type",
+  "custom1",
+  "custom2",
   "configuration_id",
-  "group",
+  "groups",
   "column_break_yglm",
   "description",
   "imei",
@@ -22,24 +23,10 @@
    "label": "PROSE Number"
   },
   {
-   "fieldname": "machine_name",
-   "fieldtype": "Data",
-   "label": "Machine Name"
-  },
-  {
-   "fieldname": "machine_type",
-   "fieldtype": "Data",
-   "label": "Machine Type"
-  },
-  {
    "fieldname": "configuration_id",
-   "fieldtype": "Data",
-   "label": "Configuration"
-  },
-  {
-   "fieldname": "group",
-   "fieldtype": "Data",
-   "label": "Group"
+   "fieldtype": "Link",
+   "label": "Configuration",
+   "options": "Smart Screen Configuration"
   },
   {
    "fieldname": "column_break_yglm",
@@ -53,19 +40,46 @@
   {
    "fieldname": "imei",
    "fieldtype": "Data",
-   "label": "IMEI"
+   "label": "IMEI",
+   "length": 15
   },
   {
    "fieldname": "phone",
-   "fieldtype": "Phone",
+   "fieldtype": "Data",
    "label": "Phone Number"
+  },
+  {
+   "fieldname": "groups",
+   "fieldtype": "Table MultiSelect",
+   "label": "Groups",
+   "options": "Assigned Smart Screen Group"
+  },
+  {
+   "fieldname": "custom1",
+   "fieldtype": "Data",
+   "label": "Machine Name"
+  },
+  {
+   "fieldname": "custom2",
+   "fieldtype": "Data",
+   "label": "Machine Type"
+  },
+  {
+   "fieldname": "device_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Device Details"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
- "links": [],
- "modified": "2025-09-15 11:00:37.051731",
+ "links": [
+  {
+   "link_doctype": "Push Message",
+   "link_fieldname": "device_number"
+  }
+ ],
+ "modified": "2025-10-01 13:14:16.354045",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Smart Screen",

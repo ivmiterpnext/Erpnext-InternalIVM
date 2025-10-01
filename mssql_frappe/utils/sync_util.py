@@ -1,13 +1,18 @@
 import frappe
-from mssql_frappe.utils.api_utils import headwind_api_get, icorp_api_get
+
 
 def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, field_map=None):
+    from mssql_frappe.utils.api_utils import headwind_api_request, icorp_api_get
     try:
         frappe.logger().info(f"Syncing {doctype}")
         if api_type == "headwind":
-            data = headwind_api_get(endpoint)
+            data = headwind_api_request("GET", endpoint)
         elif api_type == "icorp":
             data = icorp_api_get(endpoint)
+        else:
+            frappe.logger().error(f"Unknown api_type: {api_type}")
+            return f"Unknown api_type: {api_type}"
+
         items = data.get("data", [])
   
         for item in items:

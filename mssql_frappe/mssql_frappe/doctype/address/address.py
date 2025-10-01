@@ -3,13 +3,20 @@
 
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_id
-from mssql_frappe.utils.api_utils import *
-from mssql_frappe.utils.data_utils import set_attrs_from_dict
+from mssql_frappe.utils.api_utils import icorp_api_get, icorp_get_count
+from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
+from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict
 from mssql_frappe.utils.filter_utils import filters_to_query_params
+from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES
 
 
 class Address(Document):
+	_total_count = None
+
+	KEY_FIELD = "id"
+	#BOOL_FIELDS = ["is_in_effect"]
+	SORT_FIELD_MAP = { "name": "id" }
+	
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 
@@ -30,10 +37,10 @@ class Address(Document):
 			item = icorp_api_get(endpoint)
 			data = item.get("data", {})
 
-			if isinstance(data, list):
-				if not data:
-					return
-				data = data[0]
+			# if isinstance(data, list):
+			# 	if not data:
+			# 		return
+			# 	data = data[0]
 
 			set_attrs_from_dict(self, data)
 		except Exception:
@@ -48,40 +55,35 @@ class Address(Document):
 
 	@staticmethod
 	def get_list(filters=None, page_length=20, start=0, order_by=None, **kwargs):
-		global _machine_purchase_order_total_count
 		page = (start // page_length) + 1
 
-		if filters:
-			new_filters = []
-			for f in filters:
-				if (isinstance(f, (list, tuple)) and len(f) >= 4 and f[1] == "machine_id"):
-					machine_name = get_machine_name_from_id(f[3])
-					if machine_name:
-						# Replace machine_id filter with machine_name filter
-						new_filters.append((f[0], "machine_name", f[2], machine_name))
-					else:
-						new_filters.append(f)
-				else:
-					new_filters.append(f)
-
-			filters = new_filters
-
 		filter_query = filters_to_query_params(filters)
+		sort_query = build_sort_params(order_by, Address.SORT_FIELD_MAP) if order_by else []
 
-		cache_key = f"mhc_list_cache_{page}_{page_length}_{filter_query}_{order_by or ''}"
+		cache_key = f"address_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
 		# if cached:
-		#   return cached
+		# 	return cached
 
 		try:
 			endpoint = f"Address?ActiveStatus=All&page={page}&pageSize={page_length}"
 			if filter_query:
 				endpoint += f"&{filter_query}"
+			if sort_query:
+				for k, v in sort_query:
+					endpoint += f"&{k}={v}"
 
-			result = icorp_api_get(endpoint)
-			items = result.get("data", [])
-			
-			for item in items:
+			print("Endpoint:", endpoint)
+			response = icorp_api_get(endpoint)
+			data = response.get("data", [])
+			pagination = response.get("pagination", {})
+			total_records = pagination.get("total_records")
+
+			if total_records is not None:
+				Address._total_count = total_records
+
+			# Combine address parts for full_address field
+			for item in data:
 				address_parts = [
 					item.get("address_line_one"),
 					item.get("address_line_two"),
@@ -94,28 +96,27 @@ class Address(Document):
 				]
 				item["full_address"] = ", ".join([part for part in address_parts if part])
 
-			pagination = result.get("pagination", {})
-			total_records = pagination.get("total_records")
-
-			if total_records is not None:
-				_machine_purchase_order_total_count = int(total_records)
-
-			value = api_items_to_frappe_dict(
-				items,
+			items = api_data_to_frappe_dict(
+				data,
 				key_field="id"
 			)
 
-			frappe.cache().set_value(cache_key, value, expires_in_sec=300)
-			return value
+			frappe.cache().set_value(cache_key, items, expires_in_sec=LIST_CACHE_EXPIRES)
+			return items
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Address.get_list error")
 			return []
 
 	@staticmethod
 	def get_count(filters=None, **kwargs):
-		pass
+		if Address._total_count is not None:
+			return Address._total_count
+		try:
+			return icorp_get_count("Address", filters)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "Address.get_count error")
+			return 0
 
 	@staticmethod
 	def get_stats(**kwargs):
 		pass
-

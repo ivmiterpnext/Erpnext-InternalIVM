@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Machine Purpose",
         api_type="icorp",
-        endpoint=f"MachinePurpose",
+        endpoint="MachinePurpose",
         key_field="id",
         api_fields=["id", "description"]
     )

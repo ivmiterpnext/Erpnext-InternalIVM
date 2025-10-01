@@ -3,16 +3,16 @@
 
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.utils.api_utils import *
-from mssql_frappe.utils.case_utils import api_items_to_frappe_dict
+from mssql_frappe.utils.api_utils import icorp_api_get, icorp_api_post, icorp_get_count
+from mssql_frappe.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
 from mssql_frappe.utils.filter_utils import filters_to_query_params
-from mssql_frappe.utils.data_utils import set_attrs_from_dict
+from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict, to_iso8601
+from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache_by_prefix
 
-import datetime
-
-_board_total_count = None
 
 class Board(Document):
+	_total_count = None
+
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 
@@ -28,37 +28,30 @@ class Board(Document):
 		try:
 			data = self.get_valid_dict()
 
-			# Convert/cast fields as needed for API
-			for k in [
+			bool_fields = [
 				"is_update_firmware", "is_update_connection", "is_update_rfid", "is_dhcp",
 				"offline_vend_storage", "is_update_machine_motor_info",
 				"is_pin_entry_enabled", "keypad_id_entry", "has_rfid_configuration",
 				"primary_has_bit_reverse_feature", "secondary_has_bit_reverse_feature",
 				"setting3_has_bit_reverse_feature", "setting4_has_bit_reverse_feature",
 				"setting5_has_bit_reverse_feature"
-			]:
-				if k in data:
-					if isinstance(data[k], str):
-						data[k] = bool(int(data[k]))
-					else:
-						data[k] = bool(data[k])
+			]
+			data = convert_fields_to_bool(data, bool_fields)
 
-			if data["effective_date"]:
-				dt = datetime.datetime.fromisoformat(data["effective_date"])
-				data["effective_date"] = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
+			data["effective_date"] = to_iso8601(data["effective_date"])
 
-			endpoint = f"SV/Board"
+			endpoint = "SV/Board"
 			response = icorp_api_post(endpoint, data)
-			board_data = response.get("data")
+			data = response.get("data")
 
-			if not board_data or "id" not in board_data:
-				frappe.throw("Failed to create Board in external API: {}".format(response))
+			if not data or "id" not in data:
+				frappe.throw(f"Failed to create Board in external API: {response}")
 
-			self.name = str(board_data["id"])
-			for k, v in board_data.items():
+			self.name = str(data["id"])
+			for k, v in data.items():
 				setattr(self, k, v)
 
-			self.clear_board_list_cache()
+			self.clear_cache()
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Board.db_insert error")
 			raise
@@ -66,63 +59,46 @@ class Board(Document):
 	def load_from_db(self):
 		try:
 			endpoint = f"SV/Board/GetById?Id={self.name}"
-			item = icorp_api_get(endpoint)
-			board_data = item.get("data", {})
+			response = icorp_api_get(endpoint)
+			data = response.get("data", {})
 
-			# If board_data is a list, get the first item
-			if isinstance(board_data, list):
-				if not board_data:
-					return
-				board_data = board_data[0]
+			# # If data is a list, get the first item
+			# if isinstance(data, list):
+			# 	if not data:
+			# 		return
+			# 	data = data[0]
 
-			set_attrs_from_dict(self, board_data)
+			set_attrs_from_dict(self, data)
 
-			# Merge BoardVendnovationConfiguration and Board Data
-			try:
-				board_id = getattr(self, "id", None)
-				if board_id:
-					endpoint = f"SV/BoardVendnovationConfiguration/GetEffectiveConfiguration?Id={board_id}"
-					item = icorp_api_get(endpoint)
-					item = item.get("data", {})
-					print(item)
-
-					set_attrs_from_dict(self, item)
-
-					if getattr(self, "board_rfid_configuration_id", None) not in (None, '', 'null'):
-						self.has_rfid_configuration = 1
-					else:
-						self.has_rfid_configuration = 0
-
-				serial_number = getattr(self, "serial_number", None)
-				if serial_number:
-					endpoint = f"SV/BoardVendnovationConfiguration/GetByBoardSerialNumber?SerialNumber={serial_number}"
-					result = icorp_api_get(endpoint)
-
-					configs = sorted(
-						result.get("data", []),
-						key=lambda c: c.get("effective_date") or "",
-						reverse=True
-					)
-
-					self.vendnovation_configurations = []
-					for config in configs:
-						self.append("vendnovation_configurations", {
-							"id": config.get("id"),
-							"effective_date": config.get("effective_date"),
-							"is_in_effect": config.get("is_in_effect"),
-							"primary_connection": config.get("primary_board_connection_name"),
-							"secondary_connection": config.get("secondary_board_connection_name"),
-							"rfid_configuration_id": config.get("board_rfid_configuration_id"),
-							"comments": config.get("comments")
-						})
-
-			except Exception:
-				frappe.log_error(frappe.get_traceback(), "Board.load_from_db BoardVendnovationConfiguration list error")
-			except Exception:
-				frappe.log_error(frappe.get_traceback(), "Board.load_from_db BoardVendnovationConfiguration error")
+			self._set_vendnovation_configurations()
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Board.load_from_db error")
 			raise
+
+	def _set_vendnovation_configurations(self):
+		try:
+			endpoint = f"SV/BoardVendnovationConfiguration/GetEffectiveConfiguration?Id={self.name}"
+			response = icorp_api_get(endpoint)
+			data = response.get("data", {})
+
+			set_attrs_from_dict(self, data)
+			self.has_rfid_configuration = 1 if getattr(self, "board_rfid_configuration_id", None) not in (None, '', 'null') else 0
+
+			endpoint = f"SV/BoardVendnovationConfiguration/GetByBoardSerialNumber?SerialNumber={self.serial_number}"
+			response = icorp_api_get(endpoint)
+			data = response.get("data", {})
+
+			# Automatically sort configurations by effective_date descending
+			configs = sorted(
+				data,
+				key=lambda c: c.get("effective_date") or "",
+				reverse=True
+			)
+
+			for config in configs:
+				self.append("vendnovation_configurations", config)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "Board._set_vendnovation_configurations error")
 
 	def db_update(self, *args, **kwargs):
 		# Board insert and update are the same api endpoint
@@ -134,52 +110,55 @@ class Board(Document):
 
 	@staticmethod
 	def get_list(filters=None, page_length=20, start=0, order_by=None, **kwargs):
-		global _board_total_count
 		page = (start // page_length) + 1
+		sort_query = None
+
 		filter_query = filters_to_query_params(filters)
-		cache_key = f"board_list_cache_{page}_{page_length}_{filter_query}"
+
+		sort_field_map = {
+			"name": "id",
+		}
+		sort_query = build_sort_params(order_by, sort_field_map=sort_field_map) if order_by else []
+
+
+		cache_key = f"board_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		# 	return cached
+		if cached:
+			return cached
 
 		try:
 			endpoint = f"SV/Board?page={page}&pageSize={page_length}"
 			if filter_query:
 				endpoint += f"&{filter_query}"
-			result = icorp_api_get(endpoint)
+			if sort_query:
+				for k, v in sort_query:
+					endpoint += f"&{k}={v}"
 
-			items = result.get("data", [])
-			pagination = result.get("pagination", {})
+			response = icorp_api_get(endpoint)
+			data = response.get("data", [])
+			pagination = response.get("pagination", {})
 			total_records = pagination.get("total_records")
 
 			if total_records is not None:
-				_board_total_count = int(total_records)
+				Board._total_count = total_records
 
-			value = api_items_to_frappe_dict(
-				items,
-				key_field="id",
-				title_field="serial_number"
+			items = api_data_to_frappe_dict(
+				data,
+				key_field="id"
 			)
 
-			frappe.cache().set_value(cache_key, value, expires_in_sec=300)
-			return value
+			frappe.cache().set_value(cache_key, items, expires_in_sec=LIST_CACHE_EXPIRES)
+			return items
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Board.get_list error")
 			return []
 
 	@staticmethod
 	def get_count(filters=None, **kwargs):
-		global _board_total_count
-		if _board_total_count is not None:
-			return _board_total_count
+		if Board._total_count is not None:
+			return Board._total_count
 		try:
-			endpoint = f"SV/Board?page=1&pageSize=1"
-			result = icorp_api_get(endpoint)
-			pagination = result.get("pagination", {})
-			total_records = pagination.get("total_records")
-			if total_records is not None:
-				_board_total_count = int(total_records)
-			return _board_total_count
+			return icorp_get_count("SV/Board", filters)
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Board.get_count error")
 			return 0
@@ -189,15 +168,14 @@ class Board(Document):
 		pass
 
 	@staticmethod
-	def clear_board_list_cache():
-		cache = frappe.cache()
-		for key in cache.keys("board_list_cache_*"):
-			cache.delete_key(key)
+	def clear_cache():
+		Board._total_count = None
+		clear_cache_by_prefix("board_list_cache")
 
-# Dropdown logic
+# Select logic
 @frappe.whitelist()
 def get_rfid_target_number_base_types():
-    endpoint = f"SV/BoardRFIDTargetNumberBaseType"
+    endpoint = "SV/BoardRFIDTargetNumberBaseType"
 
     response = icorp_api_get(endpoint)
     items = response.get("data", [])

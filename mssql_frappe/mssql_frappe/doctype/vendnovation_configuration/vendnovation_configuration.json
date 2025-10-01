@@ -8,8 +8,8 @@
   "id",
   "is_in_effect",
   "effective_date",
-  "primary_connection",
-  "secondary_connection",
+  "primary_board_connection_name",
+  "secondary_board_connection_name",
   "rfid_configuration_id",
   "comments"
  ],
@@ -31,16 +31,6 @@
    "label": "Effective"
   },
   {
-   "fieldname": "primary_connection",
-   "fieldtype": "Data",
-   "label": "Primary Conn."
-  },
-  {
-   "fieldname": "secondary_connection",
-   "fieldtype": "Data",
-   "label": "Secondary Conn."
-  },
-  {
    "fieldname": "rfid_configuration_id",
    "fieldtype": "Data",
    "label": "RFID Conf. Id"
@@ -49,6 +39,16 @@
    "fieldname": "comments",
    "fieldtype": "Data",
    "label": "Comments"
+  },
+  {
+   "fieldname": "primary_board_connection_name",
+   "fieldtype": "Data",
+   "label": "Primary Conn."
+  },
+  {
+   "fieldname": "secondary_board_connection_name",
+   "fieldtype": "Data",
+   "label": "Secondary Conn."
   }
  ],
  "grid_page_length": 50,
@@ -56,7 +56,7 @@
  "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-18 10:50:41.687608",
+ "modified": "2025-09-22 13:03:25.750325",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Vendnovation Configuration",

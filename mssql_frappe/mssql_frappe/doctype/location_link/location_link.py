@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Location Link",
         api_type="icorp",
-        endpoint=f"SV/Location?pageSize=9999&page=1",
+        endpoint="SV/Location?pageSize=9999&page=1",
         key_field="id",
         api_fields=["id", "name", "client_id"],
 		field_map={"name": "location_name"}

@@ -6,7 +6,6 @@ from frappe.model.document import Document
 
 
 class VendnovationConfiguration(Document):
-	
 	def db_insert(self, *args, **kwargs):
 		raise NotImplementedError
 
@@ -30,4 +29,3 @@ class VendnovationConfiguration(Document):
 	@staticmethod
 	def get_stats(**kwargs):
 		pass
-

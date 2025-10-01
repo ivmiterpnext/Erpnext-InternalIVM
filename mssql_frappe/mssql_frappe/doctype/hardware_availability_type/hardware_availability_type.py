@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Hardware Availability Type",
         api_type="icorp",
-        endpoint=f"SV/HardwareAvailabilityType",
+        endpoint="SV/HardwareAvailabilityType",
         key_field="code",
         api_fields=["id", "code", "description"]
     )

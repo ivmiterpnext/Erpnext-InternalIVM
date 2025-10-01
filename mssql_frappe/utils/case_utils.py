@@ -19,12 +19,12 @@ def dict_keys_to_snake_case(obj):
     else:
         return obj
 
-def api_items_to_frappe_dict(items, key_field, title_field=None, title_map=None):
+def api_data_to_frappe_dict(data, key_field, title_field=None, title_map=None):
     import frappe
     result = []
     title_map = title_map or {}
 
-    for item in (items or []):
+    for item in (data or []):
         d = frappe._dict(item)
         rid = str(item.get(key_field))
         d.name = rid
@@ -40,3 +40,12 @@ def api_items_to_frappe_dict(items, key_field, title_field=None, title_map=None)
 
         result.append(d)
     return result
+
+def convert_fields_to_bool(data, field_names):
+    for k in field_names:
+        v = data.get(k)
+        if isinstance(v, str):
+            data[k] = v.lower() in ('1', 'true', 'yes')
+        else:
+            data[k] = bool(v)
+    return data

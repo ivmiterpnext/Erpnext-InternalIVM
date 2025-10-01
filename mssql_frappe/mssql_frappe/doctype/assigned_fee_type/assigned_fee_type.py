@@ -6,7 +6,6 @@ from frappe.model.document import Document
 
 
 class AssignedFeeType(Document):
-	
 	def db_insert(self, *args, **kwargs):
 		raise NotImplementedError
 
@@ -30,4 +29,3 @@ class AssignedFeeType(Document):
 	@staticmethod
 	def get_stats(**kwargs):
 		pass
-

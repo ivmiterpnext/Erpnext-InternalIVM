@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Client Link",
         api_type="icorp",
-        endpoint=f"Client?pageSize=999&page=1",
+        endpoint="Client?pageSize=999&page=1",
         key_field="id",
         api_fields=["id", "name"],
 		field_map={"name": "client_name"}

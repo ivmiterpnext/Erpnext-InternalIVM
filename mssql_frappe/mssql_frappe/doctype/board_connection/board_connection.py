@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Board Connection",
         api_type="icorp",
-        endpoint=f"SV/BoardConnection",
+        endpoint="SV/BoardConnection",
         key_field="id",
         api_fields=["id", "name", "ip_address", "port"],
 		field_map={"name": "connection_name"}

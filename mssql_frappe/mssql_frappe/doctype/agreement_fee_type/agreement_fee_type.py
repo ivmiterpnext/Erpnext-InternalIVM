@@ -13,8 +13,8 @@ def sync():
     return sync_doctype_from_api(
         doctype="Agreement Fee Type",
         api_type="icorp",
-        endpoint=f"AgreementFeeType",
+        endpoint="AgreementFeeType",
         key_field="code",
-        api_fields=["id", "code", "description", "is_active", "is_client", "is_vendor", "is_machine", 
+        api_fields=["id", "code", "description", "is_active", "is_client", "is_vendor", "is_machine",
                     "fee_rate_type_id", "fee_rate_type_code", "fee_rate_type_description"]
     )

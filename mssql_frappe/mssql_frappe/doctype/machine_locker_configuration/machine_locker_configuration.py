@@ -1,94 +1,145 @@
-# machine_locker_configuration.py
+# Copyright (c) 2025, Dev and contributors
+# For license information, please see license.txt
 
 import frappe
-from urllib.parse import quote_plus
 from frappe.model.document import Document
-from mssql_frappe.utils.api_utils import *
+from mssql_frappe.utils.api_utils import icorp_api_delete, icorp_api_get, icorp_api_post, icorp_api_put, icorp_get_count
+from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache_by_prefix
+from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict
 from mssql_frappe.utils.filter_utils import filters_to_query_params
-from mssql_frappe.utils.case_utils import api_items_to_frappe_dict  # if you use it below
-
-def _resolve_machine_name_from_board(value: str | int | None) -> str | None:
-	"""Translate Board ID -> in_use_machine_name via external API.
-	If value is already a machine name (or lookup fails), just return value.
-	"""
-	if not value:
-		return value
-
-	board_id = str(value).strip()
-	cache_key = f"boardid->in_use_machine_name::{board_id}"
-	cached = frappe.cache().get_value(cache_key)
-	if cached is not None:
-		return cached or value
-
-	try:
-		endpoint = f"SV/Board/GetById?Id={quote_plus(board_id)}"
-		resp = icorp_api_get(endpoint)
-		data = resp.get("data") or {}
-		# Endpoint may return dict or list; normalize
-		if isinstance(data, list):
-			data = next((r for r in data if str(r.get("id")) == board_id), data[0] if data else {})
-
-		machine_name = data.get("in_use_machine_name") or data.get("machine_name")
-		# Cache even negatives briefly to avoid hammering
-		frappe.cache().set_value(cache_key, machine_name or "", expires_in_sec=300)
-		return machine_name or value
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "MLC._resolve_machine_name_from_board error")
-		return value
-
+from mssql_frappe.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
 
 class MachineLockerConfiguration(Document):
+	_total_count = None
+
+	KEY_FIELD = "id"
+	BOOL_FIELDS = ["is_3d_printed", "enable_open_door_buzzer", "is_update_firmware"]
+	SORT_FIELD_MAP = { "name": "id" }
+
+	def check_if_latest(self):
+		pass  # Disable optimistic locking for virtual DocType
+
+	def validate_set_only_once(self):
+		pass # Disable "Set Only Once" validation for virtual DocType
+
+	@property
+	def _action(self):
+		# Always return "save" if not set
+		return getattr(self, "__action", "save")
+
 	def db_insert(self, *args, **kwargs):
-		raise NotImplementedError
+		try:
+			data = self.get_valid_dict()
+			data = convert_fields_to_bool(data, self.BOOL_FIELDS)
+
+			endpoint = "SV/MachineLockerConfiguration"
+			response = icorp_api_post(endpoint, data)
+			data = response.get("data")
+
+			if not data or not data.get(self.KEY_FIELD):
+				frappe.throw(f"Failed to create Machine Locker Configuration in external API: {response}")
+
+			self.name = str(data[self.KEY_FIELD])
+			for k, v in data.items():
+				setattr(self, k, v)
+
+			self.clear_cache()
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "MachineLockerConfiguration.db_insert error")
+			raise
 
 	def load_from_db(self):
-		raise NotImplementedError
+		try:
+			endpoint = f"SV/MachineLockerConfiguration/GetById?Id={self.name}"
+			item = icorp_api_get(endpoint)
+			data = item.get("data", {})
+
+			set_attrs_from_dict(self, data)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "MachineLockerConfiguration.load_from_db error")
+			raise
 
 	def db_update(self):
-		raise NotImplementedError
+		try:
+			data = self.get_valid_dict()
+			data[self.KEY_FIELD] = data.pop("name")
+			data = convert_fields_to_bool(data, self.BOOL_FIELDS)
+
+			endpoint = "SV/MachineLockerConfiguration"
+			response = icorp_api_put(endpoint, data)
+			data = response.get("data")
+
+			if not data or self.KEY_FIELD not in data:
+				frappe.throw(f"Failed to create Machine Locker Configuration in external API: {response}")
+
+			self.name = str(data[self.KEY_FIELD])
+			for k, v in data.items():
+				setattr(self, k, v)
+
+			self.clear_cache()
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "MachineLockerConfiguration.db_update error")
+			raise
 
 	def delete(self):
-		raise NotImplementedError
+		try:
+			endpoint = f"SV/MachineLockerConfiguration?Id={self.name}"
+			return icorp_api_delete(endpoint)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "MachineLockerConfiguration.delete error")
+			raise
 
 	@staticmethod
-	def get_list(filters=None, page_length=20, start=0, order_by=None, **kwargs):
+	def get_list(filters=None, page_length=30, start=0, order_by=None, **kwargs):
 		page = (start // page_length) + 1
 
-		# Translate dashboard-provided Board ID -> machine_name
-		if isinstance(filters, dict) and "in_use_machine_name" in filters:
-			val = _resolve_machine_name_from_board(filters["in_use_machine_name"])
-			filters["machine_name"] = val
-			del filters["in_use_machine_name"]
-
-		elif isinstance(filters, (list, tuple)):
-			new_filters = []
-			for f in filters:
-				if isinstance(f, (list, tuple)) and len(f) >= 4 and f[1] == "in_use_machine_name":
-					op, rhs = f[2], f[3]
-					rhs = _resolve_machine_name_from_board(rhs)
-					new_filters.append((f[0], "machine_name", op, rhs))
-				else:
-					new_filters.append(f)
-			filters = new_filters
-
 		filter_query = filters_to_query_params(filters)
+		sort_query = build_sort_params(order_by, MachineLockerConfiguration.SORT_FIELD_MAP) if order_by else []
+
+		cache_key = f"machine_locker_config_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
+		cached = frappe.cache().get_value(cache_key)
+		if cached:
+			return cached
 
 		endpoint = f"SV/MachineLockerConfiguration?page={page}&pageSize={page_length}"
 		if filter_query:
 			endpoint += f"&{filter_query}"
+		if sort_query:
+			for k, v in sort_query:
+				endpoint += f"&{k}={v}"
 
 		try:
-			result = icorp_api_get(endpoint)
-			items = result.get("data", [])
-			return api_items_to_frappe_dict(items, key_field="id")
+			response = icorp_api_get(endpoint)
+			data = response.get("data", [])
+			pagination = response.get("pagination", {})
+			total_records = pagination.get("total_records")
+
+			if total_records is not None:
+				MachineLockerConfiguration._total_count = total_records
+
+			items = api_data_to_frappe_dict(data, MachineLockerConfiguration.KEY_FIELD)
+
+			frappe.cache().set_value(cache_key, items, expires_in_sec=LIST_CACHE_EXPIRES)
+			return items
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "MachineLockerConfiguration.get_list error")
 			return []
 
 	@staticmethod
 	def get_count(filters=None, **kwargs):
-		pass
+		if MachineLockerConfiguration._total_count is not None:
+			return MachineLockerConfiguration._total_count
+		try:
+			return icorp_get_count("SV/MachineLockerConfiguration", filters)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "MachineLockerConfiguration.get_count error")
+			return 0
 
 	@staticmethod
 	def get_stats(**kwargs):
 		pass
+
+	@staticmethod
+	def clear_cache():
+		MachineLockerConfiguration._total_count = None
+		clear_cache_by_prefix("machine_locker_config_list_cache")

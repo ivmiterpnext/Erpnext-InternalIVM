@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, date
+from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 
 _LIKE_META = re.compile(r'([.^$+?{}[\]\\|()])')  # escape regex metachars
 
@@ -169,3 +170,21 @@ def filters_to_query_params(filters):
                 pass
         # else: ignore; you can still filter client-side
     return urlencode(params)
+
+def replace_machine_id_with_name(filters):
+    new_filters = []
+    for f in filters or []:
+        if (
+            isinstance(f, (list, tuple))
+            and len(f) >= 4
+            and f[1] == "machine_id"
+        ):
+            machine_name = get_machine_name_from_machine_id(f[3])
+            if machine_name:
+                new_filters.append((f[0], "machine_name", f[2], machine_name))
+            else:
+                new_filters.append(f)
+        else:
+            new_filters.append(f)
+    return new_filters
+

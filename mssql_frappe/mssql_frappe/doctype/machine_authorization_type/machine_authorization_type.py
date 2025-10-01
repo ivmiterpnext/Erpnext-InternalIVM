@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Machine Authorization Type",
         api_type="icorp",
-        endpoint=f"MachineAuthorization",
+        endpoint="MachineAuthorization",
         key_field="id",
         api_fields=["id", "code", "description"]
     )

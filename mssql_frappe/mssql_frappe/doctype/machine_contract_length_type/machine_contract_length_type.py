@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Machine Contract Length Type",
         api_type="icorp",
-        endpoint=f"MachineContractLengthType",
+        endpoint="MachineContractLengthType",
         key_field="id",
         api_fields=["id", "name"],
         field_map={"name": "contract_length_name"}

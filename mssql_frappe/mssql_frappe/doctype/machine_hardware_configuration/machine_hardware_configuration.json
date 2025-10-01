@@ -5,21 +5,17 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "id",
   "board_id",
   "machine_id",
-  "machine_name",
   "effective_date",
   "end_date",
-  "is_in_effect"
+  "is_in_effect",
+  "column_break_jzfr",
+  "connectivity_types",
+  "data_hidden_section",
+  "machine_name"
  ],
  "fields": [
-  {
-   "fieldname": "id",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Id"
-  },
   {
    "fieldname": "board_id",
    "fieldtype": "Link",
@@ -54,13 +50,28 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is In Effect"
+  },
+  {
+   "fieldname": "data_hidden_section",
+   "fieldtype": "Section Break",
+   "label": "Data (Hidden)"
+  },
+  {
+   "fieldname": "column_break_jzfr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "connectivity_types",
+   "fieldtype": "Table MultiSelect",
+   "label": "Hardware Connectivity",
+   "options": "Assigned Hardware Connectivity Type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2025-09-11 11:18:48.889296",
+ "modified": "2025-09-26 12:32:55.298615",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine Hardware Configuration",

@@ -18,13 +18,14 @@
   {
    "fieldname": "machine_name",
    "fieldtype": "Data",
-   "label": "Name"
+   "label": "Name",
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-27 14:06:49.213586",
+ "modified": "2025-09-29 16:23:50.053188",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine Link",

@@ -13,24 +13,24 @@
   "vendor_id",
   "location_description",
   "contract_data_section",
-  "machine_status_code",
+  "machine_status_type_code",
   "machine_type_id",
   "machine_purpose_id",
   "install_date",
-  "has_smartscreen",
+  "has_smart_screen",
   "column_break_hdhr",
   "agreement_fee_type_ids",
   "machine_contract_length_type_id",
-  "machine_authorization_type_id",
+  "machine_authorization_id",
   "allowed_vends_per_auth",
   "misc_section",
   "use_machine_timezone",
   "time_zone_id",
   "column_break_kpcb",
-  "use_job_code",
+  "using_job_code",
   "allow_skip_job_code",
   "column_break_fzig",
-  "use_vendreturn_machine_selections"
+  "is_vend_return"
  ],
  "fields": [
   {
@@ -58,12 +58,6 @@
    "label": "Contract Data"
   },
   {
-   "default": "0",
-   "fieldname": "has_smartscreen",
-   "fieldtype": "Check",
-   "label": "Has SmartScreen"
-  },
-  {
    "fieldname": "column_break_hdhr",
    "fieldtype": "Column Break"
   },
@@ -85,12 +79,6 @@
   {
    "fieldname": "column_break_fzig",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "use_vendreturn_machine_selections",
-   "fieldtype": "Check",
-   "label": "Use Vend/Return Machine Selections"
   },
   {
    "fieldname": "agreement_fee_type_ids",
@@ -135,12 +123,6 @@
    "options": "Machine Contract Length Type"
   },
   {
-   "fieldname": "machine_authorization_type_id",
-   "fieldtype": "Link",
-   "label": "Machine Authorization Type",
-   "options": "Machine Authorization Type"
-  },
-  {
    "fieldname": "install_date",
    "fieldtype": "Date",
    "label": "Installation Date"
@@ -164,15 +146,33 @@
   },
   {
    "default": "0",
-   "fieldname": "use_job_code",
+   "fieldname": "using_job_code",
    "fieldtype": "Check",
    "label": "Use Job Codes"
   },
   {
-   "fieldname": "machine_status_code",
+   "default": "0",
+   "fieldname": "is_vend_return",
+   "fieldtype": "Check",
+   "label": "Use Vend/Return Machine Selections"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_smart_screen",
+   "fieldtype": "Check",
+   "label": "Has Smart Screen"
+  },
+  {
+   "fieldname": "machine_status_type_code",
    "fieldtype": "Link",
    "label": "Machine Status",
    "options": "Machine Status Type"
+  },
+  {
+   "fieldname": "machine_authorization_id",
+   "fieldtype": "Link",
+   "label": "Machine Authorization Type",
+   "options": "Machine Authorization Type"
   },
   {
    "fieldname": "machine_name",
@@ -189,8 +189,8 @@
    "link_fieldname": "machine_id"
   },
   {
-   "link_doctype": "Address",
-   "link_fieldname": "machine_id"
+   "link_doctype": "Machine Address",
+   "link_fieldname": "id"
   },
   {
    "link_doctype": "Machine Hardware Configuration",
@@ -201,7 +201,7 @@
    "link_fieldname": "machine_id"
   }
  ],
- "modified": "2025-09-11 15:23:51.703732",
+ "modified": "2025-09-30 15:23:52.440632",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine",

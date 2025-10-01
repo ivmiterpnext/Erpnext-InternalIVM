@@ -5,13 +5,12 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "id",
-  "model_number",
   "machine_name",
   "board_id",
   "board_address",
   "start_locker_number",
   "end_locker_number",
+  "model_number",
   "is_3d_printed",
   "column_break_jtbt",
   "enable_open_door_buzzer",
@@ -19,16 +18,10 @@
   "max_buzzer_time",
   "idle_repost_time",
   "firmware_id",
-  "firmware_version",
   "is_update_firmware",
   "last_firmware_update"
  ],
  "fields": [
-  {
-   "fieldname": "id",
-   "fieldtype": "Data",
-   "label": "Id"
-  },
   {
    "fieldname": "model_number",
    "fieldtype": "Data",
@@ -41,8 +34,9 @@
   },
   {
    "fieldname": "board_id",
-   "fieldtype": "Data",
-   "label": "Board Id"
+   "fieldtype": "Link",
+   "label": "Board",
+   "options": "Board Link"
   },
   {
    "fieldname": "board_address",
@@ -82,13 +76,9 @@
   },
   {
    "fieldname": "firmware_id",
-   "fieldtype": "Data",
-   "label": "Firmware Id"
-  },
-  {
-   "fieldname": "firmware_version",
-   "fieldtype": "Data",
-   "label": "Firmware Version"
+   "fieldtype": "Link",
+   "label": "Firmware",
+   "options": "Board Firmware"
   },
   {
    "default": "0",
@@ -99,7 +89,8 @@
   {
    "fieldname": "last_firmware_update",
    "fieldtype": "Datetime",
-   "label": "Last Firmware Update"
+   "label": "Last Firmware Update",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -116,7 +107,7 @@
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2025-09-15 08:20:07.017875",
+ "modified": "2025-09-25 14:19:32.754618",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine Locker Configuration",

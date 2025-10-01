@@ -108,21 +108,13 @@
   "setting5_employee_id_length",
   "setting5_bit_size",
   "data_hidden_section",
-  "board_firmware_id_old",
-  "board_manufacturer_id_old",
-  "primary_board_connection_id_old",
-  "secondary_board_connection_id_old",
-  "board_type_code_old",
-  "hardware_availability_type_codeold",
-  "column_break_tvzc",
+  "in_use_machine_name",
   "offline_sales_mode",
   "primary_target_number_base_code",
   "secondary_target_number_base_code",
   "setting3_target_number_base_code",
   "setting4_target_number_base_code",
   "setting5_target_number_base_code",
-  "data_hidden_new_section",
-  "in_use_machine_name",
   "vendnovation_configurations_tab",
   "vendnovation_configurations"
  ],
@@ -216,11 +208,6 @@
    "fieldtype": "Small Text",
    "label": "Custom Message",
    "max_height": "70px"
-  },
-  {
-   "fieldname": "offline_sales_mode",
-   "fieldtype": "Data",
-   "label": "Offline Sales Mode"
   },
   {
    "default": "0",
@@ -506,7 +493,7 @@
    "fieldname": "data_hidden_section",
    "fieldtype": "Section Break",
    "hidden": 1,
-   "label": "Data (Hidden)"
+   "label": "Data (HIdden)"
   },
   {
    "default": "0",
@@ -594,38 +581,9 @@
    "label": "Target Number Base"
   },
   {
-   "fieldname": "column_break_tvzc",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "offline_sales_mode_description",
    "fieldtype": "Select",
    "label": "Offline Sales Mode"
-  },
-  {
-   "fieldname": "primary_target_number_base_code",
-   "fieldtype": "Data",
-   "label": "Primary RFID Target Number Base Code"
-  },
-  {
-   "fieldname": "secondary_target_number_base_code",
-   "fieldtype": "Data",
-   "label": "Secondary RFID Target Number Base Code"
-  },
-  {
-   "fieldname": "setting3_target_number_base_code",
-   "fieldtype": "Data",
-   "label": "Setting 3 RFID Target Number Base Code"
-  },
-  {
-   "fieldname": "setting4_target_number_base_code",
-   "fieldtype": "Data",
-   "label": "Setting 4 RFID Target Number Base Code"
-  },
-  {
-   "fieldname": "setting5_target_number_base_code",
-   "fieldtype": "Data",
-   "label": "Setting 5 RFID Target Number Base Code"
   },
   {
    "default": "0",
@@ -671,14 +629,8 @@
   {
    "fieldname": "vendnovation_configurations",
    "fieldtype": "Table",
-   "label": "Vendnovation Configurations",
    "options": "Vendnovation Configuration",
    "read_only": 1
-  },
-  {
-   "fieldname": "hardware_availability_type_codeold",
-   "fieldtype": "Data",
-   "label": "Hardware Availability Type Code"
   },
   {
    "fieldname": "hardware_availability_type_code",
@@ -690,11 +642,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "board_firmware_id_old",
-   "fieldtype": "Data",
-   "label": "Firmware Id"
-  },
-  {
    "fieldname": "board_firmware_id",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -702,16 +649,6 @@
    "label": "Firmware Version",
    "options": "Board Firmware",
    "reqd": 1
-  },
-  {
-   "fieldname": "board_manufacturer_id_old",
-   "fieldtype": "Int",
-   "label": "Board Manufacturer Id"
-  },
-  {
-   "fieldname": "board_type_code_old",
-   "fieldtype": "Data",
-   "label": "Board Type Code"
   },
   {
    "fieldname": "update_flags_section",
@@ -730,25 +667,40 @@
    "label": "IP / Connection"
   },
   {
-   "fieldname": "primary_board_connection_id_old",
-   "fieldtype": "Int",
-   "label": "Primary Board Connection Id"
-  },
-  {
-   "fieldname": "secondary_board_connection_id_old",
-   "fieldtype": "Int",
-   "label": "Secondary Board Connection Id"
-  },
-  {
-   "fieldname": "data_hidden_new_section",
-   "fieldtype": "Section Break",
-   "label": "Data (HIdden) new"
-  },
-  {
    "fieldname": "in_use_machine_name",
    "fieldtype": "Data",
    "label": "Current Machine",
    "read_only": 1
+  },
+  {
+   "fieldname": "offline_sales_mode",
+   "fieldtype": "Data",
+   "label": "Offline Sales Mode"
+  },
+  {
+   "fieldname": "primary_target_number_base_code",
+   "fieldtype": "Data",
+   "label": "Primary Target Number Base Code"
+  },
+  {
+   "fieldname": "secondary_target_number_base_code",
+   "fieldtype": "Data",
+   "label": "Secondary Target Number Base Code"
+  },
+  {
+   "fieldname": "setting3_target_number_base_code",
+   "fieldtype": "Data",
+   "label": "Setting 3 Target Number Base Code"
+  },
+  {
+   "fieldname": "setting4_target_number_base_code",
+   "fieldtype": "Data",
+   "label": "Setting 4 Target Number Base Code"
+  },
+  {
+   "fieldname": "setting5_target_number_base_code",
+   "fieldtype": "Data",
+   "label": "Setting 5 Target Number Base Code"
   }
  ],
  "grid_page_length": 50,
@@ -757,10 +709,10 @@
  "links": [
   {
    "link_doctype": "Machine Locker Configuration",
-   "link_fieldname": "in_use_machine_name"
+   "link_fieldname": "board_id"
   }
  ],
- "modified": "2025-09-15 09:03:00.637688",
+ "modified": "2025-09-22 16:09:33.931099",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Board",

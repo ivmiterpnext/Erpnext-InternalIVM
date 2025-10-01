@@ -3,14 +3,15 @@
 
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_id
-from mssql_frappe.utils.api_utils import *
-from mssql_frappe.utils.case_utils import api_items_to_frappe_dict
-from mssql_frappe.utils.data_utils import set_attrs_from_dict
-from mssql_frappe.utils.filter_utils import filters_to_query_params
+from mssql_frappe.utils.api_utils import icorp_api_post, icorp_api_get, icorp_api_put, icorp_api_delete, icorp_get_count
+from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
+from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict
+from mssql_frappe.utils.filter_utils import filters_to_query_params, replace_machine_id_with_name
 
 
 class MachinePurchaseOrder(Document):
+	_total_count = None
+
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 
@@ -26,14 +27,14 @@ class MachinePurchaseOrder(Document):
 		try:
 			data = self.get_valid_dict()
 
-			endpoint = f"PurchaseOrder/Machine"
+			endpoint = "PurchaseOrder/Machine"
 			response = icorp_api_post(endpoint, data)
 			data = response.get("data")
 
-			if not data or "id" not in data:
-				frappe.throw("Failed to create Machine Purchase Order in external API: {}".format(response))
-			self.name = str(data["id"])
+			if not data or not data.get("id"):
+				frappe.throw(f"Failed to create Machine Purchase Order in external API: {response}")
 
+			self.name = str(data["id"])
 			for k, v in data.items():
 				setattr(self, k, v)
 
@@ -45,13 +46,13 @@ class MachinePurchaseOrder(Document):
 	def load_from_db(self):
 		try:
 			endpoint = f"PurchaseOrder/Machine/GetById?Id={self.name}"
-			item = icorp_api_get(endpoint)
-			data = item.get("data", {})
+			response = icorp_api_get(endpoint)
+			data = response.get("data", {})
 
-			if isinstance(data, list):
-				if not data:
-					return
-				data = data[0]
+			# if isinstance(data, list):
+			# 	if not data:
+			# 		return
+			# 	data = data[0]
 
 			set_attrs_from_dict(self, data)
 		except Exception:
@@ -61,13 +62,14 @@ class MachinePurchaseOrder(Document):
 	def db_update(self):
 		try:
 			data = self.get_valid_dict()
+			data["id"] = data.pop("name")
 
-			endpoint = f"PurchaseOrder/Machine"
+			endpoint = "PurchaseOrder/Machine"
 			response = icorp_api_put(endpoint, data)
 			data = response.get("data")
 
 			if not data or "id" not in data:
-				frappe.throw("Failed to create Machine Purchase Order in external API: {}".format(response))
+				frappe.throw(f"Failed to create Machine Purchase Order in external API: {response}")
 
 			self.name = str(data["id"])
 			for k, v in data.items():
@@ -89,27 +91,18 @@ class MachinePurchaseOrder(Document):
 
 	@staticmethod
 	def get_list(filters=None, page_length=20, start=0, order_by=None, **kwargs):
-		global _machine_purchase_order_total_count
 		page = (start // page_length) + 1
 
 		if filters:
-			new_filters = []
-			for f in filters:
-				if (isinstance(f, (list, tuple)) and len(f) >= 4 and f[1] == "machine_id"):
-					machine_name = get_machine_name_from_id(f[3])
-					if machine_name:
-						# Replace machine_id filter with machine_name filter
-						new_filters.append((f[0], "machine_name", f[2], machine_name))
-					else:
-						new_filters.append(f)
-				else:
-					new_filters.append(f)
-
-			filters = new_filters
-
+			filters = replace_machine_id_with_name(filters)
 		filter_query = filters_to_query_params(filters)
 
-		cache_key = f"mhc_list_cache_{page}_{page_length}_{filter_query}_{order_by or ''}"
+		sort_field_map = {
+			"name": "id",
+		}
+		sort_query = build_sort_params(order_by, sort_field_map=sort_field_map) if order_by else []
+
+		cache_key = f"mhc_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
 		# if cached:
 		#   return cached
@@ -118,32 +111,39 @@ class MachinePurchaseOrder(Document):
 			endpoint = f"PurchaseOrder/Machines?ActiveStatus=All&page={page}&pageSize={page_length}"
 			if filter_query:
 				endpoint += f"&{filter_query}"
+			if sort_query:
+				for k, v in sort_query:
+					endpoint += f"&{k}={v}"
 
-			result = icorp_api_get(endpoint)
-			items = result.get("data", [])
-
-			pagination = result.get("pagination", {})
+			response = icorp_api_get(endpoint)
+			data = response.get("data", [])
+			pagination = response.get("pagination", {})
 			total_records = pagination.get("total_records")
 
 			if total_records is not None:
-				_machine_purchase_order_total_count = int(total_records)
+				MachinePurchaseOrder._total_count = total_records
 
-			value = api_items_to_frappe_dict(
-				items,
+			items = api_data_to_frappe_dict(
+				data,
 				key_field="id"
 			)
 
-			frappe.cache().set_value(cache_key, value, expires_in_sec=300)
-			return value
+			frappe.cache().set_value(cache_key, items, expires_in_sec=300)
+			return items
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "MachinePurchaseOrder.get_list error")
 			return []
 
 	@staticmethod
 	def get_count(filters=None, **kwargs):
-		pass
+		if MachinePurchaseOrder._total_count is not None:
+			return MachinePurchaseOrder._total_count
+		try:
+			return icorp_get_count("PurchaseOrder/Machines", filters)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "MachinePurchaseOrder.get_count error")
+			return 0
 
 	@staticmethod
 	def get_stats(**kwargs):
 		pass
-

@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Board Firmware",
         api_type="icorp",
-        endpoint=f"SV/BoardFirmware?pageSize=999&page=1",
+        endpoint="SV/BoardFirmware?pageSize=999&page=1",
         key_field="id",
         api_fields=["id", "board_manufacturer_id", "version", "is_active", "comment"],
     )

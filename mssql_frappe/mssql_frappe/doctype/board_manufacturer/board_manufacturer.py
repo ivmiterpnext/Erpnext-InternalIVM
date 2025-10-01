@@ -13,7 +13,7 @@ def sync():
     return sync_doctype_from_api(
         doctype="Board Manufacturer",
         api_type="icorp",
-        endpoint=f"SV/BoardManufacturer",
+        endpoint="SV/BoardManufacturer",
         key_field="id",
         api_fields=["id", "name", "is_active"],
         field_map={"name": "manufacturer_name"}
