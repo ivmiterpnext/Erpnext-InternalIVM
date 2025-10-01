@@ -101,7 +101,7 @@ def icorp_get_count(endpoint, filters=None):
         result = icorp_api_get(url)
         pagination = result.get("pagination", {})
         total_records = pagination.get("total_records")
- 
+
         return int(total_records) if total_records is not None else 0
     except Exception:
         frappe.log_error(frappe.get_traceback(), "get_icorp_count error")
@@ -135,7 +135,7 @@ def headwind_api_request(method, endpoint, data=None, params=None):
         data = dict_keys_to_camel_case(data)
     headers = _get_headwind_headers()
     response = requests.request(method, f"{HEADWIND_API_BASE_URL}/{endpoint}", headers=headers, json=data, params=params, timeout=10)
-    print("Response:", response)
+
     if response.status_code == 401:
         _headwind_token = _fetch_headwind_token()
         headers = _get_headwind_headers()

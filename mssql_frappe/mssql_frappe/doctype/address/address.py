@@ -15,7 +15,7 @@ class Address(Document):
 
 	KEY_FIELD = "id"
 	SORT_FIELD_MAP = { "name": "id" }
-	
+
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 

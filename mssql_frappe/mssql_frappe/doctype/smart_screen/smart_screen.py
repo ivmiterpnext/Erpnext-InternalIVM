@@ -82,7 +82,7 @@ class SmartScreen(Document):
 			return SmartScreen._total_count
 
 		data = { "pageNum": 1, "pageSize": 1 }
-		try:	
+		try:
 			response = headwind_api_request("POST", "private/devices/search", data=data)
 			return response.get("data", {}).get("devices", {}).get("total_items_count", 0)
 		except Exception:
