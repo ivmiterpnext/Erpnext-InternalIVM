@@ -1,0 +1,229 @@
+{
+ "actions": [],
+ "creation": "2025-08-21 13:29:12.941967",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "general_section",
+  "machine_name",
+  "client_id",
+  "location_id",
+  "column_break_ayub",
+  "serial_number",
+  "vendor_id",
+  "location_description",
+  "contract_data_section",
+  "machine_status_type_code",
+  "machine_type_id",
+  "machine_purpose_id",
+  "install_date",
+  "has_smart_screen",
+  "column_break_hdhr",
+  "agreement_fee_type_ids",
+  "machine_contract_length_type_id",
+  "machine_authorization_id",
+  "allowed_vends_per_auth",
+  "misc_section",
+  "use_machine_timezone",
+  "time_zone_id",
+  "column_break_kpcb",
+  "using_job_code",
+  "allow_skip_job_code",
+  "column_break_fzig",
+  "is_vend_return"
+ ],
+ "fields": [
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Data",
+   "label": "Serial Number"
+  },
+  {
+   "fieldname": "column_break_ayub",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "location_description",
+   "fieldtype": "Data",
+   "label": "Location Description"
+  },
+  {
+   "fieldname": "contract_data_section",
+   "fieldtype": "Section Break",
+   "label": "Contract Data"
+  },
+  {
+   "fieldname": "column_break_hdhr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "misc_section",
+   "fieldtype": "Section Break",
+   "label": "Misc"
+  },
+  {
+   "fieldname": "column_break_kpcb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_skip_job_code",
+   "fieldtype": "Check",
+   "label": "Allow Skip Job Code"
+  },
+  {
+   "fieldname": "column_break_fzig",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "agreement_fee_type_ids",
+   "fieldtype": "Table MultiSelect",
+   "label": "Agreement Fee Type",
+   "options": "Assigned Fee Type"
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Link",
+   "label": "Client",
+   "options": "Client Link"
+  },
+  {
+   "fieldname": "location_id",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location Link"
+  },
+  {
+   "fieldname": "vendor_id",
+   "fieldtype": "Link",
+   "label": "Vendor",
+   "options": "Vendor Link"
+  },
+  {
+   "fieldname": "machine_type_id",
+   "fieldtype": "Link",
+   "label": "Machine Type",
+   "options": "Machine Type"
+  },
+  {
+   "fieldname": "machine_purpose_id",
+   "fieldtype": "Link",
+   "label": "Machine Purpose",
+   "options": "Machine Purpose"
+  },
+  {
+   "fieldname": "machine_contract_length_type_id",
+   "fieldtype": "Link",
+   "label": "Contract Length",
+   "options": "Machine Contract Length Type"
+  },
+  {
+   "fieldname": "install_date",
+   "fieldtype": "Date",
+   "label": "Installation Date"
+  },
+  {
+   "fieldname": "allowed_vends_per_auth",
+   "fieldtype": "Int",
+   "label": "Allowed Vends Per Authorization"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_machine_timezone",
+   "fieldtype": "Check",
+   "label": "Use Machine (Local) Timezone"
+  },
+  {
+   "fieldname": "time_zone_id",
+   "fieldtype": "Link",
+   "label": "Timezone",
+   "options": "Timezone"
+  },
+  {
+   "default": "0",
+   "fieldname": "using_job_code",
+   "fieldtype": "Check",
+   "label": "Use Job Codes"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_vend_return",
+   "fieldtype": "Check",
+   "label": "Use Vend/Return Machine Selections"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_smart_screen",
+   "fieldtype": "Check",
+   "label": "Has Smart Screen"
+  },
+  {
+   "fieldname": "machine_status_type_code",
+   "fieldtype": "Link",
+   "label": "Machine Status",
+   "options": "Machine Status Type"
+  },
+  {
+   "fieldname": "machine_authorization_id",
+   "fieldtype": "Link",
+   "label": "Machine Authorization Type",
+   "options": "Machine Authorization Type"
+  },
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_virtual": 1,
+ "links": [
+  {
+   "link_doctype": "Machine Purchase Order",
+   "link_fieldname": "machine_id"
+  },
+  {
+   "link_doctype": "Machine Address",
+   "link_fieldname": "id"
+  },
+  {
+   "link_doctype": "Machine Hardware Configuration",
+   "link_fieldname": "machine_id"
+  },
+  {
+   "link_doctype": "Machine Fee",
+   "link_fieldname": "machine_id"
+  }
+ ],
+ "modified": "2025-09-30 15:23:52.440632",
+ "modified_by": "Administrator",
+ "module": "MSSQL Frappe",
+ "name": "Machine",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "machine_name"
+}

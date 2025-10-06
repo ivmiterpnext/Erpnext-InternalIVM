@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "autoname": "field:id",
+ "creation": "2025-08-18 15:53:20.935984",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "id",
+  "board_manufacturer_id",
+  "version",
+  "is_active",
+  "comment"
+ ],
+ "fields": [
+  {
+   "fieldname": "board_manufacturer_id",
+   "fieldtype": "Link",
+   "label": "Board Manufacturer",
+   "options": "Board Manufacturer"
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Data",
+   "label": "Version",
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "comment",
+   "fieldtype": "Small Text",
+   "label": "Comment"
+  },
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "Id",
+   "unique": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-21 12:05:20.576203",
+ "modified_by": "Administrator",
+ "module": "MSSQL Frappe",
+ "name": "Board Firmware",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "is_active",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "version"
+}
