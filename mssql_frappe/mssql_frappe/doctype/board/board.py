@@ -13,6 +13,17 @@ from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache_by_pre
 class Board(Document):
 	_total_count = None
 
+	KEY_FIELD = "id"
+	BOOL_FIELDS = [
+		"is_update_firmware", "is_update_connection", "is_update_rfid", "is_dhcp",
+		"offline_vend_storage", "is_update_machine_motor_info",
+		"is_pin_entry_enabled", "keypad_id_entry", "has_rfid_configuration",
+		"primary_has_bit_reverse_feature", "secondary_has_bit_reverse_feature",
+		"setting3_has_bit_reverse_feature", "setting4_has_bit_reverse_feature",
+		"setting5_has_bit_reverse_feature"
+	]
+	SORT_FIELD_MAP = { "name": "id" }
+
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 
@@ -27,17 +38,7 @@ class Board(Document):
 	def db_insert(self, *args, **kwargs):
 		try:
 			data = self.get_valid_dict()
-
-			bool_fields = [
-				"is_update_firmware", "is_update_connection", "is_update_rfid", "is_dhcp",
-				"offline_vend_storage", "is_update_machine_motor_info",
-				"is_pin_entry_enabled", "keypad_id_entry", "has_rfid_configuration",
-				"primary_has_bit_reverse_feature", "secondary_has_bit_reverse_feature",
-				"setting3_has_bit_reverse_feature", "setting4_has_bit_reverse_feature",
-				"setting5_has_bit_reverse_feature"
-			]
-			data = convert_fields_to_bool(data, bool_fields)
-
+			data = convert_fields_to_bool(data, self.BOOL_FIELDS)
 			data["effective_date"] = to_iso8601(data["effective_date"])
 
 			endpoint = "SV/Board"
@@ -104,15 +105,9 @@ class Board(Document):
 	@staticmethod
 	def get_list(filters=None, page_length=20, start=0, order_by=None, **kwargs):
 		page = (start // page_length) + 1
-		sort_query = None
 
 		filter_query = filters_to_query_params(filters)
-
-		sort_field_map = {
-			"name": "id",
-		}
-		sort_query = build_sort_params(order_by, sort_field_map=sort_field_map) if order_by else []
-
+		sort_query = build_sort_params(order_by, sort_field_map=Board.SORT_FIELD_MAP) if order_by else []
 
 		cache_key = f"board_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
 		cached = frappe.cache().get_value(cache_key)
@@ -137,7 +132,7 @@ class Board(Document):
 
 			items = api_data_to_frappe_dict(
 				data,
-				key_field="id"
+				key_field=Board.KEY_FIELD,
 			)
 
 			frappe.cache().set_value(cache_key, items, expires_in_sec=LIST_CACHE_EXPIRES)
@@ -202,7 +197,7 @@ def get_manufacturer_by_serial_number(board_serial_number):
                 "id": None,
                 "manufacturer_name": "Invalid PROSE Number"
             }
-        frappe.log_error(frappe.get_traceback(), "get_by_board_serial_number error")
+        frappe.log_error(frappe.get_traceback(), "get_manufacturer_by_serial_number error")
         return {
             "id": None,
             "manufacturer_name": "Error"

@@ -1,7 +1,7 @@
-app_name = "mssql_frappe"
-app_title = "MSSQL Frappe"
+app_name = "Machine Hardware Management"
+app_title = "Machine Hardware Management"
 app_publisher = "Dev"
-app_description = "MSSQL Integration for Frappe"
+app_description = "ICORP Machine Hardware Management Integration"
 app_email = "lhammond@ivminc.com"
 app_license = "mit"
 
