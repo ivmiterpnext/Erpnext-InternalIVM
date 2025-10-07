@@ -12,7 +12,7 @@ def get_config_value(key, default=None):
     return frappe.conf.get(key.lower()) or os.environ.get(key.upper()) or default
 
 def get_secret_client():
-    vault_url = get_config_value("AZURE_KEYVAULT_URL")
+    vault_url = get_config_value("KEY_VAULT_URL")
     credential = DefaultAzureCredential()
     return SecretClient(vault_url=vault_url, credential=credential)
 

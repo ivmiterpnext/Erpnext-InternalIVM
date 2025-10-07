@@ -1,7 +1,14 @@
 import os
 import frappe
 
-LIST_CACHE_EXPIRES = int(os.environ.get("LIST_CACHE_EXPIRES", 300))
+
+def get_list_cache_expires():
+    try:
+        return int(os.environ.get("LIST_CACHE_EXPIRES"))
+    except (TypeError, ValueError):
+        return 300
+
+LIST_CACHE_EXPIRES = get_list_cache_expires()
 
 def clear_cache_by_prefix(prefix):
     cache = None
