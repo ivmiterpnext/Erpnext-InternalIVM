@@ -7,89 +7,104 @@ from azure.keyvault.secrets import SecretClient
 from mssql_frappe.utils.case_utils import dict_keys_to_snake_case, dict_keys_to_camel_case
 from mssql_frappe.utils.filter_utils import filters_to_query_params
 
-ICORP_API_BASE_URL = os.environ.get("ICORP_API_BASE_URL")
-HEADWIND_API_BASE_URL = os.environ.get("HEADWIND_API_BASE_URL")
-KEY_VAULT_URL = os.environ.get("AZURE_KEYVAULT_URL")
-TENANT_ID = os.environ.get("AZURE_TENANT_ID")
-API_SCOPE = os.environ.get("AZURE_API_SCOPE")
 
-_credential = DefaultAzureCredential()
-_client = SecretClient(vault_url=KEY_VAULT_URL, credential=_credential)
-_headwind_token = None
+def get_config_value(key, default=None):
+    return frappe.conf.get(key.lower()) or os.environ.get(key.upper()) or default
+
+def get_secret_client():
+    vault_url = get_config_value("AZURE_KEYVAULT_URL")
+    credential = DefaultAzureCredential()
+    return SecretClient(vault_url=vault_url, credential=credential)
 
 # ICorp
-def _get_icorp_headers():
-    client_id = _client.get_secret("ICorpAPI-AzureAd-ClientId").value
-    client_secret = _client.get_secret("ICorpAPI-AzureAd-ClientSecret").value
+def get_icorp_auth():
+    client = get_secret_client()
+    client_id = client.get_secret("ICorpAPI-AzureAd-ClientId").value
+    client_secret = client.get_secret("ICorpAPI-AzureAd-ClientSecret").value
+    tenant_id = get_config_value("AZURE_TENANT_ID")
+    api_scope = get_config_value("AZURE_API_SCOPE")
+    base_url = get_config_value("ICORP_API_BASE_URL")
 
     token_credential = ClientSecretCredential(
-        tenant_id=TENANT_ID,
+        tenant_id=tenant_id,
         client_id=client_id,
         client_secret=client_secret
     )
-    access_token = token_credential.get_token(API_SCOPE).token
+    access_token = token_credential.get_token(api_scope).token
 
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
-    return headers
+    return base_url, headers
 
 def icorp_api_get(endpoint):
     try:
-        headers = _get_icorp_headers()
-        response = requests.get(f"{ICORP_API_BASE_URL}/{endpoint}", headers=headers, timeout=10)
+        base_url, headers = get_icorp_auth()
+        response = requests.get(f"{base_url}/{endpoint}", headers=headers, timeout=10)
         response.raise_for_status()
         return dict_keys_to_snake_case(response.json())
     except Exception:
         frappe.log_error(frappe.get_traceback(), "icorp_api_get error")
 
 def icorp_api_post(endpoint, data):
-    headers = _get_icorp_headers()
+    try:
+        base_url, headers = get_icorp_auth()
 
-    if "created_by" not in data or not data["created_by"]:
-        try:
-            data["created_by"] = frappe.session.user
-        except Exception:
-            data["created_by"] = "system-frappe"
+        if "created_by" not in data or not data["created_by"]:
+            try:
+                data["created_by"] = frappe.session.user
+            except Exception:
+                data["created_by"] = "system-frappe"
 
-    data = dict_keys_to_camel_case(data)
-    data = _remove_empty_fields(data)
-
-    response = requests.post(f"{ICORP_API_BASE_URL}/{endpoint}", json=data, headers=headers, timeout=10)
-    response.raise_for_status()
-    return response.json()
-
-def icorp_api_put(endpoint, data):
-    headers = _get_icorp_headers()
-
-    if "modified_by" not in data or not data["modified_by"]:
-        try:
-            data["modified_by"] = frappe.session.user
-        except Exception:
-            data["modified_by"] = "system-frappe"
-
-    data = dict_keys_to_camel_case(data)
-    data = _remove_empty_fields(data)
-
-    response = requests.put(f"{ICORP_API_BASE_URL}/{endpoint}", json=data, headers=headers, timeout=10)
-    response.raise_for_status()
-    return response.json()
-
-def icorp_api_delete(endpoint, data=None):
-    headers = _get_icorp_headers()
-
-    if data:
         data = dict_keys_to_camel_case(data)
         data = _remove_empty_fields(data)
-        response = requests.delete(f"{ICORP_API_BASE_URL}/{endpoint}", json=data, headers=headers, timeout=10)
-    else:
-        response = requests.delete(f"{ICORP_API_BASE_URL}/{endpoint}", headers=headers, timeout=10)
 
-    response.raise_for_status()
-    if not response.text.strip():
-        return {}
-    return response.json()
+        response = requests.post(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "icorp_api_post error")
+        return None
+
+def icorp_api_put(endpoint, data):
+    try:
+        base_url, headers = get_icorp_auth()
+
+        if "modified_by" not in data or not data["modified_by"]:
+            try:
+                data["modified_by"] = frappe.session.user
+            except Exception:
+                data["modified_by"] = "system-frappe"
+
+        data = dict_keys_to_camel_case(data)
+        data = _remove_empty_fields(data)
+
+        response = requests.put(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "icorp_api_put error")
+        return None
+
+def icorp_api_delete(endpoint, data=None):
+    try:
+        base_url, headers = get_icorp_auth()
+
+        if data:
+            data = dict_keys_to_camel_case(data)
+            data = _remove_empty_fields(data)
+            response = requests.delete(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=10)
+        else:
+            response = requests.delete(f"{base_url}/{endpoint}", headers=headers, timeout=10)
+
+        response.raise_for_status()
+        if not response.text.strip():
+            return {}
+        return response.json()
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "icorp_api_delete error")
+        return None
 
 def icorp_get_count(endpoint, filters=None):
     try:
@@ -110,39 +125,46 @@ def icorp_get_count(endpoint, filters=None):
 
 # Headwind
 def _fetch_headwind_token():
-    login = _client.get_secret("Headwind-Privileged-Api-User").value
-    password = _client.get_secret("Headwind-Privileged-Api-User-Password").value
-    password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest().upper()
-    payload = {"login": login, "password": password_md5}
-    response = requests.post(f"{HEADWIND_API_BASE_URL}/public/jwt/login", json=payload, timeout=10)
-    response.raise_for_status()
-    return response.json()["id_token"]
+    try:
+        client = get_secret_client()
+        base_url = get_config_value("HEADWIND_API_BASE_URL")
+        login = client.get_secret("Headwind-Privileged-Api-User").value
+        password = client.get_secret("Headwind-Privileged-Api-User-Password").value
+        password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest().upper()
+        payload = {"login": login, "password": password_md5}
 
-def _get_headwind_headers():
-    global _headwind_token
+        response = requests.post(f"{base_url}/public/jwt/login", json=payload, timeout=10)
+        response.raise_for_status()
+        return response.json()["id_token"]
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "_fetch_headwind_token error")
+        return None
 
-    if not _headwind_token:
-        _headwind_token = _fetch_headwind_token()
-
-    return {
-        "Authorization": f"Bearer {_headwind_token}",
+def get_headwind_auth(token=None):
+    base_url = get_config_value("HEADWIND_API_BASE_URL")
+    headers = {
+        "Authorization": f"Bearer {token}" if token else "",
         "Accept": "application/json"
     }
+    return base_url, headers
 
 def headwind_api_request(method, endpoint, data=None, params=None):
-    global _headwind_token
+    try:
+        token = _fetch_headwind_token()
+        base_url, headers = get_headwind_auth(token)
+        if data:
+            data = dict_keys_to_camel_case(data)
+        response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=10)
 
-    if data:
-        data = dict_keys_to_camel_case(data)
-    headers = _get_headwind_headers()
-    response = requests.request(method, f"{HEADWIND_API_BASE_URL}/{endpoint}", headers=headers, json=data, params=params, timeout=10)
-
-    if response.status_code == 401:
-        _headwind_token = _fetch_headwind_token()
-        headers = _get_headwind_headers()
-        response = requests.request(method, f"{HEADWIND_API_BASE_URL}/{endpoint}", headers=headers, json=data, params=params, timeout=10)
-    response.raise_for_status()
-    return dict_keys_to_snake_case(response.json())
+        if response.status_code == 401:
+            token = _fetch_headwind_token()
+            base_url, headers = get_headwind_auth(token)
+            response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=10)
+        response.raise_for_status()
+        return dict_keys_to_snake_case(response.json())
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "headwind_api_request error")
+        return None
 
 def _remove_empty_fields(data):
     return {k: v for k, v in data.items() if v not in (None, "", [])}
