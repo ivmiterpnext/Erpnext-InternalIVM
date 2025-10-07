@@ -21,8 +21,8 @@ def get_icorp_auth():
     client = get_secret_client()
     client_id = client.get_secret("ICorpAPI-AzureAd-ClientId").value
     client_secret = client.get_secret("ICorpAPI-AzureAd-ClientSecret").value
-    tenant_id = get_config_value("AZURE_TENANT_ID")
-    api_scope = get_config_value("AZURE_API_SCOPE")
+    tenant_id = get_config_value("TENANT_ID")
+    api_scope = get_config_value("API_SCOPE")
     base_url = get_config_value("ICORP_API_BASE_URL")
 
     token_credential = ClientSecretCredential(
