@@ -1,4 +1,5 @@
 import hashlib
+import os
 import requests
 import frappe
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
@@ -6,11 +7,11 @@ from azure.keyvault.secrets import SecretClient
 from mssql_frappe.utils.case_utils import dict_keys_to_snake_case, dict_keys_to_camel_case
 from mssql_frappe.utils.filter_utils import filters_to_query_params
 
-ICORP_API_BASE_URL = "https://dev.icorpapi.ivminc.com" # os.environ.get("ICORP_API_BASE_URL")
-HEADWIND_API_BASE_URL = "https://iot.ivmapi.com/rest" # os.environ.get("HEADWIND_API_BASE_URL")
-KEY_VAULT_URL = "https://ivm-apps-dev-kv-01.vault.azure.net//" # os.environ.get("AZURE_KEYVAULT_URL")
-TENANT_ID = "5464da95-5a54-4466-8dde-04bd9e7f49da" # os.environ.get("AZURE_TENANT_ID")
-API_SCOPE = "api://74c6b7f8-98fe-4907-8fac-93ebc38fc521/.default" # os.environ.get("AZURE_API_SCOPE")
+ICORP_API_BASE_URL = os.environ.get("ICORP_API_BASE_URL")
+HEADWIND_API_BASE_URL = os.environ.get("HEADWIND_API_BASE_URL")
+KEY_VAULT_URL = os.environ.get("AZURE_KEYVAULT_URL")
+TENANT_ID = os.environ.get("AZURE_TENANT_ID")
+API_SCOPE = os.environ.get("AZURE_API_SCOPE")
 
 _credential = DefaultAzureCredential()
 _client = SecretClient(vault_url=KEY_VAULT_URL, credential=_credential)
