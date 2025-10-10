@@ -67,20 +67,11 @@ class Machine(Document):
 		try:
 			endpoint = f"SV/Machine/GetById?Id={self.name}"
 			item = icorp_api_get(endpoint)
-			frappe.log_error("machine_log", item)
 			machine_data = item.get("data", {}) or {}
-			
-			# if "name" in machine_data:
-			# 	machine_data["machine_name"] = machine_data.pop("name")
+			frappe.log_error("machine_data", machine_data)
 
-			machine_name = frappe.db.get_value(
-				"Machine Link",
-				{"id": machine_data.get("id")},
-				"machine_name"  # pass as a string, not a list
-			)
-
-			if machine_name:
-				machine_data["machine_name"] = machine_name
+			if "name" in machine_data:
+				machine_data["machine_name"] = machine_data["name"]
 
 			child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
 			set_attrs_from_dict(self, machine_data, child_table_map)
