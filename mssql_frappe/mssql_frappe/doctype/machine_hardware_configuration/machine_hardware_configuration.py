@@ -18,6 +18,8 @@ class MachineHardwareConfiguration(Document):
 	BOOL_FIELDS = ["is_in_effect"]
 	SORT_FIELD_MAP = { "name": "code" }
 
+	_table_fieldnames = [] # Prevent frappe from trying to access non-existent table fields
+	
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 

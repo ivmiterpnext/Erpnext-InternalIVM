@@ -37,6 +37,7 @@ class PushMessage(Document):
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "PushMessage.db_insert error")
 			raise
+		
 	def load_from_db(self):
 		raise NotImplementedError
 
