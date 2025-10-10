@@ -38,8 +38,7 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
         if mapped_key in child_table_map:
             child_field = child_table_map[mapped_key]
             rows = normalize_child_table_field(v, child_field)
-            # Wrap each row in frappe._dict for Frappe compatibility
-            obj.set(mapped_key, [frappe._dict(row) for row in rows])
+            obj.set(mapped_key, rows)
             continue
 
         if mapped_key.endswith("id") and not isinstance(v, (list, dict)):
@@ -48,10 +47,6 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
             v = str(v)
 
         setattr(obj, mapped_key, v)
-
-        for field in obj.__dict__:
-            if getattr(obj, field) == "":
-                setattr(obj, field, None)
 
 def normalize_child_table_field(value, child_field):
     rows = []
