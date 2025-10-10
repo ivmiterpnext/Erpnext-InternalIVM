@@ -72,13 +72,13 @@ class Machine(Document):
 			# if "name" in machine_data:
 			# 	machine_data["machine_name"] = machine_data.pop("name")
 
-			machine_link = frappe.db.get_value(
+			machine_name = frappe.db.get_value(
 				"Machine Link",
 				{"id": machine_data.get("id")},
-				["machine_name"]
+				"machine_name"  # pass as a string, not a list
 			)
-			if machine_link:
-				machine_data["machine_name"] = machine_link["machine_name"]
+			if machine_name:
+				machine_data["machine_name"] = machine_name
 
 			child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
 			set_attrs_from_dict(self, machine_data, child_table_map)
