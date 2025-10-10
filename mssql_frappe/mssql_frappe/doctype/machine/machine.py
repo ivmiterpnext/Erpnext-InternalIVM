@@ -77,7 +77,6 @@ class Machine(Document):
 				{"id": machine_data.get("id")},
 				"machine_name"  # pass as a string, not a list
 			)
-			frappe.log_error(machine_data, "Machine.load_from_db error")
 
 			if machine_name:
 				machine_data["machine_name"] = machine_name
