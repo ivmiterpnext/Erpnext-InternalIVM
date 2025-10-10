@@ -139,8 +139,8 @@ class Machine(Document):
 
 		cache_key = f"machine_list_cache_{page}_{page_length}_{filter_query}"
 		cached = frappe.cache().get_value(cache_key)
-		if cached:
-			return cached
+		# if cached:
+		# 	return cached
 
 		endpoint = f"SV/Machine?page={page}&pageSize={page_length}"
 		if filter_query:
