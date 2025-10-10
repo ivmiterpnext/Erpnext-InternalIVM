@@ -17,6 +17,8 @@ class Machine(Document):
 	BOOL_FIELDS = ["has_smart_screen", "use_machine_timezone", "using_job_code", "allow_skip_job_code", "is_vend_return"]
 	SORT_FIELD_MAP = { "name": "id" }
 
+	_table_fieldnames = [] # Prevent frappe from trying to access non-existent table fields
+	
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 

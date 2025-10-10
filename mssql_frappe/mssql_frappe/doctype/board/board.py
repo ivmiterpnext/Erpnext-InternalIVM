@@ -24,6 +24,8 @@ class Board(Document):
 	]
 	SORT_FIELD_MAP = { "name": "id" }
 
+	_table_fieldnames = [] # Prevent frappe from trying to access non-existent table fields
+	
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 
