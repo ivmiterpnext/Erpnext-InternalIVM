@@ -72,8 +72,8 @@ class Machine(Document):
 			if "name" in machine_data:
 				machine_data["machine_name"] = machine_data["name"]
 
-			child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
-			set_attrs_from_dict(self, machine_data, child_table_map)
+			# child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
+			# set_attrs_from_dict(self, machine_data, child_table_map)
 
 			if machine_data.get("id"):
 				self.name = str(machine_data["id"])
