@@ -42,7 +42,7 @@ def icorp_api_get(endpoint):
     try:
         base_url, headers = get_icorp_auth()
         response = requests.get(f"{base_url}/{endpoint}", headers=headers, timeout=30)
-        frappe.log_error(frappe.get_traceback(), response)
+        frappe.log_error("api_log", response.json())
         response.raise_for_status()
         return dict_keys_to_snake_case(response.json())
     except Exception:
