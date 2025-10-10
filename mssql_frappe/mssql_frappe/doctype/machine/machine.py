@@ -78,7 +78,7 @@ class Machine(Document):
 				["machine_name"]
 			)
 			if machine_link:
-				machine_data["machine_name"] = machine_link
+				machine_data["machine_name"] = machine_link["machine_name"]
 
 			child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
 			set_attrs_from_dict(self, machine_data, child_table_map)
