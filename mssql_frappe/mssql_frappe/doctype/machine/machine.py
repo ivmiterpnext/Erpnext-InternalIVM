@@ -78,11 +78,6 @@ class Machine(Document):
 			if machine_data.get("id"):
 				self.name = str(machine_data["id"])
 
-			meta = frappe.get_meta(self.doctype)
-			link_fields = [df.fieldname for df in meta.fields if df.fieldtype in ("Link", "Dynamic Link")]
-			link_values = {field: getattr(self, field, None) for field in link_fields}
-			frappe.log_error(f"Link fields for {self.name}: {link_values}", "Machine Link Field Debug")
-
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine.load_from_db error")
 			raise
