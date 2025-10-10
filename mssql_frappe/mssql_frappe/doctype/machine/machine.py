@@ -17,6 +17,8 @@ class Machine(Document):
 	BOOL_FIELDS = ["has_smart_screen", "use_machine_timezone", "using_job_code", "allow_skip_job_code", "is_vend_return"]
 	SORT_FIELD_MAP = { "name": "id" }
 
+	_table_fieldnames = [] # Prevent frappe from trying to access non-existent table fields
+
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 
@@ -70,8 +72,8 @@ class Machine(Document):
 			if "name" in machine_data:
 				machine_data["machine_name"] = machine_data["name"]
 
-			# child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
-			# set_attrs_from_dict(self, machine_data, child_table_map)
+			child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
+			set_attrs_from_dict(self, machine_data)
 
 			if machine_data.get("id"):
 				self.name = str(machine_data["id"])
