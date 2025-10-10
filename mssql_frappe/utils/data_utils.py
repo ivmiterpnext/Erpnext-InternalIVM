@@ -37,6 +37,8 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
 
         if mapped_key in child_table_map:
             child_field = child_table_map[mapped_key]
+            if not isinstance(v, list):
+                v = [v]
             rows = normalize_child_table_field(v, child_field)
             obj.set(mapped_key, rows)
             continue
