@@ -17,6 +17,17 @@ class SmartScreen(Document):
 
 	_table_fieldnames = [] # Prevent frappe from trying to access non-existent table fields
 
+	def check_if_latest(self):
+		pass  # Disable optimistic locking for virtual DocType
+
+	def validate_set_only_once(self):
+		pass # Disable "Set Only Once" validation for virtual DocType
+
+	@property
+	def _action(self):
+		# Always return "save" if not set
+		return getattr(self, "__action", "save")
+
 	def db_insert(self, *args, **kwargs):
 		raise NotImplementedError
 
