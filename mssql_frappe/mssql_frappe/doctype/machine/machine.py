@@ -18,7 +18,7 @@ class Machine(Document):
 	SORT_FIELD_MAP = { "name": "id" }
 
 	_table_fieldnames = [] # Prevent frappe from trying to access non-existent table fields
-	
+
 	def check_if_latest(self):
 		pass  # Disable optimistic locking for virtual DocType
 
@@ -68,9 +68,17 @@ class Machine(Document):
 			endpoint = f"SV/Machine/GetById?Id={self.name}"
 			item = icorp_api_get(endpoint)
 			machine_data = item.get("data", {}) or {}
+			
+			# if "name" in machine_data:
+			# 	machine_data["machine_name"] = machine_data.pop("name")
 
-			if "name" in machine_data:
-				machine_data["machine_name"] = machine_data.pop("name")
+			machine_link = frappe.db.get_value(
+				"Machine Link",
+				{"id": machine_data.get("id")},
+				["machine_name"]
+			)
+			if machine_link:
+				machine_data["machine_name"] = machine_link
 
 			child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
 			set_attrs_from_dict(self, machine_data, child_table_map)
