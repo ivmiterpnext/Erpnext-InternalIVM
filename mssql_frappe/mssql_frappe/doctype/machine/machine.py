@@ -68,20 +68,36 @@ class Machine(Document):
 			endpoint = f"SV/Machine/GetById?Id={self.name}"
 			item = icorp_api_get(endpoint)
 			machine_data = item.get("data", {}) or {}
-			frappe.log_error("machine_log", machine_data)
-			
+
+			# map name safely
 			if "name" in machine_data:
 				machine_data["machine_name"] = machine_data["name"]
 
-			child_table_map = { "agreement_fee_type_ids": "agreement_fee_type_id" }
-			set_attrs_from_dict(self, machine_data, child_table_map)
+			# 1) set scalars first (skip the table-multiselect field)
+			for k, v in machine_data.items():
+				if k == "agreement_fee_type_ids":
+					continue
+				# normalize ids to strings where appropriate
+				if k.endswith("id") and not isinstance(v, (list, dict)):
+					v = "" if v is None else str(v)
+				self.set(k, v)
 
+			# 2) attach child rows for the Table MultiSelect
+			attach_children(
+				doc=self,
+				fieldname="agreement_fee_type_ids",
+				values=machine_data.get("agreement_fee_type_ids") or [],
+				child_link_field="agreement_fee_type_id",  # the Link field in "Assigned Fee Type"
+			)
+
+			# keep name stable
 			if machine_data.get("id"):
 				self.name = str(machine_data["id"])
 
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine.load_from_db error")
 			raise
+
 
 	def db_update(self):
 		try:
