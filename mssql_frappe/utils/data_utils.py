@@ -40,7 +40,7 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
             if not isinstance(v, list):
                 v = [v]
             rows = normalize_child_table_field(v, child_field)
-            obj.set(mapped_key, rows)
+            obj.set(mapped_key, [frappe._dict(row) for row in rows])
             continue
 
         if mapped_key.endswith("id") and not isinstance(v, (list, dict)):
