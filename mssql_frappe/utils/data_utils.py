@@ -29,44 +29,41 @@ def build_sort_params(order_by, sort_field_map):
     return sort_params
 
 def set_attrs_from_dict(obj, data, child_table_map=None):
-    child_table_map = child_table_map or {}
-    doctype_name = obj.doctype.lower()
+	child_table_map = child_table_map or {}
+	doctype_name = obj.doctype.lower()
 
-    for k, v in (data or {}).items():
-        mapped_key = f"{doctype_name}_name" if k == "name" else k
+	for k, v in (data or {}).items():
+		mapped_key = f"{doctype_name}_name" if k == "name" else k
 
-        if mapped_key in child_table_map:
-            child_field = child_table_map[mapped_key]
+		# Child list?
+		if mapped_key in child_table_map:
+			child_field = child_table_map[mapped_key]
+			if not isinstance(v, list):
+				v = [v]
 
-            if not isinstance(v, list):
-                v = [v]
-            rows = []
+			rows = []
+			for i, val in enumerate(v, start=1):
+				row = dict(val) if isinstance(val, dict) else {child_field: str(val)}
+				row["idx"] = i
+				rows.append(frappe._dict(row))
 
-            for i, val in enumerate(v, start=1):
-                if isinstance(val, dict):
-                    row = dict(val)
-                else:
-                    row = {child_field: str(val)}
-                row["idx"] = i
-                rows.append(frappe._dict(row))
+			# NOTE: critical change here
+			obj.set(mapped_key, rows, as_value=True)
+			continue
 
-            # Log the rows for debugging
-            frappe.log_error(f"Setting child table '{mapped_key}' with rows: {rows}", "Child Table Mapping Debug")
+		# Scalars
+		if mapped_key.endswith("id") and not isinstance(v, (list, dict)):
+			v = "" if v is None else str(v)
+		elif not isinstance(v, (str, int, float, bool, type(None), list, dict)):
+			v = str(v)
 
-            obj.set(mapped_key, rows)
-            continue
+		setattr(obj, mapped_key, v)
 
-        if mapped_key.endswith("id") and not isinstance(v, (list, dict)):
-            v = "" if v is None else str(v)
-        elif not isinstance(v, (str, int, float, bool, type(None), list, dict)):
-            v = str(v)
+	# normalize empty strings to None
+	for field in list(obj.__dict__):
+		if getattr(obj, field) == "":
+			setattr(obj, field, None)
 
-        setattr(obj, mapped_key, v)
-
-    # Set any empty string field to None
-    for field in obj.__dict__:
-        if getattr(obj, field) == "":
-            setattr(obj, field, None)
 
 # def normalize_child_table_field(value, child_field):
 #     rows = []
