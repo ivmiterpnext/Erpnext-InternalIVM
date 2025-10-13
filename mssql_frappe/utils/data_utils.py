@@ -28,73 +28,64 @@ def build_sort_params(order_by, sort_field_map):
     sort_params.append(("sort[0].sortOrder", direction.upper()))
     return sort_params
 
-def set_attrs_from_dict(obj, data, child_table_map=None):
-	child_table_map = child_table_map or {}
-	doctype_name = obj.doctype.lower()
+def set_attrs_from_dict(obj, data, child_map: dict[str, str] | None = None):
+	child_map = child_map or {}
+	data = data or {}
 
-	for k, v in (data or {}).items():
-		mapped_key = f"{doctype_name}_name" if k == "name" else k
-
-		# Child list?
-		if mapped_key in child_table_map:
-			child_field = child_table_map[mapped_key]
-			if not isinstance(v, list):
-				v = [v]
-
-			rows = []
-			for i, val in enumerate(v, start=1):
-				row = dict(val) if isinstance(val, dict) else {child_field: str(val)}
-				row["idx"] = i
-				rows.append(frappe._dict(row))
-
-			obj.set(mapped_key, rows, as_value=True)
+	for key, val in data.items():
+		# Child / Table MultiSelect field?
+		if key in child_map:
+			attach_children(obj, key, val, child_map[key])
 			continue
 
-		# Scalars
-		if mapped_key.endswith("id") and not isinstance(v, (list, dict)):
-			v = "" if v is None else str(v)
-		elif not isinstance(v, (str, int, float, bool, type(None), list, dict)):
-			v = str(v)
+		# Normalize common "id" scalars to strings
+		if key.endswith("id") and not isinstance(val, (list, dict)):
+			val = "" if val is None else str(val)
 
-		setattr(obj, mapped_key, v)
+		# Assign directly (uses BaseDocument.set under the hood)
+		obj.set(key, val)
 
-	# normalize empty strings to None
-	for field in list(obj.__dict__):
-		if getattr(obj, field) == "":
-			setattr(obj, field, None)
+	# Normalize empty strings on the doc to None (optional, keeps Desk clean)
+	for f in list(obj.__dict__):
+		if getattr(obj, f) == "":
+			setattr(obj, f, None)
 
 
 def attach_children(doc, fieldname: str, values, child_link_field: str):
-    meta = frappe.get_meta(doc.doctype)
-    df = meta.get_field(fieldname)
-    if not df:
-        frappe.throw(f"Field '{fieldname}' not found on {doc.doctype}")
+	meta = frappe.get_meta(doc.doctype)
+	df = meta.get_field(fieldname)
+	if not df:
+		frappe.throw(f"Field '{fieldname}' not found on {doc.doctype}")
 
-    child_dt = df.options  # e.g., "Assigned Fee Type"
-    link_field = getattr(df, "link_field", None) or child_link_field
-    if not child_dt:
-        frappe.throw(f"Child DocType options missing for '{fieldname}' on {doc.doctype}")
-    if not link_field:
-        frappe.throw(f"Link field not set for Table MultiSelect '{fieldname}' on {doc.doctype}")
+	child_dt = df.options  # e.g., "Assigned Fee Type" (the CHILD doctype)
+	# Prefer the link_field property on the parent DF if set; fall back to provided name
+	link_field = getattr(df, "link_field", None) or child_link_field
 
-    if values is None:
-        values = []
-    elif not isinstance(values, list):
-        values = [values]
+	if not child_dt:
+		frappe.throw(f"Child DocType options missing for field '{fieldname}' on {doc.doctype}")
+	if not link_field:
+		frappe.throw(f"Link field not set for Table MultiSelect '{fieldname}' on {doc.doctype}")
 
-    children = []
-    for i, val in enumerate(values, start=1):
-        payload = val if isinstance(val, dict) else {link_field: str(val)}
-        cd = frappe.get_doc({"doctype": child_dt})
-        cd.update(payload)
-        cd.parent = doc.name
-        cd.parenttype = doc.doctype
-        cd.parentfield = fieldname
-        cd.idx = i
-        children.append(cd)
+	# Normalize values
+	if values is None:
+		values = []
+	elif not isinstance(values, list):
+		values = [values]
 
-    # Important for virtual doctypes
-    doc.set(fieldname, children, as_value=True)
+	children = []
+	for i, val in enumerate(values, start=1):
+		payload = val if isinstance(val, dict) else {link_field: ("" if val is None else str(val))}
+		cd = frappe.get_doc({"doctype": child_dt})
+		cd.update(payload)
+		cd.parent = doc.name
+		cd.parenttype = doc.doctype
+		cd.parentfield = fieldname
+		cd.idx = i
+		children.append(cd)
+
+	# Important for virtual doctypes: bypass child-table mutation path
+	doc.set(fieldname, children, as_value=True)
+
 
 
 
