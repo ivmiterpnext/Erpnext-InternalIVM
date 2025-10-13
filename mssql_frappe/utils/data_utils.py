@@ -33,12 +33,10 @@ def set_attrs_from_dict(obj, data, child_map: dict[str, str] | None = None):
 	data = data or {}
 
 	for key, val in data.items():
-		# Child / Table MultiSelect field?
 		if key in child_map:
 			attach_children(obj, key, val, child_map[key])
 			continue
 
-		# Normalize common "id" scalars to strings
 		if key.endswith("id") and not isinstance(val, (list, dict)):
 			val = "" if val is None else str(val)
 
@@ -65,7 +63,6 @@ def attach_children(doc, fieldname: str, values, child_link_field: str):
 	if not link_field:
 		frappe.throw(f"Link field not set for Table MultiSelect '{fieldname}' on {doc.doctype}")
 
-	# Normalize values
 	if values is None:
 		values = []
 	elif not isinstance(values, list):
@@ -80,8 +77,8 @@ def attach_children(doc, fieldname: str, values, child_link_field: str):
 		cd.parenttype = doc.doctype
 		cd.parentfield = fieldname
 		cd.idx = i
+		frappe.log_error(f"Child row data: {cd.as_dict()}", "DataUtils.attach_children")  # <-- Add this
 		children.append(cd)
-	frappe.log_error(f"Setting child table '{fieldname}' with rows: {children}", "DataUtils.attach_children")
 	# Important for virtual doctypes: bypass child-table mutation path
 	doc.set(fieldname, children, as_value=True)
 
