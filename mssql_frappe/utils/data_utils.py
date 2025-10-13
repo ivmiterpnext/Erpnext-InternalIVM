@@ -50,8 +50,7 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
                 if isinstance(val, dict):
                     row = dict(val)
                 else:
-                    row = {child_field: val}
-
+                    row = {child_field: str(val)}
                 row["idx"] = i
                 rows.append(frappe._dict(row))
             obj.set(mapped_key, rows)
