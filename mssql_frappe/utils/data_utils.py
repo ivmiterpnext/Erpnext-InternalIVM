@@ -82,7 +82,7 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
 #             "idx": i
 #         })
 
-    return rows
+#    return rows
 
 def to_iso8601(date_string):
     for input_format in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
