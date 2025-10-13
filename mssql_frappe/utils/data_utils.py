@@ -29,10 +29,6 @@ def build_sort_params(order_by, sort_field_map):
     return sort_params
 
 def set_attrs_from_dict(obj, data, child_table_map=None):
-    """
-    Sets attributes on obj from data dict.
-    For any key in child_table_map, expects a list of IDs and converts to list of frappe._dicts.
-    """
     child_table_map = child_table_map or {}
     doctype_name = obj.doctype.lower()
 
@@ -53,6 +49,10 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
                     row = {child_field: str(val)}
                 row["idx"] = i
                 rows.append(frappe._dict(row))
+
+            # Log the rows for debugging
+            frappe.log_error(f"Setting child table '{mapped_key}' with rows: {rows}", "Child Table Mapping Debug")
+
             obj.set(mapped_key, rows)
             continue
 
