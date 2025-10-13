@@ -65,29 +65,31 @@ class Machine(Document):
 
 	def load_from_db(self):
 		try:
+			# Fetch from external API
 			endpoint = f"SV/Machine/GetById?Id={self.name}"
 			resp = icorp_api_get(endpoint)
 			m = resp.get("data") or {}
 
-			# FINALIZE NAME *FIRST* so child rows inherit the correct parent
-			if m.get("id"):
-				self.name = str(m["id"])
-
-			# Map API "name" to a safe field
+			# Map API "name" safely (avoid clobbering .name); keep both if you need both
 			if "name" in m:
 				m["machine_name"] = m["name"]
 
-			# child field map: parent field -> child link field
+				# Ensure doc.name is a stable string id
+			if m.get("id"):
+				self.name = str(m["id"])
+
+			# Declare which incoming keys are child/table-multiselects and their link field
 			child_map = {
-				"agreement_fee_type_ids": "agreement_fee_type_id",
+				"agreement_fee_type_ids": "agreement_fee_type_id",  # parent field -> child link field
 			}
 
+			# Set everything in one pass; child fields go through attach_children()
 			set_attrs_from_dict(self, m, child_map=child_map)
+
 
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine.load_from_db error")
 			raise
-
 
 
 
