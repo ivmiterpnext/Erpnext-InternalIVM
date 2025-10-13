@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from mssql_frappe.utils.api_utils import icorp_api_post, icorp_api_get, icorp_api_put, icorp_api_delete, icorp_get_count
 from mssql_frappe.utils.cache_util import clear_cache_by_prefix
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
-from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict
+from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict, ensure_meta_is_ready
 from mssql_frappe.utils.filter_utils import filters_to_query_params
 
 
@@ -64,27 +64,23 @@ class Machine(Document):
 
 	def load_from_db(self):
 		try:
-			self._ensure_meta_is_ready()
-			# Fetch from external API
+			ensure_meta_is_ready(self)
+
 			endpoint = f"SV/Machine/GetById?Id={self.name}"
-			resp = icorp_api_get(endpoint)
-			m = resp.get("data") or {}
+			response = icorp_api_get(endpoint)
+			data = response.get("data") or {}
 
-			# Map API "name" safely (avoid clobbering .name); keep both if you need both
-			if "name" in m:
-				m["machine_name"] = m["name"]
+			if "name" in data:
+				data["machine_name"] = data["name"]
 
-			# Declare which incoming keys are child/table-multiselects and their link field
 			child_map = {
-				"agreement_fee_type_ids": "agreement_fee_type_id",  # parent field -> child link field
+				"agreement_fee_type_ids": "agreement_fee_type_id",
 			}
 
-			# Set everything in one pass; child fields go through attach_children()
-			set_attrs_from_dict(self, m, child_table_map=child_map)
+			set_attrs_from_dict(self, data, child_table_map=child_map)
 
-			# Ensure doc.name is a stable string id
-			if m.get("id"):
-				self.name = str(m["id"])
+			if data.get("id"):
+				self.name = str(data["id"])
 
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine.load_from_db error")
@@ -228,9 +224,4 @@ class Machine(Document):
 			frappe.log_error(frappe.get_traceback(), "Machine._sync_agreement_fee_types error")
 			raise
 
-	def _ensure_meta_is_ready(self):
-		# make sure meta & table fieldnames exist before using self.set(...)
-		if not getattr(self, "meta", None):
-			self.meta = frappe.get_meta(self.doctype)
-		if not hasattr(self, "_table_fieldnames"):
-			self._table_fieldnames = [df.fieldname for df in self.meta.get_table_fields()]
+

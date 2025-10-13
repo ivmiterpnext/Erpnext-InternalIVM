@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from mssql_frappe.utils.api_utils import icorp_api_post, icorp_api_get, icorp_api_put, icorp_get_count
 from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache_by_prefix
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
-from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict, to_iso8601
+from mssql_frappe.utils.data_utils import build_sort_params, ensure_meta_is_ready, set_attrs_from_dict, to_iso8601
 from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 from mssql_frappe.utils.filter_utils import filters_to_query_params
 
@@ -62,6 +62,8 @@ class MachineHardwareConfiguration(Document):
 
 	def load_from_db(self):
 		try:
+			ensure_meta_is_ready(self)
+			
 			endpoint = f"SV/MachineHardwareConfiguration/GetById?Id={self.name}"
 			item = icorp_api_get(endpoint)
 			data = item.get("data", {})

@@ -6,7 +6,7 @@ from frappe.model.document import Document
 from mssql_frappe.utils.api_utils import headwind_api_request
 from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
-from mssql_frappe.utils.data_utils import set_attrs_from_dict
+from mssql_frappe.utils.data_utils import ensure_meta_is_ready, set_attrs_from_dict
 
 
 class SmartScreen(Document):
@@ -33,6 +33,8 @@ class SmartScreen(Document):
 
 	def load_from_db(self):
 		try:
+			ensure_meta_is_ready(self)
+			
 			endpoint = f"private/devices/number/{self.name}"
 			item = headwind_api_request("GET", endpoint)
 			data = item.get("data", {})

@@ -72,3 +72,9 @@ def to_iso8601(date_string):
         except Exception as e:
             frappe.log_error(f"Failed to parse date string: {e}", "DateTimeHelper.to_iso8601 error")
     return date_string
+
+def ensure_meta_is_ready(self):
+	if not getattr(self, "meta", None):
+		self.meta = frappe.get_meta(self.doctype)
+	if not hasattr(self, "_table_fieldnames"):
+		self._table_fieldnames = [df.fieldname for df in self.meta.get_table_fields()]
