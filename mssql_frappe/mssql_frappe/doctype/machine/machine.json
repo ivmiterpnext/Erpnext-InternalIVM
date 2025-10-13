@@ -84,7 +84,7 @@
    "fieldname": "agreement_fee_type_ids",
    "fieldtype": "Table MultiSelect",
    "label": "Agreement Fee Type",
-   "options": "Assigned Fee Type"
+   "options": "Agreement Fee Type"
   },
   {
    "fieldname": "client_id",
