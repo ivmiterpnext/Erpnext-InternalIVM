@@ -68,7 +68,8 @@ class Machine(Document):
 			endpoint = f"SV/Machine/GetById?Id={self.name}"
 			item = icorp_api_get(endpoint)
 			machine_data = item.get("data", {}) or {}
-
+			frappe.log_error("machine_log", machine_data)
+			
 			if "name" in machine_data:
 				machine_data["machine_name"] = machine_data["name"]
 

@@ -63,10 +63,10 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
 
         setattr(obj, mapped_key, v)
 
-    # # Set any empty string field to None
-    # for field in obj.__dict__:
-    #     if getattr(obj, field) == "":
-    #         setattr(obj, field, None)
+    # Set any empty string field to None
+    for field in obj.__dict__:
+        if getattr(obj, field) == "":
+            setattr(obj, field, None)
 
 # def normalize_child_table_field(value, child_field):
 #     rows = []
