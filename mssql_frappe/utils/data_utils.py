@@ -65,40 +65,40 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
 
 
 def attach_children(doc, fieldname: str, values, child_link_field: str):
-	meta = frappe.get_meta(doc.doctype)
-	df = meta.get_field(fieldname)
-	if not df:
-		frappe.throw(f"Field '{fieldname}' not found on {doc.doctype}")
+    meta = frappe.get_meta(doc.doctype)
+    df = meta.get_field(fieldname)
+    if not df:
+        frappe.throw(f"Field '{fieldname}' not found on {doc.doctype}")
 
-	child_dt = df.options  # e.g., "Assigned Fee Type" (the CHILD doctype)
-	# Prefer the link_field property on the parent DF if set; fall back to provided name
-	link_field = getattr(df, "link_field", None) or child_link_field
+    child_dt = df.options  # e.g., "Assigned Fee Type" (the CHILD doctype)
+    # Prefer the link_field property on the parent DF if set; fall back to provided name
+    link_field = getattr(df, "link_field", None) or child_link_field
 
-	if not child_dt:
-		frappe.throw(f"Child DocType options missing for field '{fieldname}' on {doc.doctype}")
-	if not link_field:
-		frappe.throw(f"Link field not set for Table MultiSelect '{fieldname}' on {doc.doctype}")
+    if not child_dt:
+        frappe.throw(f"Child DocType options missing for field '{fieldname}' on {doc.doctype}")
+    if not link_field:
+        frappe.throw(f"Link field not set for Table MultiSelect '{fieldname}' on {doc.doctype}")
 
-	# Normalize values
-	if values is None:
-		values = []
-	elif not isinstance(values, list):
-		values = [values]
+    # Normalize values
+    if values is None:
+        values = []
+    elif not isinstance(values, list):
+        values = [values]
 
-	children = []
-	for i, val in enumerate(values, start=1):
-		payload = val if isinstance(val, dict) else {link_field: ("" if val is None else str(val))}
-		cd = frappe.get_doc({"doctype": child_dt})
-		cd.update(payload)
-		cd.parent = doc.name
-		cd.parenttype = doc.doctype
-		cd.parentfield = fieldname
-		cd.idx = i
-		children.append(cd)
-
+    children = []
+    for i, val in enumerate(values, start=1):
+        payload = val if isinstance(val, dict) else {link_field: ("" if val is None else str(val))}
+        cd = frappe.get_doc({"doctype": child_dt})
+        cd.update(payload)
+        cd.parent = doc.name
+        cd.parenttype = doc.doctype
+        cd.parentfield = fieldname
+        cd.idx = i
+        children.append(cd)
     frappe.log_error(f"Setting child table '{fieldname}' with rows: {children}", "DataUtils.attach_children")
-	# Important for virtual doctypes: bypass child-table mutation path
-	doc.set(fieldname, children, as_value=True)
+
+    # Important for virtual doctypes: bypass child-table mutation path
+    doc.set(fieldname, children, as_value=True)
 
 
 
