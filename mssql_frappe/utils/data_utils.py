@@ -28,78 +28,41 @@ def build_sort_params(order_by, sort_field_map):
     sort_params.append(("sort[0].sortOrder", direction.upper()))
     return sort_params
 
-def set_attrs_from_dict(obj, data, child_map: dict[str, str] | None = None):
-	child_map = child_map or {}
-	data = data or {}
+def set_attrs_from_dict(obj, data, child_table_map=None):
+    child_table_map = child_table_map or {}
+    doctype_name = obj.doctype.lower()
 
-	for key, val in data.items():
-		if key in child_map:
-			attach_children(obj, key, val, child_map[key])
-			continue
+    for k, v in (data or {}).items():
+        mapped_key = f"{doctype_name}_name" if k == "name" else k
 
-		if key.endswith("id") and not isinstance(val, (list, dict)):
-			val = "" if val is None else str(val)
+        if mapped_key in child_table_map:
+            child_field = child_table_map[mapped_key]
+            rows = normalize_child_table_field(v, child_field)
+            obj.set(mapped_key, [frappe._dict(row) for row in rows])
+            continue
 
-		# Assign directly (uses BaseDocument.set under the hood)
-		obj.set(key, val)
+        if mapped_key.endswith("id") and not isinstance(v, (list, dict)):
+            v = "" if v is None else str(v)
+        elif not isinstance(v, (str, int, float, bool, type(None), list, dict)):
+            v = str(v)
 
-	# Normalize empty strings on the doc to None (optional, keeps Desk clean)
-	for f in list(obj.__dict__):
-		if getattr(obj, f) == "":
-			setattr(obj, f, None)
+        setattr(obj, mapped_key, v)
 
-def attach_children(doc, fieldname: str, values, child_link_field: str):
-	meta = frappe.get_meta(doc.doctype)
-	df = meta.get_field(fieldname)
-	if not df:
-		frappe.throw(f"Field '{fieldname}' not found on {doc.doctype}")
+def normalize_child_table_field(value, child_field):
+    rows = []
 
-	child_dt = df.options  # e.g., "Assigned Fee Type" (the CHILD doctype)
-	# Prefer the link_field property on the parent DF if set; fall back to provided name
-	link_field = getattr(df, "link_field", None) or child_link_field
+    if isinstance(value, list) and value and isinstance(value[0], dict):
+        values = [str(x.get(child_field, "")) for x in value]
+    else:
+        values = [str(x) for x in (value or [])]
 
-	if not child_dt:
-		frappe.throw(f"Child DocType options missing for field '{fieldname}' on {doc.doctype}")
-	if not link_field:
-		frappe.throw(f"Link field not set for Table MultiSelect '{fieldname}' on {doc.doctype}")
+    for i, val in enumerate(values, start=1):
+        rows.append({
+            child_field: val,
+            "idx": i
+        })
 
-	if values is None:
-		values = []
-	elif not isinstance(values, list):
-		values = [values]
-
-	children = []
-	for i, val in enumerate(values, start=1):
-		payload = val if isinstance(val, dict) else {link_field: ("" if val is None else str(val))}
-		cd = frappe.get_doc({"doctype": child_dt})
-		cd.update(payload)
-		cd.parent = doc.name
-		cd.parenttype = doc.doctype
-		cd.parentfield = fieldname
-		cd.idx = i
-		frappe.log_error(f"Child row data: {cd.as_dict()}", "DataUtils.attach_children")  # <-- Add this
-		children.append(cd)
-	# Important for virtual doctypes: bypass child-table mutation path
-	doc.set(fieldname, children, as_value=True)
-
-
-
-
-# def normalize_child_table_field(value, child_field):
-#     rows = []
-
-#     if isinstance(value, list) and value and isinstance(value[0], dict):
-#         values = [str(x.get(child_field, "")) for x in value]
-#     else:
-#         values = [str(x) for x in (value or [])]
-
-#     for i, val in enumerate(values, start=1):
-#         rows.append({
-#             child_field: val,
-#             "idx": i
-#         })
-
-#    return rows
+    return rows
 
 def to_iso8601(date_string):
     for input_format in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
