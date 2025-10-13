@@ -64,6 +64,7 @@ class Machine(Document):
 
 	def load_from_db(self):
 		try:
+			self._ensure_meta_is_ready()
 			# Fetch from external API
 			endpoint = f"SV/Machine/GetById?Id={self.name}"
 			resp = icorp_api_get(endpoint)
@@ -226,3 +227,10 @@ class Machine(Document):
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine._sync_agreement_fee_types error")
 			raise
+
+	def _ensure_meta_is_ready(self):
+		# make sure meta & table fieldnames exist before using self.set(...)
+		if not getattr(self, "meta", None):
+			self.meta = frappe.get_meta(self.doctype)
+		if not hasattr(self, "_table_fieldnames"):
+			self._table_fieldnames = [df.fieldname for df in self.meta.get_table_fields()]
