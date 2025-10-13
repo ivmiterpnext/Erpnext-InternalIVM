@@ -28,27 +28,40 @@ def build_sort_params(order_by, sort_field_map):
     sort_params.append(("sort[0].sortOrder", direction.upper()))
     return sort_params
 
-def set_attrs_from_dict(obj, data, child_map: dict[str, str] | None = None):
-	child_map = child_map or {}
-	data = data or {}
+def set_attrs_from_dict(obj, data, child_table_map=None):
+	child_table_map = child_table_map or {}
+	doctype_name = obj.doctype.lower()
 
-	for key, val in data.items():
-		# Child / Table MultiSelect field?
-		if key in child_map:
-			attach_children(obj, key, val, child_map[key])
+	for k, v in (data or {}).items():
+		mapped_key = f"{doctype_name}_name" if k == "name" else k
+
+		# Child list?
+		if mapped_key in child_table_map:
+			child_field = child_table_map[mapped_key]
+			if not isinstance(v, list):
+				v = [v]
+
+			rows = []
+			for i, val in enumerate(v, start=1):
+				row = dict(val) if isinstance(val, dict) else {child_field: str(val)}
+				row["idx"] = i
+				rows.append(frappe._dict(row))
+
+			obj.set(mapped_key, rows, as_value=True)
 			continue
 
-		# Normalize common "id" scalars to strings
-		if key.endswith("id") and not isinstance(val, (list, dict)):
-			val = "" if val is None else str(val)
+		# Scalars
+		if mapped_key.endswith("id") and not isinstance(v, (list, dict)):
+			v = "" if v is None else str(v)
+		elif not isinstance(v, (str, int, float, bool, type(None), list, dict)):
+			v = str(v)
 
-		# Assign directly (uses BaseDocument.set under the hood)
-		obj.set(key, val)
+		setattr(obj, mapped_key, v)
 
-	# Normalize empty strings on the doc to None (optional, keeps Desk clean)
-	for f in list(obj.__dict__):
-		if getattr(obj, f) == "":
-			setattr(obj, f, None)
+	# normalize empty strings to None
+	for field in list(obj.__dict__):
+		if getattr(obj, field) == "":
+			setattr(obj, field, None)
 
 
 def attach_children(doc, fieldname: str, values, child_link_field: str):
@@ -57,7 +70,8 @@ def attach_children(doc, fieldname: str, values, child_link_field: str):
 	if not df:
 		frappe.throw(f"Field '{fieldname}' not found on {doc.doctype}")
 
-	child_dt = df.options 
+	child_dt = df.options  # e.g., "Assigned Fee Type" (the CHILD doctype)
+	# Prefer the link_field property on the parent DF if set; fall back to provided name
 	link_field = getattr(df, "link_field", None) or child_link_field
 
 	if not child_dt:
@@ -82,6 +96,7 @@ def attach_children(doc, fieldname: str, values, child_link_field: str):
 		cd.idx = i
 		children.append(cd)
 
+    frappe.log_error(f"Setting child table '{fieldname}' with rows: {children}", "DataUtils.attach_children")
 	# Important for virtual doctypes: bypass child-table mutation path
 	doc.set(fieldname, children, as_value=True)
 
