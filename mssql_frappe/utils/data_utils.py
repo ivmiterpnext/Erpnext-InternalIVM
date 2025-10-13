@@ -57,8 +57,7 @@ def attach_children(doc, fieldname: str, values, child_link_field: str):
 	if not df:
 		frappe.throw(f"Field '{fieldname}' not found on {doc.doctype}")
 
-	child_dt = df.options  # e.g., "Assigned Fee Type" (the CHILD doctype)
-	# Prefer the link_field property on the parent DF if set; fall back to provided name
+	child_dt = df.options 
 	link_field = getattr(df, "link_field", None) or child_link_field
 
 	if not child_dt:
