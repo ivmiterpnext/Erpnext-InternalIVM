@@ -11,6 +11,7 @@ from mssql_frappe.utils.filter_utils import filters_to_query_params
 
 
 class Machine(Document):
+	_table_fieldnames = []
 	_total_count = None
 
 	KEY_FIELD = "id"

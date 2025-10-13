@@ -41,7 +41,7 @@ def get_icorp_auth():
 def icorp_api_get(endpoint):
     try:
         base_url, headers = get_icorp_auth()
-        response = requests.get(f"{base_url}/{endpoint}", headers=headers, timeout=10)
+        response = requests.get(f"{base_url}/{endpoint}", headers=headers, timeout=30)
         response.raise_for_status()
         return dict_keys_to_snake_case(response.json())
     except Exception:
@@ -60,7 +60,7 @@ def icorp_api_post(endpoint, data):
         data = dict_keys_to_camel_case(data)
         data = _remove_empty_fields(data)
 
-        response = requests.post(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=10)
+        response = requests.post(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=30)
         response.raise_for_status()
         return response.json()
     except Exception:
@@ -80,7 +80,7 @@ def icorp_api_put(endpoint, data):
         data = dict_keys_to_camel_case(data)
         data = _remove_empty_fields(data)
 
-        response = requests.put(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=10)
+        response = requests.put(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=30)
         response.raise_for_status()
         return response.json()
     except Exception:
@@ -94,9 +94,9 @@ def icorp_api_delete(endpoint, data=None):
         if data:
             data = dict_keys_to_camel_case(data)
             data = _remove_empty_fields(data)
-            response = requests.delete(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=10)
+            response = requests.delete(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=30)
         else:
-            response = requests.delete(f"{base_url}/{endpoint}", headers=headers, timeout=10)
+            response = requests.delete(f"{base_url}/{endpoint}", headers=headers, timeout=30)
 
         response.raise_for_status()
         if not response.text.strip():
@@ -133,7 +133,7 @@ def _fetch_headwind_token():
         password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest().upper()
         payload = {"login": login, "password": password_md5}
 
-        response = requests.post(f"{base_url}/public/jwt/login", json=payload, timeout=10)
+        response = requests.post(f"{base_url}/public/jwt/login", json=payload, timeout=30)
         response.raise_for_status()
         return response.json()["id_token"]
     except Exception:
@@ -154,12 +154,12 @@ def headwind_api_request(method, endpoint, data=None, params=None):
         base_url, headers = get_headwind_auth(token)
         if data:
             data = dict_keys_to_camel_case(data)
-        response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=10)
+        response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=30)
 
         if response.status_code == 401:
             token = _fetch_headwind_token()
             base_url, headers = get_headwind_auth(token)
-            response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=10)
+            response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=30)
         response.raise_for_status()
         return dict_keys_to_snake_case(response.json())
     except Exception:
