@@ -29,6 +29,10 @@ def build_sort_params(order_by, sort_field_map):
     return sort_params
 
 def set_attrs_from_dict(obj, data, child_table_map=None):
+    """
+    Sets attributes on obj from data dict.
+    For any key in child_table_map, expects a list of IDs and converts to list of frappe._dicts.
+    """
     child_table_map = child_table_map or {}
     doctype_name = obj.doctype.lower()
 
@@ -37,10 +41,20 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
 
         if mapped_key in child_table_map:
             child_field = child_table_map[mapped_key]
+
             if not isinstance(v, list):
                 v = [v]
-            rows = normalize_child_table_field(v, child_field)
-            obj.set(mapped_key, [frappe._dict(row) for row in rows])
+            rows = []
+
+            for i, val in enumerate(v, start=1):
+                if isinstance(val, dict):
+                    row = dict(val)
+                else:
+                    row = {child_field: val}
+
+                row["idx"] = i
+                rows.append(frappe._dict(row))
+            obj.set(mapped_key, rows)
             continue
 
         if mapped_key.endswith("id") and not isinstance(v, (list, dict)):
@@ -50,19 +64,24 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
 
         setattr(obj, mapped_key, v)
 
-def normalize_child_table_field(value, child_field):
-    rows = []
+    # # Set any empty string field to None
+    # for field in obj.__dict__:
+    #     if getattr(obj, field) == "":
+    #         setattr(obj, field, None)
 
-    if isinstance(value, list) and value and isinstance(value[0], dict):
-        values = [str(x.get(child_field, "")) for x in value]
-    else:
-        values = [str(x) for x in (value or [])]
+# def normalize_child_table_field(value, child_field):
+#     rows = []
 
-    for i, val in enumerate(values, start=1):
-        rows.append({
-            child_field: val,
-            "idx": i
-        })
+#     if isinstance(value, list) and value and isinstance(value[0], dict):
+#         values = [str(x.get(child_field, "")) for x in value]
+#     else:
+#         values = [str(x) for x in (value or [])]
+
+#     for i, val in enumerate(values, start=1):
+#         rows.append({
+#             child_field: val,
+#             "idx": i
+#         })
 
     return rows
 
