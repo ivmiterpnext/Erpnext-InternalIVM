@@ -65,38 +65,31 @@ class Machine(Document):
 
 	def load_from_db(self):
 		try:
+			# Fetch from external API
 			endpoint = f"SV/Machine/GetById?Id={self.name}"
-			item = icorp_api_get(endpoint)
-			machine_data = item.get("data", {}) or {}
+			resp = icorp_api_get(endpoint)
+			m = resp.get("data") or {}
 
-			# map name safely
-			if "name" in machine_data:
-				machine_data["machine_name"] = machine_data["name"]
+			# Map API "name" safely (avoid clobbering .name); keep both if you need both
+			if "name" in m:
+				m["machine_name"] = m["name"]
 
-			# 1) set scalars first (skip the table-multiselect field)
-			for k, v in machine_data.items():
-				if k == "agreement_fee_type_ids":
-					continue
-				# normalize ids to strings where appropriate
-				if k.endswith("id") and not isinstance(v, (list, dict)):
-					v = "" if v is None else str(v)
-				self.set(k, v)
+			# Declare which incoming keys are child/table-multiselects and their link field
+			child_map = {
+				"agreement_fee_type_ids": "agreement_fee_type_id",  # parent field -> child link field
+			}
 
-			# 2) attach child rows for the Table MultiSelect
-			attach_children(
-				doc=self,
-				fieldname="agreement_fee_type_ids",
-				values=machine_data.get("agreement_fee_type_ids") or [],
-				child_link_field="agreement_fee_type_id",  # the Link field in "Assigned Fee Type"
-			)
+			# Set everything in one pass; child fields go through attach_children()
+			set_attrs_from_dict(self, m, child_map=child_map)
 
-			# keep name stable
-			if machine_data.get("id"):
-				self.name = str(machine_data["id"])
+			# Ensure doc.name is a stable string id
+			if m.get("id"):
+				self.name = str(m["id"])
 
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine.load_from_db error")
 			raise
+
 
 
 	def db_update(self):
