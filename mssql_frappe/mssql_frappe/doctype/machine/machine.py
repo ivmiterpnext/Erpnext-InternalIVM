@@ -2,91 +2,67 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
-from mssql_frappe.utils.api_utils import icorp_api_post, icorp_api_get, icorp_api_put, icorp_api_delete, icorp_get_count
-from mssql_frappe.utils.cache_util import clear_cache_by_prefix
+from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
+from mssql_frappe.utils.api_utils import (icorp_api_post, icorp_api_get, icorp_api_put, icorp_api_delete, icorp_get_count)
+from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
-from mssql_frappe.utils.data_utils import build_sort_params, set_attrs_from_dict, ensure_meta_is_ready
+from mssql_frappe.utils.data_utils import set_attrs_from_dict, ensure_meta_is_ready, build_sort_params
 from mssql_frappe.utils.filter_utils import filters_to_query_params
 
 
-class Machine(Document):
-	_total_count = None
-
+class Machine(BaseVirtualDoctype):
 	KEY_FIELD = "id"
-	BOOL_FIELDS = ["has_smart_screen", "use_machine_timezone", "using_job_code", "allow_skip_job_code", "is_vend_return"]
-	SORT_FIELD_MAP = { "name": "id" }
+	BOOL_FIELDS = ["has_smart_screen", "use_machine_timezone", "using_job_code",
+					"allow_skip_job_code", "is_vend_return"]
 
+	# Map Frappe list fields to API field names
+	SORT_FIELD_MAP = {
+		"name": KEY_FIELD,
+		"creation": "createdDate",
+		"machine_name": "machineName",
+	}
 
-	def check_if_latest(self):
-		pass  # Disable optimistic locking for virtual DocType
+	def pre_insert_data(self, data):
+		data = convert_fields_to_bool(data, self.BOOL_FIELDS)
+		data["name"] = data.get("machine_name")
 
-	def validate_set_only_once(self):
-		pass # Disable "Set Only Once" validation for virtual DocType
+		if "time_zone_id" in data:
+			data["time_zone_id"] = str(data["time_zone_id"])
+		return data
 
-	@property
-	def _action(self):
-		# Always return "save" if not set
-		return getattr(self, "__action", "save")
+	def post_insert_response(self, payload):
+		machine_id = str(payload.get("id") or "")
+		if not machine_id:
+			frappe.throw(f"Failed to create Machine in external API: {payload}")
+		if "name" in payload:
+			payload["machine_name"] = payload.pop("name")
 
-	def db_insert(self, *args, **kwargs):
-		try:
-			data = self.get_valid_dict()
-			data = convert_fields_to_bool(data, self.BOOL_FIELDS)
-			data["name"] = data.get("machine_name")
+		for k, v in payload.items():
+			setattr(self, k, v)
+		self.name = machine_id
+	
+		if not frappe.db.exists("Machine Link", self.name):
+			frappe.get_doc({
+				"doctype": "Machine Link",
+				"name": self.name,
+				"id": self.name,
+				"machine_name": self.machine_name,
+			}).insert(ignore_permissions=True)
 
-			response = icorp_api_post("SV/Machine", data)
-			data = response.get("data") or {}
+		clear_cache("machine_list_cache", "machine_count")
 
-			machine_id = str(data.get("id") or "")
-			if not machine_id:
-				frappe.throw(f"Failed to create Machine in external API: {response}")
+	def post_process_loaded_data(self, data):
+		# if data.get("id"):
+		# 	self.name = str(data["id"])
 
-			if "name" in data:
-				data["machine_name"] = data.pop("name")
+		# if "name" in data:
+		# 	data["machine_name"] = data["name"]
 
-			for k, v in data.items():
-				setattr(self, k, v)
-			self.name = machine_id
+		child_table_map = {
+			"agreement_fee_type_ids": "agreement_fee_type_id",
+		}
 
-			if not frappe.db.exists("Machine Link", self.name):
-				frappe.get_doc({
-					"doctype": "Machine Link",
-					"name": self.name,
-					"id": self.name,
-					"machine_name": self.machine_name,
-				}).insert(ignore_permissions=True)
-
-			self.clear_cache()
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "Machine.db_insert error")
-			raise
-
-	def load_from_db(self):
-		try:
-			ensure_meta_is_ready(self)
-
-			endpoint = f"SV/Machine/GetById?Id={self.name}"
-			response = icorp_api_get(endpoint)
-			data = response.get("data") or {}
-
-			if "name" in data:
-				data["machine_name"] = data["name"]
-
-			child_map = {
-				"agreement_fee_type_ids": "agreement_fee_type_id",
-			}
-
-			set_attrs_from_dict(self, data, child_table_map=child_map)
-
-			if data.get("id"):
-				self.name = str(data["id"])
-
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "Machine.load_from_db error")
-			raise
-
-
+		set_attrs_from_dict(self, data, child_table_map)
 
 	def db_update(self):
 		try:
@@ -95,133 +71,79 @@ class Machine(Document):
 			data[self.KEY_FIELD] = self.name
 			data["name"] = self.machine_name
 
-			response = icorp_api_put("SV/Machine", data)
-			data = response.get("data") or {}
+			response = icorp_api_put("SV/Machine", data) or {}
+			payload = response.get("data") or {}
 
-			machine_id = str(data.get("id") or "")
+			machine_id = str(payload.get("id") or "")
 			if not machine_id:
 				frappe.throw(f"Failed to update Machine in external API: {response}")
 
-			if "name" in data:
-				data["machine_name"] = data.pop("name")
+			if "name" in payload:
+				payload["machine_name"] = payload.pop("name")
 
 			self._sync_agreement_fee_types()
 
-			for k, v in data.items():
+			for k, v in payload.items():
 				setattr(self, k, v)
 			self.name = machine_id
 
 			frappe.db.set_value("Machine Link", self.name, "machine_name", self.machine_name)
-			self.clear_cache()
+			clear_cache("machine_list_cache", "machine_count")
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine.db_update error")
 			raise
 
 	def delete(self):
-		# This "deactivates" a machine rather than delete it
+		# External system "deactivate"
 		try:
 			endpoint = f"SV/Machine?Id={self.name}"
-			response = icorp_api_delete(endpoint, {"id": self.name})
-
+			resp = icorp_api_delete(endpoint, {"id": self.name})
 			frappe.delete_doc("Machine Link", self.name, force=True)
-			return response
+			return resp
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine.delete error")
 			raise
 
-	@staticmethod
-	def get_list(filters=None, page_length=20, start=0, order_by=None, **kwargs):
-		page = (start // page_length) + 1
+	@classmethod
+	def process_list_data(cls, data, args):
+		ids = [str(r["id"]) for r in data if r.get("id") is not None]
 
-		filter_query = filters_to_query_params(filters)
-		sort_query = build_sort_params(order_by, Machine.SORT_FIELD_MAP) if order_by else []
-
-		cache_key = f"machine_list_cache_{page}_{page_length}_{filter_query}"
-		cached = frappe.cache().get_value(cache_key)
-		# if cached:
-		# 	return cached
-
-		endpoint = f"SV/Machine?page={page}&pageSize={page_length}"
-		if filter_query:
-			endpoint += f"&{filter_query}"
-		if sort_query:
-			for k, v in sort_query:
-				endpoint += f"&{k}={v}"
-
-		try:
-			response = icorp_api_get(endpoint) or {}
-			data = response.get("data", []) or []
-			pagination = response.get("pagination", {}) or {}
-			total_records = pagination.get("total_records")
-
-			if total_records is not None:
-				Machine._total_count = total_records
-
-			ids = [str(r["id"]) for r in data if r.get("id") is not None]
-
-			title_by_id = {}
-			if ids:
-				cached_rows = frappe.get_all(
-					"Machine Link",
-					filters={"name": ["in", ids]},
-					fields=["name", "machine_name"]
-				)
-				title_by_id.update({
-					row["name"]: (row["machine_name"] or row["name"])
-					for row in cached_rows
-				})
-
-			items = api_data_to_frappe_dict(
-				data,
-				Machine.KEY_FIELD,
-				title_field="machine_name",
-				title_map=title_by_id
+		title_by_id = {}
+		if ids:
+			cached_rows = frappe.get_all(
+				"Machine Link",
+				filters={"name": ["in", ids]},
+				fields=["name", "machine_name"],
 			)
+			title_by_id.update({
+				row["name"]: (row["machine_name"] or row["name"])
+				for row in cached_rows
+			})
 
-			frappe.cache().set_value(cache_key, items, expires_in_sec=300)
-			return items
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "Machine.get_list error")
-			return []
+		return api_data_to_frappe_dict(
+			data,
+			cls.KEY_FIELD,
+			title_field="machine_name",
+			title_map=title_by_id,
+		)
 
-	@staticmethod
-	def get_count(filters=None, **kwargs):
-		if Machine._total_count is not None:
-			return Machine._total_count
-		try:
-			return icorp_get_count("SV/Machine", filters)
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "Machine.get_count error")
-			return 0
-
-	@staticmethod
-	def get_stats(**kwargs):
-		pass
-
-	@staticmethod
-	def clear_cache():
-		Machine._total_count = None
-		clear_cache_by_prefix("machine_list_cache")
+	@classmethod
+	def get_count_from_api(cls, filters):
+		return icorp_get_count("SV/Machine", filters)
 
 	def _sync_agreement_fee_types(self):
 		try:
 			fee_type_ids = [
 				int(row.agreement_fee_type_id)
 				for row in getattr(self, "agreement_fee_type_ids", [])
-				if hasattr(row, "agreement_fee_type_id")
+				if hasattr(row, "agreement_fee_type_id") and row.agreement_fee_type_id
 			]
-
 			payload = {
 				"id": int(self.name),
-				"agreement_fee_type_ids": fee_type_ids
+				"agreement_fee_type_ids": fee_type_ids,
 			}
 
-			endpoint = "SV/Machine/FeeTypes"
-			response = icorp_api_put(endpoint, payload)
-
-			return response
+			return icorp_api_put("SV/Machine/FeeTypes", payload)
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "Machine._sync_agreement_fee_types error")
 			raise
-
-
