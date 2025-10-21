@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 import frappe
 from frappe.model.document import Document
 from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache
