@@ -143,7 +143,7 @@ class BaseVirtualDoctype(Document):
             result = response.get("data") or {}
 
             if not result or self.KEY_FIELD not in result:
-                frappe.throw(f"Failed to update {self.__class__.__name__} in external API: {response.text}")
+                frappe.throw(f"Failed to update {self.__class__.__name__} in external API: {response}")
 
             self.process_update_response(result)
             self.name = str(result[self.KEY_FIELD])
