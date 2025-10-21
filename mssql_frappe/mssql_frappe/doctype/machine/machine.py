@@ -74,6 +74,8 @@ class Machine(BaseVirtualDoctype):
 		if "name" in result:
 			result["machine_name"] = result.pop("name")
 
+		self._sync_agreement_fee_types()
+		
 		if not frappe.db.exists("Machine Link", result.get("id")):
 			frappe.get_doc({
 				"doctype": "Machine Link",

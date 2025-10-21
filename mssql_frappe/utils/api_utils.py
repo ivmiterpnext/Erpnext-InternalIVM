@@ -12,7 +12,7 @@ HEADWIND_API_BASE_URL = "https://iot.ivmapi.com/rest" # os.environ.get("HEADWIND
 KEY_VAULT_URL = "https://ivm-apps-dev-kv-01.vault.azure.net//" # os.environ.get("AZURE_KEYVAULT_URL")
 TENANT_ID = "5464da95-5a54-4466-8dde-04bd9e7f49da" # os.environ.get("AZURE_TENANT_ID")
 API_SCOPE = "api://74c6b7f8-98fe-4907-8fac-93ebc38fc521/.default" # os.environ.get("AZURE_API_SCOPE")
-
+APPLICATION_APP_ID = "api://70b60f48-f244-4683-a041-a120a273f676" # os.environ.get("AZURE_APPLICATION_APP_ID")
 
 def get_config_value(key, default=None):
     return frappe.conf.get(key.lower()) or os.environ.get(key.upper()) or default
@@ -36,11 +36,13 @@ def get_icorp_auth():
         client_id=client_id,
         client_secret=client_secret
     )
-    access_token = token_credential.get_token(api_scope).token
+    access_token = token_credential.get_token(f"{APPLICATION_APP_ID}/.default").token
 
     headers = {
         "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-User-Email": (frappe.session.user if getattr(frappe, "session", None) and frappe.session.user != "Guest"
+                    else "svc-frappe")
     }
     return base_url, headers
 
@@ -88,7 +90,6 @@ def icorp_api_put(endpoint, data):
         data = _remove_empty_fields(data)
         print(endpoint, data)
         response = requests.put(f"{base_url}/{endpoint}", json=data, headers=headers, timeout=30)
-        print(response.text)
         response.raise_for_status()
         return response.json()
     except Exception:
