@@ -1,3 +1,4 @@
+import datetime
 import frappe
 from frappe.model.document import Document
 from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache
@@ -105,6 +106,9 @@ class BaseVirtualDoctype(Document):
         try:
             data = self.get_valid_dict()
             data = convert_fields_to_bool(data, self.BOOL_FIELDS)
+            data["created_by"] = frappe.session.user if hasattr(frappe, "session") else "system-frappe"
+            data["created_date"] = datetime.now(datetime.timezone.utc).isoformat()
+
             data = self.prepare_insert_data(data)
 
             response = self.insert_via_api(self.endpoint, data) or {}
@@ -137,6 +141,9 @@ class BaseVirtualDoctype(Document):
             data = self.get_valid_dict()
             data = convert_fields_to_bool(data, self.BOOL_FIELDS)
             data[self.KEY_FIELD] = str(self.name)
+            data["modified_by"] = frappe.session.user if hasattr(frappe, "session") else "system-frappe"
+            data["modified_date"] = datetime.now(datetime.timezone.utc).isoformat()
+
             data = self.prepare_update_data(data)
 
             response = self.update_via_api(self.endpoint, data) or {}
