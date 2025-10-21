@@ -120,6 +120,7 @@ class Machine(BaseVirtualDoctype):
 			payload = {
 				"id": int(self.name),
 				"agreement_fee_type_ids": fee_type_ids,
+				"created_by": frappe.session.user if hasattr(frappe, "session") else "system-frappe"
 			}
 
 			return icorp_api_put("SV/Machine/FeeTypes", payload)
