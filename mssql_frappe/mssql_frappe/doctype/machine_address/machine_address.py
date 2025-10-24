@@ -4,10 +4,8 @@
 import frappe
 from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 from mssql_frappe.utils.case_utils import convert_fields_to_bool
-from mssql_frappe.utils.api_utils import icorp_api_get, icorp_api_post
-from mssql_frappe.utils.data_utils import build_sort_params
+from mssql_frappe.utils.api_utils import icorp_api_get
 from mssql_frappe.utils.filter_utils import filters_to_query_params
-from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache
 from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 
 

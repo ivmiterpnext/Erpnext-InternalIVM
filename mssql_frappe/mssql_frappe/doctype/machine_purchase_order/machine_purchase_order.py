@@ -3,15 +3,23 @@
 
 import frappe
 from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
-from mssql_frappe.utils.api_utils import icorp_api_post, icorp_api_get, icorp_api_put, icorp_api_delete, icorp_get_count
-from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
-from mssql_frappe.utils.data_utils import build_sort_params, ensure_meta_is_ready, set_attrs_from_dict
-from mssql_frappe.utils.filter_utils import filters_to_query_params, replace_machine_id_with_name
+from mssql_frappe.utils.api_utils import icorp_api_post, icorp_api_put, icorp_api_get
+from mssql_frappe.utils.data_utils import set_attrs_from_dict
+from mssql_frappe.utils.filter_utils import replace_machine_id_with_name
 
 
 class MachinePurchaseOrder(BaseVirtualDoctype):	
 	KEY_FIELD = "id"
 	endpoint = "PurchaseOrder/Machines"
+
+	def load_from_db(self):
+		endpoint = f"PurchaseOrder/Machine/GetById?id={self.name}"
+		response = icorp_api_get(endpoint)
+		data = response.get("data", [])
+		if data:
+			set_attrs_from_dict(self, data[0])
+		else:
+			frappe.throw(f"Could not load Machine Purchase Order with id {self.name}")
 
 	def db_insert(self, *args, **kwargs):
 		try:
@@ -28,7 +36,6 @@ class MachinePurchaseOrder(BaseVirtualDoctype):
 			for k, v in data.items():
 				setattr(self, k, v)
 
-			# self.clear_machine_hardware_config_cache()
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "MachinePurchaseOrder.db_insert error")
 			raise
@@ -59,17 +66,3 @@ class MachinePurchaseOrder(BaseVirtualDoctype):
 		if filters:
 			filters = replace_machine_id_with_name(filters)
 		return filters
-
-	def delete(self):
-		try:
-			endpoint = f"PurchaseOrder/Machine/Delete?Id={self.name}"
-			response = icorp_api_delete(endpoint, {"id": self.name})
-			return response
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "MachinePurchaseOrder.delete error")
-			raise
-
-	@classmethod
-	def get_count_from_api(cls, filters):
-		return icorp_get_count(cls.endpoint, filters)
-		

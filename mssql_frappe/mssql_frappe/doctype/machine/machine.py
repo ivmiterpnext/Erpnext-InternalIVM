@@ -3,7 +3,7 @@
 
 import frappe
 from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
-from mssql_frappe.utils.api_utils import (icorp_api_put)
+from mssql_frappe.utils.api_utils import icorp_api_put
 from mssql_frappe.utils.cache_util import clear_cache
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
 from mssql_frappe.utils.data_utils import set_attrs_from_dict
@@ -52,7 +52,6 @@ class Machine(BaseVirtualDoctype):
 			"agreement_fee_type_ids": "agreement_fee_type_id",
 		}
 
-
 		set_attrs_from_dict(self, data, child_table_map)
 
 # Insert Overrides
@@ -62,12 +61,6 @@ class Machine(BaseVirtualDoctype):
 		if "time_zone_id" in data:
 			data["time_zone_id"] = str(data["time_zone_id"])
 
-		if hasattr(self, "agreement_fee_type_ids"):
-			data["agreement_fee_type_ids"] = [
-				int(row.agreement_fee_type_id)
-				for row in getattr(self, "agreement_fee_type_ids", [])
-				if hasattr(row, "agreement_fee_type_id") and row.agreement_fee_type_id
-			]
 		return data
 
 	def process_insert_response(self, result):
@@ -75,7 +68,7 @@ class Machine(BaseVirtualDoctype):
 			result["machine_name"] = result.pop("name")
 
 		self._sync_agreement_fee_types()
-		
+
 		if not frappe.db.exists("Machine Link", result.get("id")):
 			frappe.get_doc({
 				"doctype": "Machine Link",

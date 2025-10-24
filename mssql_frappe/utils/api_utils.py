@@ -12,7 +12,6 @@ HEADWIND_API_BASE_URL = "https://iot.ivmapi.com/rest" # os.environ.get("HEADWIND
 KEY_VAULT_URL = "https://ivm-apps-dev-kv-01.vault.azure.net//" # os.environ.get("AZURE_KEYVAULT_URL")
 TENANT_ID = "5464da95-5a54-4466-8dde-04bd9e7f49da" # os.environ.get("AZURE_TENANT_ID")
 API_SCOPE = "api://74c6b7f8-98fe-4907-8fac-93ebc38fc521/.default" # os.environ.get("AZURE_API_SCOPE")
-APPLICATION_APP_ID = "api://70b60f48-f244-4683-a041-a120a273f676" # os.environ.get("AZURE_APPLICATION_APP_ID")
 
 def get_config_value(key, default=None):
     return frappe.conf.get(key.lower()) or os.environ.get(key.upper()) or default
@@ -36,13 +35,11 @@ def get_icorp_auth():
         client_id=client_id,
         client_secret=client_secret
     )
-    access_token = token_credential.get_token(f"{APPLICATION_APP_ID}/.default").token
+    access_token = token_credential.get_token(api_scope).token
 
     headers = {
         "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-        "X-User-Email": (frappe.session.user if getattr(frappe, "session", None) and frappe.session.user != "Guest"
-                    else "svc-frappe")
+        "Content-Type": "application/json"
     }
     return base_url, headers
 
@@ -136,7 +133,7 @@ def icorp_get_count(endpoint, filters=None):
 def _fetch_headwind_token():
     try:
         client = get_secret_client()
-        base_url = get_config_value("HEADWIND_API_BASE_URL")
+        base_url = HEADWIND_API_BASE_URL
         login = client.get_secret("Headwind-Privileged-Api-User").value
         password = client.get_secret("Headwind-Privileged-Api-User-Password").value
         password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest().upper()
@@ -150,7 +147,7 @@ def _fetch_headwind_token():
         return None
 
 def get_headwind_auth(token=None):
-    base_url = get_config_value("HEADWIND_API_BASE_URL")
+    base_url = HEADWIND_API_BASE_URL
     headers = {
         "Authorization": f"Bearer {token}" if token else "",
         "Accept": "application/json"
@@ -163,8 +160,9 @@ def headwind_api_request(method, endpoint, data=None, params=None):
         base_url, headers = get_headwind_auth(token)
         if data:
             data = dict_keys_to_camel_case(data)
+        print(endpoint, data, params)
         response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=30)
-
+        print("response: ", response.status_code, response.json())
         if response.status_code == 401:
             token = _fetch_headwind_token()
             base_url, headers = get_headwind_auth(token)
@@ -173,6 +171,7 @@ def headwind_api_request(method, endpoint, data=None, params=None):
         return dict_keys_to_snake_case(response.json())
     except Exception:
         frappe.log_error(frappe.get_traceback(), "headwind_api_request error")
+        print(frappe.get_traceback())
         return None
 
 def _remove_empty_fields(data):

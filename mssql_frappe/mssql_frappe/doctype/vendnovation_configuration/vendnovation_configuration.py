@@ -1,11 +1,10 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-# import frappe
-from frappe.model.document import Document
+from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 
 
-class VendnovationConfiguration(Document):
+class VendnovationConfiguration(BaseVirtualDoctype):
 	def db_insert(self, *args, **kwargs):
 		raise NotImplementedError
 
@@ -19,13 +18,9 @@ class VendnovationConfiguration(Document):
 		raise NotImplementedError
 
 	@staticmethod
-	def get_list(filters=None, page_length=20, **kwargs):
+	def get_list(args=None, page_length=20, **kwargs):
 		pass
 
 	@staticmethod
-	def get_count(filters=None, **kwargs):
-		pass
-
-	@staticmethod
-	def get_stats(**kwargs):
+	def get_count(*args, **kwargs):
 		pass

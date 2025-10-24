@@ -2,31 +2,17 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
+from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 from mssql_frappe.utils.api_utils import headwind_api_request
 from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
 from mssql_frappe.utils.data_utils import ensure_meta_is_ready, set_attrs_from_dict
 
 
-class SmartScreen(Document):
-	_total_count = None
-
+class SmartScreen(BaseVirtualDoctype):
 	KEY_FIELD = "number"
-	SORT_FIELD_MAP = { "name": "number" }
-
-	_table_fieldnames = [] # Prevent frappe from trying to access non-existent table fields
-
-	def check_if_latest(self):
-		pass  # Disable optimistic locking for virtual DocType
-
-	def validate_set_only_once(self):
-		pass # Disable "Set Only Once" validation for virtual DocType
-
-	@property
-	def _action(self):
-		# Always return "save" if not set
-		return getattr(self, "__action", "save")
+	SORT_FIELD_MAP = { "name": KEY_FIELD }
+	endpoint = None
 
 	def db_insert(self, *args, **kwargs):
 		raise NotImplementedError
@@ -34,7 +20,7 @@ class SmartScreen(Document):
 	def load_from_db(self):
 		try:
 			ensure_meta_is_ready(self)
-			
+
 			endpoint = f"private/devices/number/{self.name}"
 			item = headwind_api_request("GET", endpoint)
 			data = item.get("data", {})
@@ -61,11 +47,13 @@ class SmartScreen(Document):
 	def delete(self):
 		raise NotImplementedError
 
-	@staticmethod
-	def get_list(filters=None, page_length=30, start=0, order_by=None, **kwargs):
+	@classmethod
+	def get_list(cls, args=None):
+		page_length = int(args.get("page_length") or 20)
+		start = int(args.get("start") or 0)
 		page = (start // page_length) + 1
 
-		cache_key = f"smart_screen_list_cache_{page}_{page_length}_{filters}"
+		cache_key = f"smart_screen_list_cache_{page}_{page_length}_{args.get('filters')}"
 		cached = frappe.cache().get_value(cache_key)
 		if cached:
 			return cached
@@ -78,13 +66,7 @@ class SmartScreen(Document):
 		try:
 			response = headwind_api_request("POST", "private/devices/search", data=data)
 			devices = response.get("data", {}).get("devices", {}).get("items", [])
-			total_records = response.get("data", {}).get("devices", {}).get("total_items_count", 0)
-
-			if total_records is not None:
-				SmartScreen._total_count = total_records
-
-			items = api_data_to_frappe_dict(devices, SmartScreen.KEY_FIELD)
-
+			items = api_data_to_frappe_dict(devices, cls.KEY_FIELD)
 			frappe.cache().set_value(cache_key, items, expires_in_sec=LIST_CACHE_EXPIRES)
 			return items
 		except Exception:
@@ -92,10 +74,7 @@ class SmartScreen(Document):
 			return []
 
 	@staticmethod
-	def get_count(filters=None, **kwargs):
-		if SmartScreen._total_count is not None:
-			return SmartScreen._total_count
-
+	def get_count(args=None, **kwargs):
 		data = { "pageNum": 1, "pageSize": 1 }
 		try:
 			response = headwind_api_request("POST", "private/devices/search", data=data)
@@ -103,10 +82,6 @@ class SmartScreen(Document):
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "SmartScreen.get_count error")
 			return 0
-
-	@staticmethod
-	def get_stats(**kwargs):
-		pass
 
 	def get_indicator(self):
 		color = (self.status_code or "gray").lower()

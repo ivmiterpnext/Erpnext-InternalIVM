@@ -74,6 +74,7 @@ class BaseVirtualDoctype(Document):
     @classmethod
     def process_list_data(cls, data, args):
         # Subclasses can override for custom post-processing
+        print("process list data:", data)
         return api_data_to_frappe_dict(data, getattr(cls, "KEY_FIELD", "id"))
 
 # Load from DB
@@ -84,7 +85,6 @@ class BaseVirtualDoctype(Document):
         try:
             ensure_meta_is_ready(self)
             endpoint = f"{self.endpoint}/GetById?Id={self.name}"
-
             response = self.fetch_via_api(endpoint)
             data = response.get("data", {})
             self.process_load_response(data)
