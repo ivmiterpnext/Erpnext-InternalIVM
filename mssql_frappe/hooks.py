@@ -156,6 +156,7 @@ scheduler_events = {
         "mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type.sync",
         "mssql_frappe.mssql_frappe.doctype.hardware_connectivity_type.hardware_connectivity_type.sync",
         "mssql_frappe.mssql_frappe.doctype.location_link.location_link.sync",
+        "mssql_frappe.mssql_frappe.doctype.machine_activity_log_type.machine_activity_log_type.sync",
         "mssql_frappe.mssql_frappe.doctype.machine_authorization_type.machine_authorization_type.sync",
         "mssql_frappe.mssql_frappe.doctype.machine_contract_length_type.machine_contract_length_type.sync",
         "mssql_frappe.mssql_frappe.doctype.machine_link.machine_link.sync",

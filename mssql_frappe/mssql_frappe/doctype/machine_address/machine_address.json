@@ -5,19 +5,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "id",
   "address_id",
   "is_active",
-  "data_hidden_section",
-  "machine_name"
+  "column_break_milk",
+  "machine_id"
  ],
  "fields": [
-  {
-   "fieldname": "machine_name",
-   "fieldtype": "Data",
-   "label": "Machine",
-   "options": "Machine"
-  },
   {
    "fieldname": "address_id",
    "fieldtype": "Link",
@@ -31,22 +24,21 @@
    "label": "Is Active"
   },
   {
-   "fieldname": "id",
+   "fieldname": "machine_id",
    "fieldtype": "Link",
    "label": "Machine",
    "options": "Machine Link"
   },
   {
-   "fieldname": "data_hidden_section",
-   "fieldtype": "Section Break",
-   "label": "Data (Hidden)"
+   "fieldname": "column_break_milk",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2025-09-30 11:57:18.778109",
+ "modified": "2025-11-05 12:55:00.844289",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine Address",

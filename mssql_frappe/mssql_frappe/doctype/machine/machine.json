@@ -30,7 +30,9 @@
   "using_job_code",
   "allow_skip_job_code",
   "column_break_fzig",
-  "is_vend_return"
+  "is_vend_return",
+  "hidden_data_section",
+  "machine_id"
  ],
  "fields": [
   {
@@ -89,12 +91,14 @@
   {
    "fieldname": "client_id",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Client",
    "options": "Client Link"
   },
   {
    "fieldname": "location_id",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Location",
    "options": "Location Link"
   },
@@ -107,6 +111,7 @@
   {
    "fieldname": "machine_type_id",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Machine Type",
    "options": "Machine Type"
   },
@@ -165,7 +170,8 @@
   {
    "fieldname": "machine_status_type_code",
    "fieldtype": "Link",
-   "label": "Machine Status",
+   "in_standard_filter": 1,
+   "label": "Status",
    "options": "Machine Status Type"
   },
   {
@@ -177,10 +183,22 @@
   {
    "fieldname": "machine_name",
    "fieldtype": "Data",
-   "label": "Name"
+   "in_list_view": 1,
+   "label": "Machine Name"
+  },
+  {
+   "fieldname": "hidden_data_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden Data"
+  },
+  {
+   "fieldname": "machine_id",
+   "fieldtype": "Data"
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [
@@ -190,7 +208,7 @@
   },
   {
    "link_doctype": "Machine Address",
-   "link_fieldname": "id"
+   "link_fieldname": "machine_id"
   },
   {
    "link_doctype": "Machine Hardware Configuration",
@@ -199,9 +217,13 @@
   {
    "link_doctype": "Machine Fee",
    "link_fieldname": "machine_id"
+  },
+  {
+   "link_doctype": "Machine Activity Log",
+   "link_fieldname": "machine_id"
   }
  ],
- "modified": "2025-09-30 15:23:52.440632",
+ "modified": "2025-11-05 15:25:50.273643",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine",

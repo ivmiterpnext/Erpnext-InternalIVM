@@ -6,11 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "satellite_code",
-  "activity_log_type",
-  "machine_name",
+  "activity_log_type_code",
+  "machine_id",
   "firmware_id",
-  "location_id",
   "client_id",
+  "location_id",
   "column_break_axzo",
   "log_date",
   "secure_trak_machine_message",
@@ -23,19 +23,16 @@
    "label": "Satellite Code"
   },
   {
-   "fieldname": "machine_name",
-   "fieldtype": "Data",
-   "label": "Machine"
-  },
-  {
    "fieldname": "firmware_id",
    "fieldtype": "Data",
    "label": "Firmware"
   },
   {
    "fieldname": "client_id",
-   "fieldtype": "Data",
-   "label": "Client"
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Client",
+   "options": "Client Link"
   },
   {
    "fieldname": "secure_trak_machine_message",
@@ -47,31 +44,41 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "activity_log_type",
-   "fieldtype": "Data",
-   "label": "Activity Log Type"
-  },
-  {
    "fieldname": "log_date",
    "fieldtype": "Datetime",
    "label": "Log Date"
   },
   {
    "fieldname": "location_id",
-   "fieldtype": "Data",
-   "label": "Location"
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location Link"
   },
   {
    "fieldname": "secure_tral_server_response",
    "fieldtype": "Small Text",
    "label": "Server Response"
+  },
+  {
+   "fieldname": "activity_log_type_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Activity Log Type",
+   "options": "Machine Activity Log Type"
+  },
+  {
+   "fieldname": "machine_id",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Machine",
+   "options": "Machine Link"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2025-10-01 10:39:27.012380",
+ "modified": "2025-11-05 14:58:55.216949",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine Activity Log",

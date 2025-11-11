@@ -1,133 +1,91 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-import frappe
-from frappe.model.document import Document
+from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 from mssql_frappe.utils.case_utils import convert_fields_to_bool
-from mssql_frappe.utils.api_utils import icorp_api_get, icorp_api_post
-from mssql_frappe.utils.data_utils import build_sort_params
-from mssql_frappe.utils.filter_utils import filters_to_query_params
-from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES
+from mssql_frappe.utils.data_utils import set_attrs_from_dict
 from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 
 
-class MachineAddress(Document):
-	_total_count = None
-
-	KEY_FIELD = "address_id"
+class MachineAddress(BaseVirtualDoctype):
+	API_TYPE = "icorp"
 	BOOL_FIELDS = ["is_active"]
-	SORT_FIELD_MAP = { "name": "id" }
+	FIELD_MAP = {"name": "id"}
+	endpoint = "SV/Machine/Address"
 
-	def check_if_latest(self):
-		pass  # Disable optimistic locking for virtual DocType
+# Get List Overrides
+	@classmethod
+	def preprocess_filters(cls, filters, args=None):
+		new_filters = []
+		for f in filters or []:
+			if f[1] == "machine_id":
+				new_filters.append([f[0], "Id", f[2], f[3]])
+			else:
+				new_filters.append(f)
 
-	def validate_set_only_once(self):
-		pass # Disable "Set Only Once" validation for virtual DocType
+		if args and not any(f[1] == "Id" for f in new_filters):
+			if args.get("parent") and args.get("parenttype") == "Machine":
+				new_filters.append(["=", "Id", args.get("parent")])
+		return new_filters
 
-	@property
-	def _action(self):
-		# Always return "save" if not set
-		return getattr(self, "__action", "save")
+	@classmethod
+	def process_list_response(cls, data, args):
+		items = []
+		addresses = data.get("address_machines", [])
+		machine_name = data.get("name")
+		for address in addresses:
+			address_row = dict(address)
+			address_row["name"] = str(address_row.pop("id", ""))
+			address_row["machine_name"] = machine_name or ""
 
-	def db_insert(self, *args, **kwargs):
-		try:
-			data = self.get_valid_dict()
-			data = convert_fields_to_bool(data, self.BOOL_FIELDS)
-			data.machine_name = get_machine_name_from_machine_id(self.id)
+			# Build a readable address string for the address_id field
+			address_row["address_id"] = ", ".join(
+				filter(None, [
+					address_row.get("address_line_one"),
+					address_row.get("address_line_two"),
+					address_row.get("city"),
+					address_row.get("state_code"),
+					address_row.get("postal_code"),
+				])
+			)
+			items.append(address_row)
+		return items
 
-			endpoint = "SV/Machine/Address"
-			response = icorp_api_post(endpoint, data)
+# Load From DB Overrides
+	def process_load_response(self, data):
+		if data.get("id"):
+			self.name = str(data["id"])
+		if "machine_id" in data:
+			data["machine_name"] = get_machine_name_from_machine_id(data["machine_id"])
+		set_attrs_from_dict(self, data)
 
-			data = response.get("data")
+# Insert Overrides
+	def prepare_insert_data(self, data):
+		data = convert_fields_to_bool(data, self.BOOL_FIELDS)
+		if "machine_id" in data:
+			data["machine_name"] = get_machine_name_from_machine_id(data["machine_id"])
+		return data
 
-			if not data or not data.get(self.KEY_FIELD):
-				frappe.throw(f"Failed to create Machine Address in external API: {response}")
+	def process_insert_response(self, data):
+		if "id" in data:
+			self.name = str(data["id"])
+		print("Insert response data:", data)
+		set_attrs_from_dict(self, data)
 
-			self.name = str(data[self.KEY_FIELD])
-			for k, v in data.items():
-				setattr(self, k, v)
+# Update Overrides
+	def prepare_update_data(self, data):
+		data = convert_fields_to_bool(data, self.BOOL_FIELDS)
+		if "machine_id" in data:
+			data["machine_name"] = get_machine_name_from_machine_id(data["machine_id"])
+		return data
 
-			self.clear_cache()
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "MachineAddress.db_insert error")
-			raise
+	def process_update_response(self, data):
+		if "id" in data:
+			data["address_id"] = str(data["id"])
+		set_attrs_from_dict(self, data)
 
-	def load_from_db(self):
-		if self.name and self.name.startswith("new-"):
-			return
-		raise NotImplementedError
-
-	def db_update(self):
-		raise NotImplementedError
-
-	def delete(self):
-		raise NotImplementedError
-
-	@staticmethod
-	def get_list(filters=None, page_length=30, start=0, order_by=None, **kwargs):
-		page = (start // page_length) + 1
-
-		filter_query = filters_to_query_params(filters)
-		sort_query = build_sort_params(order_by, MachineAddress.SORT_FIELD_MAP) if order_by else []
-
-		cache_key = f"machine_address_list_cache_{page}_{page_length}_{filter_query}_{sort_query}"
-		cached = frappe.cache().get_value(cache_key)
-		if cached:
-			return cached
-
-		endpoint = "SV/Machine/Address?"
-		if filter_query:
-			endpoint += f"{filter_query}"
-		if sort_query:
-			for k, v in sort_query:
-				endpoint += f"&{k}={v}"
-
-		try:
-			response = icorp_api_get(endpoint)
-			data = response.get("data", {}).get("address_machines", [])
-			pagination = response.get("pagination", {})
-			total_records = pagination.get("total_records")
-
-			if total_records is not None:
-				MachineAddress._total_count = total_records
-
-			items = []
-			machine_name = response.get("data", {}).get("name")  # Get machine name from API response
-
-			for address in data:
-				address_row = dict(address)
-				address_row["address_id"] = str(address_row.pop("id", ""))
-				address_row["machine_name"] = machine_name  # Set machine name for display
-				address_row["name"] = frappe.generate_hash(length=10)
-				items.append(address_row)
-
-			frappe.cache().set_value(cache_key, items, expires_in_sec=LIST_CACHE_EXPIRES)
-			return items
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "MachineAddress.get_list error")
-			return []
-
-	@staticmethod
-	def get_count(filters=None, **kwargs):
-		# Translate machine_id to name for the API
-		if filters and "machine_id" in filters:
-			machine_name = get_machine_name_from_machine_id(filters["machine_id"])
-			if machine_name:
-				filters["name"] = machine_name
-			filters.pop("machine_id")
-
-		filter_query = filters_to_query_params(filters)
-		endpoint = "SV/Machine/Address?"
-		if filter_query:
-			endpoint += f"&{filter_query}"
-		try:
-			response = icorp_api_get(endpoint)
-			data = response.get("data", {}).get("address_machines", [])
-			return len(data)
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "MachineAddress.get_count error")
-			return 0
-
-	@staticmethod
-	def get_stats(**kwargs):
-		pass
+# Count Overrides
+	@classmethod
+	def extract_count(cls, response):
+		data = response.get("data", {}).get("address_machines", [])
+		return len(data)

@@ -1,32 +1,53 @@
 from datetime import datetime
+from urllib.parse import unquote_plus
+import re
 import frappe
 from mssql_frappe.utils.case_utils import to_camel_case
 
-def get_primary_order_by(order_by):
-    if not order_by:
-        return ""
-    parts = [part.strip() for part in order_by.split(',') if part.strip()]
-    return parts[0] if parts else ""
 
-def build_sort_params(order_by, sort_field_map):
-    sort_field_map = {**sort_field_map, 'creation': 'createdDate'}
-    sort_params = []
-    # Only use the most recent (last) order_by field
-    primary_order_by = get_primary_order_by(order_by)
-    if not primary_order_by:
+def build_sort_params(order_by, sort_field_map: dict, *, add_tie_breaker=False):
+    map_with_alias = {**(sort_field_map or {}), "creation": "createdDate"}
+
+    field, direction = _parse_order_by(order_by)
+    if not field:
         return []
-    part = primary_order_by
-    # Remove table prefix and backticks
-    if part.startswith('`'):
-        part = part.split('`.', 1)[-1]
-    if ' ' in part:
-        field, direction = part.rsplit(' ', 1)
-    else:
-        field, direction = part, 'asc'
-    api_field = sort_field_map.get(field, to_camel_case(field))
-    sort_params.append(("sort[0].parameterName", api_field))
-    sort_params.append(("sort[0].sortOrder", direction.upper()))
-    return sort_params
+
+    api_field = map_with_alias.get(field) or to_camel_case(field)
+
+    params = [
+        ("sort[0].parameterName", api_field),
+        ("sort[0].sortOrder", direction),
+    ]
+
+    if add_tie_breaker:
+        tie_api = (map_with_alias.get("name")
+                   or map_with_alias.get("id")
+                   or "Id")
+        params += [
+            ("sort[1].parameterName", tie_api),
+            ("sort[1].sortOrder", "ASC"),
+        ]
+
+    return params
+
+def _parse_order_by(order_by: str):
+    if not order_by:
+        return None, None
+
+    s = unquote_plus(str(order_by)).strip()
+    s = s.replace("`", "")
+
+    clause = s.split(",", 1)[0].strip()
+
+    m = re.match(r"(?:(?P<table>[^.\s]+)\.)?(?P<field>[^.\s]+)(?:\s+(?P<dir>asc|desc))?$",
+                 clause, re.IGNORECASE)
+    if not m:
+        return None, None
+
+    field = m.group("field")
+    direction = (m.group("dir") or "asc").upper()
+    direction = "DESC" if direction.startswith("D") else "ASC"
+    return field, direction
 
 def set_attrs_from_dict(obj, data, child_table_map=None):
     child_table_map = child_table_map or {}
@@ -38,7 +59,6 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
         if mapped_key in child_table_map:
             child_field = child_table_map[mapped_key]
             rows = normalize_child_table_field(v, child_field)
-            # Wrap each row in frappe._dict for Frappe compatibility
             obj.set(mapped_key, [frappe._dict(row) for row in rows])
             continue
 
@@ -73,3 +93,9 @@ def to_iso8601(date_string):
         except Exception as e:
             frappe.log_error(f"Failed to parse date string: {e}", "DateTimeHelper.to_iso8601 error")
     return date_string
+
+def ensure_meta_is_ready(self):
+	if not getattr(self, "meta", None):
+		self.meta = frappe.get_meta(self.doctype)
+	if not hasattr(self, "_table_fieldnames"):
+		self._table_fieldnames = [df.fieldname for df in self.meta.get_table_fields()]

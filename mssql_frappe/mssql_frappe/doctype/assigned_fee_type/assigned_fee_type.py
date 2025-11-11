@@ -7,13 +7,13 @@ from frappe.model.document import Document
 
 class AssignedFeeType(Document):
 	def db_insert(self, *args, **kwargs):
-		raise NotImplementedError
+		pass
 
 	def load_from_db(self):
 		raise NotImplementedError
 
 	def db_update(self):
-		raise NotImplementedError
+		pass
 
 	def delete(self):
 		raise NotImplementedError
