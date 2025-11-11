@@ -12,7 +12,7 @@ class VendnovationConfiguration(BaseVirtualDoctype):
 		raise NotImplementedError
 
 	def db_update(self):
-		raise NotImplementedError
+		pass
 
 	def delete(self):
 		raise NotImplementedError

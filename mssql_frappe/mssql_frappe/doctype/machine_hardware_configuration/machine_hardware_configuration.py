@@ -7,10 +7,17 @@ from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_mach
 
 
 class MachineHardwareConfiguration(BaseVirtualDoctype):
-	KEY_FIELD = "id"
+	API_TYPE = "icorp"
 	BOOL_FIELDS = ["is_in_effect"]
-	SORT_FIELD_MAP = { "name": "code" }
+	FIELD_MAP = { "name": "id", "end_date": "effective_range_end_date" }
 	endpoint = "SV/MachineHardwareConfiguration"
+
+# Load from DB Overrides
+	def process_load_response(self, data):
+		if "machine_id" in data:
+			self.machine_id = str(data["machine_id"])
+
+		set_attrs_from_dict(self, data)
 
 # Insert Overrides
 	def prepare_insert_data(self, data):
@@ -25,15 +32,9 @@ class MachineHardwareConfiguration(BaseVirtualDoctype):
 		]
 		return data
 
-# Load from DB Overrides
-	def process_load_response(self, data):
-		if "machine_id" in data:
-			self.machine_id = str(data["machine_id"])
-
-		set_attrs_from_dict(self, data)
-
 # Update Overrides
 	def prepare_update_data(self, data):
+		data["id"] = data.pop("name")
 		data["machine_name"] = get_machine_name_from_machine_id(self.machine_id)
 		data["effective_date"] = to_iso8601(data["effective_date"])
 

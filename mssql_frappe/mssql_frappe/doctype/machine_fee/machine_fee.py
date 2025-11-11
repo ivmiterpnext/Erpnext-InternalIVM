@@ -5,7 +5,6 @@ from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDo
 
 
 class MachineFee(BaseVirtualDoctype):
-	KEY_FIELD = "id"
-	SORT_FIELD_MAP = { "name": KEY_FIELD }
-
+	API_TYPE = "icorp"
+	SORT_FIELD_MAP = { "name": "id" }
 	endpoint = "ClientContract/Fee/MachineFee"

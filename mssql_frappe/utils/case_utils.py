@@ -15,29 +15,17 @@ def dict_keys_to_snake_case(obj):
 
     if isinstance(obj, dict):
         return {camel_to_snake(k): dict_keys_to_snake_case(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [dict_keys_to_snake_case(i) for i in obj]
-    else:
-        return obj
+    return obj
 
-def api_data_to_frappe_dict(data, key_field, title_field=None, title_map=None):
+def api_data_to_frappe_dict(data, key_field):
     result = []
-    title_map = title_map or {}
 
     for item in (data or []):
         d = frappe._dict(item)
         rid = str(item.get(key_field))
         d.name = rid
-
-        title = title_map.get(rid)
-        if not title and title_field and title_field in item:
-            title = item.get(title_field)
-        if not title:
-            title = rid
-
-        d["_title"] = title
-        d["title"] = title
-
         result.append(d)
     return result
 

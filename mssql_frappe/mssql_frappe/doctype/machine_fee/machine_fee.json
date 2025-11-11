@@ -11,7 +11,6 @@
   "amount",
   "column_break_xsuc",
   "client_id",
-  "hidden_section",
   "machine_id"
  ],
  "fields": [
@@ -32,16 +31,6 @@
    "label": "Amount"
   },
   {
-   "fieldname": "hidden_section",
-   "fieldtype": "Section Break",
-   "label": "Hidden"
-  },
-  {
-   "fieldname": "machine_id",
-   "fieldtype": "Data",
-   "label": "Machine Id"
-  },
-  {
    "fieldname": "column_break_xsuc",
    "fieldtype": "Column Break"
   },
@@ -50,13 +39,19 @@
    "fieldtype": "Link",
    "label": "Client",
    "options": "Client Link"
+  },
+  {
+   "fieldname": "machine_id",
+   "fieldtype": "Link",
+   "label": "Machine",
+   "options": "Machine Link"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2025-09-30 15:18:14.156179",
+ "modified": "2025-11-05 10:47:18.823426",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine Fee",

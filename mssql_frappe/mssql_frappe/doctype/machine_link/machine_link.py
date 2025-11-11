@@ -23,3 +23,8 @@ def sync():
 def get_machine_name_from_machine_id(machine_id: str) -> str | None:
     name = frappe.db.get_value("Machine Link", machine_id, "machine_name")
     return name if name else "Unknown Machine"
+
+@frappe.whitelist()
+def get_machine_id_from_machine_name(machine_name: str) -> str | None:
+    machine_id = frappe.db.get_value("Machine Link", {"machine_name": machine_name}, "name")
+    return machine_id if machine_id else None

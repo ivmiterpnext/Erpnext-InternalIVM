@@ -3,15 +3,13 @@
 
 import frappe
 from frappe.model.document import Document
-
 from mssql_frappe.utils.api_utils import headwind_api_request
-from mssql_frappe.utils.cache_util import LIST_CACHE_EXPIRES
 from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
 
 
 class PushMessage(Document):
-	KEY_FIELD = "id"
-	SORT_FIELD_MAP = { "name": "id" }
+	API_TYPE = "headwind"
+	FIELD_MAP = { "name": "id" }
 
 	def db_insert(self, *args, **kwargs):
 		try:
@@ -24,10 +22,10 @@ class PushMessage(Document):
 
 			data = response.get("data")
 
-			if not data or not data.get(self.KEY_FIELD):
+			if not data or not data.get(self.FIELD_MAP["name"]):
 				frappe.throw(f"Failed to send Push Message in external API: {response}")
 
-			self.name = str(data[self.KEY_FIELD])
+			self.name = str(data[self.FIELD_MAP["name"]])
 			for k, v in data.items():
 				setattr(self, k, v)
 
@@ -35,7 +33,7 @@ class PushMessage(Document):
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "PushMessage.db_insert error")
 			raise
-		
+
 	def load_from_db(self):
 		raise NotImplementedError
 
@@ -58,6 +56,7 @@ class PushMessage(Document):
 				if isinstance(f, (list, tuple)) and len(f) >= 4 and f[1] == "device_number" and f[2] == "=":
 					device_filter = f[3]
 					break
+
 		elif isinstance(filters, dict) and "device_number" in filters and filters["device_number"]:
 			device_filter = filters["device_number"]
 
@@ -71,14 +70,14 @@ class PushMessage(Document):
 		try:
 			response = headwind_api_request("POST", "plugins/push/private/search", data=data)
 			data = response.get("data", {}).get("items", [])
-			items = api_data_to_frappe_dict(data, cls.KEY_FIELD)
+			items = api_data_to_frappe_dict(data, cls.FIELD_MAP["name"])
 			for item in items:
 				if "name" not in item:
-					if cls.KEY_FIELD in item:
-						item["name"] = str(item[cls.KEY_FIELD])
+					if cls.FIELD_MAP["name"] in item:
+						item["name"] = str(item[cls.FIELD_MAP["name"]])
 					else:
 						item["name"] = ""
-			#frappe.cache().set_value(cache_key, items, expires_in_sec=LIST_CACHE_EXPIRES)
+						
 			return items
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), "PushMessage.get_list error")

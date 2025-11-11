@@ -1,19 +1,20 @@
 {
  "actions": [],
+ "allow_copy": 1,
  "allow_rename": 1,
  "creation": "2025-09-11 10:11:22.005463",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "board_id",
-  "machine_id",
   "effective_date",
   "end_date",
-  "is_in_effect",
   "column_break_jzfr",
+  "machine_id",
   "connectivity_types",
   "data_hidden_section",
-  "machine_name"
+  "machine_name",
+  "is_in_effect"
  ],
  "fields": [
   {
@@ -68,10 +69,11 @@
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2025-09-26 12:32:55.298615",
+ "modified": "2025-11-05 13:04:32.582134",
  "modified_by": "Administrator",
  "module": "MSSQL Frappe",
  "name": "Machine Hardware Configuration",

@@ -4,13 +4,12 @@
 import frappe
 from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 from mssql_frappe.utils.api_utils import icorp_api_get
+from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
 from mssql_frappe.utils.data_utils import set_attrs_from_dict, to_iso8601
 
 
 class Board(BaseVirtualDoctype):
-	_total_count = None
-
-	KEY_FIELD = "id"
+	API_TYPE = "icorp"
 	BOOL_FIELDS = [
 		"is_update_firmware", "is_update_connection", "is_update_rfid", "is_dhcp",
 		"offline_vend_storage", "is_update_machine_motor_info",
@@ -19,20 +18,47 @@ class Board(BaseVirtualDoctype):
 		"setting3_has_bit_reverse_feature", "setting4_has_bit_reverse_feature",
 		"setting5_has_bit_reverse_feature"
 	]
-	SORT_FIELD_MAP = { "name": KEY_FIELD }
+	FIELD_MAP = { "name": "id" }
 	endpoint = "SV/Board"
 
-# Insert Overrides
-	def prepare_insert_data(self, data):
-		data["effective_date"] = to_iso8601(data["effective_date"])
-		return data
+# Get List Overrides
+	@classmethod
+	def preprocess_filters(cls, filters):
+		new_filters = []
+		for f in filters or []:
+			if f[1] == "board_firmware_id":
+				version = frappe.db.get_value("Board Firmware", f[3], "version")
+				if version:
+					new_filters.append([f[0], "firmware_version", f[2], version])
+				else:
+					continue
+			else:
+				new_filters.append(f)
+		return new_filters
+
+	@classmethod
+	def process_list_response(cls, data, args):
+		for row in data:
+			if "board_manufacturer_name" in row:
+				row["board_manufacturer_id"] = row["board_manufacturer_name"]
+			if "hardware_availability_type_description" in row:
+				row["hardware_availability_type_code"] = row["hardware_availability_type_description"]
+			if "board_firmware_version" in row:
+				row["board_firmware_id"] = row["board_firmware_version"]
+
+		return api_data_to_frappe_dict(data, cls.FIELD_MAP.get("name"))
 
 # Load from DB Overrides
 	def process_load_response(self, data):
 		self._set_vendnovation_configurations()
 		set_attrs_from_dict(self, data)
 
-# Helper Methods
+# Insert Overrides
+	def prepare_insert_data(self, data):
+		data["effective_date"] = to_iso8601(data["effective_date"])
+		return data
+
+# Helpers
 	def _set_vendnovation_configurations(self):
 		try:
 			endpoint = f"SV/BoardVendnovationConfiguration/GetEffectiveConfiguration?Id={self.name}"
@@ -46,7 +72,6 @@ class Board(BaseVirtualDoctype):
 			response = icorp_api_get(endpoint)
 			data = response.get("data", {})
 
-			# Automatically sort configurations by effective_date descending
 			configs = sorted(
 				data,
 				key=lambda c: c.get("effective_date") or "",
@@ -55,8 +80,8 @@ class Board(BaseVirtualDoctype):
 
 			for config in configs:
 				self.append("vendnovation_configurations", config)
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "Board._set_vendnovation_configurations error")
+		except Exception as e:
+				frappe.log_error(f"{e}\n{frappe.get_traceback()}", "Board._set_vendnovation_configurations error")
 
 	def db_update(self, *args, **kwargs):
 		# Board insert and update are the same api endpoint
@@ -97,12 +122,12 @@ def get_manufacturer_by_serial_number(board_serial_number):
             }
         return None
     except Exception as e:
-        # Check for HTTP 404 error
         if hasattr(e, 'response') and getattr(e.response, 'status_code', None) == 404:
             return {
                 "id": None,
                 "manufacturer_name": "Invalid PROSE Number"
             }
+
         frappe.log_error(frappe.get_traceback(), "get_manufacturer_by_serial_number error")
         return {
             "id": None,

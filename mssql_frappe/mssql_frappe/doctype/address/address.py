@@ -6,8 +6,7 @@ from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
 
 
 class Address(BaseVirtualDoctype):
-	KEY_FIELD = "id"
-	SORT_FIELD_MAP = { "name": KEY_FIELD }
+	FIELD_MAP = { "name": "id" }
 
 	def db_insert(self, *args, **kwargs):
 		raise NotImplementedError
@@ -44,4 +43,4 @@ class Address(BaseVirtualDoctype):
 			]
 
 			item["full_address"] = ", ".join([part for part in address_parts if part])
-		return api_data_to_frappe_dict(data, key_field=cls.KEY_FIELD)
+		return api_data_to_frappe_dict(data, key_field=cls.FIELD_MAP["name"])

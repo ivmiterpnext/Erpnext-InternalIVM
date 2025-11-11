@@ -1,64 +1,91 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-import frappe
 from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 from mssql_frappe.utils.case_utils import convert_fields_to_bool
-from mssql_frappe.utils.api_utils import icorp_api_get
-from mssql_frappe.utils.filter_utils import filters_to_query_params
+from mssql_frappe.utils.data_utils import set_attrs_from_dict
 from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 
 
 class MachineAddress(BaseVirtualDoctype):
-	KEY_FIELD = "address_id"
+	API_TYPE = "icorp"
 	BOOL_FIELDS = ["is_active"]
-	SORT_FIELD_MAP = { "name": "id" }
-
+	FIELD_MAP = {"name": "id"}
 	endpoint = "SV/Machine/Address"
 
-	# Insert
-	def pre_insert_data(self, data):
-		data = convert_fields_to_bool(data, self.BOOL_FIELDS)
-		data["machine_name"] = get_machine_name_from_machine_id(self.id)
-		return data
-
-	# Get List
+# Get List Overrides
 	@classmethod
-	def extract_list_data(cls, response):
-		# Custom extraction for address_machines
-		return response.get("data", {}).get("address_machines", [])
+	def preprocess_filters(cls, filters, args=None):
+		new_filters = []
+		for f in filters or []:
+			if f[1] == "machine_id":
+				new_filters.append([f[0], "Id", f[2], f[3]])
+			else:
+				new_filters.append(f)
+
+		if args and not any(f[1] == "Id" for f in new_filters):
+			if args.get("parent") and args.get("parenttype") == "Machine":
+				new_filters.append(["=", "Id", args.get("parent")])
+		return new_filters
 
 	@classmethod
-	def process_list_data(cls, data, args):
+	def process_list_response(cls, data, args):
 		items = []
-		machine_name = args.get("machine_name") or args.get("_api_response", {}).get("data", {}).get("name")
-
-		for address in data:
+		addresses = data.get("address_machines", [])
+		machine_name = data.get("name")
+		for address in addresses:
 			address_row = dict(address)
-			address_row["address_id"] = str(address_row.pop("id", ""))
+			address_row["name"] = str(address_row.pop("id", ""))
 			address_row["machine_name"] = machine_name or ""
-			address_row["name"] = frappe.generate_hash(length=10)
-			items.append(address_row)
 
+			# Build a readable address string for the address_id field
+			address_row["address_id"] = ", ".join(
+				filter(None, [
+					address_row.get("address_line_one"),
+					address_row.get("address_line_two"),
+					address_row.get("city"),
+					address_row.get("state_code"),
+					address_row.get("postal_code"),
+				])
+			)
+			items.append(address_row)
 		return items
 
-	# Get Count
+# Load From DB Overrides
+	def process_load_response(self, data):
+		if data.get("id"):
+			self.name = str(data["id"])
+		if "machine_id" in data:
+			data["machine_name"] = get_machine_name_from_machine_id(data["machine_id"])
+		set_attrs_from_dict(self, data)
+
+# Insert Overrides
+	def prepare_insert_data(self, data):
+		data = convert_fields_to_bool(data, self.BOOL_FIELDS)
+		if "machine_id" in data:
+			data["machine_name"] = get_machine_name_from_machine_id(data["machine_id"])
+		return data
+
+	def process_insert_response(self, data):
+		if "id" in data:
+			self.name = str(data["id"])
+		print("Insert response data:", data)
+		set_attrs_from_dict(self, data)
+
+# Update Overrides
+	def prepare_update_data(self, data):
+		data = convert_fields_to_bool(data, self.BOOL_FIELDS)
+		if "machine_id" in data:
+			data["machine_name"] = get_machine_name_from_machine_id(data["machine_id"])
+		return data
+
+	def process_update_response(self, data):
+		if "id" in data:
+			data["address_id"] = str(data["id"])
+		set_attrs_from_dict(self, data)
+
+# Count Overrides
 	@classmethod
-	def get_count_from_api(cls, filters):
-		# Translate machine_id to name for the API
-		if filters and "machine_id" in filters:
-			machine_name = get_machine_name_from_machine_id(filters["machine_id"])
-			if machine_name:
-				filters["name"] = machine_name
-			filters.pop("machine_id")
-		filter_query = filters_to_query_params(filters)
-		endpoint = "SV/Machine/Address?"
-		if filter_query:
-			endpoint += f"&{filter_query}"
-		try:
-			response = icorp_api_get(endpoint)
-			data = response.get("data", {}).get("address_machines", [])
-			return len(data)
-		except Exception:
-			frappe.log_error(frappe.get_traceback(), "MachineAddress.get_count_from_api error")
-			return 0
+	def extract_count(cls, response):
+		data = response.get("data", {}).get("address_machines", [])
+		return len(data)

@@ -5,8 +5,7 @@ from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDo
 
 
 class MachineLockerConfiguration(BaseVirtualDoctype):
-	KEY_FIELD = "id"
+	API_TYPE = "icorp"
 	BOOL_FIELDS = ["is_3d_printed", "enable_open_door_buzzer", "is_update_firmware"]
-	SORT_FIELD_MAP = { "name": KEY_FIELD }
-
+	FIELD_MAP = { "name": "id" }
 	endpoint = "SV/MachineLockerConfiguration"
