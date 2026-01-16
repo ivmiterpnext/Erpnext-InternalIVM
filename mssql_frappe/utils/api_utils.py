@@ -8,24 +8,28 @@ from mssql_frappe.utils.case_utils import dict_keys_to_snake_case, dict_keys_to_
 from mssql_frappe.utils.filter_utils import filters_to_query_params
 
 
-ICORP_API_BASE_URL = os.environ.get("ICORP_API_BASE_URL")
-HEADWIND_API_BASE_URL = os.environ.get("HEADWIND_API_BASE_URL")
-KEY_VAULT_URL = os.environ.get("AZURE_KEYVAULT_URL")
-TENANT_ID = os.environ.get("AZURE_TENANT_ID")
-API_SCOPE = os.environ.get("AZURE_API_SCOPE")
+ICORP_API_BASE_URL = "https://dev.icorpapi.ivminc.com"
+HEADWIND_API_BASE_URL = "https://iot.ivmapi.com/rest"
+KEY_VAULT_URL = "https://ivm-apps-dev-kv-01.vault.azure.net//"
+TENANT_ID = "5464da95-5a54-4466-8dde-04bd9e7f49da"
+API_SCOPE = "api://74c6b7f8-98fe-4907-8fac-93ebc38fc521/.default"
 
 def get_config_value(key, default=None):
     return frappe.conf.get(key.lower()) or os.environ.get(key.upper()) or default
 
 def get_secret_client():
-    vault_url = KEY_VAULT_URL
-    credential = DefaultAzureCredential()
-    return SecretClient(vault_url=vault_url, credential=credential)
+    try:
+        print(KEY_VAULT_URL)
+        vault_url = KEY_VAULT_URL
+        credential = DefaultAzureCredential()
+        return SecretClient(vault_url=vault_url, credential=credential)
+    except Exception as e:
+        print(e)
 
 # ICorp
 def get_icorp_auth():
     client = get_secret_client()
-
+    print("Client: ", client)
     token_credential = ClientSecretCredential(
         tenant_id = TENANT_ID,
         client_id = client.get_secret("ICorpAPI-AzureAd-ClientId").value,
@@ -42,7 +46,7 @@ def get_icorp_auth():
 def icorp_api_get(endpoint):
     base_url, headers = get_icorp_auth()
     response = requests.get(f"{base_url}/{endpoint}", headers=headers, timeout=60)
-
+    print(response.json())
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
@@ -63,8 +67,9 @@ def icorp_api_post(endpoint, data, headers=None):
             data["created_by"] = "system-frappe"
 
     url = f"{base_url}/{endpoint}"
+    print("Data: ", data)
     response = requests.post(url, json=data, headers=headers, timeout=60)
-
+    print(response.json())
     try:
         return response.json()
     except ValueError:

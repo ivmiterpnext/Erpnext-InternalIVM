@@ -8,6 +8,7 @@ def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, fi
         if api_type == "headwind":
             data = headwind_api_request("GET", endpoint)
         elif api_type == "icorp":
+            print("Testing the catch here")
             data = icorp_api_get(endpoint)
         else:
             frappe.logger().error(f"Unknown api_type: {api_type}")

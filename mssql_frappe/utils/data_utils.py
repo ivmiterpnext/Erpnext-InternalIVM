@@ -59,6 +59,7 @@ def set_attrs_from_dict(obj, data, child_table_map=None):
         if mapped_key in child_table_map:
             child_field = child_table_map[mapped_key]
             rows = normalize_child_table_field(v, child_field)
+            print("rows: ", rows)
             obj.set(mapped_key, [frappe._dict(row) for row in rows])
             continue
 

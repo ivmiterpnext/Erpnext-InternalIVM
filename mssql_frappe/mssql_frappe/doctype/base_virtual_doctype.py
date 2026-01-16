@@ -10,6 +10,20 @@ from mssql_frappe.utils.api_utils import headwind_api_request, icorp_api_get, ic
 
 
 class BaseVirtualDoctype(Document):
+    @staticmethod
+    def sanitize_order_by(order_by):
+        """
+        Remove or replace unsupported SQL expressions in order_by for API usage.
+        Returns None if order_by is not a simple field sort.
+        """
+        if not order_by:
+            return None
+        # Disallow SQL expressions like ifnull, coalesce, etc.
+        lower = order_by.lower()
+        if any(expr in lower for expr in ["ifnull", "coalesce", "(", ")", ","]):
+            return None
+        return order_by
+
     API_TYPE = None  # Must be set to "icorp", "headwind", etc. in each subclass
     BOOL_FIELDS = [] # List of boolean fields in the doctype for conversion
     FIELD_MAP = {}  # Mapping of Frappe field names to API field names. Frappe expects "name" for the primary key
@@ -30,6 +44,8 @@ class BaseVirtualDoctype(Document):
         if cached:
             return cached
 
+        print("endpoint: ", cls.endpoint)
+        print("params: ", params)
         try:
             response = cls.get_list_via_api(cls.endpoint, params)
             response_data = cls.extract_data(response)
@@ -55,9 +71,10 @@ class BaseVirtualDoctype(Document):
         filters = cls.preprocess_filters(args.get("filters"))
         params = frappe_filters_to_dict(filters, field_map=getattr(cls, "FIELD_MAP", {}))
         order_by = args.get("order_by")
+        sanitized_order_by = cls.sanitize_order_by(order_by)
 
-        if order_by:
-            params.update(frappe_sort_to_dict(order_by, field_map=getattr(cls, "FIELD_MAP", {})))
+        if sanitized_order_by:
+            params.update(frappe_sort_to_dict(sanitized_order_by, field_map=getattr(cls, "FIELD_MAP", {})))
 
         params["page"] = page
         params["pageSize"] = page_length
