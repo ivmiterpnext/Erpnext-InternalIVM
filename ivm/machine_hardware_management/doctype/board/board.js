@@ -23,7 +23,7 @@ frappe.ui.form.on('Board', {
 
         // RFID Target Number Base select setup
         frappe.call({
-            method: "machine_hardware_management.machine_hardware_management.doctype.board.board.get_rfid_target_number_base_types",
+            method: "ivm.machine_hardware_management.doctype.board.board.get_rfid_target_number_base_types",
             callback: function(r) {
                 if (r.message) {
                     frm.rfid_target_base_code_to_desc = {};
@@ -163,7 +163,7 @@ frappe.ui.form.on('Board', {
     serial_number: function(frm) {
         if (frm.doc.serial_number) {
             frappe.call({
-                method: "machine_hardware_management.machine_hardware_management.doctype.board.board.get_manufacturer_by_serial_number",
+                method: "ivm.machine_hardware_management.doctype.board.board.get_manufacturer_by_serial_number",
                 args: { board_serial_number: frm.doc.serial_number },
                 callback: function(r) {
                     if (r.message && r.message.id) {
