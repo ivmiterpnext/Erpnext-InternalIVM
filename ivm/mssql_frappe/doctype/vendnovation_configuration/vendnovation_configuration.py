@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from ivm.mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
+from ivm.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 
 
 class VendnovationConfiguration(BaseVirtualDoctype):

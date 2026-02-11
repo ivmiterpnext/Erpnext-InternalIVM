@@ -2,7 +2,7 @@ import re
 from datetime import datetime, date
 from urllib.parse import urlencode
 from ivm.mssql_frappe.utils.case_utils import to_camel_case
-from ivm.mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
+from ivm.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 
 _LIKE_META = re.compile(r'([.^$+?{}[\]\\|()])')  # escape regex metachars
 

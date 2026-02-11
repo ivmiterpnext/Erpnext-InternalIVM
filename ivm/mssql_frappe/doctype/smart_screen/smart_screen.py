@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from ivm.mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
+from ivm.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 from ivm.mssql_frappe.utils.api_utils import headwind_api_request
 from ivm.mssql_frappe.utils.data_utils import set_attrs_from_dict
 

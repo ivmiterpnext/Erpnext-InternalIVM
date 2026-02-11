@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from ivm.mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
+from ivm.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
 from ivm.mssql_frappe.utils.filter_utils import replace_machine_id_with_name, frappe_filters_to_dict
 from ivm.mssql_frappe.utils.data_utils import set_attrs_from_dict
 
