@@ -45,15 +45,49 @@ def get_icorp_auth():
 
 def icorp_api_get(endpoint):
     base_url, headers = get_icorp_auth()
-    response = requests.get(f"{base_url}/{endpoint}", headers=headers, timeout=60)
-    print(response.json())
+    full_url = f"{base_url}/{endpoint}"
+    print(f"[ICORP GET] Endpoint: {endpoint}")
+    print(f"[ICORP GET] Full URL: {full_url}")
+    print(f"[ICORP GET] Making request...")
+    
     try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        error_msg = _extract_error_message(response)
-        frappe.throw(f"ICorp API Error: {error_msg or str(e)}")
+        response = requests.get(full_url, headers=headers, timeout=120)  # Increased to 120 seconds
+        print(f"[ICORP GET] Request completed!")
+        print(f"[ICORP GET] Status Code: {response.status_code}")
+        
+        # Try to get JSON response, handle errors gracefully
+        try:
+            response_json = response.json()
+            print(f"[ICORP GET] Response JSON parsed successfully")
+            print(f"[ICORP GET] Response: {response_json}")
+        except ValueError as e:
+            print(f"[ICORP GET] Failed to parse JSON: {str(e)}")
+            print(f"[ICORP GET] Response (non-JSON): {response.text}")
+            response_json = None
+        
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            error_msg = _extract_error_message(response)
+            print(f"[ICORP GET] ERROR: {error_msg or str(e)}")
+            print(f"[ICORP GET] Response Text: {response.text}")
+            frappe.throw(f"ICorp API Error: {error_msg or str(e)}")
 
-    return dict_keys_to_snake_case(response.json())
+        print(f"[ICORP GET] Converting keys to snake_case...")
+        result = dict_keys_to_snake_case(response_json)
+        print(f"[ICORP GET] Converted Result: {result}")
+        print(f"[ICORP GET] Returning result...")
+        return result
+    except requests.exceptions.Timeout as e:
+        print(f"[ICORP GET] TIMEOUT ERROR: {str(e)}")
+        frappe.throw(f"ICorp API Timeout: Request to {full_url} timed out after 120 seconds")
+    except requests.exceptions.RequestException as e:
+        print(f"[ICORP GET] REQUEST ERROR: {str(e)}")
+        frappe.throw(f"ICorp API Request Error: {str(e)}")
+    except Exception as e:
+        print(f"[ICORP GET] UNEXPECTED ERROR: {str(e)}")
+        print(f"[ICORP GET] Traceback: {frappe.get_traceback()}")
+        frappe.throw(f"ICorp API Unexpected Error: {str(e)}")
 
 def icorp_api_post(endpoint, data, headers=None):
     base_url, headers = get_icorp_auth()
@@ -67,12 +101,18 @@ def icorp_api_post(endpoint, data, headers=None):
             data["created_by"] = "system-frappe"
 
     url = f"{base_url}/{endpoint}"
-    print("Data: ", data)
-    response = requests.post(url, json=data, headers=headers, timeout=60)
-    print(response.json())
+    print(f"[ICORP POST] Endpoint: {endpoint}")
+    print(f"[ICORP POST] Full URL: {url}")
+    print(f"[ICORP POST] Data: {data}")
+    response = requests.post(url, json=data, headers=headers, timeout=120)
+    print(f"[ICORP POST] Status Code: {response.status_code}")
+    
     try:
-        return response.json()
+        response_json = response.json()
+        print(f"[ICORP POST] Response: {response_json}")
+        return response_json
     except ValueError:
+        print(f"[ICORP POST] Response (non-JSON): {response.text}")
         frappe.log_error(f"Non-JSON response from {url}: {response.text}", "ICorp API POST Error")
         return {"error": "Invalid JSON response", "status_code": response.status_code, "text": response.text}
 
@@ -88,34 +128,61 @@ def icorp_api_put(endpoint, data):
             data["modified_by"] = "system-frappe"
 
     url = f"{base_url}/{endpoint}"
-    response = requests.put(url, json=data, headers=headers, timeout=60)
+    print(f"[ICORP PUT] Endpoint: {endpoint}")
+    print(f"[ICORP PUT] Full URL: {url}")
+    print(f"[ICORP PUT] Data: {data}")
+    response = requests.put(url, json=data, headers=headers, timeout=120)
+    print(f"[ICORP PUT] Status Code: {response.status_code}")
+    
+    try:
+        response_json = response.json()
+        print(f"[ICORP PUT] Response: {response_json}")
+    except ValueError:
+        print(f"[ICORP PUT] Response (non-JSON): {response.text}")
+        response_json = None
 
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
         error_msg = _extract_error_message(response)
+        print(f"[ICORP PUT] ERROR: {error_msg or str(e)}")
+        print(f"[ICORP PUT] Response Text: {response.text}")
         frappe.throw(f"ICorp API Error: {error_msg or str(e)}")
 
-    return response.json()
+    return response_json
 
 def icorp_api_delete(endpoint, data=None):
     base_url, headers = get_icorp_auth()
     url = f"{base_url}/{endpoint}"
+    print(f"[ICORP DELETE] Endpoint: {endpoint}")
+    print(f"[ICORP DELETE] Full URL: {url}")
+    print(f"[ICORP DELETE] Data: {data}")
 
     if data:
         data = dict_keys_to_camel_case(data)
         data = _remove_empty_fields(data)
-        response = requests.delete(url, json=data, headers=headers, timeout=60)
+        response = requests.delete(url, json=data, headers=headers, timeout=120)
     else:
-        response = requests.delete(url, headers=headers, timeout=60)
+        response = requests.delete(url, headers=headers, timeout=120)
 
+    print(f"[ICORP DELETE] Status Code: {response.status_code}")
+    
+    try:
+        response_json = response.json()
+        print(f"[ICORP DELETE] Response: {response_json}")
+    except ValueError:
+        print(f"[ICORP DELETE] Response (non-JSON): {response.text}")
+        response_json = None
+        
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
         error_msg = _extract_error_message(response)
+        print(f"[ICORP DELETE] ERROR: {error_msg or str(e)}")
+        print(f"[ICORP DELETE] Response Text: {response.text}")
         frappe.throw(f"ICorp API Error: {error_msg or str(e)}")
 
-    return response.json()
+    return response_json
 
 def icorp_get_count(endpoint, filters=None):
     try:
@@ -143,7 +210,7 @@ def _fetch_headwind_token():
         password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest().upper()
         payload = {"login": login, "password": password_md5}
 
-        response = requests.post(f"{HEADWIND_API_BASE_URL}/public/jwt/login", json=payload, timeout=60)
+        response = requests.post(f"{HEADWIND_API_BASE_URL}/public/jwt/login", json=payload, timeout=120)
         response.raise_for_status()
         return response.json()["id_token"]
     except Exception:
@@ -159,22 +226,41 @@ def get_headwind_auth(token=None):
 
 def headwind_api_request(method, endpoint, data=None, params=None):
     try:
+        print(f"[HEADWIND {method.upper()}] Endpoint: {endpoint}")
+        print(f"[HEADWIND {method.upper()}] Data: {data}")
+        print(f"[HEADWIND {method.upper()}] Params: {params}")
         token = _fetch_headwind_token()
         base_url, headers = get_headwind_auth(token)
+        full_url = f"{base_url}/{endpoint}"
+        print(f"[HEADWIND {method.upper()}] Full URL: {full_url}")
 
         if data:
             data = dict_keys_to_camel_case(data)
 
-        response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=60)
+        response = requests.request(method, full_url, headers=headers, json=data, params=params, timeout=120)
 
         if response.status_code == 401:
+            print(f"[HEADWIND {method.upper()}] Got 401, retrying with new token...")
             token = _fetch_headwind_token()
             base_url, headers = get_headwind_auth(token)
-            response = requests.request(method, f"{base_url}/{endpoint}", headers=headers, json=data, params=params, timeout=60)
+            response = requests.request(method, full_url, headers=headers, json=data, params=params, timeout=120)
 
+        print(f"[HEADWIND {method.upper()}] Status Code: {response.status_code}")
+        
+        try:
+            response_json = response.json()
+            print(f"[HEADWIND {method.upper()}] Response: {response_json}")
+        except ValueError:
+            print(f"[HEADWIND {method.upper()}] Response (non-JSON): {response.text}")
+            response_json = None
+            
         response.raise_for_status()
-        return dict_keys_to_snake_case(response.json())
-    except Exception:
+        
+        result = dict_keys_to_snake_case(response_json)
+        print(f"[HEADWIND {method.upper()}] Converted Result: {result}")
+        return result
+    except Exception as e:
+        print(f"[HEADWIND {method.upper()}] EXCEPTION: {str(e)}")
         frappe.log_error(frappe.get_traceback(), "headwind_api_request error")
         return None
 
