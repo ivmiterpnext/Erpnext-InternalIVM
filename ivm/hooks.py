@@ -13,6 +13,17 @@ fixtures = [
     "Workspace", "Dashboard", "Issue Type", "Campaign", "Sales Stage", "Case Reason", "Lead Source", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
     "Opportunity Type", "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role"
 ]
+
+# Add to apps screen (for v16 navigation)
+add_to_apps_screen = [
+    {
+        "name": "ivm",
+        "logo": "/assets/ivm/images/ivm-logo.png",
+        "title": "IVM",
+        "route": "/app/ivm",
+    }
+]
+
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ivm/css/ivm.css"
 app_include_js = ["/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js"]

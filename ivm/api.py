@@ -258,7 +258,6 @@ def on_session_creation():
                 data.is_hidden = 1  # Set is_hidden to 1 for non-matching modules
             try:
                 data.save(ignore_permissions=True)
-                frappe.db.commit()
             except frappe.LinkValidationError:
                 # Skip workspaces with broken links
                 frappe.db.rollback()
@@ -272,7 +271,6 @@ def on_session_creation():
             data.is_hidden = 0  # Set is_hidden to 1 for non-matching modules
             try:
                 data.save()
-                frappe.db.commit()
             except frappe.LinkValidationError:
                 # Skip workspaces with broken links
                 frappe.db.rollback()
@@ -316,7 +314,6 @@ def creating_issue(doc, method):
                         'attached_to_name': doc.reference_name
                     })
                     file.save()
-            frappe.db.commit()
     except Exception as e:
         pass
 
@@ -463,8 +460,6 @@ def create_warehouse_request(doc, reason, attached_files=None):
 
             else:
                 pass
-
-    frappe.db.commit()
 
 
 @frappe.whitelist()
@@ -895,7 +890,6 @@ def apply_contact_matches(dry_run: int = 1):
                 doc = frappe.get_doc("Contact", contact_name)
                 doc.custom_css_contact_id = canonical_rid
                 doc.save(ignore_permissions=True)
-                frappe.db.commit()
                 updated += 1
             except Exception as e:
                 errors.append({"contact": contact_name, "error": str(e)})
@@ -1004,7 +998,6 @@ def import_mssql_to_frappe(dry_run: int = 1, limit: int = 0):
                 doc.phone = r.get("Phone1")
                 doc.custom_css_contact_id = r.get("CanonicalRID")
                 doc.insert(ignore_permissions=True)
-                frappe.db.commit()
                 created += 1
             except Exception as e:
                 errors.append({"mssql_rid": r.get("CanonicalRID"), "error": str(e)})
@@ -1073,7 +1066,6 @@ def import_frappe_to_mssql(dry_run: int = 1, limit: int = 0):
                         doc = frappe.get_doc("Contact", c["name"])
                         doc.custom_css_contact_id = new_canonical_rid
                         doc.save(ignore_permissions=True)
-                        frappe.db.commit()
                         created += 1
                         
             except Exception as e:

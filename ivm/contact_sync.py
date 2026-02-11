@@ -80,7 +80,6 @@ def sync_contact_to_mssql(doc, method=None):
         # Update Frappe doc with the new ID
         if new_canonical_rid:
             frappe.db.set_value("Contact", doc.name, "custom_css_contact_id", new_canonical_rid)
-            frappe.db.commit()
             frappe.logger().info(f"Contact {doc.name} synced to MSSQL with CanonicalRID={new_canonical_rid}")
             
     except Exception as e:
