@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-08 07:54:22.612546",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "client_name",
+  "primary_contact",
+  "restriction_priority",
+  "is_enhanced_client",
+  "using_enhanced_assignments",
+  "is_using_vend_return_machines",
+  "column_break_zveb",
+  "partner_client_id",
+  "initial_address",
+  "comments",
+  "is_active",
+  "assignment_expiry_section",
+  "assignment_expiry_days",
+  "column_break_mliu",
+  "time_frame",
+  "invoicing_section",
+  "check_frequency_type_code",
+  "column_break_lmuf",
+  "fee_rate_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "partner_client_id",
+   "fieldtype": "Link",
+   "label": "Partner Client",
+   "options": "Client Link"
+  },
+  {
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "primary_contact",
+   "fieldtype": "Link",
+   "label": "Primary Contact",
+   "options": "Contact",
+   "reqd": 1
+  },
+  {
+   "fieldname": "initial_address",
+   "fieldtype": "Link",
+   "label": "Initial Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "column_break_zveb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "restriction_priority",
+   "fieldtype": "Select",
+   "label": "Restriction Priority",
+   "options": "\nMost\nLeast",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Active"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_enhanced_client",
+   "fieldtype": "Check",
+   "label": "Enhanced"
+  },
+  {
+   "default": "0",
+   "fieldname": "using_enhanced_assignments",
+   "fieldtype": "Check",
+   "label": "Enhanced Assignments"
+  },
+  {
+   "fieldname": "assignment_expiry_section",
+   "fieldtype": "Section Break",
+   "label": "Assignment Expiry"
+  },
+  {
+   "fieldname": "assignment_expiry_days",
+   "fieldtype": "Int",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "column_break_mliu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "time_frame",
+   "fieldtype": "Select",
+   "label": "Time Frame",
+   "options": "Day(s)\nWeek(s)\nMonth(s)"
+  },
+  {
+   "fieldname": "invoicing_section",
+   "fieldtype": "Section Break",
+   "label": "Invoicing"
+  },
+  {
+   "fieldname": "column_break_lmuf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_using_vend_return_machines",
+   "fieldtype": "Check",
+   "label": "Using Vend Return Machines"
+  },
+  {
+   "fieldname": "comments",
+   "fieldtype": "Small Text",
+   "label": "Comments"
+  },
+  {
+   "fieldname": "check_frequency_type_code",
+   "fieldtype": "Link",
+   "label": "Check Frequency Type",
+   "options": "Check Frequency Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fee_rate_id",
+   "fieldtype": "Link",
+   "label": "Fee Rate",
+   "options": "Fee Rate",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_virtual": 1,
+ "links": [],
+ "modified": "2025-12-17 05:01:48.187378",
+ "modified_by": "Administrator",
+ "module": "MSSQL Frappe",
+ "name": "Client",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,30 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-08-16 17:25:15.592086",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2023-09-25 02:15:18.529538",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Closed Cases Total",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT\n    u.full_name AS \"Case Owner\",\n    i.case_owner AS \"Email\",\n    COUNT(*) AS \"Closed Issue Count\",\n    i.case_number AS \"Case Number\",\n    i.date_and_time_closed AS \"Date/Time Closed\"\nFROM\n    `tabIssue` i\nJOIN\n    `tabUser` u ON i.case_owner = u.email\nWHERE\n    i.status = 'Closed'\n    AND u.enabled = 1\n    AND i.date_and_time_closed >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)\nGROUP BY\n    u.full_name, i.case_owner\nORDER BY\n    \"Closed Issue Count\" DESC;\n\n",
+ "ref_doctype": "Issue",
+ "report_name": "Closed Cases Total",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Workspace Manager"
+  }
+ ]
+}

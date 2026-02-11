@@ -1,0 +1,298 @@
+[
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.647030",
+  "name": "ZoomInfo",
+  "source_name": "ZoomInfo"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.658515",
+  "name": "Yahoo! Natural Search",
+  "source_name": "Yahoo! Natural Search"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.665203",
+  "name": "Word of mouth",
+  "source_name": "Word of mouth"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.671632",
+  "name": "Reddit",
+  "source_name": "Reddit"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.678358",
+  "name": "Public Relations",
+  "source_name": "Public Relations"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.686292",
+  "name": "Google Natural Search",
+  "source_name": "Google Natural Search"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.692398",
+  "name": "Google Ad",
+  "source_name": "Google Ad"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.698709",
+  "name": "Google",
+  "source_name": "Google"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.726874",
+  "name": "Gmail",
+  "source_name": "Gmail"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.732584",
+  "name": "External Referral",
+  "source_name": "External Referral"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.738380",
+  "name": "Employee Referral",
+  "source_name": "Employee Referral"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.743896",
+  "name": "Email",
+  "source_name": "Email"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.749562",
+  "name": "Bing Natural Search",
+  "source_name": "Bing Natural Search"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.756763",
+  "name": "Ask.com Natural Search",
+  "source_name": "Ask.com Natural Search"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.762577",
+  "name": "Facebook",
+  "source_name": "Facebook"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.768115",
+  "name": "LinkedIn",
+  "source_name": "LinkedIn"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.773948",
+  "name": "Web",
+  "source_name": "Web"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.779422",
+  "name": "Trade Show",
+  "source_name": "Trade Show"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.786548",
+  "name": "Referral",
+  "source_name": "Referral"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.792157",
+  "name": "Other",
+  "source_name": "Other"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.798573",
+  "name": "Advertisement",
+  "source_name": "Advertisement"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.804427",
+  "name": "Walk In",
+  "source_name": "Walk In"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.810841",
+  "name": "Campaign",
+  "source_name": "Campaign"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.816526",
+  "name": "Customer's Vendor",
+  "source_name": "Customer's Vendor"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.829135",
+  "name": "Mass Mailing",
+  "source_name": "Mass Mailing"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.835737",
+  "name": "Supplier Reference",
+  "source_name": "Supplier Reference"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.841379",
+  "name": "Exhibition",
+  "source_name": "Exhibition"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.847638",
+  "name": "Cold Calling",
+  "source_name": "Cold Calling"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.853841",
+  "name": "Reference",
+  "source_name": "Reference"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-30 03:43:55.859216",
+  "name": "Existing Customer",
+  "source_name": "Existing Customer"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-09-01 19:45:46.034652",
+  "name": "reporting",
+  "source_name": "reporting"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-09-01 19:45:46.047612",
+  "name": "ready to test/build",
+  "source_name": "ready to test/build"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-09-01 19:45:46.057075",
+  "name": "moving forward with more machines",
+  "source_name": "moving forward with more machines"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-09-01 19:45:46.062501",
+  "name": "Put Together Product List",
+  "source_name": "Put Together Product List"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-09-08 01:23:27.477284",
+  "name": "Demo-1",
+  "source_name": "Demo-1"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-09-08 01:30:59.710585",
+  "name": "Testing-1",
+  "source_name": "Testing-1"
+ },
+ {
+  "details": null,
+  "docstatus": 0,
+  "doctype": "Lead Source",
+  "modified": "2023-08-27 20:26:02.072676",
+  "name": "Twitter",
+  "source_name": "Twitter"
+ }
+]
