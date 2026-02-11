@@ -1,0 +1,83 @@
+{
+ "chart_name": "Support Cases Closed This Month",
+ "chart_type": "Report",
+ "creation": "2023-08-17 11:36:13.157899",
+ "custom_options": "{\"x_field\": \"case_owner\", \"chart_type\": \"Bar\", \"y_axis_fields\": [{\"idx\": 1, \"__islocal\": true, \"name\": \"row 1\", \"y_field\": \"vm_support_count\"}, {\"idx\": 2, \"__islocal\": true, \"name\": \"row 2\", \"y_field\": \"batch_count\"}, {\"idx\": 3, \"__islocal\": true, \"name\": \"row 3\", \"y_field\": \"permissions_count\"}, {\"idx\": 4, \"__islocal\": true, \"name\": \"row 4\", \"y_field\": \"shipping_request_count\"}, {\"idx\": 5, \"__islocal\": true, \"name\": \"row 5\", \"y_field\": \"print_labels_count\"}, {\"idx\": 6, \"__islocal\": true, \"name\": \"row 6\", \"y_field\": \"wrap_ready_count\"}, {\"idx\": 7, \"__islocal\": true, \"name\": \"row 7\", \"y_field\": \"sales_support_count\"}, {\"idx\": 8, \"__islocal\": true, \"name\": \"row 8\", \"y_field\": \"build_machine_count\"}, {\"idx\": 9, \"__islocal\": true, \"name\": \"row 9\", \"y_field\": \"product_testing_count\"}, {\"idx\": 10, \"__islocal\": true, \"name\": \"row 10\", \"y_field\": \"salesforce_count\"}, {\"idx\": 11, \"__islocal\": true, \"name\": \"row 11\", \"y_field\": \"data_update_count\"}, {\"idx\": 12, \"__islocal\": true, \"name\": \"row 12\", \"y_field\": \"remove_vend_count\"}, {\"idx\": 13, \"__islocal\": true, \"name\": \"row 13\", \"y_field\": \"redeployment_count\"}, {\"idx\": 14, \"__islocal\": true, \"name\": \"row 14\", \"y_field\": \"miscellaneous_issues_count\"}, {\"idx\": 15, \"__islocal\": true, \"name\": \"row 15\", \"y_field\": \"other_count\"}, {\"idx\": 16, \"__islocal\": true, \"name\": \"row 16\", \"y_field\": \"reconfiguration_count\"}, {\"idx\": 17, \"__islocal\": true, \"name\": \"row 17\", \"y_field\": \"related_to_existing_case_count\"}, {\"idx\": 18, \"__islocal\": true, \"name\": \"row 18\", \"y_field\": \"website_count\"}, {\"idx\": 19, \"__islocal\": true, \"name\": \"row 19\", \"y_field\": \"equipment_issue_count\"}, {\"idx\": 20, \"__islocal\": true, \"name\": \"row 20\", \"y_field\": \"po_request_count\"}, {\"idx\": 21, \"__islocal\": true, \"name\": \"row 21\", \"y_field\": \"technical_count\"}, {\"idx\": 22, \"__islocal\": true, \"name\": \"row 22\", \"y_field\": \"technical_count\"}, {\"idx\": 23, \"__islocal\": true, \"name\": \"row 23\", \"y_field\": \"none_count\"}, {\"idx\": 24, \"__islocal\": true, \"name\": \"row 24\", \"y_field\": \"change_request_count\"}, {\"idx\": 25, \"__islocal\": true, \"name\": \"row 25\", \"y_field\": \"product_innovation_count\"}, {\"idx\": 26, \"__islocal\": true, \"name\": \"row 26\", \"y_field\": \"new_deployment_count\"}, {\"idx\": 27, \"__islocal\": true, \"name\": \"row 27\", \"y_field\": \"redeployment_count\"}, {\"idx\": 28, \"__islocal\": true, \"name\": \"row 28\", \"y_field\": \"client_call_count\"}, {\"idx\": 29, \"__islocal\": true, \"name\": \"row 29\", \"y_field\": \"desktop_support_count\"}, {\"idx\": 30, \"__islocal\": true, \"name\": \"row 30\", \"y_field\": \"virtual_install_call_count\"}, {\"idx\": 31, \"__islocal\": true, \"name\": \"row 31\", \"y_field\": \"travel_install_count\"}, {\"idx\": 32, \"__islocal\": true, \"name\": \"row 32\", \"y_field\": \"information_count\", \"__checked\": 0}, {\"idx\": 33, \"__islocal\": true, \"name\": \"row 33\", \"y_field\": \"issues_count\"}], \"y_fields\": [\"vm_support_count\", \"batch_count\", \"permissions_count\", \"shipping_request_count\", \"print_labels_count\", \"wrap_ready_count\", \"sales_support_count\", \"build_machine_count\", \"product_testing_count\", \"salesforce_count\", \"data_update_count\", \"remove_vend_count\", \"redeployment_count\", \"miscellaneous_issues_count\", \"other_count\", \"reconfiguration_count\", \"related_to_existing_case_count\", \"website_count\", \"equipment_issue_count\", \"po_request_count\", \"technical_count\", \"technical_count\", \"none_count\", \"change_request_count\", \"product_innovation_count\", \"new_deployment_count\", \"redeployment_count\", \"client_call_count\", \"desktop_support_count\", \"virtual_install_call_count\", \"travel_install_count\", \"information_count\", \"issues_count\"], \"colors\": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "filters_json": "{}",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2023-09-25 02:05:33.977279",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Support Cases Closed This Month",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "report_name": "Cases",
+ "roles": [
+  {
+   "role": "Workspace Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "x_field": "user_full_name",
+ "y_axis": [
+  {
+   "color": "#ECAD4B",
+   "y_field": "data_update"
+  },
+  {
+   "color": "#4F9DD9",
+   "y_field": "remove_vend"
+  },
+  {
+   "color": "#29CD42",
+   "y_field": "receivable"
+  },
+  {
+   "color": "#761ACB",
+   "y_field": "miscellaneous_issues"
+  },
+  {
+   "color": "#CB2929",
+   "y_field": "other"
+  },
+  {
+   "color": "#4463F0",
+   "y_field": "reconfiguration"
+  },
+  {
+   "color": "#EC864B",
+   "y_field": "related_to_existing_case"
+  },
+  {
+   "y_field": "tasks"
+  },
+  {
+   "color": "#403636",
+   "y_field": "website"
+  },
+  {
+   "color": "#29CD42",
+   "y_field": "equipment_issue"
+  },
+  {
+   "color": "#39E4A5",
+   "y_field": "technical"
+  },
+  {
+   "color": "#449CF0",
+   "y_field": "vm_support"
+  }
+ ]
+}

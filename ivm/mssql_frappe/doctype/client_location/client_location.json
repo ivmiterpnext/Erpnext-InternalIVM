@@ -1,0 +1,111 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-10 03:17:12.302223",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "location_name",
+  "client_id",
+  "is_restricted",
+  "restriction_types",
+  "allowed_vends_per_auth",
+  "column_break_brxg",
+  "time_zone",
+  "default_pin",
+  "is_pin_required",
+  "is_allow_anyone_vend",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "location_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Link",
+   "label": "Client",
+   "options": "Client Link"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_restricted",
+   "fieldtype": "Check",
+   "label": "Restricted"
+  },
+  {
+   "fieldname": "restriction_types",
+   "fieldtype": "Table MultiSelect",
+   "label": "Restriction Types",
+   "options": "Assigned Restriction Type"
+  },
+  {
+   "fieldname": "allowed_vends_per_auth",
+   "fieldtype": "Int",
+   "label": "Allowed Vends Per Auth"
+  },
+  {
+   "fieldname": "column_break_brxg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "time_zone",
+   "fieldtype": "Link",
+   "label": "Time Zone",
+   "options": "Timezone"
+  },
+  {
+   "fieldname": "default_pin",
+   "fieldtype": "Data",
+   "label": "Default PIN"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_pin_required",
+   "fieldtype": "Check",
+   "label": "Require PIN"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_allow_anyone_vend",
+   "fieldtype": "Check",
+   "label": "Allow Anonymous Vending"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Active"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_virtual": 1,
+ "links": [],
+ "modified": "2025-12-10 03:17:12.302223",
+ "modified_by": "Administrator",
+ "module": "MSSQL Frappe",
+ "name": "Client Location",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

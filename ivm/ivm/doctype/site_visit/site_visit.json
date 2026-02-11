@@ -1,0 +1,292 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:SV-{####}",
+ "creation": "2023-09-25 21:28:09.971574",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_document_type",
+  "reference_related_to",
+  "assigned_to",
+  "column_break_6at3h",
+  "status",
+  "owner1",
+  "contact_information_section",
+  "primary_contact_name",
+  "primary_contact_email",
+  "primary_contact_phone",
+  "column_break_ewyk9",
+  "secondary_contact_name",
+  "secondary_contact_email",
+  "secondary_contact_phone",
+  "address_details_section",
+  "street_address",
+  "city",
+  "state",
+  "column_break_tsrub",
+  "country",
+  "zip_code",
+  "visit_details_section",
+  "location_name",
+  "vendor_name",
+  "machine_numbers",
+  "type_of_service",
+  "start_date",
+  "start_time",
+  "column_break_m02cz",
+  "security__safety_requirements",
+  "parts_tracking",
+  "parts_required",
+  "end_date",
+  "invoice_client_for_visit",
+  "notes",
+  "system_details_section",
+  "created_by",
+  "last_modified_by",
+  "created_date",
+  "last_modified_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "New\nAssigned/ Scheduled\nFollow Up Scheduled\nComplete\nCancel"
+  },
+  {
+   "fieldname": "primary_contact_name",
+   "fieldtype": "Data",
+   "label": "Primary Contact Name"
+  },
+  {
+   "fieldname": "primary_contact_email",
+   "fieldtype": "Data",
+   "label": "Primary Contact Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "secondary_contact_name",
+   "fieldtype": "Data",
+   "label": "Secondary Contact Name"
+  },
+  {
+   "fieldname": "secondary_contact_email",
+   "fieldtype": "Data",
+   "label": "Secondary Contact Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "machine_numbers",
+   "fieldtype": "Small Text",
+   "label": "Machine Numbers"
+  },
+  {
+   "fieldname": "primary_contact_phone",
+   "fieldtype": "Phone",
+   "label": "Primary Contact Phone"
+  },
+  {
+   "fieldname": "secondary_contact_phone",
+   "fieldtype": "Phone",
+   "label": "Secondary Contact Phone"
+  },
+  {
+   "fieldname": "vendor_name",
+   "fieldtype": "Small Text",
+   "label": "Vendor Name"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "label": "Start Time"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "street_address",
+   "fieldtype": "Small Text",
+   "label": "Street Address"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Small Text",
+   "label": "City"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Small Text",
+   "label": "State"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Small Text",
+   "label": "Country"
+  },
+  {
+   "fieldname": "zip_code",
+   "fieldtype": "Small Text",
+   "label": "Zip Code"
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Select",
+   "label": "Assigned To",
+   "options": "None\nNone\nSean Whitaker\nDustin Norvell\nMike Brady\nWilliam Ott\nNathan Guffey\nMatthew Brose\nScott Beck\nJosh Guffey\nWill Calderon\nVendor\nDaniel Yilma\nOther"
+  },
+  {
+   "fieldname": "type_of_service",
+   "fieldtype": "Select",
+   "label": "Type of Service",
+   "options": "None\nInstall\nRepair\nReconfiguration\nGraphics\nPreventative Maintenance\nPhone Support\nOther"
+  },
+  {
+   "fieldname": "invoice_client_for_visit",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Invoice Client for Visit",
+   "options": "None\nYes\nNo\nTBD",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parts_required",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Parts Required",
+   "options": "None\nYes\nNo\nTBD",
+   "reqd": 1
+  },
+  {
+   "fieldname": "security__safety_requirements",
+   "fieldtype": "Small Text",
+   "label": "Security / Safety Requirements"
+  },
+  {
+   "fieldname": "parts_tracking",
+   "fieldtype": "Small Text",
+   "label": "Parts Tracking"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "owner1",
+   "fieldtype": "Link",
+   "label": "Owner",
+   "options": "User"
+  },
+  {
+   "fieldname": "location_name",
+   "fieldtype": "Small Text",
+   "label": "Location Name"
+  },
+  {
+   "fieldname": "created_by",
+   "fieldtype": "Link",
+   "label": "Created By",
+   "options": "User"
+  },
+  {
+   "fieldname": "last_modified_by",
+   "fieldtype": "Link",
+   "label": "Last Modified By",
+   "options": "User"
+  },
+  {
+   "fieldname": "created_date",
+   "fieldtype": "Datetime",
+   "label": "Created Date"
+  },
+  {
+   "fieldname": "last_modified_date",
+   "fieldtype": "Datetime",
+   "label": "Last Modified Date"
+  },
+  {
+   "fieldname": "contact_information_section",
+   "fieldtype": "Section Break",
+   "label": "Contact Information"
+  },
+  {
+   "fieldname": "address_details_section",
+   "fieldtype": "Section Break",
+   "label": "Address Details"
+  },
+  {
+   "fieldname": "visit_details_section",
+   "fieldtype": "Section Break",
+   "label": "Visit Details"
+  },
+  {
+   "fieldname": "column_break_6at3h",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ewyk9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_tsrub",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_m02cz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "system_details_section",
+   "fieldtype": "Section Break",
+   "label": "System Details"
+  },
+  {
+   "fieldname": "reference_document_type",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_related_to",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Related To",
+   "options": "reference_document_type"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-09-27 11:22:09.353584",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "Site Visit",
+ "name_case": "UPPER CASE",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
