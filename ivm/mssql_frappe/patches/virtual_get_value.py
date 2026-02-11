@@ -1,8 +1,8 @@
 import frappe
 from frappe.desk.search import get_value as frappe_get_value
-from mssql_frappe.mssql_frappe.doctype.board_manufacturer.board_manufacturer import BoardManufacturer
-from mssql_frappe.mssql_frappe.doctype.board_type.board_type import BoardType
-from mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type import HardwareAvailabilityType
+from ivm.mssql_frappe.mssql_frappe.doctype.board_manufacturer.board_manufacturer import BoardManufacturer
+from ivm.mssql_frappe.mssql_frappe.doctype.board_type.board_type import BoardType
+from ivm.mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type import HardwareAvailabilityType
 
 @frappe.whitelist()
 def virtual_get_value(doctype, name, fieldname, **kwargs):

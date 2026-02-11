@@ -1,8 +1,8 @@
 import frappe
 from frappe import _
-from mssql_frappe.mssql_frappe.doctype.board_manufacturer.board_manufacturer import BoardManufacturer
-from mssql_frappe.mssql_frappe.doctype.board_type.board_type import BoardType
-from mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type import HardwareAvailabilityType
+from ivm.mssql_frappe.mssql_frappe.doctype.board_manufacturer.board_manufacturer import BoardManufacturer
+from ivm.mssql_frappe.mssql_frappe.doctype.board_type.board_type import BoardType
+from ivm.mssql_frappe.mssql_frappe.doctype.hardware_availability_type.hardware_availability_type import HardwareAvailabilityType
 
 @frappe.whitelist()
 def get_board_manufacturer_link(doctype, txt, searchfield, start, page_len, filters):

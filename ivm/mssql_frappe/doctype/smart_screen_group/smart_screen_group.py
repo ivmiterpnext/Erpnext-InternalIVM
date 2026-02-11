@@ -1,6 +1,6 @@
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.utils.sync_util import sync_doctype_from_api
+from ivm.mssql_frappe.utils.sync_util import sync_doctype_from_api
 
 class SmartScreenGroup(Document):
 	pass

@@ -2,10 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
-from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
-from mssql_frappe.utils.api_utils import icorp_api_get
-from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
-from mssql_frappe.utils.data_utils import set_attrs_from_dict, to_iso8601
+from ivm.mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
+from ivm.mssql_frappe.utils.api_utils import icorp_api_get
+from ivm.mssql_frappe.utils.case_utils import api_data_to_frappe_dict
+from ivm.mssql_frappe.utils.data_utils import set_attrs_from_dict, to_iso8601
 
 
 class Board(BaseVirtualDoctype):

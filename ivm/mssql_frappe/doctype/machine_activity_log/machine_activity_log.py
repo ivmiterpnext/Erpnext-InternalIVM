@@ -1,9 +1,9 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
-from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id, get_machine_id_from_machine_name
-from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
+from ivm.mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
+from ivm.mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id, get_machine_id_from_machine_name
+from ivm.mssql_frappe.utils.case_utils import api_data_to_frappe_dict
 
 class MachineActivityLog(BaseVirtualDoctype):
 	API_TYPE = "icorp"

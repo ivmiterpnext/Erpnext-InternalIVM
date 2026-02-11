@@ -4,8 +4,8 @@ import requests
 import frappe
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from mssql_frappe.utils.case_utils import dict_keys_to_snake_case, dict_keys_to_camel_case
-from mssql_frappe.utils.filter_utils import filters_to_query_params
+from ivm.mssql_frappe.utils.case_utils import dict_keys_to_snake_case, dict_keys_to_camel_case
+from ivm.mssql_frappe.utils.filter_utils import filters_to_query_params
 
 
 ICORP_API_BASE_URL = "https://dev.icorpapi.ivminc.com"

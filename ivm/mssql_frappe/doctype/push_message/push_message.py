@@ -3,8 +3,8 @@
 
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.utils.api_utils import headwind_api_request
-from mssql_frappe.utils.case_utils import api_data_to_frappe_dict
+from ivm.mssql_frappe.utils.api_utils import headwind_api_request
+from ivm.mssql_frappe.utils.case_utils import api_data_to_frappe_dict
 
 
 class PushMessage(Document):

@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from mssql_frappe.utils.api_utils import icorp_api_get
+from ivm.mssql_frappe.utils.api_utils import icorp_api_get
 
 class AddressLink(Document):
 	pass

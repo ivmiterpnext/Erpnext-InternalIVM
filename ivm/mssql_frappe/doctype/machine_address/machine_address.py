@@ -1,10 +1,10 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
-from mssql_frappe.utils.case_utils import convert_fields_to_bool
-from mssql_frappe.utils.data_utils import set_attrs_from_dict
-from mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
+from ivm.mssql_frappe.mssql_frappe.doctype.base_virtual_doctype import BaseVirtualDoctype
+from ivm.mssql_frappe.utils.case_utils import convert_fields_to_bool
+from ivm.mssql_frappe.utils.data_utils import set_attrs_from_dict
+from ivm.mssql_frappe.mssql_frappe.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 
 
 class MachineAddress(BaseVirtualDoctype):

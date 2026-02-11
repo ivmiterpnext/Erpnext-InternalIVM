@@ -2,7 +2,7 @@ import frappe
 
 
 def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, field_map=None):
-    from mssql_frappe.utils.api_utils import headwind_api_request, icorp_api_get
+    from ivm.mssql_frappe.utils.api_utils import headwind_api_request, icorp_api_get
     try:
         frappe.logger().info(f"Syncing {doctype}")
         if api_type == "headwind":
