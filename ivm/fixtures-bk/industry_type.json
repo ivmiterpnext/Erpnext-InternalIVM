@@ -1,0 +1,1556 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Wire & Cable",
+  "modified": "2023-08-30 03:55:50.284604",
+  "name": "Wire & Cable"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Vitamins, Supplements & Health Stores",
+  "modified": "2023-08-30 03:55:50.290301",
+  "name": "Vitamins, Supplements & Health Stores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Venture Capital & Private Equity",
+  "modified": "2023-08-30 03:55:50.295766",
+  "name": "Venture Capital & Private Equity"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Utilities",
+  "modified": "2023-08-30 03:55:50.310711",
+  "name": "Utilities"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Travel Agencies & Services",
+  "modified": "2023-08-30 03:55:50.320745",
+  "name": "Travel Agencies & Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Training",
+  "modified": "2023-08-30 03:55:50.327839",
+  "name": "Training"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Textiles & Apparel",
+  "modified": "2023-08-30 03:55:50.336705",
+  "name": "Textiles & Apparel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Test & Measurement Equipment",
+  "modified": "2023-08-30 03:55:50.342701",
+  "name": "Test & Measurement Equipment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Telephony & Wireless",
+  "modified": "2023-08-30 03:55:50.348842",
+  "name": "Telephony & Wireless"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Telecommunication Equipment",
+  "modified": "2023-08-30 03:55:50.354667",
+  "name": "Telecommunication Equipment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Supply Chain Management (SCM) Software",
+  "modified": "2023-08-30 03:55:50.360210",
+  "name": "Supply Chain Management (SCM) Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Storage & System Management Software",
+  "modified": "2023-08-30 03:55:50.365681",
+  "name": "Storage & System Management Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Sports Teams & Leagues",
+  "modified": "2023-08-30 03:55:50.371680",
+  "name": "Sports Teams & Leagues"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Sporting & Recreational Equipment Retail",
+  "modified": "2023-08-30 03:55:50.377212",
+  "name": "Sporting & Recreational Equipment Retail"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Shipping",
+  "modified": "2023-08-30 03:55:50.382829",
+  "name": "Shipping"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Security Software",
+  "modified": "2023-08-30 03:55:50.388348",
+  "name": "Security Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Security Products & Services",
+  "modified": "2023-08-30 03:55:50.394270",
+  "name": "Security Products & Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Sales Retail",
+  "modified": "2023-08-30 03:55:50.399677",
+  "name": "Sales Retail"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Retail",
+  "modified": "2023-08-30 03:55:50.405129",
+  "name": "Retail"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Restaurants",
+  "modified": "2023-08-30 03:55:50.410600",
+  "name": "Restaurants"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Research & Development",
+  "modified": "2023-08-30 03:55:50.416053",
+  "name": "Research & Development"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Repair Services",
+  "modified": "2023-08-30 03:55:50.427124",
+  "name": "Repair Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Recreation",
+  "modified": "2023-08-30 03:55:50.432712",
+  "name": "Recreation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Railroad",
+  "modified": "2023-08-30 03:55:50.438148",
+  "name": "Railroad"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Rail, Bus & Taxi",
+  "modified": "2023-08-30 03:55:50.443742",
+  "name": "Rail, Bus & Taxi"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Power",
+  "modified": "2023-08-30 03:55:50.449271",
+  "name": "Power"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Plastic, Packaging & Containers",
+  "modified": "2023-08-30 03:55:50.454750",
+  "name": "Plastic, Packaging & Containers"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Other",
+  "modified": "2023-08-30 03:55:50.460439",
+  "name": "Other"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Organizations",
+  "modified": "2023-08-30 03:55:50.466053",
+  "name": "Organizations"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Oil & Gas Exploration & Services",
+  "modified": "2023-08-30 03:55:50.471349",
+  "name": "Oil & Gas Exploration & Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Office Products Retail & Distribution",
+  "modified": "2023-08-30 03:55:50.476807",
+  "name": "Office Products Retail & Distribution"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Nonclassifiable Industries",
+  "modified": "2023-08-30 03:55:50.482383",
+  "name": "Nonclassifiable Industries"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Non-Profit & Charitable Organizations",
+  "modified": "2023-08-30 03:55:50.488248",
+  "name": "Non-Profit & Charitable Organizations"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Newspapers & News Services",
+  "modified": "2023-08-30 03:55:50.493645",
+  "name": "Newspapers & News Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Networking Software",
+  "modified": "2023-08-30 03:55:50.499435",
+  "name": "Networking Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Multimedia, Games & Graphics Software",
+  "modified": "2023-08-30 03:55:50.504745",
+  "name": "Multimedia, Games & Graphics Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Motor Vehicles",
+  "modified": "2023-08-30 03:55:50.510231",
+  "name": "Motor Vehicles"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Mobile App Development",
+  "modified": "2023-08-30 03:55:50.515865",
+  "name": "Mobile App Development"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Minerals & Mining",
+  "modified": "2023-08-30 03:55:50.521556",
+  "name": "Minerals & Mining"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Medical Devices & Equipment",
+  "modified": "2023-08-30 03:55:50.526965",
+  "name": "Medical Devices & Equipment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Medical & Surgical Hospitals",
+  "modified": "2023-08-30 03:55:50.532460",
+  "name": "Medical & Surgical Hospitals"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Media & Internet",
+  "modified": "2023-08-30 03:55:50.538177",
+  "name": "Media & Internet"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Media",
+  "modified": "2023-08-30 03:55:50.553890",
+  "name": "Media"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Marine Shipping & Transportation",
+  "modified": "2023-08-30 03:55:50.559517",
+  "name": "Marine Shipping & Transportation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Management Consulting",
+  "modified": "2023-08-30 03:55:50.564923",
+  "name": "Management Consulting"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Machinery",
+  "modified": "2023-08-30 03:55:50.570618",
+  "name": "Machinery"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Lodging",
+  "modified": "2023-08-30 03:55:50.575950",
+  "name": "Lodging"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Local",
+  "modified": "2023-08-30 03:55:50.582015",
+  "name": "Local"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Lending & Brokerage",
+  "modified": "2023-08-30 03:55:50.587995",
+  "name": "Lending & Brokerage"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Legal Software",
+  "modified": "2023-08-30 03:55:50.593366",
+  "name": "Legal Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Left Blank",
+  "modified": "2023-08-30 03:55:50.598703",
+  "name": "Left Blank"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Law Firms & Legal Services",
+  "modified": "2023-08-30 03:55:50.604054",
+  "name": "Law Firms & Legal Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "K-12 Schools",
+  "modified": "2023-08-30 03:55:50.609506",
+  "name": "K-12 Schools"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Jewelry and Silverware",
+  "modified": "2023-08-30 03:55:50.614982",
+  "name": "Jewelry and Silverware"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Jewelry & Watch Retail",
+  "modified": "2023-08-30 03:55:50.620438",
+  "name": "Jewelry & Watch Retail"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Internet Service Providers, Website Hosting & Internet-related Services",
+  "modified": "2023-08-30 03:55:50.625992",
+  "name": "Internet Service Providers, Website Hosting & Internet-related Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Insurance",
+  "modified": "2023-08-30 03:55:50.631409",
+  "name": "Insurance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Industrial Machinery & Equipment",
+  "modified": "2023-08-30 03:55:50.636838",
+  "name": "Industrial Machinery & Equipment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Human Resources Software",
+  "modified": "2023-08-30 03:55:50.642162",
+  "name": "Human Resources Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "HR & Staffing",
+  "modified": "2023-08-30 03:55:50.648182",
+  "name": "HR & Staffing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Hospitals & Physicians Clinics",
+  "modified": "2023-08-30 03:55:50.659600",
+  "name": "Hospitals & Physicians Clinics"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Hospitality",
+  "modified": "2023-08-30 03:55:50.665548",
+  "name": "Hospitality"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Hospital",
+  "modified": "2023-08-30 03:55:50.671003",
+  "name": "Hospital"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Home Improvement & Hardware Retail",
+  "modified": "2023-08-30 03:55:50.676564",
+  "name": "Home Improvement & Hardware Retail"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Holding Companies & Conglomerates",
+  "modified": "2023-08-30 03:55:50.681984",
+  "name": "Holding Companies & Conglomerates"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Healthcare Software",
+  "modified": "2023-08-30 03:55:50.687323",
+  "name": "Healthcare Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Healthcare Services",
+  "modified": "2023-08-30 03:55:50.692914",
+  "name": "Healthcare Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Healthcare",
+  "modified": "2023-08-30 03:55:50.698337",
+  "name": "Healthcare"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Grocery Retail",
+  "modified": "2023-08-30 03:55:50.703818",
+  "name": "Grocery Retail"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Government",
+  "modified": "2023-08-30 03:55:50.709181",
+  "name": "Government"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Furniture",
+  "modified": "2023-08-30 03:55:50.714730",
+  "name": "Furniture"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Freight & Logistics Services",
+  "modified": "2023-08-30 03:55:50.720099",
+  "name": "Freight & Logistics Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Food Service",
+  "modified": "2023-08-30 03:55:50.725395",
+  "name": "Food Service"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Food & Beverage",
+  "modified": "2023-08-30 03:55:50.730705",
+  "name": "Food & Beverage"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Flowers, Gifts & Specialty Stores",
+  "modified": "2023-08-30 03:55:50.735980",
+  "name": "Flowers, Gifts & Specialty Stores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Financial Software",
+  "modified": "2023-08-30 03:55:50.741631",
+  "name": "Financial Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Finance",
+  "modified": "2023-08-30 03:55:50.747006",
+  "name": "Finance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Facilities Management & Commercial Cleaning",
+  "modified": "2023-08-30 03:55:50.752502",
+  "name": "Facilities Management & Commercial Cleaning"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Environmental",
+  "modified": "2023-08-30 03:55:50.758546",
+  "name": "Environmental"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Enterprise Resource Planning (ERP) Software",
+  "modified": "2023-08-30 03:55:50.768257",
+  "name": "Enterprise Resource Planning (ERP) Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Engineering Software",
+  "modified": "2023-08-30 03:55:50.773718",
+  "name": "Engineering Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Engineering",
+  "modified": "2023-08-30 03:55:50.779243",
+  "name": "Engineering"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Energy, Utilities & Waste",
+  "modified": "2023-08-30 03:55:50.784770",
+  "name": "Energy, Utilities & Waste"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Electricity, Oil & Gas",
+  "modified": "2023-08-30 03:55:50.799181",
+  "name": "Electricity, Oil & Gas"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Drug Stores & Pharmacies",
+  "modified": "2023-08-30 03:55:50.804817",
+  "name": "Drug Stores & Pharmacies"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Department Stores, Shopping Centers & Superstores",
+  "modified": "2023-08-30 03:55:50.810473",
+  "name": "Department Stores, Shopping Centers & Superstores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Debt Collection",
+  "modified": "2023-08-30 03:55:50.815897",
+  "name": "Debt Collection"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Data Collection & Internet Portals",
+  "modified": "2023-08-30 03:55:50.821575",
+  "name": "Data Collection & Internet Portals"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Customer Relationship Management (CRM) Software",
+  "modified": "2023-08-30 03:55:50.826962",
+  "name": "Customer Relationship Management (CRM) Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Custom Software & IT Services",
+  "modified": "2023-08-30 03:55:50.832626",
+  "name": "Custom Software & IT Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Credit Cards & Transaction Processing",
+  "modified": "2023-08-30 03:55:50.838424",
+  "name": "Credit Cards & Transaction Processing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Cosmetics, Beauty Supply & Personal Care Products",
+  "modified": "2023-08-30 03:55:50.843747",
+  "name": "Cosmetics, Beauty Supply & Personal Care Products"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Convenience Stores, Gas Stations & Liquor Stores",
+  "modified": "2023-08-30 03:55:50.849065",
+  "name": "Convenience Stores, Gas Stations & Liquor Stores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Content & Collaboration Software",
+  "modified": "2023-08-30 03:55:50.854687",
+  "name": "Content & Collaboration Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Consumer Services",
+  "modified": "2023-08-30 03:55:50.860219",
+  "name": "Consumer Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Consumer Electronics & Computers Retail",
+  "modified": "2023-08-30 03:55:50.865699",
+  "name": "Consumer Electronics & Computers Retail"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Construction",
+  "modified": "2023-08-30 03:55:50.871206",
+  "name": "Construction"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Computer Equipment & Peripherals",
+  "modified": "2023-08-30 03:55:50.876567",
+  "name": "Computer Equipment & Peripherals"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Communications",
+  "modified": "2023-08-30 03:55:50.882170",
+  "name": "Communications"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Commercial Printing",
+  "modified": "2023-08-30 03:55:50.887507",
+  "name": "Commercial Printing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Commercial & Residential Construction",
+  "modified": "2023-08-30 03:55:50.893356",
+  "name": "Commercial & Residential Construction"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Colleges & Universities",
+  "modified": "2023-08-30 03:55:50.899101",
+  "name": "Colleges & Universities"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Civil Engineering Construction",
+  "modified": "2023-08-30 03:55:50.904564",
+  "name": "Civil Engineering Construction"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Childcare",
+  "modified": "2023-08-30 03:55:50.909845",
+  "name": "Childcare"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Chemicals, Petrochemicals, Glass & Gases",
+  "modified": "2023-08-30 03:55:50.923171",
+  "name": "Chemicals, Petrochemicals, Glass & Gases"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Chemicals & Related Products",
+  "modified": "2023-08-30 03:55:50.929920",
+  "name": "Chemicals & Related Products"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Chemicals",
+  "modified": "2023-08-30 03:55:50.935638",
+  "name": "Chemicals"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Call Centers & Business Centers",
+  "modified": "2023-08-30 03:55:50.941190",
+  "name": "Call Centers & Business Centers"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Cable & Satellite",
+  "modified": "2023-08-30 03:55:50.947055",
+  "name": "Cable & Satellite"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Business Services",
+  "modified": "2023-08-30 03:55:50.952288",
+  "name": "Business Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Business Intelligence (BI) Software",
+  "modified": "2023-08-30 03:55:50.958107",
+  "name": "Business Intelligence (BI) Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Building Materials",
+  "modified": "2023-08-30 03:55:50.963733",
+  "name": "Building Materials"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Barber Shops & Beauty Salons",
+  "modified": "2023-08-30 03:55:50.969646",
+  "name": "Barber Shops & Beauty Salons"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Automotive Service & Collision Repair",
+  "modified": "2023-08-30 03:55:50.975114",
+  "name": "Automotive Service & Collision Repair"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Automobile Parts Stores",
+  "modified": "2023-08-30 03:55:50.983011",
+  "name": "Automobile Parts Stores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Automobile Dealers",
+  "modified": "2023-08-30 03:55:50.988599",
+  "name": "Automobile Dealers"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Architecture, Engineering & Design",
+  "modified": "2023-08-30 03:55:50.994353",
+  "name": "Architecture, Engineering & Design"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Appliances",
+  "modified": "2023-08-30 03:55:50.999995",
+  "name": "Appliances"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Apparel & Accessories Retail",
+  "modified": "2023-08-30 03:55:51.006172",
+  "name": "Apparel & Accessories Retail"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "513",
+  "modified": "2023-08-30 03:55:51.017248",
+  "name": "513"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "512",
+  "modified": "2023-08-30 03:55:51.022899",
+  "name": "512"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "511",
+  "modified": "2023-08-30 03:55:51.028228",
+  "name": "511"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Apparel",
+  "modified": "2023-08-30 03:55:51.033994",
+  "name": "Apparel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "510",
+  "modified": "2023-08-30 03:55:51.048542",
+  "name": "510"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "509",
+  "modified": "2023-08-30 03:55:51.054570",
+  "name": "509"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "508",
+  "modified": "2023-08-30 03:55:51.060613",
+  "name": "508"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "506",
+  "modified": "2023-08-30 03:55:51.066202",
+  "name": "506"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "504",
+  "modified": "2023-08-30 03:55:51.072197",
+  "name": "504"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "502",
+  "modified": "2023-08-30 03:55:51.077972",
+  "name": "502"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Transportation",
+  "modified": "2023-08-30 03:55:51.084943",
+  "name": "Transportation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Telecommunications",
+  "modified": "2023-08-30 03:55:51.090494",
+  "name": "Telecommunications"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Technology",
+  "modified": "2023-08-30 03:55:51.095977",
+  "name": "Technology"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Software",
+  "modified": "2023-08-30 03:55:51.101459",
+  "name": "Software"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Real Estate",
+  "modified": "2023-08-30 03:55:51.106705",
+  "name": "Real Estate"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Publishing",
+  "modified": "2023-08-30 03:55:51.112242",
+  "name": "Publishing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Pharmaceuticals",
+  "modified": "2023-08-30 03:55:51.119929",
+  "name": "Pharmaceuticals"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Online Auctions",
+  "modified": "2023-08-30 03:55:51.126931",
+  "name": "Online Auctions"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Manufacturing",
+  "modified": "2023-08-30 03:55:51.132116",
+  "name": "Manufacturing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Investment Banking",
+  "modified": "2023-08-30 03:55:51.137630",
+  "name": "Investment Banking"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Financial Services",
+  "modified": "2023-08-30 03:55:51.143013",
+  "name": "Financial Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Entertainment & Leisure",
+  "modified": "2023-08-30 03:55:51.148782",
+  "name": "Entertainment & Leisure"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Energy",
+  "modified": "2023-08-30 03:55:51.154402",
+  "name": "Energy"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Electronics",
+  "modified": "2023-08-30 03:55:51.171269",
+  "name": "Electronics"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Education",
+  "modified": "2023-08-30 03:55:51.177388",
+  "name": "Education"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Consulting",
+  "modified": "2023-08-30 03:55:51.183105",
+  "name": "Consulting"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Chemical",
+  "modified": "2023-08-30 03:55:51.188600",
+  "name": "Chemical"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Broadcasting",
+  "modified": "2023-08-30 03:55:51.194173",
+  "name": "Broadcasting"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Banking",
+  "modified": "2023-08-30 03:55:51.199674",
+  "name": "Banking"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Automotive",
+  "modified": "2023-08-30 03:55:51.205180",
+  "name": "Automotive"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Apparel & Accessories",
+  "modified": "2023-08-30 03:55:51.210783",
+  "name": "Apparel & Accessories"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Airline",
+  "modified": "2023-08-30 03:55:51.216429",
+  "name": "Airline"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Agriculture",
+  "modified": "2023-08-30 03:55:51.221816",
+  "name": "Agriculture"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Aerospace",
+  "modified": "2023-08-30 03:55:51.227204",
+  "name": "Aerospace"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Advertising",
+  "modified": "2023-08-30 03:55:51.232550",
+  "name": "Advertising"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Accounting",
+  "modified": "2023-08-30 03:55:51.238259",
+  "name": "Accounting"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Venture Capital",
+  "modified": "2023-08-30 03:55:51.243612",
+  "name": "Venture Capital"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Television",
+  "modified": "2023-08-30 03:55:51.249089",
+  "name": "Television"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Sports",
+  "modified": "2023-08-30 03:55:51.254412",
+  "name": "Sports"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Soap & Detergent",
+  "modified": "2023-08-30 03:55:51.259645",
+  "name": "Soap & Detergent"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Service",
+  "modified": "2023-08-30 03:55:51.265573",
+  "name": "Service"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Securities & Commodity Exchanges",
+  "modified": "2023-08-30 03:55:51.270884",
+  "name": "Securities & Commodity Exchanges"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Retail & Wholesale",
+  "modified": "2023-08-30 03:55:51.276892",
+  "name": "Retail & Wholesale"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Private Equity",
+  "modified": "2023-08-30 03:55:51.282279",
+  "name": "Private Equity"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Pension Funds",
+  "modified": "2023-08-30 03:55:51.287879",
+  "name": "Pension Funds"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Newspaper Publishers",
+  "modified": "2023-08-30 03:55:51.301616",
+  "name": "Newspaper Publishers"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Music",
+  "modified": "2023-08-30 03:55:51.307587",
+  "name": "Music"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Motion Picture & Video",
+  "modified": "2023-08-30 03:55:51.312896",
+  "name": "Motion Picture & Video"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Legal",
+  "modified": "2023-08-30 03:55:51.318507",
+  "name": "Legal"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Internet Publishing",
+  "modified": "2023-08-30 03:55:51.323857",
+  "name": "Internet Publishing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Health Care",
+  "modified": "2023-08-30 03:55:51.329179",
+  "name": "Health Care"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Grocery",
+  "modified": "2023-08-30 03:55:51.334891",
+  "name": "Grocery"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Food, Beverage & Tobacco",
+  "modified": "2023-08-30 03:55:51.340682",
+  "name": "Food, Beverage & Tobacco"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Executive Search",
+  "modified": "2023-08-30 03:55:51.346647",
+  "name": "Executive Search"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Department Stores",
+  "modified": "2023-08-30 03:55:51.352279",
+  "name": "Department Stores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Defense",
+  "modified": "2023-08-30 03:55:51.357884",
+  "name": "Defense"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Cosmetics",
+  "modified": "2023-08-30 03:55:51.363182",
+  "name": "Cosmetics"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Consumer Products",
+  "modified": "2023-08-30 03:55:51.368951",
+  "name": "Consumer Products"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Computer",
+  "modified": "2023-08-30 03:55:51.374326",
+  "name": "Computer"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Brokerage",
+  "modified": "2023-08-30 03:55:51.380052",
+  "name": "Brokerage"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Biotechnology",
+  "modified": "2023-08-30 03:55:51.385559",
+  "name": "Biotechnology"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Transportation (Logistics)",
+  "modified": "2023-08-31 00:35:02.365589",
+  "name": "Transportation (Logistics)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Metals & Mining",
+  "modified": "2023-08-31 00:35:02.380975",
+  "name": "Metals & Mining"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Hospitality (Travel)",
+  "modified": "2023-08-31 00:35:02.387923",
+  "name": "Hospitality (Travel)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Federal",
+  "modified": "2023-08-31 00:35:02.394210",
+  "name": "Federal"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Industrial",
+  "modified": "2023-08-31 00:35:02.411810",
+  "name": "Industrial"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Cities, Towns & Municipalities",
+  "modified": "2023-08-31 00:39:36.345372",
+  "name": "Cities, Towns & Municipalities"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Pet Products",
+  "modified": "2023-09-21 22:25:15.580664",
+  "name": "Pet Products"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Toys & Games",
+  "modified": "2023-09-21 22:25:15.634470",
+  "name": "Toys & Games"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Sporting Goods",
+  "modified": "2023-09-21 22:25:15.645881",
+  "name": "Sporting Goods"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Household Goods",
+  "modified": "2023-09-21 22:25:15.654281",
+  "name": "Household Goods"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Lodging & Resorts",
+  "modified": "2023-09-21 22:25:15.663609",
+  "name": "Lodging & Resorts"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Accounting Services",
+  "modified": "2023-09-21 22:25:15.671935",
+  "name": "Accounting Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Social Networks",
+  "modified": "2023-09-21 22:25:15.679324",
+  "name": "Social Networks"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Airlines",
+  "modified": "2023-09-21 22:25:15.686493",
+  "name": "Airlines"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Airports & Air Services",
+  "modified": "2023-09-21 22:25:15.694760",
+  "name": "Airports & Air Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Car & Truck Rental",
+  "modified": "2023-09-21 22:25:15.702823",
+  "name": "Car & Truck Rental"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Crops",
+  "modified": "2023-09-21 22:25:15.710974",
+  "name": "Crops"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Record",
+  "modified": "2023-09-21 22:25:15.718825",
+  "name": "Record"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Video & Book Stores",
+  "modified": "2023-09-21 22:25:15.726500",
+  "name": "Video & Book Stores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Gambling & Gaming",
+  "modified": "2023-09-21 22:25:15.752867",
+  "name": "Gambling & Gaming"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Waste Treatment",
+  "modified": "2023-09-21 22:25:15.761126",
+  "name": "Waste Treatment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Environmental Services & Recycling",
+  "modified": "2023-09-21 22:25:15.768622",
+  "name": "Environmental Services & Recycling"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Music Production & Services",
+  "modified": "2023-09-21 22:25:15.776017",
+  "name": "Music Production & Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Photographic & Optical Equipment",
+  "modified": "2023-09-21 22:25:15.785775",
+  "name": "Photographic & Optical Equipment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Membership Organizations",
+  "modified": "2023-09-21 22:25:15.795911",
+  "name": "Membership Organizations"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Aerospace & Defense",
+  "modified": "2023-09-21 22:25:15.807638",
+  "name": "Aerospace & Defense"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Amusement Parks",
+  "modified": "2023-09-21 22:25:15.816601",
+  "name": "Amusement Parks"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Arcades & Attractions",
+  "modified": "2023-09-21 22:25:15.825016",
+  "name": "Arcades & Attractions"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Hand",
+  "modified": "2023-09-21 22:25:15.831913",
+  "name": "Hand"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Power & Lawn-care Tools",
+  "modified": "2023-09-21 22:25:15.838654",
+  "name": "Power & Lawn-care Tools"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Automotive Parts",
+  "modified": "2023-09-21 22:25:15.845932",
+  "name": "Automotive Parts"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Medical Laboratories & Imaging Centers",
+  "modified": "2023-09-21 22:25:15.857913",
+  "name": "Medical Laboratories & Imaging Centers"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Advertising & Marketing",
+  "modified": "2023-09-21 22:25:15.864606",
+  "name": "Advertising & Marketing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Boats & Submarines",
+  "modified": "2023-09-21 22:25:15.871586",
+  "name": "Boats & Submarines"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Other Rental Stores (Furniture, A/V, Construction & Industrial Equipment)",
+  "modified": "2023-09-21 22:25:15.878549",
+  "name": "Other Rental Stores (Furniture, A/V, Construction & Industrial Equipment)"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Hand, Power & Lawn-care Tools",
+  "modified": "2023-09-21 22:33:47.666081",
+  "name": "Hand, Power & Lawn-care Tools"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Record Video & Book Stores",
+  "modified": "2023-09-21 22:33:47.674563",
+  "name": "Record Video & Book Stores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Waste Treatment, Environmental Services & Recycling",
+  "modified": "2023-09-21 22:33:47.684243",
+  "name": "Waste Treatment, Environmental Services & Recycling"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Amusement Parks, Arcades & Attractions",
+  "modified": "2023-09-21 22:33:47.696854",
+  "name": "Amusement Parks, Arcades & Attractions"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Airlines, Airports & Air Services",
+  "modified": "2023-09-21 22:33:47.703045",
+  "name": "Airlines, Airports & Air Services"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Record, Video & Book Stores",
+  "modified": "2023-09-21 22:35:31.041836",
+  "name": "Record, Video & Book Stores"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Industry Type",
+  "industry": "Vending Company",
+  "modified": "2023-08-27 20:23:06.963289",
+  "name": "Vending Company"
+ }
+]

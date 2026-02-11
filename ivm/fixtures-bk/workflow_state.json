@@ -1,0 +1,101 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2023-08-25 17:14:28.186479",
+  "name": "Pending",
+  "style": "",
+  "workflow_state_name": "Pending"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "ok-sign",
+  "modified": "2023-08-25 17:14:28.187792",
+  "name": "Approved",
+  "style": "Success",
+  "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2023-08-25 17:14:28.189077",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-08-03 14:51:59.542855",
+  "name": "Active Dialogue",
+  "style": "",
+  "workflow_state_name": "Active Dialogue"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-08-03 14:52:13.625210",
+  "name": "Pending Contract",
+  "style": "",
+  "workflow_state_name": "Pending Contract"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-08-03 14:52:26.369202",
+  "name": "Contract Sent",
+  "style": "",
+  "workflow_state_name": "Contract Sent"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-08-03 14:52:41.687593",
+  "name": "Redline/PO",
+  "style": "",
+  "workflow_state_name": "Redline/PO"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-08-03 14:53:00.835081",
+  "name": "Closed Won",
+  "style": "",
+  "workflow_state_name": "Closed Won"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-08-03 14:53:11.558701",
+  "name": "Closed Lost",
+  "style": "",
+  "workflow_state_name": "Closed Lost"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-08-03 14:53:19.709507",
+  "name": "Discovery",
+  "style": "",
+  "workflow_state_name": "Discovery"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2023-08-03 15:07:31.363431",
+  "name": "Beginning Stages",
+  "style": "",
+  "workflow_state_name": "Beginning Stages"
+ }
+]
