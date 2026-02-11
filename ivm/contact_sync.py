@@ -6,7 +6,7 @@ Triggered by doc events on Contact creation/update
 import frappe
 import pyodbc
 
-# TODO: Replace this with API calls using MSSQL_FRAPPE module, probably time to merge it with IVM project
+# TODO: Replace this with API calls using machine_hardware_management module, probably time to merge it with IVM project
 def _get_conn():
     """Get MSSQL connection using site config."""
     cfg = frappe.get_site_config()

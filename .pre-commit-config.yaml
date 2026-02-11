@@ -8,7 +8,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        files: "mssql_frappe.*"
+        files: "machine_hardware_management.*"
         exclude: ".*json$|.*txt$|.*csv|.*md|.*svg"
       - id: check-merge-conflict
       - id: check-ast
@@ -38,11 +38,11 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
             (?x)^(
-                mssql_frappe/public/dist/.*|
+                machine_hardware_management/public/dist/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                mssql_frappe/templates/includes/.*|
-                mssql_frappe/public/js/lib/.*
+                machine_hardware_management/templates/includes/.*|
+                machine_hardware_management/public/js/lib/.*
             )$
 
 
@@ -55,12 +55,12 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
             (?x)^(
-                mssql_frappe/public/dist/.*|
+                machine_hardware_management/public/dist/.*|
                 cypress/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                mssql_frappe/templates/includes/.*|
-                mssql_frappe/public/js/lib/.*
+                machine_hardware_management/templates/includes/.*|
+                machine_hardware_management/public/js/lib/.*
             )$
 
 ci:
