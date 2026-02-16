@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from ivm.machine_hardware_management.utils.sync_util import sync_doctype_from_api
+from ivm.common.utils.sync_util import sync_doctype_from_api
 
 class BoardConnection(Document):
 	pass

@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from ivm.machine_hardware_management.doctype.base_virtual_doctype import BaseVirtualDoctype
+from ivm.common.utils.base_virtual_doctype import BaseVirtualDoctype
 
 
 class VendnovationConfiguration(BaseVirtualDoctype):

@@ -2,7 +2,7 @@ import frappe
 
 
 def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, field_map=None):
-    from ivm.machine_hardware_management.utils.api_utils import headwind_api_request, icorp_api_get
+    from ivm.common.utils.api_utils import headwind_api_request, icorp_api_get
     try:
         frappe.logger().info(f"Syncing {doctype}")
         if api_type == "headwind":
@@ -33,9 +33,9 @@ def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, fi
 
                 if updated_fields:
                     frappe.db.set_value(doctype, item[key_field], updated_fields)
-                    frappe.logger().info(f"Updated {item[key_field]}: {updated_fields}")
+                    frappe.logger().info("Updated %s: %s", item[key_field], updated_fields)
                 else:
-                    frappe.logger().info(f"No changes for {item[key_field]}")
+                    frappe.logger().info("No changes for %s", item[key_field])
 
             else:
                 doc_fields = {
