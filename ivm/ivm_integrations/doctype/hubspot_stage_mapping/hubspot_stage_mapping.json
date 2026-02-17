@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "creation": "2026-02-17 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "hubspot_stage",
+  "crm_deal_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "hubspot_stage",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "HubSpot Stage",
+   "reqd": 1
+  },
+  {
+   "fieldname": "crm_deal_status",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "CRM Deal Status",
+   "options": "CRM Deal Status",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IVM_Integrations",
+ "name": "HubSpot Stage Mapping",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

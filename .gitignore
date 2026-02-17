@@ -53,3 +53,8 @@ jspm_packages/
 
 # Aider AI Chat
 .aider*
+
+#Opencode AI
+AGENTS.md
+.opencode
+__ivm/

@@ -102,6 +102,10 @@ on_session_creation = [
 # before_install = "ivm.install.before_install"
 # after_install = "ivm.install.after_install"
 
+after_migrate = [
+    "ivm.ivm_integrations.hubspot.setup.create_custom_fields",
+]
+
 # Uninstallation
 # ------------
 

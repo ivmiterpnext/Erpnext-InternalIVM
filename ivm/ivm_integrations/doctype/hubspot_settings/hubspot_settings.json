@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "creation": "2026-02-17 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "webhook_secret",
+  "section_break_stage_mapping",
+  "stage_mapping"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "description": "Shared secret that HubSpot sends as an X-HubSpot-Secret header. Configure the same value in your HubSpot Workflow webhook action.",
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "Webhook Secret",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_stage_mapping",
+   "fieldtype": "Section Break",
+   "label": "Stage Mapping"
+  },
+  {
+   "description": "Map HubSpot deal stage identifiers to CRM Deal Status values. These mappings are used by the webhook endpoints to translate HubSpot stages into the corresponding Frappe CRM statuses.",
+   "fieldname": "stage_mapping",
+   "fieldtype": "Table",
+   "label": "Stage Mapping",
+   "options": "HubSpot Stage Mapping"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-02-17 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "IVM_Integrations",
+ "name": "HubSpot Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
