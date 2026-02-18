@@ -78,9 +78,6 @@ doctype_list_js = {
 # }
 
 # Session Creation
-on_session_creation = [
-    "ivm.api.on_session_creation"
-]
 # Generators
 # ----------
 
