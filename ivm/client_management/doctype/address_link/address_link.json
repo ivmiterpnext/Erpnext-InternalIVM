@@ -1,13 +1,12 @@
 {
  "actions": [],
  "autoname": "field:id",
- "creation": "2025-08-25 11:45:42.064227",
+ "creation": "2025-09-29 13:02:02.286575",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "id",
-  "location_name",
-  "client_id"
+  "full_address"
  ],
  "fields": [
   {
@@ -17,24 +16,18 @@
    "unique": 1
   },
   {
-   "fieldname": "location_name",
-   "fieldtype": "Data",
-   "label": "Name"
-  },
-  {
-   "fieldname": "client_id",
-   "fieldtype": "Link",
-   "label": "Client Id",
-   "options": "Client Link"
+   "fieldname": "full_address",
+   "fieldtype": "Small Text",
+   "label": "Full Address"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-25 14:52:54.136880",
+ "modified": "2025-09-29 13:57:14.315428",
  "modified_by": "Administrator",
- "module": "Machine Hardware Management",
- "name": "Location Link",
+ "module": "Client Management",
+ "name": "Address Link",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -56,5 +49,5 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "title_field": "location_name"
+ "title_field": "full_address"
 }

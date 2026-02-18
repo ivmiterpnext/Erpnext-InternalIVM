@@ -78,9 +78,6 @@ doctype_list_js = {
 # }
 
 # Session Creation
-on_session_creation = [
-    "ivm.api.on_session_creation"
-]
 # Generators
 # ----------
 
@@ -175,17 +172,18 @@ doc_events = {
 
 scheduler_events = {
     "daily": [
-        "ivm.machine_hardware_management.doctype.address_link.address_link.sync",
+        "ivm.client_management.doctype.address_link.address_link.sync",
+        "ivm.client_management.doctype.client_link.client_link.sync",
+        "ivm.client_management.location_link.location_link.sync",
+    
         "ivm.machine_hardware_management.doctype.agreement_fee_type.agreement_fee_type.sync",
         "ivm.machine_hardware_management.doctype.board_link.board_link.sync",
         "ivm.machine_hardware_management.doctype.board_connection.board_connection.sync",
         "ivm.machine_hardware_management.doctype.board_firmware.board_firmware.sync",
         "ivm.machine_hardware_management.doctype.board_manufacturer.board_manufacturer.sync",
         "ivm.machine_hardware_management.doctype.board_type.board_type.sync",
-        "ivm.machine_hardware_management.doctype.client_link.client_link.sync",
         "ivm.machine_hardware_management.doctype.hardware_availability_type.hardware_availability_type.sync",
         "ivm.machine_hardware_management.doctype.hardware_connectivity_type.hardware_connectivity_type.sync",
-        "ivm.machine_hardware_management.doctype.location_link.location_link.sync",
         "ivm.machine_hardware_management.doctype.machine_activity_log_type.machine_activity_log_type.sync",
         "ivm.machine_hardware_management.doctype.machine_authorization_type.machine_authorization_type.sync",
         "ivm.machine_hardware_management.doctype.machine_contract_length_type.machine_contract_length_type.sync",

@@ -2,11 +2,11 @@ from datetime import datetime, timezone
 from urllib.parse import urlencode
 import frappe
 from frappe.model.document import Document
-from ivm.machine_hardware_management.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache
-from ivm.machine_hardware_management.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
-from ivm.machine_hardware_management.utils.filter_utils import frappe_filters_to_dict, frappe_sort_to_dict
-from ivm.machine_hardware_management.utils.data_utils import ensure_meta_is_ready, set_attrs_from_dict
-from ivm.machine_hardware_management.utils.api_utils import headwind_api_request, icorp_api_get, icorp_api_post, icorp_api_put, icorp_api_delete
+from ivm.common.utils.cache_util import LIST_CACHE_EXPIRES, clear_cache
+from ivm.common.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
+from ivm.common.utils.filter_utils import frappe_filters_to_dict, frappe_sort_to_dict
+from ivm.common.utils.data_utils import ensure_meta_is_ready, set_attrs_from_dict
+from ivm.common.utils.api_utils import headwind_api_request, icorp_api_get, icorp_api_post, icorp_api_put, icorp_api_delete
 
 
 class BaseVirtualDoctype(Document):

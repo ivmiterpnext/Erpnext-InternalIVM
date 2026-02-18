@@ -1,7 +1,7 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from ivm.machine_hardware_management.doctype.base_virtual_doctype import BaseVirtualDoctype, api_data_to_frappe_dict, set_attrs_from_dict
+from ivm.common.utils.base_virtual_doctype import BaseVirtualDoctype, api_data_to_frappe_dict, set_attrs_from_dict
 
 
 class ClientLocation(BaseVirtualDoctype):

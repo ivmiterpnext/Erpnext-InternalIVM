@@ -1,9 +1,9 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from ivm.machine_hardware_management.doctype.base_virtual_doctype import BaseVirtualDoctype
-from ivm.machine_hardware_management.utils.filter_utils import replace_machine_id_with_name, frappe_filters_to_dict
-from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict
+from ivm.common.utils.base_virtual_doctype import BaseVirtualDoctype
+from ivm.common.utils.filter_utils import replace_machine_id_with_name, frappe_filters_to_dict
+from ivm.common.utils.data_utils import set_attrs_from_dict
 
 
 class MachinePurchaseOrder(BaseVirtualDoctype):

@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from ivm.machine_hardware_management.utils.api_utils import icorp_api_get
+from ivm.common.utils.api_utils import icorp_api_get
 
 class AddressLink(Document):
 	pass

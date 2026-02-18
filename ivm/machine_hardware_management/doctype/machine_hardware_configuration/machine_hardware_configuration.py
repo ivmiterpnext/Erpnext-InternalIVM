@@ -1,8 +1,8 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from ivm.machine_hardware_management.doctype.base_virtual_doctype import BaseVirtualDoctype
-from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict, to_iso8601
+from ivm.common.utils.base_virtual_doctype import BaseVirtualDoctype
+from ivm.common.utils.data_utils import set_attrs_from_dict, to_iso8601
 from ivm.machine_hardware_management.doctype.machine_link.machine_link import get_machine_name_from_machine_id
 
 

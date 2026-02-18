@@ -1,3 +1,4 @@
 IVM
 Machine Hardware Management
+Client Management
 IVM_Integrations
