@@ -3,8 +3,8 @@
 
 import frappe
 from frappe.model.document import Document
-from ivm.machine_hardware_management.utils.api_utils import headwind_api_request
-from ivm.machine_hardware_management.utils.case_utils import api_data_to_frappe_dict
+from ivm.common.utils.api_utils import headwind_api_request
+from ivm.common.utils.case_utils import api_data_to_frappe_dict
 
 
 class PushMessage(Document):

@@ -2,10 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
-from ivm.machine_hardware_management.doctype.base_virtual_doctype import BaseVirtualDoctype
-from ivm.machine_hardware_management.utils.api_utils import icorp_api_put
-from ivm.machine_hardware_management.utils.case_utils import api_data_to_frappe_dict
-from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict
+from ivm.common.utils.base_virtual_doctype import BaseVirtualDoctype
+from ivm.common.utils.api_utils import icorp_api_put
+from ivm.common.utils.case_utils import api_data_to_frappe_dict
+from ivm.common.utils.data_utils import set_attrs_from_dict
 
 
 class Machine(BaseVirtualDoctype):
