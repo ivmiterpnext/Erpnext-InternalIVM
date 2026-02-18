@@ -22,6 +22,19 @@ def create_custom_fields():
 				"description": "Auto-populated by the HubSpot webhook integration.",
 			},
 		],
+		"Project": [
+			{
+				"fieldname": "crm_deal",
+				"fieldtype": "Link",
+				"label": "CRM Deal",
+				"options": "CRM Deal",
+				"insert_after": "project_type",
+				"unique": 1,
+				"read_only": 1,
+				"no_copy": 1,
+				"description": "Linked CRM Deal that triggered this project.",
+			},
+		],
 	}
 
 	for doctype, fields in custom_fields.items():

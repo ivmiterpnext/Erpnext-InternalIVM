@@ -155,6 +155,9 @@ doc_events = {
     #     "after_insert": "ivm.contact_sync.sync_contact_to_mssql",
     #     "on_update": "ivm.contact_sync.update_contact_in_mssql",
     },
+    "CRM Deal": {
+        "on_update": "ivm.ivm_integrations.hubspot.deal_events.on_update",
+    },
     "Custom Field": {
         "after_insert": "ivm.utils.auto_export.auto_export_custom_field",
         "on_update": "ivm.utils.auto_export.auto_export_custom_field",
