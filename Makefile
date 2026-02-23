@@ -15,8 +15,8 @@ setup:
 		echo "FAIL - Development environment already constructed"; \
 		exit 1; \
 	fi
-	@if [ ! -d ".devcontainers" ]; then \
-		echo ".devcontainers folder not found"; \
+	@if [ ! -d ".devcontainer" ]; then \
+		echo ".devcontainer folder not found"; \
 		exit 1; \
 	fi
 	@echo "Initializing Dev Container"

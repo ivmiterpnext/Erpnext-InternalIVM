@@ -28,6 +28,7 @@ bench install-app crm
 bench install-app wiki
 bench install-app erpnext
 
+cd ..
 mkdir ivm
 mv ./* ivm
 mv ivm/frappe-bench .
