@@ -4,6 +4,7 @@ set -e
 CONTAINER_NAME="frappe-dev"
 
 echo "Initializing Container"
+docker compose -f .devcontainer/docker-compose.yml -p frappe-dev up -d;
 docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash
 
 echo "Initializing frappe development environment..."
@@ -27,6 +28,9 @@ bench install-app crm
 bench install-app wiki
 bench install-app erpnext
 
+mkdir ivm
+mv ./* ivm
+mv ivm/frappe-bench .
 mv ivm frappe-bench/apps/
 bench install-app ivm
 
