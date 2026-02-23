@@ -29,10 +29,12 @@ docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:lat
     bench install-app erpnext
 
     cd ..
-    mkdir ivm
-    mv ./* ivm
-    mv ivm/frappe-bench .
+    mkdir _ivm
+    mv ./* _ivm
+    mv _ivm/frappe-bench .
+    mv _ivm ivm
     mv ivm frappe-bench/apps/
+    cd frappe-bench
     bench install-app ivm
 
     echo 'Dev Container Environment Completed.'
