@@ -31,10 +31,9 @@ docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:lat
 
     exit
 "
-
 mkdir -p temp
 for file in *; do
-    if [-f "$file"]&&["$file"!="development_init.sh"]&&["$file"!=".devcontainer"]&&["$file"!="frappe-bench"];
+    if [ -e "$file" ]&&[ "$file"!="development_init.sh" ]&&[ "$file"!=".devcontainer" ]&&[ "$file"!="frappe-bench" ];
     then
         mv "$file" temp/
     fi
