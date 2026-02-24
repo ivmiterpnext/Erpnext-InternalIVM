@@ -4,6 +4,7 @@ set -e
 CONTAINER_NAME="frappe-dev"
 
 echo "Initializing Container"
+
 docker compose -f .devcontainer/docker-compose.yml -p frappe-dev up -d;
 docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash -c "
     echo 'Initializing frappe development environment...'
@@ -28,16 +29,20 @@ docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:lat
     bench install-app wiki
     bench install-app erpnext
 
-    cd ..
-    mkdir _ivm
-    mv ./* _ivm
-    mv _ivm/frappe-bench .
-    mv _ivm ivm
-    mv ivm frappe-bench/apps/
-    cd frappe-bench
-    bench install-app ivm
-
-    echo 'Dev Container Environment Completed.'
-    echo 'Server located at http://ivm.localhost:8000/'
-    echo 'Admin Login:  User = administrator, Password = admin.'
+    exit
 "
+
+mkdir -p temp
+for file in *; do
+    if [-f "$file"]&&["$file"!="development_init.sh"]&&["$file"!=".devcontainer"]&&["$file"!="frappe-bench"];
+    then
+        mv "$file" temp/
+    fi
+done
+
+mv ./temp/ ./ivm/
+mv ./ivm/ ./frappe-bench/apps
+
+echo 'Dev Container Environment Completed.'
+echo 'Server located at http://ivm.localhost:8000/'
+echo 'Admin Login-  User: administrator, Password: admin.'
