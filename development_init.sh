@@ -29,19 +29,20 @@ docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:lat
     bench install-app wiki
     bench install-app erpnext
 
-    exit
+    mkdir -p temp
+    for file in *; do
+        if [ -e "$file" ]&&[ "$file"!="development_init.sh" ]&&[ "$file"!=".devcontainer" ]&&[ "$file"!="frappe-bench/" ]&&[ "$file"!="temp/" ];
+        then
+            mv "$file" temp/
+        fi
+    done
+
+    mv ./temp/ ./ivm/
+    mv ./ivm/ ./frappe-bench/apps
+
+    bench install-app ivm
+
+    echo 'Dev Container Environment Completed.'
+    echo 'Server located at http://ivm.localhost:8000/'
+    echo 'Admin Login-  User: administrator, Password: admin.'
 "
-mkdir -p temp
-for file in *; do
-    if [ -e "$file" ]&&[ "$file"!="development_init.sh" ]&&[ "$file"!=".devcontainer" ]&&[ "$file"!="frappe-bench" ];
-    then
-        mv "$file" temp/
-    fi
-done
-
-mv ./temp/ ./ivm/
-mv ./ivm/ ./frappe-bench/apps
-
-echo 'Dev Container Environment Completed.'
-echo 'Server located at http://ivm.localhost:8000/'
-echo 'Admin Login-  User: administrator, Password: admin.'
