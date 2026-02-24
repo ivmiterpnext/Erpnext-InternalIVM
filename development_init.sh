@@ -33,13 +33,12 @@ docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:lat
     for file in *; do
         if [ -e "$file" ]&&[ "$file"!="development_init.sh" ]&&[ "$file"!=".devcontainer" ]&&[ "$file"!="frappe-bench/" ]&&[ "$file"!="temp/" ];
         then
-            mv "$file" temp/
+            mv "$file" temp
         fi
     done
 
-    mv ./temp/ ./ivm/
-    mv ./ivm/ ./frappe-bench/apps
-
+    mv temp ivm
+    mv ivm frappe-bench/apps
     bench install-app ivm
 
     echo 'Dev Container Environment Completed.'
