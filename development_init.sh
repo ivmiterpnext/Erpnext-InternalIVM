@@ -47,7 +47,8 @@ docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:lates
 
     echo 'Dev Container Environment Completed.'
     echo '================================================='
-    echo 'Run make run to start the site'
+    echo 'Use cd frappe-bench/apps/ivm to begin development'
+    echo 'Use make run to begin the bench site'
     echo 'Server located at http://ivm.localhost:8000/'
     echo 'Admin Login-  User: administrator, Password: admin'
     echo '================================================='
