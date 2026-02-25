@@ -33,7 +33,7 @@ docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:lates
 
     bench use ivm.localhost
 
-    bench get-app frappe --branch v16.9.0
+    bench switch-to-branch v16.9.0 frappe
     bench get-app crm --branch v1.59.0
     bench get-app https://github.com/frappe/wiki
     bench get-app erpnext
@@ -46,8 +46,12 @@ docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:lates
     bench install-app ivm
 
     echo 'Dev Container Environment Completed.'
+    echo '================================================='
+    echo 'Run make run to start the site'
     echo 'Server located at http://ivm.localhost:8000/'
-    echo 'Admin Login-  User: administrator, Password: admin.'
+    echo 'Admin Login-  User: administrator, Password: admin'
+    echo '================================================='
 
     exit
 "
+mv development_init.sh frappe/apps/ivm
