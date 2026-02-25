@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-cd ../../../ && docker compose -f .devcontainer/docker-compose.yml -p frappe-dev up -d;
-docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash
-cd frappe-bench/
-
-echo "Frappe Environment Entered. Common Commands:"
+docker compose -f ../../../.devcontainer/docker-compose.yml -p frappe-dev up -d;
+echo "Frappe Environment started. Common Commands:"
 echo " - bench start"
 echo " - bench migrate"
 echo " - bench clear-cache"
+echo "To leave, type 'exit'"
+docker exec -it -w /workspace/frappe-bench $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash
