@@ -31,17 +31,13 @@ docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:lat
 
     mkdir -p temp
     for item in * .*; do
-        # Skip . and ..
-        [ "$item" = "." ] || [ "$item" = ".." ] && continue
-
-        # Skip exclusions
+        [ "$item" = "." -o "$item" = ".." ] && continue
         case "$item" in
             development_init.sh|frappe-bench|.devcontainer|temp|move_to_temp.sh)
                 continue
                 ;;
         esac
 
-        # Move item to temp
         mv -v "$item" temp/
     done
 
