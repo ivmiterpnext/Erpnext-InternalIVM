@@ -30,11 +30,19 @@ docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:lat
     bench install-app erpnext
 
     mkdir -p temp
-    for file in *; do
-        if [ -e "$file" ]&&[ "$file"!="development_init.sh" ]&&[ "$file"!=".devcontainer" ]&&[ "$file"!="frappe-bench/" ]&&[ "$file"!="temp/" ];
-        then
-            mv "$file" temp
-        fi
+    for item in * .*; do
+        # Skip . and ..
+        [ "$item" = "." ] || [ "$item" = ".." ] && continue
+
+        # Skip exclusions
+        case "$item" in
+            development_init.sh|frappe-bench|.devcontainer|temp|move_to_temp.sh)
+                continue
+                ;;
+        esac
+
+        # Move item to temp
+        mv -v "$item" temp/
     done
 
     mv temp ivm
