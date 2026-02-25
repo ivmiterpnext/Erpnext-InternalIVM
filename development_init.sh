@@ -6,7 +6,7 @@ CONTAINER_NAME="frappe-dev"
 echo "Initializing Container"
 
 docker compose -f .devcontainer/docker-compose.yml -p frappe-dev up -d;
-docker exec -it -w /workspace/ \ $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash -c "
+docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash -c "
     echo 'Initializing frappe development environment...'
 
     bench init --skip-redis-config-generation frappe-bench
