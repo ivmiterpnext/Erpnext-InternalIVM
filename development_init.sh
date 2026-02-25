@@ -32,7 +32,7 @@ docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:lates
     mkdir -p temp
     for item in * .*; do
         [ "$item" = "." -o "$item" = ".." ] && continue
-        if [[ "$item" == "development_init.sh" || "$item" == "frappe-bench" || "$item" == ".devcontainer" || "$item" == "temp" ]]; then
+        if [ "$item" == "development_init.sh" || "$item" == "frappe-bench" || "$item" == ".devcontainer" || "$item" == "temp" ]; then
             continue
         fi
 
