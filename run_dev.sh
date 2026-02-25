@@ -7,4 +7,4 @@ echo " - bench start"
 echo " - bench migrate"
 echo " - bench clear-cache"
 echo "To leave, type 'exit'"
-docker exec -it -e "TERM=xterm-256color" -w /workspace/frappe-bench $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash
+docker exec -it -w /workspace/frappe-bench $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash
