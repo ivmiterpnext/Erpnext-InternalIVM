@@ -5,20 +5,20 @@ CONTAINER_NAME="frappe-dev"
 
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
+mkdir -p temp
+for item in * .*; do
+    [ "$item" = "." -o "$item" = ".." ] && continue
+    if [[ "$item" == "development_init.sh" || "$item" == "frappe-bench" || "$item" == ".devcontainer" || "$item" == "temp" ]]; then
+        continue
+    fi
+
+    mv -v "$item" temp/
+done
+
+rm -rf temp
+
 docker compose -f .devcontainer/docker-compose.yml -p frappe-dev up -d;
 docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:latest" -q) bash -c "
-    mkdir -p temp
-    for item in * .*; do
-        [ "$item" = "." -o "$item" = ".." ] && continue
-        if [[ "$item" == "development_init.sh" || "$item" == "frappe-bench" || "$item" == ".devcontainer" || "$item" == "temp" ]]; then
-            continue
-        fi
-
-        mv -v "$item" temp/
-    done
-
-    rm -rf temp
-
     echo 'Initializing frappe development environment...'
 
     bench init --skip-redis-config-generation frappe-bench
