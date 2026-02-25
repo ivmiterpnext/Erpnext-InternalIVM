@@ -55,4 +55,4 @@ docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:lates
 
     exit
 "
-mv development_init.sh frappe/apps/ivm
+mv development_init.sh frappe-bench/apps/ivm
