@@ -32,11 +32,9 @@ docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:lates
     mkdir -p temp
     for item in * .*; do
         [ "$item" = "." -o "$item" = ".." ] && continue
-        case "$item" in
-            development_init.sh|frappe-bench|.devcontainer|temp|move_to_temp.sh)
-                continue
-                ;;
-        esac
+        if [[ "$item" == "development_init.sh" || "$item" == "frappe-bench" || "$item" == ".devcontainer" || "$item" == "temp" ]]; then
+            continue
+        fi
 
         mv -v "$item" temp/
     done
