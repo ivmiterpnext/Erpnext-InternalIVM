@@ -1,0 +1,99 @@
+{
+	"actions": [],
+	"allow_rename": 1,
+	"autoname": "field:subtype_name",
+	"creation": "2026-02-26 00:00:00.000000",
+	"doctype": "DocType",
+	"document_type": "Document",
+	"engine": "InnoDB",
+	"field_order": [
+		"subtype_name",
+		"business_area",
+		"ticket_type",
+		"is_active",
+		"default_team",
+		"default_priority",
+		"description"
+	],
+	"fields": [
+		{
+			"fieldname": "subtype_name",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Subtype Name",
+			"reqd": 1,
+			"unique": 1
+		},
+		{
+			"fieldname": "business_area",
+			"fieldtype": "Select",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Business Area",
+			"options": "IT_SUPPORT\nWAREHOUSE\nVENDING",
+			"reqd": 1
+		},
+		{
+			"fieldname": "ticket_type",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Ticket Type",
+			"options": "Ticket Type",
+			"reqd": 1
+		},
+		{
+			"default": "1",
+			"fieldname": "is_active",
+			"fieldtype": "Check",
+			"label": "Is Active"
+		},
+		{
+			"fieldname": "default_team",
+			"fieldtype": "Data",
+			"label": "Default Team"
+		},
+		{
+			"default": "Medium",
+			"fieldname": "default_priority",
+			"fieldtype": "Select",
+			"label": "Default Priority",
+			"options": "Low\nMedium\nHigh\nCritical"
+		},
+		{
+			"fieldname": "description",
+			"fieldtype": "Small Text",
+			"label": "Description"
+		}
+	],
+	"grid_page_length": 50,
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"modified": "2026-02-26 00:00:00.000000",
+	"modified_by": "Administrator",
+	"module": "Ticket",
+	"name": "Ticket Subtype",
+	"naming_rule": "By fieldname",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"title_field": "subtype_name",
+	"track_changes": 1
+}

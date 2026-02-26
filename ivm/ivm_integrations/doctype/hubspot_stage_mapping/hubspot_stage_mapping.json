@@ -1,0 +1,67 @@
+{
+	"actions": [],
+	"allow_rename": 0,
+	"autoname": "field:hubspot_stage_id",
+	"creation": "2026-02-26 00:00:00.000000",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"hubspot_stage_id",
+		"hubspot_stage_label",
+		"crm_deal_status",
+		"is_closed_won"
+	],
+	"fields": [
+		{
+			"fieldname": "hubspot_stage_id",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"label": "HubSpot Stage ID",
+			"reqd": 1,
+			"unique": 1
+		},
+		{
+			"fieldname": "hubspot_stage_label",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"label": "HubSpot Stage Label"
+		},
+		{
+			"fieldname": "crm_deal_status",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "CRM Deal Status",
+			"options": "CRM Deal Status",
+			"reqd": 1
+		},
+		{
+			"default": "0",
+			"fieldname": "is_closed_won",
+			"fieldtype": "Check",
+			"label": "Is Closed Won"
+		}
+	],
+	"grid_page_length": 50,
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"module": "IVM Integrations",
+	"name": "HubSpot Stage Mapping",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}

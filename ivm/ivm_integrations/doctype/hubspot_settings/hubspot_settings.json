@@ -1,0 +1,78 @@
+{
+	"actions": [],
+	"allow_rename": 0,
+	"autoname": "prompt",
+	"creation": "2026-02-26 00:00:00.000000",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"enabled",
+		"access_token",
+		"webhook_secret",
+		"portal_id",
+		"default_company",
+		"project_template"
+	],
+	"fields": [
+		{
+			"default": "0",
+			"fieldname": "enabled",
+			"fieldtype": "Check",
+			"label": "Enabled"
+		},
+		{
+			"fieldname": "access_token",
+			"fieldtype": "Password",
+			"label": "Access Token",
+			"reqd": 1
+		},
+		{
+			"fieldname": "webhook_secret",
+			"fieldtype": "Password",
+			"label": "Webhook Secret",
+			"reqd": 1
+		},
+		{
+			"fieldname": "portal_id",
+			"fieldtype": "Data",
+			"label": "Portal ID"
+		},
+		{
+			"fieldname": "default_company",
+			"fieldtype": "Link",
+			"label": "Default Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "project_template",
+			"fieldtype": "Link",
+			"label": "Project Template",
+			"options": "Project Template"
+		}
+	],
+	"grid_page_length": 50,
+	"index_web_pages_for_search": 1,
+	"issingle": 1,
+	"links": [],
+	"module": "IVM Integrations",
+	"name": "HubSpot Settings",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}
