@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:machine_name",
+ "creation": "2025-11-26 07:59:44.545691",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_dcvm",
+  "machine_name",
+  "vault_size",
+  "vault_power_configuration_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_dcvm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "vault_size",
+   "fieldtype": "Select",
+   "label": "Vault Size",
+   "options": "--None--\nFull\nHalf\nHalf with storage"
+  },
+  {
+   "fieldname": "vault_power_configuration_details",
+   "fieldtype": "Small Text",
+   "label": "Vault Power Configuration Details"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-26 08:03:41.456761",
+ "modified_by": "Administrator",
+ "module": "Deployments",
+ "name": "Deployment SmartVault Details",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

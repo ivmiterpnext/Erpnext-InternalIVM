@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:machine_name",
+ "creation": "2025-11-26 07:56:19.997018",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_5w3o",
+  "machine_name",
+  "card_reader_type",
+  "card_reader_quantity",
+  "workflow"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_5w3o",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "card_reader_type",
+   "fieldtype": "Select",
+   "label": "Card Reader Type",
+   "options": "--None--\nBarcode\nBarcode Reader\n2-D Barcode Reader\nStandard Barcode Reader\nCredit Card\nCredit Card Reader\nDelta3\nHID iCLASS SE\nHID MultiCLASS SE\nHID P300HA\nHID Multi Class\nHID Multiclass\nprox\nProx - HID Iclass SE\nP300 HA\nProx - P300\nP-300AH\nProx - P300 - AH\nP300AH\nP300 - AH\np-300\nFOB - P300 AH\nPin Pad\nQR Code\nQR Code Reader\nWave\nWave ID reader\nMifare\nIndala\ntbd\nOther\nNot Needed"
+  },
+  {
+   "fieldname": "card_reader_quantity",
+   "fieldtype": "Int",
+   "label": "Card Reader Quantity"
+  },
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine Name",
+   "options": "Machine Link",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "workflow",
+   "fieldtype": "Select",
+   "label": "Workflow",
+   "options": "--None--\nVend and Return",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-05 08:11:51.060616",
+ "modified_by": "Administrator",
+ "module": "Deployments",
+ "name": "Deployment SmartStation Details",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

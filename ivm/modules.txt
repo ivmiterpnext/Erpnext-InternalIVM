@@ -2,3 +2,4 @@ IVM
 Machine Hardware Management
 Client Management
 Warehouse Requests
+Deployments
