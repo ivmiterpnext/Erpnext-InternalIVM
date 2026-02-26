@@ -9,6 +9,8 @@ readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # "frappe~=16.0.0" # Installed and managed by bench.
+    "azure-identity",
+    "azure-keyvault-secrets",
 ]
 
 [build-system]
