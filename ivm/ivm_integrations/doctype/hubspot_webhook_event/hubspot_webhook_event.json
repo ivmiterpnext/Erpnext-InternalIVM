@@ -50,12 +50,6 @@
 			"label": "Status",
 			"options": "Queued\nProcessed\nIgnored\nFailed",
 			"reqd": 1
-		},
-		{
-			"fieldtype": "Data",
-		},
-		{
-			"fieldtype": "Long Text",
 		}
 	],
 	"grid_page_length": 50,

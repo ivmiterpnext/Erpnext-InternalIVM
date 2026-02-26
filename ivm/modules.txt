@@ -1,6 +1,9 @@
 IVM
+Machine Hardware Management
+Client Management
 IVM_Integrations
 Ticket
 IT Support
-Warehouse Request
+Warehouse Requests
 Vending Management
+Deployments
