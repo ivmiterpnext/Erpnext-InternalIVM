@@ -140,6 +140,29 @@ app_license = "mit"
 # 	}
 # }
 
+doc_events = {
+    # "Communication": {
+    #     "on_update": "ivm.api.creating_issue",
+    # },
+    # "Issue": {
+    #     "on_update": "ivm.api.fetching_dates"
+    # },
+    # "Contact": {
+    #     "after_insert": "ivm.contact_sync.sync_contact_to_mssql",
+    #     "on_update": "ivm.contact_sync.update_contact_in_mssql",
+    #},
+    "Custom Field": {
+        "after_insert": "ivm.ivm.utils.auto_export.auto_export_custom_field",
+        "on_update": "ivm.ivm.utils.auto_export.auto_export_custom_field",
+        "on_trash": "ivm.ivm.utils.auto_export.auto_export_custom_field",
+    },
+    "Property Setter": {
+        "after_insert": "ivm.ivm.utils.auto_export.auto_export_property_setter",
+        "on_update": "ivm.ivm.utils.auto_export.auto_export_property_setter",
+        "on_trash": "ivm.ivm.utils.auto_export.auto_export_property_setter",
+    }
+}
+
 # Scheduled Tasks
 # ---------------
 
