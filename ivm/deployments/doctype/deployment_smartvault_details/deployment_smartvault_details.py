@@ -1,4 +1,4 @@
-# Copyright (c) 2025, korecent and contributors
+# Copyright (c) 2026, IVM and contributors
 # For license information, please see license.txt
 
 # import frappe

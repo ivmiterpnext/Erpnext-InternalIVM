@@ -9,14 +9,19 @@
  "field_order": [
   "section_break_uvjb",
   "machine_name",
+  "smartscreen",
+  "column_break_qhcr",
+  "workflow",
+  "serial_validation",
+  "home_screen_logo",
   "section_break_38vj",
   "kiosk_options",
   "kvm_switch_options",
   "monitor_options",
-  "network_options",
-  "column_break_hzug",
   "electrical_outlet_in_bins",
+  "column_break_hzug",
   "network_port_in_bins",
+  "network_options",
   "interior_kiosk_lighting",
   "locker_bin_door_type",
   "column_break_bmfq",
@@ -122,13 +127,41 @@
   {
    "fieldname": "column_break_bmfq",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "smartscreen",
+   "fieldtype": "Select",
+   "label": "SmartScreen",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_qhcr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workflow",
+   "fieldtype": "Select",
+   "label": "Workflow",
+   "options": "\nVend/Return"
+  },
+  {
+   "fieldname": "serial_validation",
+   "fieldtype": "Select",
+   "label": "Serial Validation",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "home_screen_logo",
+   "fieldtype": "Select",
+   "label": "Home Screen Logo",
+   "options": "\nIVM Logo\nClient Logo"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-26 08:48:11.051034",
+ "modified": "2026-02-26 10:49:18.399362",
  "modified_by": "Administrator",
  "module": "Deployments",
  "name": "Deployment SmartCenter Details",
