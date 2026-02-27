@@ -1,0 +1,30 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2026-02-27 10:07:44.789282",
+  "name": "Warehouse Request"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2026-02-27 10:11:43.482602",
+  "name": "Vending Management"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2026-02-27 10:12:06.650412",
+  "name": "Accounts Receivable"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2026-02-27 10:12:34.990364",
+  "name": "Support"
+ }
+]

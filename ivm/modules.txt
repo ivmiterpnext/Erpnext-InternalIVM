@@ -3,3 +3,4 @@ Machine Hardware Management
 Client Management
 IVM_Integrations
 Deployments
+Warehouse Requests
