@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:machine_name",
+ "creation": "2025-11-26 08:04:03.153517",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_uvjb",
+  "machine_name",
+  "smartscreen",
+  "column_break_qhcr",
+  "workflow",
+  "serial_validation",
+  "home_screen_logo",
+  "section_break_38vj",
+  "kiosk_options",
+  "kvm_switch_options",
+  "monitor_options",
+  "electrical_outlet_in_bins",
+  "column_break_hzug",
+  "network_port_in_bins",
+  "network_options",
+  "interior_kiosk_lighting",
+  "locker_bin_door_type",
+  "column_break_bmfq",
+  "countertop_color",
+  "ada_side_table",
+  "kiosk_side_for_table",
+  "monitor_mount"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_uvjb",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "kiosk_options",
+   "fieldtype": "Select",
+   "label": "Kiosk Options",
+   "options": "--None--\nNone\nKiosk w/ KVM & All-in-one\nKisok w/ All-in-one\nSide Table"
+  },
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_38vj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "kvm_switch_options",
+   "fieldtype": "Select",
+   "label": "KVM Switch Options",
+   "options": "--None--\nNone\nStandard KVM Switch Raritan DKX3-108 KVM\nClient to Provide"
+  },
+  {
+   "fieldname": "monitor_options",
+   "fieldtype": "Select",
+   "label": "Monitor Options",
+   "options": "--None--\nNone\n27' All-in-One Optiplex 7780\n22' Display Dell P2217\n24' Display Dell E2420HS\n27' Display Dell E2720HS\nClient to Provide and Install"
+  },
+  {
+   "fieldname": "network_options",
+   "fieldtype": "Select",
+   "label": "Network Options",
+   "options": "--None--\n16 Port Netgear Switch\nClient Provided"
+  },
+  {
+   "fieldname": "column_break_hzug",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "electrical_outlet_in_bins",
+   "fieldtype": "Select",
+   "label": "Electrical Outlet in Bins",
+   "options": "--None--\nNone\nUSB\n110 Outlets\n220 Outlets"
+  },
+  {
+   "fieldname": "network_port_in_bins",
+   "fieldtype": "Select",
+   "label": "Network Port in Bins",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "interior_kiosk_lighting",
+   "fieldtype": "Select",
+   "label": "Interior Kiosk Lighting",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "locker_bin_door_type",
+   "fieldtype": "Select",
+   "label": "Locker Bin Door Type",
+   "options": "--None--\nGlass\nSolid"
+  },
+  {
+   "fieldname": "countertop_color",
+   "fieldtype": "Select",
+   "label": "Countertop Color",
+   "options": "--None--\nBlue\nBlack\nLight Gray\nDark Gray"
+  },
+  {
+   "fieldname": "ada_side_table",
+   "fieldtype": "Select",
+   "label": "ADA Side Table",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "kiosk_side_for_table",
+   "fieldtype": "Select",
+   "label": "Kiosk Side for Table",
+   "options": "--None--\nRight\nLeft"
+  },
+  {
+   "fieldname": "monitor_mount",
+   "fieldtype": "Select",
+   "label": "Monitor Mount",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_bmfq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "smartscreen",
+   "fieldtype": "Select",
+   "label": "SmartScreen",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_qhcr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workflow",
+   "fieldtype": "Select",
+   "label": "Workflow",
+   "options": "\nVend/Return"
+  },
+  {
+   "fieldname": "serial_validation",
+   "fieldtype": "Select",
+   "label": "Serial Validation",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "home_screen_logo",
+   "fieldtype": "Select",
+   "label": "Home Screen Logo",
+   "options": "\nIVM Logo\nClient Logo"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-26 10:49:18.399362",
+ "modified_by": "Administrator",
+ "module": "Deployments",
+ "name": "Deployment SmartCenter Details",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

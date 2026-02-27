@@ -1,0 +1,189 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:machine_name",
+ "creation": "2026-02-26 10:09:40.028625",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_rtas",
+  "machine_name",
+  "3d_printed",
+  "smartscreen",
+  "workflow",
+  "serial_validation",
+  "home_screen_logo",
+  "column_break_gviu",
+  "notes",
+  "section_break_gwwj",
+  "edit_bins",
+  "bins_data",
+  "section_break_uykj",
+  "power_connection",
+  "power_connections",
+  "lan_ports",
+  "casters",
+  "plug_type",
+  "interior_lighting",
+  "column_break_rzwb",
+  "bin_door_type",
+  "label_color",
+  "offline_sales",
+  "connectivity_type",
+  "connectivity_device_quantity"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_rtas",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_gviu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "3d_printed",
+   "fieldtype": "Check",
+   "label": "3D Printed"
+  },
+  {
+   "fieldname": "section_break_gwwj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "edit_bins",
+   "fieldtype": "Button",
+   "label": "Edit Bins"
+  },
+  {
+   "fieldname": "bins_data",
+   "fieldtype": "JSON",
+   "label": "Bins"
+  },
+  {
+   "fieldname": "section_break_uykj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "power_connections",
+   "fieldtype": "Select",
+   "label": "Power Connections in Bins",
+   "options": "\nNone\nUSB\n110V\n220V"
+  },
+  {
+   "fieldname": "lan_ports",
+   "fieldtype": "Select",
+   "label": "LAN Ports in Bins",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "casters",
+   "fieldtype": "Select",
+   "label": "Casters"
+  },
+  {
+   "fieldname": "plug_type",
+   "fieldtype": "Data",
+   "label": "Plug Type"
+  },
+  {
+   "fieldname": "interior_lighting",
+   "fieldtype": "Select",
+   "label": "Interior Lighting",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_rzwb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bin_door_type",
+   "fieldtype": "Select",
+   "label": "Bin Door Type",
+   "options": "\nSolid\nGlass"
+  },
+  {
+   "fieldname": "label_color",
+   "fieldtype": "Data",
+   "label": "Label Color"
+  },
+  {
+   "fieldname": "offline_sales",
+   "fieldtype": "Select",
+   "label": "Offline Sales",
+   "options": "\nAll\nStored\nDisabled"
+  },
+  {
+   "fieldname": "connectivity_type",
+   "fieldtype": "Link",
+   "label": "Connectivity Type",
+   "options": "Connectivity Type"
+  },
+  {
+   "fieldname": "connectivity_device_quantity",
+   "fieldtype": "Int",
+   "label": "Connectivity Device Quantity"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "power_connection",
+   "fieldtype": "Select",
+   "label": "Power Connection",
+   "options": "\n110V\n220V"
+  },
+  {
+   "fieldname": "smartscreen",
+   "fieldtype": "Select",
+   "label": "SmartScreen",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "workflow",
+   "fieldtype": "Select",
+   "label": "Workflow",
+   "options": "\nVend/Return"
+  },
+  {
+   "fieldname": "serial_validation",
+   "fieldtype": "Select",
+   "label": "Serial Validation",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "home_screen_logo",
+   "fieldtype": "Select",
+   "label": "Home Screen Logo",
+   "options": "\nIVM Logo\nClient Logo"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-26 10:52:28.695814",
+ "modified_by": "Administrator",
+ "module": "Deployments",
+ "name": "Deployment SmartSync Details",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
