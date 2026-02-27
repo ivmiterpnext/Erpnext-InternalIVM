@@ -44,6 +44,11 @@ app_license = "mit"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
+
+doctype_js = {
+    "Project": "public/js/project.js"
+}
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -156,6 +161,7 @@ doc_events = {
 
     "Project": {
         "before_insert": "ivm.deployments.hooks.project.before_insert",
+        "on_update": "ivm.deployments.services.notify_coi_required.send_notification",
     },
 }
 
