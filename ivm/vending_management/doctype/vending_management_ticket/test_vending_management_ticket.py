@@ -13,9 +13,9 @@ IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
 
-class IntegrationTestWarehouseRequest(IntegrationTestCase):
+class IntegrationTestVendingManagementTicket(IntegrationTestCase):
 	"""
-	Integration tests for WarehouseRequest.
+	Integration tests for VendingManagementTicket.
 	Use this class for testing interactions between multiple components.
 	"""
 

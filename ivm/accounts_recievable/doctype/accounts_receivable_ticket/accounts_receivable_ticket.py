@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class WarehouseRequest(Document):
+class AccountsReceivableTicket(Document):
 	pass

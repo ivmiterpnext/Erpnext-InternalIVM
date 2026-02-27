@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2026-02-27 11:38:38.668818",
+ "creation": "2026-02-27 11:58:49.648474",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -17,10 +17,10 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:38:49.063218",
+ "modified": "2026-02-27 11:58:55.403655",
  "modified_by": "Administrator",
- "module": "Warehouse Requests",
- "name": "Warehouse Request",
+ "module": "Vending Management",
+ "name": "Vending Management Ticket",
  "owner": "Administrator",
  "permissions": [
   {
