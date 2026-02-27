@@ -130,15 +130,6 @@ app_license = "mit"
 
 # Document Events
 # ---------------
-# Hook on document methods and events
-
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
 
 doc_events = {
     # "Communication": {
@@ -147,42 +138,59 @@ doc_events = {
     # "Issue": {
     #     "on_update": "ivm.api.fetching_dates"
     # },
-    # "Contact": {
-    #     "after_insert": "ivm.contact_sync.sync_contact_to_mssql",
-    #     "on_update": "ivm.contact_sync.update_contact_in_mssql",
-    #},
     "Custom Field": {
         "after_insert": "ivm.ivm.utils.auto_export.auto_export_custom_field",
         "on_update": "ivm.ivm.utils.auto_export.auto_export_custom_field",
         "on_trash": "ivm.ivm.utils.auto_export.auto_export_custom_field",
     },
+
     "Property Setter": {
         "after_insert": "ivm.ivm.utils.auto_export.auto_export_property_setter",
         "on_update": "ivm.ivm.utils.auto_export.auto_export_property_setter",
         "on_trash": "ivm.ivm.utils.auto_export.auto_export_property_setter",
-    }
+    },
+
+    "Deal": {
+        "on_update": "ivm.deployments.hooks.deal.on_update",
+    },
+
+    "Project": {
+        "before_insert": "ivm.deployments.hooks.project.before_insert",
+    },
 }
+
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"ivm.tasks.all"
-# 	],
-# 	"daily": [
-# 		"ivm.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"ivm.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"ivm.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"ivm.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+    "daily": [
+        "ivm.client_management.doctype.address_link.address_link.sync",
+        "ivm.client_management.doctype.client_link.client_link.sync",
+        "ivm.client_management.location_link.location_link.sync",
+    
+        "ivm.machine_hardware_management.doctype.agreement_fee_type.agreement_fee_type.sync",
+        "ivm.machine_hardware_management.doctype.board_link.board_link.sync",
+        "ivm.machine_hardware_management.doctype.board_connection.board_connection.sync",
+        "ivm.machine_hardware_management.doctype.board_firmware.board_firmware.sync",
+        "ivm.machine_hardware_management.doctype.board_manufacturer.board_manufacturer.sync",
+        "ivm.machine_hardware_management.doctype.board_type.board_type.sync",
+        "ivm.machine_hardware_management.doctype.hardware_availability_type.hardware_availability_type.sync",
+        "ivm.machine_hardware_management.doctype.hardware_connectivity_type.hardware_connectivity_type.sync",
+        "ivm.machine_hardware_management.doctype.machine_activity_log_type.machine_activity_log_type.sync",
+        "ivm.machine_hardware_management.doctype.machine_authorization_type.machine_authorization_type.sync",
+        "ivm.machine_hardware_management.doctype.machine_contract_length_type.machine_contract_length_type.sync",
+        "ivm.machine_hardware_management.doctype.machine_link.machine_link.sync",
+        "ivm.machine_hardware_management.doctype.machine_purpose.machine_purpose.sync",
+        "ivm.machine_hardware_management.doctype.machine_status_type.machine_status_type.sync",
+        "ivm.machine_hardware_management.doctype.machine_type.machine_type.sync",
+        "ivm.machine_hardware_management.doctype.push_message_type.push_message_type.sync",
+        "ivm.machine_hardware_management.doctype.smart_screen_configuration.smart_screen_configuration.sync",
+        "ivm.machine_hardware_management.doctype.smart_screen_group.smart_screen_group.sync",
+        "ivm.machine_hardware_management.doctype.vendor_link.vendor_link.sync"
+    ],
+}
+
 
 # Testing
 # -------
