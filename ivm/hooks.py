@@ -144,9 +144,6 @@ doc_events = {
 	"CRM Deal": {
 		"on_update": "ivm.ivm_integrations.hubspot.project.create_project_on_won",
 	},
-	"Communication": {
-		"after_insert": "ivm.ticket.services.email.handle_communication_after_insert",
-	}
 }
 
 # Scheduled Tasks

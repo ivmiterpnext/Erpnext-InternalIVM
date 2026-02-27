@@ -45,6 +45,26 @@ docker exec -it -w /workspace/ $(docker ps --filter "ancestor=frappe/bench:lates
     bench get-app https://github.com/ivmiterpnext/Erpnext-InternalIVM --branch '$CURRENT_BRANCH'
     bench install-app ivm
 
+    python - <<'PY'
+import json
+from pathlib import Path
+
+site_config_path = Path("sites/ivm.localhost/site_config.json")
+
+with site_config_path.open("r", encoding="utf-8") as f:
+    site_config = json.load(f)
+
+current_value = site_config.get("developer_mode")
+is_last_key = list(site_config.keys())[-1] == "developer_mode" if site_config else False
+
+if current_value != 1 or not is_last_key:
+    site_config.pop("developer_mode", None)
+    site_config["developer_mode"] = 1
+    with site_config_path.open("w", encoding="utf-8") as f:
+        json.dump(site_config, f, indent=2)
+        f.write("\n")
+PY
+
     echo 'Dev Container Environment Completed.'
     echo '================================================='
     echo 'Use cd frappe-bench/apps/ivm to begin development'
