@@ -50,6 +50,7 @@ services:
       - SHELL=/bin/bash
     volumes:
       - ..:/workspace:cached
+      - ${IVM_FRAPPE_APP_PATH:-..}:/workspace/ivm:cached
       # Enable if you require git cloning
       # - ${HOME}/.ssh:/home/frappe/.ssh
     working_dir: /workspace/

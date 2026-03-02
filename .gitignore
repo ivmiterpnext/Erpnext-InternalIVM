@@ -56,3 +56,6 @@ jspm_packages/
 
 # AI Documents
 AGENTS.md
+
+#Qdrant
+qdrant_storage

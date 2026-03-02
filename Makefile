@@ -11,17 +11,13 @@ help:
 
 setup:
 	@echo "Creating Development Environment..."
-	@if [[ "$$(pwd)" == *"/frappe-bench"* ]]; then \
-		echo "FAIL - Development environment already constructed"; \
-		exit 1; \
-	fi
 	@if [ ! -d ".devcontainer" ]; then \
 		echo ".devcontainer folder not found"; \
 		exit 1; \
 	fi
 	@echo "Initializing Dev Container"
-	@./development_init.sh
+	@./scripts/setup.sh
 
 run:
 	@echo "Starting Development Environment"
-	@./run_dev.sh
+	@./scripts/run.sh
