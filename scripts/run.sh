@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-set -e
+#!/bin/bash
 
 docker compose -f ../../../.devcontainer/docker-compose.yml -p frappe-dev up -d;
 echo "Frappe Environment started. Common Commands:"
