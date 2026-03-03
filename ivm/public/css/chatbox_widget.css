@@ -5,6 +5,95 @@
 	font-size: var(--text-base, 14px);
 }
 
+/* Smooth transitions for theme switching */
+#howiebot-widget,
+#howiebot-toggle,
+#howiebot-panel,
+#howiebot-header,
+#howiebot-input-area,
+#howiebot-input,
+#howiebot-send,
+.howiebot-msg,
+.howiebot-typing {
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Dark Mode Support - Syncs with Frappe's dark theme */
+[data-theme="dark"] #howiebot-toggle {
+	background: #fff;
+	color: #000;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] #howiebot-toggle:hover {
+	background: #e0e0e0;
+}
+
+[data-theme="dark"] #howiebot-panel {
+	background: var(--card-bg, #1c1c1c);
+	border-color: var(--border-color, #4a4a4a);
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] #howiebot-header {
+	background: var(--primary, #4da3ff);
+}
+
+[data-theme="dark"] #howiebot-messages {
+	background: var(--card-bg, #1c1c1c);
+}
+
+[data-theme="dark"] .howiebot-msg.user {
+	background: var(--primary, #4da3ff);
+	color: #000;
+}
+
+[data-theme="dark"] .howiebot-msg.bot {
+	background: var(--control-bg, #2a2a2a);
+	color: var(--text-color, #e8e8e8);
+}
+
+[data-theme="dark"] .howiebot-msg.error {
+	background: var(--red-100, #3d1f1f);
+	color: var(--red-600, #ff6b6b);
+}
+
+[data-theme="dark"] .howiebot-typing {
+	background: var(--control-bg, #2a2a2a);
+}
+
+[data-theme="dark"] .howiebot-typing span {
+	background: var(--text-muted, #a0a0a0);
+}
+
+[data-theme="dark"] #howiebot-input-area {
+	background: var(--card-bg, #1c1c1c);
+	border-top-color: var(--border-color, #4a4a4a);
+}
+
+[data-theme="dark"] #howiebot-input {
+	background: var(--control-bg, #2a2a2a);
+	color: var(--text-color, #e8e8e8);
+	border-color: var(--border-color, #4a4a4a);
+}
+
+[data-theme="dark"] #howiebot-input:focus {
+	border-color: var(--primary, #4da3ff);
+}
+
+[data-theme="dark"] #howiebot-input::placeholder {
+	color: var(--text-muted, #a0a0a0);
+}
+
+[data-theme="dark"] #howiebot-send {
+	background: var(--primary, #4da3ff);
+	color: #000;
+}
+
+[data-theme="dark"] #howiebot-send:hover {
+	background: var(--primary-dark, #2490ef);
+}
+
 /* Floating toggle button */
 #howiebot-toggle {
 	position: fixed;
@@ -15,7 +104,7 @@
 	height: 52px;
 	border-radius: 50%;
 	border: none;
-	background: var(--primary, #2490ef);
+	background: #000;
 	color: #fff;
 	cursor: pointer;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -26,7 +115,7 @@
 }
 
 #howiebot-toggle:hover {
-	background: var(--primary-dark, #1a73e8);
+	background: #333;
 	transform: scale(1.05);
 }
 

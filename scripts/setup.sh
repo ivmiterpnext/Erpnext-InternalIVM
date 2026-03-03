@@ -28,6 +28,7 @@ docker compose -f "$HOME/IVM-Frappe-Bench/.devcontainer/docker-compose.yml" -p f
     printf '\n' | bench new-site --db-root-password 123 --admin-password admin --mariadb-user-host-login-scope=% ivm.localhost
 
     bench use ivm.localhost
+    bench set-config developer_mode 1
 
     bench switch-to-branch v16.9.0 frappe
     bench get-app crm --branch v1.59.0
