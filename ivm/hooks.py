@@ -29,8 +29,8 @@ fixtures = [
 ]
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/ivm/css/ivm.css"
-# app_include_js = "/assets/ivm/js/ivm.js"
+app_include_css = "/assets/ivm/css/chatbox_widget.css"
+app_include_js = "/assets/ivm/js/chatbox_widget.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/ivm/css/ivm.css"
@@ -174,6 +174,9 @@ doc_events = {
 	"CRM Deal": {
 		"on_update": "ivm.ivm_integrations.hubspot.project.create_project_on_won",
 	},
+	"Wiki Document": {
+		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
+	},
 }
 
 # Scheduled Tasks
@@ -184,7 +187,7 @@ scheduler_events = {
         "ivm.client_management.doctype.address_link.address_link.sync",
         "ivm.client_management.doctype.client_link.client_link.sync",
         "ivm.client_management.location_link.location_link.sync",
-    
+
         "ivm.machine_hardware_management.doctype.agreement_fee_type.agreement_fee_type.sync",
         "ivm.machine_hardware_management.doctype.board_link.board_link.sync",
         "ivm.machine_hardware_management.doctype.board_connection.board_connection.sync",

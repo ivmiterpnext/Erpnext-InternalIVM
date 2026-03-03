@@ -18,7 +18,7 @@ docker compose -f "$HOME/IVM-Frappe-Bench/.devcontainer/docker-compose.yml" -p f
     cd frappe-bench
 
     source env/activate
-    pip install azure-identity azure-keyvault-secrets qdrant-client
+    pip install azure-identity azure-keyvault-secrets qdrant-client openai
 
     bench set-config -g db_host mariadb
     bench set-config -g redis_cache redis://redis-cache:6379
