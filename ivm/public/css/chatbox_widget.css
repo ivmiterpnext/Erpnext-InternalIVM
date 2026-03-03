@@ -20,61 +20,66 @@
 
 /* Dark Mode Support - Syncs with Frappe's dark theme */
 [data-theme="dark"] #howiebot-toggle {
-	background: #fff;
-	color: #000;
+	background: #1a2639;
+	color: #fff;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 [data-theme="dark"] #howiebot-toggle:hover {
-	background: #e0e0e0;
+	background: #243447;
 }
 
 [data-theme="dark"] #howiebot-panel {
-	background: var(--card-bg, #1c1c1c);
-	border-color: var(--border-color, #4a4a4a);
+	background: #fff;
+	border-color: #d1d8dd;
 	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="dark"] #howiebot-header {
-	background: var(--primary, #4da3ff);
-}
-
-[data-theme="dark"] #howiebot-messages {
-	background: var(--card-bg, #1c1c1c);
-}
-
-[data-theme="dark"] .howiebot-msg.user {
-	background: var(--primary, #4da3ff);
+	background: #fff;
 	color: #000;
 }
 
+[data-theme="dark"] #howiebot-close {
+	color: #000;
+}
+
+[data-theme="dark"] #howiebot-messages {
+	background: #fff;
+}
+
+[data-theme="dark"] .howiebot-msg.user {
+	background: var(--primary, #2490ef);
+	color: #fff;
+}
+
 [data-theme="dark"] .howiebot-msg.bot {
-	background: var(--control-bg, #2a2a2a);
-	color: var(--text-color, #e8e8e8);
+	background: var(--control-bg, #f4f5f6);
+	color: var(--text-color, #333);
 }
 
 [data-theme="dark"] .howiebot-msg.error {
-	background: var(--red-100, #3d1f1f);
-	color: var(--red-600, #ff6b6b);
+	background: var(--red-100, #fff0f0);
+	color: var(--red-600, #e03636);
 }
 
 [data-theme="dark"] .howiebot-typing {
-	background: var(--control-bg, #2a2a2a);
+	background: var(--control-bg, #f4f5f6);
 }
 
 [data-theme="dark"] .howiebot-typing span {
-	background: var(--text-muted, #a0a0a0);
+	background: var(--text-muted, #8d99a6);
 }
 
 [data-theme="dark"] #howiebot-input-area {
-	background: var(--card-bg, #1c1c1c);
-	border-top-color: var(--border-color, #4a4a4a);
+	background: #fff;
+	border-top-color: #d1d8dd;
 }
 
 [data-theme="dark"] #howiebot-input {
-	background: var(--control-bg, #2a2a2a);
-	color: var(--text-color, #e8e8e8);
-	border-color: var(--border-color, #4a4a4a);
+	background: var(--control-bg, #f4f5f6);
+	color: var(--text-color, #333);
+	border-color: #d1d8dd;
 }
 
 [data-theme="dark"] #howiebot-input:focus {
@@ -82,16 +87,20 @@
 }
 
 [data-theme="dark"] #howiebot-input::placeholder {
-	color: var(--text-muted, #a0a0a0);
+	color: var(--text-muted, #8d99a6);
 }
 
 [data-theme="dark"] #howiebot-send {
-	background: var(--primary, #4da3ff);
-	color: #000;
+	background: var(--primary, #2490ef);
+	color: #fff;
 }
 
 [data-theme="dark"] #howiebot-send:hover {
 	background: var(--primary-dark, #2490ef);
+}
+
+[data-theme="light"] #howiebot-toggle {
+	background: #000;
 }
 
 /* Floating toggle button */
@@ -104,7 +113,6 @@
 	height: 52px;
 	border-radius: 50%;
 	border: none;
-	background: #000;
 	color: #fff;
 	cursor: pointer;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -154,7 +162,7 @@
 	align-items: center;
 	justify-content: space-between;
 	padding: 14px 16px;
-	background: var(--primary, #2490ef);
+	background: #000;
 	color: #fff;
 	flex-shrink: 0;
 }
