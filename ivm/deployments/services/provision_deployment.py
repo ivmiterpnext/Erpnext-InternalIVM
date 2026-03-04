@@ -24,7 +24,7 @@ def generate_deployment(deal):
         "expected_start_date": today(),
         "expected_end_date": add_days(today(), 56),
         "target_ship_date": add_days(today(), 42),
-
+        # Get actual fields from Eduardo/Connor
     })
     project.insert(ignore_permissions=True)
     deal.db_set("ivm_project", project.name, update_modified=False)

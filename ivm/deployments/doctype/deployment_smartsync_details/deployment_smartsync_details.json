@@ -89,7 +89,8 @@
   {
    "fieldname": "casters",
    "fieldtype": "Select",
-   "label": "Casters"
+   "label": "Casters",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "plug_type",
@@ -174,7 +175,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-26 10:52:28.695814",
+ "modified": "2026-03-04 04:17:44.467422",
  "modified_by": "Administrator",
  "module": "Deployments",
  "name": "Deployment SmartSync Details",
