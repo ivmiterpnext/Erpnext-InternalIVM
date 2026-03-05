@@ -1,6 +1,9 @@
 IVM
 Machine Hardware Management
 Client Management
-IVM_Integrations
+IVM Integrations
+IVM Support
 Deployments
 Warehouse Requests
+Accounts Recievable
+Vending Management

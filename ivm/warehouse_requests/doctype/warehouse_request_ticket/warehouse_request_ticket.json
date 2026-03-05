@@ -1,0 +1,469 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series",
+ "creation": "2026-02-27 11:38:38.668818",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "warehouse_request_name",
+  "naming_series",
+  "created_date",
+  "request_reason",
+  "use_existing_plan",
+  "due_date",
+  "time_due",
+  "column_break_qnsk",
+  "owner_name",
+  "bonus_timestamp",
+  "explanation",
+  "status",
+  "priority",
+  "request",
+  "machine_name",
+  "smartscreen",
+  "workflow",
+  "serial_validation",
+  "home_screen_logo",
+  "column_break_weru",
+  "offline_sales",
+  "label_color",
+  "connectivity_type",
+  "notes",
+  "smartstation_section",
+  "3d_printed",
+  "casters",
+  "power_connection",
+  "machine_key",
+  "card_reader_type",
+  "power_connections",
+  "lan_ports",
+  "column_break_gtnk",
+  "plug_type",
+  "interior_lighting",
+  "bin_door_type",
+  "bins_data",
+  "column_break_bmbm",
+  "kiosk_options",
+  "kvm_switch_options",
+  "monitor_options",
+  "network_options",
+  "countertop_color",
+  "ada_side_table",
+  "kiosk_side_for_table",
+  "monitor_mount",
+  "shipping_tab",
+  "primary_contact",
+  "shipping_phone",
+  "delivery_options",
+  "invoice_clients_for_parts",
+  "invoice_notes",
+  "parts_invoiced",
+  "eori_information",
+  "ior",
+  "column_break_lilb",
+  "shipping_address",
+  "shipping_company",
+  "tracking_number",
+  "return_tracking_number",
+  "invoice",
+  "ivm_parts_invoice_number",
+  "value_added_tax"
+ ],
+ "fields": [
+  {
+   "default": "WR-",
+   "fieldname": "warehouse_request_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Warehouse Request Name"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "WR-"
+  },
+  {
+   "fieldname": "created_date",
+   "fieldtype": "Datetime",
+   "label": "Created Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "request_reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Request Reason",
+   "options": "--None--\nProduct Testing\nBuild Machine\nBuild Locker\nBuild Kiosk\nBuild Vault\nWrap Ready\nPrint Labels\nDevice Request\nShipping Request\nReader Request\nTransport/Relocate Equipment\nShipping Quote\nOther"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_existing_plan",
+   "fieldtype": "Check",
+   "label": "Use Existing Plan"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date"
+  },
+  {
+   "fieldname": "time_due",
+   "fieldtype": "Time",
+   "label": "Time Due"
+  },
+  {
+   "fieldname": "owner_name",
+   "fieldtype": "Link",
+   "label": "Owner Name",
+   "options": "User"
+  },
+  {
+   "fieldname": "bonus_timestamp",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Bonus Timestamp"
+  },
+  {
+   "fieldname": "explanation",
+   "fieldtype": "Data",
+   "label": "Explanation"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "New\nIn Progress\nPending\nCrated - Ready to Ship\nClosed"
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "High\nMedium\nLow"
+  },
+  {
+   "fieldname": "request",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Request"
+  },
+  {
+   "fieldname": "offline_sales",
+   "fieldtype": "Select",
+   "label": "Offline Sales",
+   "options": "\nAll\nStored\nDisabled"
+  },
+  {
+   "fieldname": "column_break_qnsk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "label": "Machine Name"
+  },
+  {
+   "fieldname": "smartscreen",
+   "fieldtype": "Select",
+   "label": "SmartScreen"
+  },
+  {
+   "fieldname": "workflow",
+   "fieldtype": "Select",
+   "label": "Workflow"
+  },
+  {
+   "fieldname": "serial_validation",
+   "fieldtype": "Select",
+   "label": "Serial Validation"
+  },
+  {
+   "fieldname": "home_screen_logo",
+   "fieldtype": "Select",
+   "label": "Home Screen Logo",
+   "options": "\nIVM Logo\nClient Logo"
+  },
+  {
+   "fieldname": "smartstation_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Machine' ||\ndoc.request_reason=='Build Locker';",
+   "fieldname": "casters",
+   "fieldtype": "Select",
+   "label": "Casters",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Machine' ||\ndoc.request_reason=='Build Locker' ||\ndoc.request_reason=='Build Vault';",
+   "fieldname": "power_connection",
+   "fieldtype": "Select",
+   "label": "Power Connection",
+   "options": "\n100V\n220V"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Machine';",
+   "fieldname": "machine_key",
+   "fieldtype": "Data",
+   "label": "Machine Key"
+  },
+  {
+   "fieldname": "label_color",
+   "fieldtype": "Data",
+   "label": "Label Color"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Machine';",
+   "fieldname": "card_reader_type",
+   "fieldtype": "Select",
+   "label": "Card Reader Type",
+   "options": "\nBarcode\nBarcode Reader\n2-D Barcode Reader\nStandard Barcode Reader\nCredit Card\nCredit Card Reader\nDelta3\nHID iCLASS SE\nHID MultiCLASS SE\nHID P300HA\nHID Multi Class\nHID Multiclass\nprox\nProx - HID Iclass SE\nP300 HA\nProx - P300\nP-300AH\nProx - P300 - AH\nP300AH\nP300 - AH\np-300\nFOB - P300 AH\nPin Pad\nQR Code\nQR Code Reader\nWave\nWave ID reader\nMifare\nIndala\ntbd\nOther\nNot Needed"
+  },
+  {
+   "fieldname": "connectivity_type",
+   "fieldtype": "Link",
+   "label": "Connectivity Type",
+   "options": "Connectivity Type"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.request_reason=='Build Locker';",
+   "fieldname": "3d_printed",
+   "fieldtype": "Check",
+   "label": "3D Printed"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Locker' ||\ndoc.request_reason=='Build Vault' ||\ndoc.request_reason=='Build Kiosk';",
+   "fieldname": "power_connections",
+   "fieldtype": "Select",
+   "label": "Power Connections in Bins",
+   "options": "\nNone\nUSB\n110V\n220V"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Locker' ||\ndoc.request_reason=='Build Vault' ||\ndoc.request_reason=='Build Kiosk';",
+   "fieldname": "lan_ports",
+   "fieldtype": "Select",
+   "label": "LAN Ports in Bins",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_weru",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "column_break_gtnk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Locker' ||\ndoc.request_reason=='Build Vault';",
+   "fieldname": "plug_type",
+   "fieldtype": "Data",
+   "label": "Plug Type"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Locker' ||\ndoc.request_reason=='Build Vault' ||\ndoc.request_reason=='Build Kiosk';",
+   "fieldname": "interior_lighting",
+   "fieldtype": "Select",
+   "label": "Interior Lighting",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Locker' ||\ndoc.request_reason=='Build Vault' ||\ndoc.request_reason=='Build Kiosk';",
+   "fieldname": "bin_door_type",
+   "fieldtype": "Select",
+   "label": "Bin Door Type",
+   "options": "\nSolid\nGlass"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Locker' ||\ndoc.request_reason=='Build Vault';",
+   "fieldname": "bins_data",
+   "fieldtype": "JSON",
+   "label": "Bins"
+  },
+  {
+   "fieldname": "column_break_bmbm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Kiosk';",
+   "fieldname": "kiosk_options",
+   "fieldtype": "Select",
+   "label": "Kiosk Options",
+   "options": "\nNone\nKiosk w/ KVM & All-in-one\nKisok w/ All-in-one\nSide Table"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Kiosk';",
+   "fieldname": "kvm_switch_options",
+   "fieldtype": "Select",
+   "label": "KVM Switch Options",
+   "options": "\nNone\nStandard KVM Switch Raritan DKX3-108 KVM\nClient to Provide"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Kiosk';",
+   "fieldname": "monitor_options",
+   "fieldtype": "Select",
+   "label": "Monitor Options",
+   "options": "\nNone\n27' All-in-One Optiplex 7780\n22' Display Dell P2217\n24' Display Dell E2420HS\n27' Display Dell E2720HS\nClient to Provide and Install"
+  },
+  {
+   "depends_on": "eval:doc.lan_ports=='Yes' &&\ndoc.request_reason=='Build Locker' ||\ndoc.request_reason=='Build Kiosk';",
+   "fieldname": "network_options",
+   "fieldtype": "Select",
+   "label": "Network Options",
+   "options": "\n16 Port Netgear Switch\nClient Provided"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Kiosk';",
+   "fieldname": "countertop_color",
+   "fieldtype": "Select",
+   "label": "Countertop Color",
+   "options": "\nBlue\nBlack\nLight Gray\nDark Gray"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Kiosk';",
+   "fieldname": "ada_side_table",
+   "fieldtype": "Select",
+   "label": "ADA Side Table",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.ada_side_table=='Yes' &&\ndoc.request_reason=='Build Kiosk';",
+   "fieldname": "kiosk_side_for_table",
+   "fieldtype": "Select",
+   "label": "Kiosk Side for Table",
+   "options": "\nRight\nLeft"
+  },
+  {
+   "depends_on": "eval:doc.request_reason=='Build Kiosk';",
+   "fieldname": "monitor_mount",
+   "fieldtype": "Select",
+   "label": "Monitor Mount",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "shipping_tab",
+   "fieldtype": "Tab Break",
+   "label": "Shipping"
+  },
+  {
+   "fieldname": "primary_contact",
+   "fieldtype": "Link",
+   "label": "Primary Contact",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "shipping_phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "delivery_options",
+   "fieldtype": "Select",
+   "label": "Delivery Options",
+   "options": "\nOvernight\n2-Day\nGround"
+  },
+  {
+   "default": "0",
+   "fieldname": "invoice_clients_for_parts",
+   "fieldtype": "Check",
+   "label": "Invoice Clients for Parts"
+  },
+  {
+   "fieldname": "invoice_notes",
+   "fieldtype": "Small Text",
+   "label": "Invoice Notes"
+  },
+  {
+   "default": "0",
+   "fieldname": "parts_invoiced",
+   "fieldtype": "Check",
+   "label": "Parts Invoiced"
+  },
+  {
+   "fieldname": "eori_information",
+   "fieldtype": "Data",
+   "label": "EORI Information"
+  },
+  {
+   "fieldname": "ior",
+   "fieldtype": "Data",
+   "label": "IOR"
+  },
+  {
+   "fieldname": "column_break_lilb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Small Text",
+   "label": "Shipping Address"
+  },
+  {
+   "fieldname": "shipping_company",
+   "fieldtype": "Data",
+   "label": "Shipping Company"
+  },
+  {
+   "fieldname": "tracking_number",
+   "fieldtype": "Data",
+   "label": "Tracking Number"
+  },
+  {
+   "fieldname": "return_tracking_number",
+   "fieldtype": "Data",
+   "label": "Return Tracking Number"
+  },
+  {
+   "fieldname": "invoice",
+   "fieldtype": "Select",
+   "label": "Invoice",
+   "options": "\nClient\nIVM"
+  },
+  {
+   "fieldname": "ivm_parts_invoice_number",
+   "fieldtype": "Data",
+   "label": "IVM Parts Invoice Number"
+  },
+  {
+   "fieldname": "value_added_tax",
+   "fieldtype": "Data",
+   "label": "Value-Added Tax (VAT)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-04 05:53:29.692732",
+ "modified_by": "Administrator",
+ "module": "Warehouse Requests",
+ "name": "Warehouse Request Ticket",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
