@@ -37,6 +37,7 @@ run:
 hard_reset_environment:
 	@echo "Refreshing Environment"
 	@./scripts/hard_reset_environment.sh
+	@./scripts/setup.sh
 
 migrate:
 	@./scripts/migrate.sh

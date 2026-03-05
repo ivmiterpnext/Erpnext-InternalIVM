@@ -7,9 +7,3 @@ docker compose -f "$HOME/IVM-Frappe-Bench/.devcontainer/docker-compose.yml" -p f
 
 echo "Cleaning Folder Structure"
 rm -rf ~/IVM-Frappe-Bench
-mkdir -p ~/IVM-Frappe-Bench
-
-echo "Setting up New Environment"
-./setup.sh
-
-
