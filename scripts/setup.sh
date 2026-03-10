@@ -41,6 +41,10 @@ docker compose -f "$HOME/IVM-Frappe-Bench/.devcontainer/docker-compose.yml" -p f
     bench get-app --soft-link /workspace/ivm
     bench install-app ivm
 
+    bench clear-cache
+    bench migrate
+    bench restart
+
     echo 'Dev Container Environment Completed.'
     echo '================================================='
     echo 'Use make run to begin the bench site'
