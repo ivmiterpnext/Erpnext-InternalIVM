@@ -49,11 +49,11 @@ services:
     environment:
       - SHELL=/bin/bash
     volumes:
-      - ..:/workspace:cached
-      - ${IVM_FRAPPE_APP_PATH:-..}:/workspace/ivm:cached
+      - frappe-bench:/workspace/frappe-bench    # persistent bench state (named volume)
+      - ..:/workspace/ivm:cached                # live app source from host repo
       # Enable if you require git cloning
       # - ${HOME}/.ssh:/home/frappe/.ssh
-    working_dir: /workspace/
+    working_dir: /workspace/frappe-bench
     ports:
       - 8000-8005:8000-8005
       - 9000-9005:9000-9005
@@ -86,5 +86,6 @@ services:
   #   network_mode: "host"
 volumes:
   mariadb-data:
+  frappe-bench:
   #postgresql-data:
   #mailpit-data:

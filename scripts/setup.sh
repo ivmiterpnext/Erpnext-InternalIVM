@@ -1,57 +1,96 @@
 #!/bin/bash
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-export IVM_FRAPPE_APP_PATH="$APP_ROOT"
+COMPOSE_FILE="$APP_ROOT/.devcontainer/docker-compose.yml"
+PROJECT_NAME="frappe-dev"
 
-mkdir -p "$HOME/IVM-Frappe-Bench"
-cp -R .devcontainer "$HOME/IVM-Frappe-Bench"
+echo "Starting containers..."
+docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" up -d
 
-docker compose -f "$HOME/IVM-Frappe-Bench/.devcontainer/docker-compose.yml" -p frappe-dev up -d
+echo "Initializing frappe development environment..."
+docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" exec -T frappe bash -lc '
+    set -euo pipefail
 
-docker compose -f "$HOME/IVM-Frappe-Bench/.devcontainer/docker-compose.yml" -p frappe-dev exec -T frappe bash -lc "
-    echo 'Initializing frappe development environment...'
+    BENCH_DIR="/workspace/frappe-bench"
 
-    cd /workspace
+    # Fix ownership of named volume mount (created as root by Docker)
+    sudo chown -R frappe:frappe "$BENCH_DIR"
 
-    bench init --skip-redis-config-generation frappe-bench
-    cd frappe-bench
+    # Idempotent bench init: check for a valid bench marker
+    if [ ! -f "$BENCH_DIR/sites/common_site_config.json" ]; then
+        echo "Initializing frappe bench..."
+        cd /workspace
+        bench init --ignore-exist --skip-redis-config-generation --frappe-branch version-16 frappe-bench
+    else
+        echo "Bench already initialized, skipping init."
+    fi
 
-    source env/activate
+    cd "$BENCH_DIR"
+    source env/bin/activate
     pip install azure-identity azure-keyvault-secrets
 
+    # Configure services (idempotent — set-config overwrites)
     bench set-config -g db_host mariadb
     bench set-config -g redis_cache redis://redis-cache:6379
     bench set-config -g redis_queue redis://redis-queue:6379
     bench set-config -g redis_socketio redis://redis-queue:6379
 
-    printf '\n' | bench new-site --db-root-password 123 --admin-password admin --mariadb-user-host-login-scope=% ivm.localhost
+    # Create site if not present
+    if [ ! -d "sites/ivm.localhost" ]; then
+        echo "Creating site ivm.localhost..."
+        printf "\n" | bench new-site --db-root-password 123 --admin-password admin \
+            --mariadb-user-host-login-scope=% ivm.localhost
+    else
+        echo "Site ivm.localhost already exists, skipping."
+    fi
 
     bench use ivm.localhost
     bench set-config developer_mode 1
 
-    bench switch-to-branch v16.9.0 frappe
-    bench get-app crm --branch v1.59.0
-    bench get-app https://github.com/frappe/wiki
-    bench get-app erpnext
-    bench install-app crm
-    bench install-app wiki
-    bench install-app erpnext
+    if [ ! -d "apps/crm" ]; then
+        echo "Installing crm..."
+        bench get-app crm --branch v1.59.0
+        bench install-app crm
+    else
+        echo "crm already installed, skipping."
+    fi
 
-    bench get-app --soft-link /workspace/ivm
-    bench install-app ivm
+    if [ ! -d "apps/wiki" ]; then
+        echo "Installing wiki..."
+        bench get-app https://github.com/frappe/wiki
+        bench install-app wiki
+    else
+        echo "wiki already installed, skipping."
+    fi
 
+    if [ ! -d "apps/erpnext" ]; then
+        echo "Installing erpnext..."
+        bench get-app erpnext
+        bench install-app erpnext
+    else
+        echo "erpnext already installed, skipping."
+    fi
+
+    if [ ! -L "apps/ivm" ] && [ ! -d "apps/ivm" ]; then
+        echo "Linking ivm app..."
+        bench get-app --soft-link /workspace/ivm
+        bench install-app ivm
+    else
+        echo "ivm app already linked, skipping."
+    fi
+
+    echo "Running migrations..."
     bench clear-cache
     bench migrate
     bench restart
 
-    echo 'Dev Container Environment Completed.'
-    echo '================================================='
-    echo 'Use make run to begin the bench site'
-    echo 'Server located at http://ivm.localhost:8000/'
-    echo 'Admin Login-  User: administrator, Password: admin'
-    echo '================================================='
-    echo 'Basic Development Environment Constructed'
-
-    exit
-"
+    echo "================================================="
+    echo "Dev Container Environment Completed."
+    echo "Use make run to begin the bench site"
+    echo "Server located at http://ivm.localhost:8000/"
+    echo "Admin Login - User: administrator, Password: admin"
+    echo "================================================="
+    echo "Basic Development Environment Constructed"
+'
