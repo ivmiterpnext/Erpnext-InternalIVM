@@ -1,15 +1,14 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+COMPOSE_FILE="$APP_ROOT/.devcontainer/docker-compose.yml"
+PROJECT_NAME="frappe-dev"
+
 echo "Removing old environment"
 
-echo "Clearing Docker Containers"
-docker compose -f "$HOME/IVM-Frappe-Bench/.devcontainer/docker-compose.yml" -p frappe-dev down -v
+echo "Clearing Docker Containers and Volumes..."
+docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down -v
 
-echo "Cleaning Folder Structure"
-rm -rf ~/IVM-Frappe-Bench
-mkdir -p ~/IVM-Frappe-Bench
-
-echo "Setting up New Environment"
-./setup.sh
-
-
+echo "Environment reset complete."
+echo "Run 'make setup' to recreate the environment."

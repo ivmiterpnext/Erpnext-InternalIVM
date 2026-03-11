@@ -5,19 +5,33 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "test"
+  "issue_id",
+  "column_break_mntn",
+  "ticket_status"
  ],
  "fields": [
   {
-   "fieldname": "test",
-   "fieldtype": "Data",
-   "label": "Test"
+   "fieldname": "column_break_mntn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "issue_id",
+   "fieldtype": "Link",
+   "label": "Ticket Number",
+   "options": "Issue",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "issue_id.status",
+   "fieldname": "ticket_status",
+   "fieldtype": "Select",
+   "label": "Status"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:55:27.136120",
+ "modified": "2026-03-05 10:21:15.708951",
  "modified_by": "Administrator",
  "module": "IVM Support",
  "name": "Support Ticket",
