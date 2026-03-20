@@ -36,6 +36,12 @@
  ],
  "fields": [
   {
+   "fieldname": "issue",
+   "fieldtype": "Link",
+   "label": "Issue",
+   "options": "Issue"
+  },
+  {
    "fieldname": "column_break_mntn",
    "fieldtype": "Column Break"
   },
