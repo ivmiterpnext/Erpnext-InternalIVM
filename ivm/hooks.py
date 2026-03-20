@@ -25,7 +25,9 @@ app_license = "mit"
 # ------------------
 
 fixtures = [
-    {"doctype": "Issue Type"}
+    {"doctype": "Issue Type"},
+    {"doctype": "Client Script", "filters": [["dt", "=", "Issue"]]}
+	{"doctype": "Support Ticket Type"}
 ]
 
 # include js, css files in header of desk.html
@@ -50,7 +52,8 @@ app_include_js = "/assets/ivm/js/chatbox_widget.js"
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 
 doctype_js = {
-    "Project": "public/js/project.js"
+    "Project": "public/js/project.js",
+    "Issue": "public/js/issue.js"
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -147,6 +150,7 @@ doc_events = {
 
     "Project": {
         "before_insert": "ivm.deployments.hooks.project.before_insert",
+        "after_insert": "ivm.deployments.hooks.project.after_insert",
         "on_update": "ivm.deployments.services.notify_coi_required.send_notification",
     },
 
@@ -157,6 +161,9 @@ doc_events = {
 	"Wiki Document": {
 		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
 	},
+    "Issue": {
+        "after_insert": "ivm.ivm_support.hooks.issue.after_insert"
+    }
 }
 
 # Scheduled Tasks
@@ -166,7 +173,7 @@ scheduler_events = {
     "daily": [
         "ivm.client_management.doctype.address_link.address_link.sync",
         "ivm.client_management.doctype.client_link.client_link.sync",
-        "ivm.client_management.location_link.location_link.sync",
+        "ivm.client_management.doctype.location_link.location_link.sync",
 
         "ivm.machine_hardware_management.doctype.agreement_fee_type.agreement_fee_type.sync",
         "ivm.machine_hardware_management.doctype.board_link.board_link.sync",
@@ -188,6 +195,10 @@ scheduler_events = {
         "ivm.machine_hardware_management.doctype.smart_screen_group.smart_screen_group.sync",
         "ivm.machine_hardware_management.doctype.vendor_link.vendor_link.sync"
     ],
+
+    "monthly": [
+        #"ivm.vending_management.doctype.sales_ticket_email_list.monthly_email.send_monthly_sales_ticket_emails"
+    ]
 }
 
 

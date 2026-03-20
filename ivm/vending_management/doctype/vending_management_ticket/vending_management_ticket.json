@@ -5,19 +5,45 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "test"
+  "subject",
+  "customer",
+  "column_break_odko",
+  "status",
+  "location"
  ],
  "fields": [
   {
-   "fieldname": "test",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "subject",
    "fieldtype": "Data",
-   "label": "Test"
+   "label": "Subject"
+  },
+  {
+   "fieldname": "column_break_odko",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nNew\nOpen\nPending\nResolved\nClosed\nEscalated\nIn Progress\nOn Hold\nPayment Scheduled\nDeactivation Notice Sent\nEquipment Deactivated"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location Link"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:58:55.403655",
+ "modified": "2026-03-09 07:00:04.580975",
  "modified_by": "Administrator",
  "module": "Vending Management",
  "name": "Vending Management Ticket",
