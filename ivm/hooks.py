@@ -26,7 +26,7 @@ app_license = "mit"
 
 fixtures = [
     {"doctype": "Issue Type"},
-    {"doctype": "Client Script", "filters": [["dt", "=", "Issue"]]}
+    {"doctype": "Client Script", "filters": [["dt", "=", "Issue"]]},
 	{"doctype": "Support Ticket Type"}
 ]
 
