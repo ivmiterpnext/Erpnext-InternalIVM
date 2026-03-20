@@ -25,6 +25,7 @@ app_license = "mit"
 # ------------------
 
 fixtures = [
+	{"doctype": "Support Ticket Type"},
     {"doctype": "Issue Type"}
 ]
 
