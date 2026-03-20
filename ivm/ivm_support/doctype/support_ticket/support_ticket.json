@@ -5,9 +5,16 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "issue",
   "test"
  ],
  "fields": [
+  {
+   "fieldname": "issue",
+   "fieldtype": "Link",
+   "label": "Issue",
+   "options": "Issue"
+  },
   {
    "fieldname": "test",
    "fieldtype": "Data",
