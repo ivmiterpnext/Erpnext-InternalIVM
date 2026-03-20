@@ -1,0 +1,37 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Support Ticket Type",
+  "modified": "2026-03-11 06:00:02.037794",
+  "name": "IT Support"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Support Ticket Type",
+  "modified": "2026-03-11 06:01:39.263363",
+  "name": "Permission Change"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Support Ticket Type",
+  "modified": "2026-03-11 06:01:49.690414",
+  "name": "Onboarding"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Support Ticket Type",
+  "modified": "2026-03-11 06:02:00.494582",
+  "name": "Offboarding"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Support Ticket Type",
+  "modified": "2026-03-11 06:02:11.144922",
+  "name": "Reconfiguration"
+ }
+]

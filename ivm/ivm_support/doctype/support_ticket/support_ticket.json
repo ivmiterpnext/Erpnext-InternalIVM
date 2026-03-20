@@ -1,12 +1,38 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "field:issue_id",
  "creation": "2026-02-27 11:55:13.572312",
  "doctype": "DocType",
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
-  "issue",
-  "test"
+  "column_break_bvfk",
+  "issue_id",
+  "ticket_type",
+  "subject",
+  "sender",
+  "client",
+  "column_break_mntn",
+  "ticket_status",
+  "priority",
+  "related_deployment",
+  "parent_ticket",
+  "ticket_information_section",
+  "description",
+  "internal_notes",
+  "onboarding_details_section",
+  "employee_first_name",
+  "employee_email",
+  "employees_manager",
+  "column_break_zpyy",
+  "employee_last_name",
+  "employee_title",
+  "employees_department",
+  "more_info_section",
+  "created_date",
+  "created_by",
+  "column_break_rqao",
+  "modified_date"
  ],
  "fields": [
   {
@@ -16,18 +42,182 @@
    "options": "Issue"
   },
   {
-   "fieldname": "test",
+   "fieldname": "column_break_mntn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "issue_id",
+   "fieldtype": "Link",
+   "label": "Ticket Number",
+   "options": "Issue",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "default": "New",
+   "fieldname": "ticket_status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "New\nOpen\nPending\nResolved\nClosed"
+  },
+  {
+   "fieldname": "column_break_bvfk",
+   "fieldtype": "Column Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "ticket_type",
+   "fieldtype": "Link",
+   "label": "Ticket Type",
+   "options": "Support Ticket Type"
+  },
+  {
+   "fetch_from": "issue_id.subject",
+   "fieldname": "subject",
    "fieldtype": "Data",
-   "label": "Test"
+   "label": "Subject"
+  },
+  {
+   "fetch_from": "issue_id.company",
+   "fieldname": "client",
+   "fieldtype": "Link",
+   "label": "Client",
+   "options": "Client Link"
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh"
+  },
+  {
+   "fieldname": "related_deployment",
+   "fieldtype": "Link",
+   "label": "Related Deployment",
+   "options": "Deployment Location"
+  },
+  {
+   "fetch_from": "issue_id.issue_split_from",
+   "fieldname": "parent_ticket",
+   "fieldtype": "Link",
+   "label": "Parent Ticket",
+   "options": "Support Ticket"
+  },
+  {
+   "fieldname": "ticket_information_section",
+   "fieldtype": "Section Break",
+   "label": "Ticket Information"
+  },
+  {
+   "fetch_from": "issue_id.description",
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description",
+   "read_only": 1
+  },
+  {
+   "fieldname": "internal_notes",
+   "fieldtype": "Text Editor",
+   "label": "Internal Notes"
+  },
+  {
+   "fieldname": "more_info_section",
+   "fieldtype": "Section Break",
+   "label": "More Info"
+  },
+  {
+   "fetch_from": "issue_id.custom_created_on",
+   "fieldname": "created_date",
+   "fieldtype": "Datetime",
+   "label": "Created Date"
+  },
+  {
+   "fetch_from": "issue_id.custom_created_by",
+   "fieldname": "created_by",
+   "fieldtype": "Data",
+   "label": "Created By"
+  },
+  {
+   "fieldname": "column_break_rqao",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "modified_date",
+   "fieldtype": "Datetime",
+   "label": "Modified Date"
+  },
+  {
+   "depends_on": "doc.ticket_type=='Onboarding';",
+   "fieldname": "onboarding_details_section",
+   "fieldtype": "Section Break",
+   "label": "Onboarding Details"
+  },
+  {
+   "fieldname": "employee_first_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee First Name",
+   "mandatory_depends_on": "doc.ticket_type=='Onboarding';",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Email",
+   "mandatory_depends_on": "doc.ticket_type=='Onboarding';",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employees_manager",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee's Manager",
+   "mandatory_depends_on": "doc.ticket_type=='Onboarding';",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_zpyy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee_last_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Last Name",
+   "mandatory_depends_on": "doc.ticket_type=='Onboarding';",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_title",
+   "fieldtype": "Data",
+   "label": "Employee Title",
+   "mandatory_depends_on": "doc.ticket_type=='Onboarding';",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employees_department",
+   "fieldtype": "Data",
+   "label": "Employee's Department",
+   "mandatory_depends_on": "doc.ticket_type=='Onboarding';",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Data",
+   "label": "Sender",
+   "options": "Email"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:55:27.136120",
+ "modified": "2026-03-19 06:51:59.362490",
  "modified_by": "Administrator",
  "module": "IVM Support",
  "name": "Support Ticket",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -45,7 +235,9 @@
  ],
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
+ "sender_field": "sender",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "subject_field": "subject"
 }
