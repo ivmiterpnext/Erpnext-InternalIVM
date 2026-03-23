@@ -1,8 +1,9 @@
 frappe.ui.form.on('Issue', {
     refresh: function(frm) {
-        // Lock issue_type after save
+        // Lock subject and issue_type after save
         if (!frm.doc.__islocal) {
-            frm.set_df_property('issue_type', 'read_only', 1);
+        frm.set_df_property('subject', 'read_only', 1);
+        frm.set_df_property('issue_type', 'read_only', 1);
         }
 
         // Render sub-ticket form if ticket exists
@@ -12,6 +13,7 @@ frappe.ui.form.on('Issue', {
     },
 
     after_save: function(frm) {
+        frm.set_df_property('subject', 'read_only', 1);
         frm.set_df_property('issue_type', 'read_only', 1);
 
         if (frm.doc.sub_ticket && frm.doc.sub_ticket_type) {
@@ -22,7 +24,7 @@ frappe.ui.form.on('Issue', {
     before_save: function(frm) {
         // Save sub-ticket fields before saving Issue
         if (frm.doc.sub_ticket && frm._sub_ticket_field_controls) {
-            return save_sub_ticket_before_issue_save(frm);
+            return save_sub_ticket(frm);
         }
     },
 
@@ -31,11 +33,161 @@ frappe.ui.form.on('Issue', {
         if (frm.doc.sub_ticket && frm.doc.sub_ticket_type) {
             render_sub_ticket_form(frm);
         }
+    },
+
+    sub_ticket_type: function(frm) {
+        // Clear sub_ticket when ticket type changes to prevent stale data
+        if (frm.doc.sub_ticket) {
+            frm.set_value('sub_ticket', '');
+            frm._sub_ticket_field_controls = null;
+            frm._sub_ticket_dirty = false;
+        }
     }
 });
 
-function save_sub_ticket_before_issue_save(frm) {
-    // Only save if there were actual changes
+function render_sub_ticket_form(frm) {
+    const wrapper = frm.fields_dict['custom_sub_ticket_form'].$wrapper;
+
+    // Clear wrapper and embedded-form
+    wrapper.empty();
+    const parent_section = wrapper.closest('.form-section');
+    if (parent_section.length) {
+        parent_section.find('.embedded-form').remove();
+        // Unhide section-body in case form is being cleared
+        // parent_section.find('.section-body').show();
+    }
+
+    if (!frm.doc.sub_ticket || !frm.doc.sub_ticket_type) {
+        return;
+    }
+
+    // Load the sub-ticket doc based on sub_ticket_type
+    frappe.model.with_doc(frm.doc.sub_ticket_type, frm.doc.sub_ticket, function() {
+        const ticket_doc = frappe.get_doc(frm.doc.sub_ticket_type, frm.doc.sub_ticket);
+
+        frappe.model.with_doctype(frm.doc.sub_ticket_type, function() {
+            const meta = frappe.get_meta(frm.doc.sub_ticket_type);
+            const form_container = $('<div class="embedded-form"></div>').appendTo(wrapper);
+
+            // Move embedded form out of section-body but keep inside parent form-section for styling purposes
+            const parent_body = wrapper.closest('.section-body');
+            const parent_section = wrapper.closest('.form-section');
+            if (parent_body.length && parent_section.length) {
+                form_container.detach();
+                parent_body.after(form_container);
+                parent_body.hide();
+            }
+
+            const field_controls = {};
+            const state = {
+                current_section: null,
+                current_row: null,
+                current_column: null,
+                skip_current_section: false
+            };
+
+            meta.fields.forEach(function(df) {
+                if (df.hidden) return;
+
+                if (df.fieldtype === 'Section Break') {
+                    handle_section_break(df, ticket_doc, form_container, state);
+                    return;
+                }
+
+                if (df.fieldtype === 'Column Break') {
+                    handle_column_break(state);
+                    return;
+                }
+                
+                // Skip all fields if in a hidden section
+                if (state.skip_current_section) {
+                    debug_log('Skipping field', df.fieldname, '(in hidden section)');
+                    return;
+                }
+                
+                // Evaluate field/section's depends_on
+                if (df.depends_on) {
+                    debug_log('Evaluating field depends_on for', df.fieldname, ':', df.depends_on);
+                    const condition_met = evaluate_depends_on(df.depends_on, ticket_doc);
+                    debug_log('Result:', condition_met);
+                    
+                    if (!condition_met) {
+                        debug_log('Skipping field', df.fieldname);
+                        return;
+                    }
+                }
+
+                // Ensure we have a container to append to
+                if (!state.current_column) {
+                    if (!state.current_section) {
+                        state.current_section = $('<div class="form-section"></div>').appendTo(form_container);
+                        state.current_row = $('<div class="section-body"></div>').appendTo(state.current_section);
+                    }
+                    if (!state.current_row) {
+                        state.current_row = $('<div class="section-body"></div>').appendTo(state.current_section);
+                    }
+                    state.current_column = $('<div class="form-column col-sm-6"></div>').appendTo(state.current_row);
+                }
+
+                const field_wrapper = $('<div class="frappe-control"></div>').appendTo(state.current_column);
+
+                const field = frappe.ui.form.make_control({
+                    df: df,
+                    parent: field_wrapper,
+                    only_input: false
+                });
+
+                field_controls[df.fieldname] = field;
+                
+                // Set up change handler using Frappe's built-in mechanism to mark form as dirty
+                field.df.change = function() {
+                    frm._sub_ticket_dirty = true;
+                    frm.doc.__unsaved = 1;
+                    frm.dirty();
+                    frm.enable_save();
+                };
+                
+                // If this is the ticket_type field, re-render form when it changes
+                if (df.fieldname === 'ticket_type') {
+                    const original_change = field.df.change;
+                    const current_ticket_type = ticket_doc.ticket_type;
+                    
+                    field.df.change = function() {
+                        const new_value = field.get_value();
+                        
+                        if (new_value && new_value !== current_ticket_type) {
+                            // Save all current field values to ticket_doc before re-rendering
+                            if (frm._sub_ticket_field_controls) {
+                                save_field_values_to_doc(frm._sub_ticket_field_controls, ticket_doc);
+                            }
+                            
+                            // Update ticket_type specifically
+                            ticket_doc.ticket_type = new_value;
+                            
+                            if (original_change) original_change.call(this);
+                            
+                            // Re-render the form with new field visibility
+                            setTimeout(function() { render_sub_ticket_form(frm); }, 150);
+                        } else {
+                            // Just call the original change handler without re-rendering
+                            if (original_change) original_change.call(this);
+                        }
+                    };
+                }
+                
+                // Set value AFTER change handler is configured to avoid triggering during initial set
+                field.set_value(ticket_doc[df.fieldname]);
+                field.refresh();
+            });
+
+            // Store controls for save handler
+            frm._sub_ticket_field_controls = field_controls;
+            frm._sub_ticket_dirty = false;
+        });
+    });
+}
+
+function save_sub_ticket(frm) {
     if (!frm._sub_ticket_dirty) {
         return;
     }
@@ -47,11 +199,11 @@ function save_sub_ticket_before_issue_save(frm) {
         field_values[fieldname] = controls[fieldname].get_value();
     }
 
-    // Save synchronously with dynamic doctype
+    // Synchronous save to ensure it completes before the main form save
     return frappe.call({
         method: 'ivm.ivm_support.services.ticket_manager.save_sub_ticket',
         args: {
-            ticket_doctype: frm.doc.sub_ticket_type,  // Dynamic doctype
+            ticket_doctype: frm.doc.sub_ticket_type,
             ticket_name: frm.doc.sub_ticket,
             field_values: field_values
         },
@@ -64,84 +216,71 @@ function save_sub_ticket_before_issue_save(frm) {
     });
 }
 
-function render_sub_ticket_form(frm) {
-    const wrapper = frm.fields_dict['custom_sub_ticket_form'].$wrapper;
-    wrapper.empty();
+function debug_log(...args) {
+    if (frappe.boot.developer_mode) {
+        console.log(...args);
+    }
+}
 
-    if (!frm.doc.sub_ticket || !frm.doc.sub_ticket_type) {
-        return;
+function evaluate_depends_on(depends_on, doc) {
+    if (!depends_on) return true;
+    
+    try {
+        let condition = depends_on.startsWith('eval:') 
+            ? depends_on.substring(5) 
+            : depends_on;
+        return eval(condition);
+
+    } catch(e) {
+        debug_log('Error evaluating depends_on:', depends_on, e);
+        return true; // Show field on error
+    }
+}
+
+function save_field_values_to_doc(field_controls, ticket_doc) {
+    for (let fieldname in field_controls) {
+        try {
+            const control = field_controls[fieldname];
+            if (control?.get_value) {
+                ticket_doc[fieldname] = control.get_value();
+            }
+        } catch(e) {
+            debug_log('Error saving field', fieldname, e);
+        }
+    }
+}
+
+function handle_section_break(df, ticket_doc, form_container, state) {
+    state.skip_current_section = false;
+
+    // Check if this section should be hidden
+    if (df.depends_on) {
+        debug_log('Evaluating section depends_on:', df.label || 'unlabeled', ':', df.depends_on);
+        const condition_met = evaluate_depends_on(df.depends_on, ticket_doc);
+        debug_log('Section visible:', condition_met);
+        
+        if (!condition_met) {
+            state.skip_current_section = true;
+            return state;
+        }
     }
 
-    // Load the ticket document (dynamically based on sub_ticket_type)
-    frappe.model.with_doc(frm.doc.sub_ticket_type, frm.doc.sub_ticket, function() {
-        const ticket_doc = frappe.get_doc(frm.doc.sub_ticket_type, frm.doc.sub_ticket);
+    // Create section
+    state.current_section = $('<div class="form-section"></div>').appendTo(form_container);
+    if (df.label) {
+        state.current_section.append(`<div class="section-head">${df.label}</div>`);
+    }
+    state.current_row = $('<div class="section-body"></div>').appendTo(state.current_section);
+    state.current_column = $('<div class="form-column col-sm-6"></div>').appendTo(state.current_row);
+    
+    return state;
+}
 
-        frappe.model.with_doctype(frm.doc.sub_ticket_type, function() {
-            const meta = frappe.get_meta(frm.doc.sub_ticket_type);
-            const form_container = $('<div class="embedded-form"></div>').appendTo(wrapper);
-            form_container.append(`<h4 style="margin-bottom: 15px; color: #1f2937;">Ticket Details</h4>`);
+function handle_column_break(state) {
+    if (state.skip_current_section) return state;
 
-            const field_controls = {};
-            let current_section = null;
-
-            meta.fields.forEach(function(df) {
-                // Skip the 'issue' link field and hidden fields
-                if (df.fieldname === 'issue' || df.hidden) return;
-
-                // Handle Section Breaks
-                if (df.fieldtype === 'Section Break') {
-                    if (df.label) {
-                        current_section = $(`<div class="form-section">
-                            <div class="section-head">${df.label}</div>
-                        </div>`).appendTo(form_container);
-                    }
-                    return;
-                }
-
-                // Handle Column Breaks
-                if (df.fieldtype === 'Column Break') {
-                    return;
-                }
-
-                const field_wrapper = $('<div class="frappe-control"></div>');
-
-                if (current_section) {
-                    field_wrapper.appendTo(current_section);
-                } else {
-                    field_wrapper.appendTo(form_container);
-                }
-
-                const field = frappe.ui.form.make_control({
-                    df: df,
-                    parent: field_wrapper,
-                    only_input: false
-                });
-
-                field.set_value(ticket_doc[df.fieldname]);
-                field.refresh();
-
-                field_controls[df.fieldname] = field;
-
-                // Mark Issue as dirty when any ticket field changes
-                if (field.$input) {
-                    field.$input.on('change', function() {
-                        frm._sub_ticket_dirty = true;
-                        frm.dirty();
-                    });
-                }
-
-                // Also handle link fields and other input types
-                if (field.$wrapper) {
-                    field.$wrapper.on('change', 'input, select, textarea', function() {
-                        frm._sub_ticket_dirty = true;
-                        frm.dirty();
-                    });
-                }
-            });
-
-            // Store controls for save handler
-            frm._sub_ticket_field_controls = field_controls;
-            frm._sub_ticket_dirty = false;
-        });
-    });
+    if (state.current_row) {
+        state.current_column = $('<div class="form-column col-sm-6"></div>').appendTo(state.current_row);
+    }
+    return state;
 }
