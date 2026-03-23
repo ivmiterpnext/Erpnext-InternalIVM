@@ -1,0 +1,100 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:50:28.550870",
+  "name": "Product Testing"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:51:14.480390",
+  "name": "Build SmartStation"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:51:34.095482",
+  "name": "Build SmartLocker"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:51:49.137726",
+  "name": "Build SmartSync"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:51:57.823964",
+  "name": "Build SmartCenter"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:52:04.967731",
+  "name": "Build SmartVault"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:53:07.463169",
+  "name": "Wrap Ready"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:53:19.498470",
+  "name": "Print Labels"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:53:29.865714",
+  "name": "Device Request"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:53:49.478634",
+  "name": "Shipping Request"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:54:00.308992",
+  "name": "Reader Request"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:54:18.181784",
+  "name": "Transport/Relocate Equipment"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:54:34.585588",
+  "name": "Shipping Quote"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Warehouse Request Ticket Type",
+  "modified": "2026-03-23 08:54:54.348305",
+  "name": "Other"
+ }
+]

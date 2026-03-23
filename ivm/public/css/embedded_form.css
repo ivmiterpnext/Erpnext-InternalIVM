@@ -1,0 +1,19 @@
+/* Embedded form section styling */
+.embedded-form {
+    border-bottom: 1px solid #d1d8dd;
+}
+
+.embedded-form .form-section {
+    margin-bottom: 15px;
+}
+
+.embedded-form .form-section:not(:first-child):has(.section-head) {
+    border-top: 1px solid #d1d8dd;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+
+.embedded-form .section-head {
+    margin-bottom: 10px;
+}
+

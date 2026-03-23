@@ -1,22 +1,40 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-02-27 11:57:23.434225",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_deub"
+  "hidden_section",
+  "issue",
+  "naming_series"
  ],
  "fields": [
   {
-   "fieldname": "section_break_deub",
-   "fieldtype": "Section Break"
+   "fieldname": "issue",
+   "fieldtype": "Link",
+   "label": "Issue",
+   "options": "Issue"
+  },
+  {
+   "fieldname": "hidden_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden"
+  },
+  {
+   "default": "AR-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "AR-.YYYY.-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:57:23.434225",
+ "modified": "2026-03-23 11:09:33.212143",
  "modified_by": "Administrator",
  "module": "Accounts Recievable",
  "name": "Accounts Receivable Ticket",

@@ -41,6 +41,9 @@ frappe.ui.form.on('Issue', {
             frm.set_value('sub_ticket', '');
             frm._sub_ticket_field_controls = null;
             frm._sub_ticket_dirty = false;
+            
+            // Clear the old form from DOM
+            render_sub_ticket_form(frm);
         }
     }
 });
@@ -48,13 +51,12 @@ frappe.ui.form.on('Issue', {
 function render_sub_ticket_form(frm) {
     const wrapper = frm.fields_dict['custom_sub_ticket_form'].$wrapper;
 
-    // Clear wrapper and embedded-form
+    // Clear wrapper and find the embedded form that was moved outside
     wrapper.empty();
     const parent_section = wrapper.closest('.form-section');
     if (parent_section.length) {
-        parent_section.find('.embedded-form').remove();
-        // Unhide section-body in case form is being cleared
-        // parent_section.find('.section-body').show();
+        // Remove embedded form that's a sibling of parent_section (moved there previously)
+        parent_section.nextAll('.embedded-form').remove();
     }
 
     if (!frm.doc.sub_ticket || !frm.doc.sub_ticket_type) {
@@ -74,9 +76,8 @@ function render_sub_ticket_form(frm) {
             const parent_section = wrapper.closest('.form-section');
             if (parent_body.length && parent_section.length) {
                 form_container.detach();
-                parent_body.after(form_container);
-                parent_body.hide();
-            }
+                parent_section.after(form_container);
+                parent_section.hide();                parent_section.addClass('embedded-form-parent');            }
 
             const field_controls = {};
             const state = {
@@ -87,12 +88,17 @@ function render_sub_ticket_form(frm) {
             };
 
             meta.fields.forEach(function(df) {
-                if (df.hidden) return;
+                if (df.fieldtype === 'Tab Break') {
+                    handle_tab_break(df, ticket_doc, form_container, state);
+                    return;
+                }
 
                 if (df.fieldtype === 'Section Break') {
                     handle_section_break(df, ticket_doc, form_container, state);
                     return;
                 }
+
+                if (df.hidden) return;
 
                 if (df.fieldtype === 'Column Break') {
                     handle_column_break(state);
@@ -250,10 +256,59 @@ function save_field_values_to_doc(field_controls, ticket_doc) {
     }
 }
 
+function handle_tab_break(df, ticket_doc, form_container, state) {
+    // Treat Tab Breaks as major sections
+    state.skip_current_section = false;
+
+    // Check if tab is hidden
+    if (df.hidden) {
+        debug_log('Tab is hidden:', df.label || 'unlabeled');
+        state.skip_current_section = true;
+        return state;
+    }
+
+    // Check if this tab should be hidden via depends_on
+    if (df.depends_on) {
+        debug_log('Evaluating tab depends_on:', df.label || 'unlabeled', ':', df.depends_on);
+        const condition_met = evaluate_depends_on(df.depends_on, ticket_doc);
+        debug_log('Tab visible:', condition_met);
+        
+        if (!condition_met) {
+            state.skip_current_section = true;
+            return state;
+        }
+    }
+
+    // Hide previous section if it has no actual field controls (only structural divs)
+    if (state.current_section) {
+        const has_fields = state.current_section.find('.frappe-control').length > 0;
+        if (!has_fields) {
+            state.current_section.hide();
+        }
+    }
+
+    // Create section for the tab
+    state.current_section = $('<div class="form-section"></div>').appendTo(form_container);
+    if (df.label) {
+        state.current_section.append(`<div class="section-head">${df.label}</div>`);
+    }
+    state.current_row = $('<div class="section-body"></div>').appendTo(state.current_section);
+    state.current_column = $('<div class="form-column col-sm-6"></div>').appendTo(state.current_row);
+    
+    return state;
+}
+
 function handle_section_break(df, ticket_doc, form_container, state) {
     state.skip_current_section = false;
 
-    // Check if this section should be hidden
+    // Check if section is hidden
+    if (df.hidden) {
+        debug_log('Section is hidden:', df.label || 'unlabeled');
+        state.skip_current_section = true;
+        return state;
+    }
+
+    // Check if this section should be hidden via depends_on
     if (df.depends_on) {
         debug_log('Evaluating section depends_on:', df.label || 'unlabeled', ':', df.depends_on);
         const condition_met = evaluate_depends_on(df.depends_on, ticket_doc);

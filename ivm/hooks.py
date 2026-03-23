@@ -26,11 +26,16 @@ app_license = "mit"
 
 fixtures = [
     {"doctype": "Issue Type"},
-	{"doctype": "Support Ticket Type"}
+	{"doctype": "Support Ticket Type"},
+    {"doctype": "Warehouse Request Ticket Type"}
 ]
 
 # include js, css files in header of desk.html
-app_include_css = "/assets/ivm/css/chatbox_widget.css"
+app_include_css = [
+    "/assets/ivm/css/chatbox_widget.css",
+    "/assets/ivm/css/embedded_form.css"
+]
+
 app_include_js = "/assets/ivm/js/chatbox_widget.js"
 
 # include js, css files in header of web template
