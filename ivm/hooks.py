@@ -36,7 +36,11 @@ app_include_css = [
     "/assets/ivm/css/embedded_form.css"
 ]
 
-app_include_js = "/assets/ivm/js/chatbox_widget.js"
+app_include_js = [
+    "/assets/ivm/js/utils.js",
+    "/assets/ivm/js/embedded_form.js",
+    "/assets/ivm/js/chatbox_widget.js"
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/ivm/css/ivm.css"
