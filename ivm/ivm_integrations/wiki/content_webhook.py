@@ -31,7 +31,7 @@ def on_wiki_document_update(doc: Any, method: str | None = None) -> None:
 
 
 def send_wiki_content_webhook(payload: dict[str, Any]) -> None:
-	webhook_url = "http://127.0.0.1"
+	webhook_url = "https://howiebot-api.ivminc.com/wiki"
 	if not webhook_url:
 		return
 
