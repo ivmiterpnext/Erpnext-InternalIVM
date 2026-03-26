@@ -1,25 +1,62 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "prompt",
  "creation": "2026-02-27 11:57:23.434225",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_deub"
+  "receivable_section",
+  "invoice_date",
+  "balance_due",
+  "payment_scheduled_date",
+  "amount_paid",
+  "date_paid",
+  "column_break_sybe"
  ],
  "fields": [
   {
-   "fieldname": "section_break_deub",
-   "fieldtype": "Section Break"
+   "fieldname": "receivable_section",
+   "fieldtype": "Section Break",
+   "label": "Receivable"
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date"
+  },
+  {
+   "fieldname": "balance_due",
+   "fieldtype": "Data",
+   "label": "Balance Due"
+  },
+  {
+   "fieldname": "payment_scheduled_date",
+   "fieldtype": "Date",
+   "label": "Payment Scheduled Date"
+  },
+  {
+   "fieldname": "amount_paid",
+   "fieldtype": "Data",
+   "label": "Amount Paid"
+  },
+  {
+   "fieldname": "date_paid",
+   "fieldtype": "Date",
+   "label": "Date Paid"
+  },
+  {
+   "fieldname": "column_break_sybe",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-27 11:57:23.434225",
+ "modified": "2026-03-20 07:39:54.781579",
  "modified_by": "Administrator",
  "module": "Accounts Recievable",
  "name": "Accounts Receivable Ticket",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
