@@ -1,55 +1,46 @@
+import json
 import frappe
 
-# Map issue type to ticket doctype
-TICKET_DOCTYPES = {
-    'Support': 'Support Ticket',
-    'Bug': 'Bug Report',
-    'Sales': 'Sales Inquiry'
-}
 
+def get_ticket_doctype(issue_type):
+    """Generate ticket doctype name from issue type"""
+    return f"{issue_type} Ticket"
 
 def create_linked_ticket_on_insert(doc):
-    """Auto-create linked ticket when Issue is created"""
+    """Automatically create linked sub-ticket when Issue is created"""
 
-    if doc.issue_type and doc.issue_type in TICKET_DOCTYPES:
-        if not doc.sub_ticket:
-            ticket_name = create_linked_ticket(doc.name, doc.issue_type)
-            ticket_doctype = TICKET_DOCTYPES[doc.issue_type]
+    if doc.issue_type and not doc.sub_ticket:
+        ticket_doctype = get_ticket_doctype(doc.issue_type)
+        ticket_name = create_linked_ticket(doc.name, doc.issue_type)
 
-            # Update in memory AND database using dynamic link fields
-            doc.set('sub_ticket_type', ticket_doctype)
-            doc.set('sub_ticket', ticket_name)
+        # Update in memory and database using dynamic link fields
+        doc.set('sub_ticket_type', ticket_doctype)
+        doc.set('sub_ticket', ticket_name)
 
-            frappe.db.set_value('Issue', doc.name, {
-                'sub_ticket_type': ticket_doctype,
-                'sub_ticket': ticket_name
-            }, update_modified=False)
-            frappe.db.commit()
-
+        frappe.db.set_value('Issue', doc.name, {
+            'sub_ticket_type': ticket_doctype,
+            'sub_ticket': ticket_name
+        }, update_modified=False)
+        frappe.db.commit()
 
 @frappe.whitelist()
 def create_linked_ticket(issue_name, issue_type):
-    """Create a linked ticket document based on issue type
-
-    Args:
-        issue_name: Name of the Issue document
-        issue_type: Type of ticket to create (Support, Bug, Sales)
+    """
+    Create a linked sub-ticket document based on issue type
 
     Returns:
-        str: Name of the created or existing ticket
+        str: Name of the created or existing sub-ticket
     """
-    ticket_doctype = TICKET_DOCTYPES.get(issue_type)
-    if not ticket_doctype:
-        frappe.throw(f"Invalid issue type: {issue_type}")
-
+    ticket_doctype = get_ticket_doctype(issue_type)
     issue = frappe.get_doc('Issue', issue_name)
 
     # Return existing ticket if already linked
     if issue.sub_ticket and issue.sub_ticket_type == ticket_doctype:
         return issue.sub_ticket
 
-    # Update the issue's sub_ticket_type field
-    issue.sub_ticket_type = ticket_doctype
+    # Validate that the ticket doctype exists
+    if not frappe.db.exists('DocType', ticket_doctype):
+        frappe.throw(f"Ticket DocType '{ticket_doctype}' does not exist")
 
     # Create new linked ticket (name will be set by autoname() method)
     ticket = frappe.get_doc({
@@ -63,29 +54,20 @@ def create_linked_ticket(issue_name, issue_type):
     issue.db_set('sub_ticket', ticket.name, update_modified=False)
     frappe.db.commit()
 
-    frappe.logger().info(f"Created {ticket_doctype} {ticket.name} for Issue {issue_name}")
+    frappe.logger().info(f"Created {ticket_doctype} '{ticket.name}' for Issue '{issue_name}'")
 
     return ticket.name
 
-
 @frappe.whitelist()
 def save_sub_ticket(ticket_doctype, ticket_name, field_values):
-    """Save sub ticket field values for any ticket type
-
-    Args:
-        ticket_doctype: The ticket doctype (Support Ticket, Bug Report, Sales Inquiry)
-        ticket_name: Name of the ticket document
-        field_values: Dict of field values to update (or JSON string)
     """
-    # Parse field_values if it's a string (from JSON)
-    if isinstance(field_values, str):
-        import json
-        field_values = json.loads(field_values)
+    Save sub ticket field values for any ticket type
 
-    # Validate doctype is a valid ticket type
-    valid_doctypes = list(TICKET_DOCTYPES.values())
-    if ticket_doctype not in valid_doctypes:
-        frappe.throw(f"Invalid ticket doctype: {ticket_doctype}")
+    Returns:
+        dict: Updated sub-ticket document as a dictionary
+    """
+    if isinstance(field_values, str):
+        field_values = json.loads(field_values)
 
     ticket = frappe.get_doc(ticket_doctype, ticket_name)
 
@@ -93,13 +75,6 @@ def save_sub_ticket(ticket_doctype, ticket_name, field_values):
         ticket.set(field, value)
 
     ticket.save(ignore_permissions=True)
-    frappe.db.commit()
-
-    frappe.logger().info(f"Saved {ticket_doctype} {ticket_name} with values: {field_values}")
+    frappe.logger().info(f"Saved {ticket_doctype} '{ticket_name}' with {len(field_values)} field(s)")
 
     return ticket.as_dict()
-
-
-def get_ticket_doctype(issue_type):
-    """Get the ticket doctype name for a given issue type"""
-    return TICKET_DOCTYPES.get(issue_type)

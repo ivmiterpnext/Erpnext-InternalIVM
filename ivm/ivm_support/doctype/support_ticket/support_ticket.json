@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "autoname": "naming_series:",
  "creation": "2026-02-27 11:55:13.572312",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -7,7 +8,9 @@
   "support_ticket_details_section",
   "ticket_type",
   "column_break_rgya",
+  "hidden_section",
   "issue",
+  "naming_series",
   "onboarding_details_section",
   "employee_first_name",
   "employee_email",
@@ -78,7 +81,8 @@
    "fieldname": "ticket_type",
    "fieldtype": "Link",
    "label": "Ticket Type",
-   "options": "Support Ticket Type"
+   "options": "Support Ticket Type",
+   "read_only_depends_on": "eval:!doc.__islocal && doc.modified != doc.creation;"
   },
   {
    "fieldname": "column_break_rgya",
@@ -87,18 +91,32 @@
   {
    "fieldname": "issue",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Issue",
    "options": "Issue"
+  },
+  {
+   "default": "IT-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "IT-.YYYY.-"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "hidden_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-20 05:43:45.893520",
+ "modified": "2026-03-25 06:16:02.904522",
  "modified_by": "Administrator",
  "module": "IVM Support",
  "name": "Support Ticket",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

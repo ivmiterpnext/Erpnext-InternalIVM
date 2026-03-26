@@ -1,28 +1,20 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2026-02-27 11:58:49.648474",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "subject",
-  "customer",
+  "column_break_gvrr",
+  "location",
   "column_break_odko",
   "status",
-  "location"
+  "hidden_section",
+  "issue",
+  "naming_series"
  ],
  "fields": [
-  {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "options": "Customer"
-  },
-  {
-   "fieldname": "subject",
-   "fieldtype": "Data",
-   "label": "Subject"
-  },
   {
    "fieldname": "column_break_odko",
    "fieldtype": "Column Break"
@@ -38,15 +30,39 @@
    "fieldtype": "Link",
    "label": "Location",
    "options": "Location Link"
+  },
+  {
+   "fieldname": "issue",
+   "fieldtype": "Link",
+   "label": "Issue",
+   "options": "Issue"
+  },
+  {
+   "fieldname": "column_break_gvrr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hidden_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden"
+  },
+  {
+   "default": "VM-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "VM-.YYYY.-"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 07:00:04.580975",
+ "modified": "2026-03-23 11:08:16.426929",
  "modified_by": "Administrator",
  "module": "Vending Management",
  "name": "Vending Management Ticket",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
