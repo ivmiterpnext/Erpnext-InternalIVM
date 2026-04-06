@@ -1,3 +1,4 @@
+import io
 from typing import Any
 
 import frappe
@@ -32,10 +33,8 @@ def on_wiki_document_update(doc: Any, method: str | None = None) -> None:
 
 def send_wiki_content_webhook(payload: dict[str, Any]) -> None:
 	webhook_url = "https://howiebot-api.ivminc.com/wiki"
-	if not webhook_url:
-		return
 
-	headers = {"Content-Type": "application/json"}
+	headers: dict[str, str] = {}
 	token = frappe.conf.get("wiki_content_webhook_token")
 	if token:
 		token_header = frappe.conf.get("wiki_content_webhook_token_header") or DEFAULT_TOKEN_HEADER
@@ -43,10 +42,13 @@ def send_wiki_content_webhook(payload: dict[str, Any]) -> None:
 
 	timeout_seconds = cint_or_default(frappe.conf.get("wiki_content_webhook_timeout"), DEFAULT_TIMEOUT_SECONDS)
 
+	content_bytes = (payload.get("content") or "").encode("utf-8")
+	file_obj = io.BytesIO(content_bytes)
+
 	try:
 		response = requests.post(
 			str(webhook_url),
-			json=payload,
+			files={"file": ("content.md", file_obj, "text/markdown")},
 			headers=headers,
 			timeout=timeout_seconds,
 		)
