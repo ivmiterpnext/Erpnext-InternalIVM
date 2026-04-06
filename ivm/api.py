@@ -245,6 +245,7 @@ def on_session_creation():
         workspaces = frappe.get_list(
             "Workspace", fields=["name"], ignore_permissions=True)
         for workspace in workspaces:
+          try:
             workspace_name = workspace.get("name")
 
             if workspace_name in modules:
@@ -256,15 +257,20 @@ def on_session_creation():
                 data.is_hidden = 1  # Set is_hidden to 1 for non-matching modules
             data.save(ignore_permissions=True)
             frappe.db.commit()
+          except Exception:
+            frappe.db.rollback()
     # This part of code is for the user who is having admin role-------------------------
     else:
         workspaces = frappe.get_list("Workspace", fields=["name"])
         for workspace in workspaces:
+          try:
             workspace_name = workspace.get("name")
             data = frappe.get_doc("Workspace", workspace_name)
             data.is_hidden = 0  # Set is_hidden to 1 for non-matching modules
             data.save()
             frappe.db.commit()
+          except Exception:
+            frappe.db.rollback()
 
 
 @frappe.whitelist()

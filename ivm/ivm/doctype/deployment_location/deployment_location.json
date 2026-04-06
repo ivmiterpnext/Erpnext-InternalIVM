@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "format:DLN-{######}",
- "creation": "2023-09-27 02:15:37.863710",
+ "creation": "2023-10-03 12:40:28.086539",
  "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -21,7 +21,12 @@
   "section_break_oiiax",
   "created_on",
   "column_break_vuqbf",
-  "last_modified_by"
+  "last_modified_by",
+  "lft",
+  "rgt",
+  "is_group",
+  "old_parent",
+  "parent_deployment_location"
  ],
  "fields": [
   {
@@ -31,6 +36,7 @@
    "options": "Opportunity"
   },
   {
+   "fetch_from": "opportunity.customer_name",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
@@ -92,15 +98,50 @@
    "fieldname": "shipping_address",
    "fieldtype": "Long Text",
    "label": "Shipping Address"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "label": "Old Parent",
+   "options": "Deployment Location"
+  },
+  {
+   "fieldname": "parent_deployment_location",
+   "fieldtype": "Link",
+   "label": "Parent Deployment Location",
+   "options": "Deployment Location"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-09-28 14:43:38.388044",
+ "modified": "2023-12-09 14:01:51.689886",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Deployment Location",
  "naming_rule": "Expression",
+ "nsm_parent_field": "parent_deployment_location",
  "owner": "Administrator",
  "permissions": [
   {

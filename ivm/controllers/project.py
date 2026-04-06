@@ -6,6 +6,16 @@ import math
 
 
 class CustomProjectController(OriginalProjectController):
+	def update_percent_complete(self):
+		# Preserve the user-set status before calling the parent method,
+		# which unconditionally resets it to "Open" or "Completed".
+		original_status = self.status
+		super().update_percent_complete()
+		# Only allow auto-status for the base ERPNext statuses.
+		# If the user chose a custom status, restore it.
+		if original_status not in ("Open", "Completed", "Cancelled"):
+			self.status = original_status
+
 	def validate(self):
 		OriginalProjectController.validate(self)
 		self.update_provide_planogram_due_date()
