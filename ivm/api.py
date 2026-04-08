@@ -628,4 +628,298 @@ def createLeads(selectedContacts):
            create_salesloft_person(email=contact.get("email"), first_name=contact.get("first_name"), last_name= contact.get("last_name"), job_title=contact.get("title"), city= contact.get("city"), state=contact.get("state"), country=contact.get("country"), company='', website=contact.get("website_url"), phone='', phone_ext='', mobile_no=contact.get("sanitized_phone"), lead_owner=frappe.session.user)
 
 
+@frappe.whitelist()
+def get_item_with_warehouse(item_code, parent_warehouse='Warehouse - I'):
+    """
+    Get item details and find all warehouses with stock, ordered by available quantity.
 
+    Args:
+        item_code: Item code to search for
+        parent_warehouse: Parent warehouse to search under (default: Warehouse - I)
+
+    Returns:
+        Dict with item details and list of warehouses with stock
+    """
+    item = frappe.get_doc("Item", item_code)
+
+    if not item:
+        return None
+
+    def get_all_descendant_warehouses(parent):
+        warehouses = []
+        children = frappe.get_all("Warehouse", 
+            filters={
+                "parent_warehouse": parent,
+                "disabled": 0
+            },
+            pluck="name"
+        )
+
+        for child in children:
+            is_group = frappe.db.get_value("Warehouse", child, "is_group")
+
+            if is_group:
+                warehouses.extend(get_all_descendant_warehouses(child))
+            else:
+                warehouses.append(child)
+
+        return warehouses
+
+    all_warehouses = get_all_descendant_warehouses(parent_warehouse)
+
+    warehouses_with_stock = []
+    for warehouse in all_warehouses:
+        stock_qty = frappe.db.get_value("Bin", 
+            {"item_code": item_code, "warehouse": warehouse}, 
+            "actual_qty"
+        )
+        if stock_qty and stock_qty > 0:
+            warehouses_with_stock.append({
+                "warehouse": warehouse,
+                "available_qty": stock_qty
+            })
+
+    warehouses_with_stock.sort(key=lambda x: x["available_qty"], reverse=True)
+
+    return {
+        "item_code": item.item_code,
+        "item_name": item.item_name,
+        "stock_uom": item.stock_uom,
+        "warehouses": warehouses_with_stock
+    }
+
+
+@frappe.whitelist()
+def create_stock_entry_from_scan(warehouse_request, items, target_warehouse):
+    """
+    Create a Material Transfer Stock Entry from scanned items.
+    Each item has its own source warehouse already specified.
+
+    Args:
+        warehouse_request: Name of the Warehouse Request
+        items: List of scanned items with item_code, qty, uom, source_warehouse
+        target_warehouse: Target warehouse (WIP)
+
+    Returns:
+        Name of the created Stock Entry
+    """
+    import json
+
+    if isinstance(items, str):
+        items = json.loads(items)
+
+    stock_entry = frappe.new_doc("Stock Entry")
+    stock_entry.stock_entry_type = "Material Transfer"
+    stock_entry.set_posting_time = 0
+
+    stock_entry.remarks = f"Material Transfer for Warehouse Request: {warehouse_request}"
+
+    if hasattr(stock_entry, 'warehouse_request'):
+        stock_entry.warehouse_request = warehouse_request
+
+    for item in items:
+        stock_entry.append("items", {
+            "item_code": item.get("item_code"),
+            "qty": item.get("qty", 1),
+            "uom": item.get("uom"),
+            "s_warehouse": item.get("source_warehouse"),
+            "t_warehouse": target_warehouse,
+            "transfer_qty": item.get("qty", 1)
+        })
+
+    stock_entry.insert()
+    stock_entry.submit()
+
+    frappe.msgprint(f"Stock Entry {stock_entry.name} created and submitted successfully")
+
+    return stock_entry.name
+
+
+@frappe.whitelist()
+def create_delivery_note_from_warehouse_request(warehouse_request):
+    """
+    Create a Delivery Note from items in Build In Progress warehouse for a Warehouse Request.
+    Fetches items from related Stock Entries.
+
+    Args:
+        warehouse_request: Name of the Warehouse Request
+
+    Returns:
+        Name of the created Delivery Note
+    """
+    # Find stock entries related to this warehouse request
+    stock_entries = frappe.get_all("Stock Entry",
+        filters={
+            "docstatus": 1,  # Submitted only
+            "stock_entry_type": "Material Transfer"
+        },
+        fields=["name"]
+    )
+
+    # Filter by warehouse request in remarks
+    related_entries = []
+    for entry in stock_entries:
+        doc = frappe.get_doc("Stock Entry", entry.name)
+        if warehouse_request in (doc.remarks or ""):
+            related_entries.append(doc)
+
+    if not related_entries:
+        frappe.msgprint(f"No Stock Entries found for Warehouse Request {warehouse_request}")
+        return None
+
+    # Collect all items from Build In Progress warehouse across related stock entries
+    items_dict = {}
+    for stock_entry in related_entries:
+        for item in stock_entry.items:
+            if item.t_warehouse == "Build In Progress - I":
+                key = item.item_code
+                
+                if key in items_dict:
+                    items_dict[key]["qty"] += item.qty
+                else:
+                    items_dict[key] = {
+                        "item_code": item.item_code,
+                        "qty": item.qty,
+                        "uom": item.uom,
+                        "rate": item.basic_rate or 0
+                    }
+
+    if not items_dict:
+        frappe.msgprint("No items found in Build In Progress warehouse")
+        return None
+
+    delivery_note = frappe.new_doc("Delivery Note")
+    delivery_note.set_warehouse = "Build In Progress - I"
+
+    if hasattr(delivery_note, 'warehouse_request'):
+        delivery_note.warehouse_request = warehouse_request
+
+    for item_data in items_dict.values():
+        delivery_note.append("items", {
+            "item_code": item_data["item_code"],
+            "qty": item_data["qty"],
+            "uom": item_data["uom"],
+            "warehouse": "Build In Progress - I",
+            "rate": item_data["rate"]
+        })
+
+    delivery_note.insert()
+    frappe.msgprint(f"Delivery Note {delivery_note.name} created successfully")
+
+    return delivery_note.name
+
+
+@frappe.whitelist()
+def get_items_from_warehouse_request(warehouse_request):
+	"""
+	Get all items from Stock Entries related to a Warehouse Request.
+	Used by Delivery Note to fetch items via "Get Items From > Warehouse Request"
+	
+	Args:
+		warehouse_request: Name of the Warehouse Request
+	
+	Returns:
+		List of items with quantities from Build In Progress warehouse
+	"""
+	# Find stock entries related to this warehouse request
+	stock_entries = frappe.get_all("Stock Entry",
+		filters={
+			"docstatus": 1,  # Submitted only
+			"stock_entry_type": "Material Transfer"
+		},
+		fields=["name"]
+	)
+	
+	# Filter by warehouse request in remarks
+	related_entries = []
+	for entry in stock_entries:
+		doc = frappe.get_doc("Stock Entry", entry.name)
+		if warehouse_request in (doc.remarks or ""):
+			related_entries.append(doc)
+	
+	if not related_entries:
+		return []
+	
+	# Collect all items from Build In Progress warehouse
+	items_dict = {}
+	for stock_entry in related_entries:
+		for item in stock_entry.items:
+			if item.t_warehouse == "Build In Progress - I":
+				key = item.item_code
+				if key in items_dict:
+					items_dict[key]["qty"] += item.qty
+				else:
+					# Fetch complete item details for Delivery Note
+					item_doc = frappe.get_doc("Item", item.item_code)
+					items_dict[key] = {
+						"item_code": item.item_code,
+						"item_name": item_doc.item_name,
+						"description": item_doc.description or item_doc.item_name,
+						"qty": item.qty,
+						"uom": item.uom,
+						"stock_uom": item_doc.stock_uom,
+						"conversion_factor": 1,
+						"warehouse": "Build In Progress - I",
+						"rate": item.basic_rate or 0,
+						"price_list_rate": item.basic_rate or 0
+					}
+	
+	return list(items_dict.values())
+
+
+@frappe.whitelist()
+def has_stock_entries_for_warehouse_request(warehouse_request):
+	"""
+	Check if stock entries already exist for this warehouse request.
+	Used to prevent duplicate picking operations.
+	
+	Args:
+		warehouse_request: Name of the Warehouse Request
+	
+	Returns:
+		Boolean indicating if stock entries exist
+	"""
+	# Find stock entries related to this warehouse request
+	stock_entries = frappe.get_all("Stock Entry",
+		filters={
+			"docstatus": 1,  # Submitted only
+			"stock_entry_type": "Material Transfer"
+		},
+		fields=["name"]
+	)
+	
+	# Check if any entry has this warehouse request in remarks
+	for entry in stock_entries:
+		doc = frappe.get_doc("Stock Entry", entry.name)
+		if warehouse_request in (doc.remarks or ""):
+			return True
+	
+	return False
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def warehouse_request_query(doctype, txt, searchfield, start, page_len, filters):
+	"""
+	Custom query for Warehouse Request link field.
+	Shows both ID and subject in the dropdown.
+	"""
+	return frappe.db.sql("""
+		SELECT 
+			name,
+			CASE 
+				WHEN subject IS NOT NULL AND subject != '' 
+				THEN CONCAT(name, ' - ', subject)
+				ELSE name
+			END as description
+		FROM `tabWarehouse Request`
+		WHERE 
+			(name LIKE %(txt)s OR subject LIKE %(txt)s)
+			AND docstatus < 2
+		ORDER BY modified DESC
+		LIMIT %(start)s, %(page_len)s
+	""", {
+		'txt': f'%{txt}%',
+		'start': start,
+		'page_len': page_len
+	})
