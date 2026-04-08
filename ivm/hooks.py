@@ -1,21 +1,29 @@
-from . import __version__ as app_version
-
 app_name = "ivm"
 app_title = "IVM"
-app_publisher = "korecent"
-app_description = "IVM customizations"
-app_email = "hello@korecent.com"
-app_license = "MIT"
+app_publisher = "IVM"
+app_description = "IVM Integration App"
+app_email = "itsupport@ivminc.com"
+app_license = "mit"
 
 # Includes in <head>
 # ------------------
 fixtures = [
-    "Workspace", "Dashboard", "Issue Type", "Campaign", "Sales Stage", "Case Reason", "Lead Source", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
-    "Opportunity Type", "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role"
+    "Workspace", "Dashboard", "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
+    "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role"
 ]
 # include js, css files in header of desk.html
-# app_include_css = "/assets/ivm/css/ivm.css"
-app_include_js = ["/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js"]
+app_include_css = [
+    "/assets/ivm/css/chatbox_widget.css",
+    "/assets/ivm/css/embedded_form.css"
+]
+
+app_include_js = [
+	"/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js",
+
+    "/assets/ivm/js/utils.js",
+    "/assets/ivm/js/embedded_form.js",
+    "/assets/ivm/js/chatbox_widget.js"
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/ivm/css/ivm.css"
@@ -34,8 +42,7 @@ app_include_js = ["/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js"]
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {
-    "Lead": "public/js/doctype/Lead.js",
-    "Opportunity": "public/js/doctype/Opportunity.js",
+    # "Opportunity": "public/js/doctype/Opportunity.js",
     "Customer": "public/js/doctype/Customer.js",
     "Deployment Location": "public/js/doctype/Deployment_location.js",
     "User": "public/js/doctype/user.js",
@@ -45,8 +52,8 @@ doctype_js = {
 }
 
 doctype_list_js = {
-    "Lead": "public/js/listview/Lead_listview.js",
-    "Opportunity": "public/js/listview/Opportunity_listview.js",
+    # "Lead": "public/js/listview/Lead_listview.js",
+    # "Opportunity": "public/js/listview/Opportunity_listview.js",
     "Customer": "public/js/listview/Customer_listview.js",
     "User": "public/js/listview/user_listview.js",
     "Calendar Events": "public/js/calendar.js",
@@ -135,7 +142,15 @@ doc_events = {
     },
     "Issue": {
         "on_update": "ivm.api.fetching_dates"
-    }
+    },
+###################### Good stuff v
+	"CRM Deal": {
+		"on_update": "ivm.ivm_integrations.hubspot.project.create_project_on_won",
+	},
+
+	"Wiki Document": {
+		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
+	},
 }
 
 # Scheduled Tasks
