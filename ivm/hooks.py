@@ -48,7 +48,8 @@ doctype_js = {
     "User": "public/js/doctype/user.js",
     "Task": "public/js/doctype/Task.js",
     "Project": "public/js/doctype/Project.js",
-    "Issue": "public/js/doctype/Issue.js"
+    "Issue": "public/js/doctype/Issue.js",
+    "Delivery Note": "public/js/doctype/Delivery_Note.js"
 }
 
 doctype_list_js = {
