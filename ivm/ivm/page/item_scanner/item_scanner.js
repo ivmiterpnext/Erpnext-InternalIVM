@@ -211,37 +211,21 @@ class ItemScanner {
 	}
 
 	lookup_item(barcode) {
+		// Use custom API method to bypass Item Barcode child table permission issues
 		frappe.call({
-			method: 'frappe.client.get_value',
+			method: 'ivm.api.lookup_item_by_barcode',
 			args: {
-				doctype: 'Item Barcode',
-				filters: { barcode: barcode },
-				fieldname: 'parent'
+				barcode: barcode
 			},
 			callback: (r) => {
-				if (r.message && r.message.parent) {
-					this.fetch_item_details(r.message.parent);
+				if (r.message) {
+					this.fetch_item_details(r.message);
 				} else {
-					// Fallback: check if it's an Item Code directly
-					frappe.call({
-						method: 'frappe.client.get_value',
-						args: {
-							doctype: 'Item',
-							filters: { item_code: barcode },
-							fieldname: 'item_code'
-						},
-						callback: (r2) => {
-							if (r2.message && r2.message.item_code) {
-								this.fetch_item_details(r2.message.item_code);
-							} else {
-								frappe.show_alert({
-									message: `Item "${barcode}" not found`,
-									indicator: 'red'
-								}, 5);
-								this.play_error_sound();
-							}
-						}
-					});
+					frappe.show_alert({
+						message: `Item "${barcode}" not found`,
+						indicator: 'red'
+					}, 5);
+					this.play_error_sound();
 				}
 			}
 		});
