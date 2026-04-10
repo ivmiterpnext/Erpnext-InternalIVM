@@ -3,8 +3,9 @@
 
 frappe.ui.form.on('Warehouse Request', {
 	refresh: function(frm) {
-		// Add button to open item scanner page only if request_reason contains "Build"
-		if (!frm.is_new() && frm.doc.request_reason && frm.doc.request_reason.includes('Build')) {
+		// Add button to open item scanner page for Build or Shipping requests
+		if (!frm.is_new() && frm.doc.request_reason && 
+		    (frm.doc.request_reason.includes('Build') || frm.doc.request_reason == 'Shipping Request')) {
 			// Check if stock entries already exist for this WR
 			frappe.call({
 				method: 'ivm.api.has_stock_entries_for_warehouse_request',
