@@ -49,6 +49,17 @@ docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" exec -T frappe bash -lc '
     bench use ivm.localhost
     bench set-config developer_mode 1
 
+    if [ -n "${HUBSPOT_API_KEY:-}" ]; then
+        bench set-config hubspot_api_key "${HUBSPOT_API_KEY}"
+    else
+        echo "No Hubspot API Key"
+    fi
+    if [ -n "${HUBSPOT_CLIENT_SECRET:-}" ]; then
+        bench set-config hubspot_client_secret "${HUBSPOT_CLIENT_SECRET}"
+    else
+        echo "No Hubspot Client Secret"
+    fi
+
     if [ ! -d "apps/crm" ]; then
         echo "Installing crm..."
         bench get-app crm --branch v1.59.0

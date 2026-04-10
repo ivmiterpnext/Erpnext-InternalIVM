@@ -9,7 +9,7 @@ app_license = "mit"
 # ------------------
 fixtures = [
     "Workspace", "Dashboard", "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
-    "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role"
+    "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role", "Custom Field"
 ]
 # include js, css files in header of desk.html
 app_include_css = [
@@ -145,10 +145,6 @@ doc_events = {
         "on_update": "ivm.api.fetching_dates"
     },
 ###################### Good stuff v
-	"CRM Deal": {
-		"on_update": "ivm.ivm_integrations.hubspot.project.create_project_on_won",
-	},
-
 	"Wiki Document": {
 		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
 	},

@@ -48,6 +48,8 @@ services:
     command: sleep infinity
     environment:
       - SHELL=/bin/bash
+      - HUBSPOT_API_KEY=${HUBSPOT_API_KEY}
+      - HUBSPOT_CLIENT_SECRET=${HUBSPOT_CLIENT_SECRET}
     volumes:
       - frappe-bench:/workspace/frappe-bench    # persistent bench state (named volume)
       - ..:/workspace/ivm:cached                # live app source from host repo

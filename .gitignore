@@ -7,3 +7,5 @@ ivm/docs/current
 node_modules/
 **/__pycache__/
 ivm/www/
+.opencode/
+.env
