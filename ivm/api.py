@@ -1,5 +1,4 @@
 import frappe
-import requests
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.data import getdate, add_days
@@ -7,113 +6,6 @@ import math
 import json
 import time
 from frappe.utils.jinja import render_template
-
-# function to get user id from salesloft
-
-
-def get_user_id(lead_owener):
-    salesloft_doc = frappe.get_doc("SalesLoft Settings")
-    access_token = salesloft_doc.salesloft_api_token
-
-    if lead_owener:
-        url = "https://api.salesloft.com/v2/users"
-        payload = {}
-        headers = {
-            'Accept': 'application/json',
-            'Authorization': f'Bearer {access_token}'
-        }
-
-        response = requests.request("GET", url, headers=headers, data=payload)
-        response = response.json()
-        data = response["data"]
-        for i in data:
-            if i['email'].strip() == lead_owener.strip():
-                user_id = i["id"]
-                return user_id
-        return False
-
-
-# Function to get the SalesLoft API token from the "SalesLoft Settings" doctype
-
-
-def get_salesloft_api_token():
-    api_token = frappe.get_value(
-        "SalesLoft Settings", None, "salesloft_api_token")
-
-    if not api_token:
-        frappe.throw("SalesLoft API Token not set in SalesLoft Settings")
-
-    return api_token
-
-# Function to make API calls to SalesLoft
-
-
-def make_salesloft_api_call(url, method="GET", payload=None):
-    SALESLOFT_API_TOKEN = get_salesloft_api_token()
-
-    if not SALESLOFT_API_TOKEN:
-        frappe.throw("SalesLoft API Token not set in SalesLoft Settings")
-
-    headers = {"Authorization": f"Bearer {SALESLOFT_API_TOKEN}"}
-    response = requests.request(method, url, json=payload, headers=headers)
-
-    return response
-
-# Function to check if the SalesLoft user already exists
-
-
-@frappe.whitelist(allow_guest=True)
-def check_salesloft_user(email):
-    url = "https://api.salesloft.com/v2/people"
-    salesloft_doc = frappe.get_doc("SalesLoft Settings")
-    guid = salesloft_doc.guid
-
-    payload = {"email_addresses": [email]}
-    response = make_salesloft_api_call(url, payload=payload)
-
-    for person in response.json().get("data", []):
-        if person.get("email_address") == email:
-            return person
-
-    return None
-
-# Function to create a new SalesLoft person
-
-
-@frappe.whitelist(allow_guest=True)
-def create_salesloft_person(email, first_name='', last_name='', job_title='', city='', state='', country='', company='', website='', phone='', phone_ext='', mobile_no='', lead_owner=""):
-
-    url = "https://api.salesloft.com/v2/people"
-    payload = {
-        "email_address": email,
-        "first_name": first_name,
-        'last_name': last_name,
-        'title': job_title,
-        'city': city,
-        'state': state,
-        'country': country,
-        'person_company_name': company,
-        'person_company_website': website,
-        'phone': phone,
-        'phone_extension': phone_ext,
-        'mobile_phone': mobile_no
-    }
-    print(payload)
-
-    if lead_owner and lead_owner != "Administrator":
-        user_id = get_user_id(lead_owner)
-        if user_id:
-            payload["owner_id"] = user_id
-            response = make_salesloft_api_call(
-                url, method="POST", payload=payload)
-
-            if response.status_code == 201:
-                created_person = response.json()
-                return created_person["data"]["id"]
-            else:
-                return None
-        return "noUserFound"
-    return None
 
 
 @frappe.whitelist()
@@ -154,10 +46,6 @@ def get_data(data):
             {"label": _("Warehouse Request"), "items": ["Warehouse Request"]},
             {"label": _("Related Cases"), "items": ["Issue"]}]}
 
-
-@frappe.whitelist()
-def getCheckboxStatus():
-    return frappe.get_doc("SalesLoft Settings").enable_salesloft_integration
 
 
 @frappe.whitelist()
@@ -560,74 +448,6 @@ def send_auto_reply(self, communication, email):
                     "Message-Id"),
                 unsubscribe_message=unsubscribe_message,
             )
-@frappe.whitelist()
-def fetch_contacts_from_apollo(page,searchKeyword):   
-   url = "https://api.apollo.io/v1/contacts/search"
-
-
-   data = {
-       "api_key": frappe.get_single('Apollo  Integration Settings').api_key,
-       "page": page,
-   }
-   if searchKeyword:
-       data = {
-       "api_key": frappe.get_single('Apollo  Integration Settings').api_key,
-       "q_keywords": searchKeyword,
-   }
-
-
-
-
-   headers = {
-       'Cache-Control': 'no-cache',
-       'Content-Type': 'application/json'
-   }
-
-
-   response = requests.request("POST", url, headers=headers, json=data)
-  
-   if response.status_code == 200:
-       apollo_data = response.json()
-      
-      
-       for contact in apollo_data.get("contacts", []):
-           contact['disabled'] = frappe.db.exists({"doctype": "Lead", "email_id":contact.get('email')})
-
-
-
-
-       return apollo_data
-   else:
-       return {
-           'error': 'Failed to fetch data from Apollo.io'
-       }
-
-
-@frappe.whitelist()
-def createLeads(selectedContacts):
-   contacts_data = json.loads(selectedContacts)
-
-
-   for contact in contacts_data:
-       lead = frappe.new_doc("Lead")
-       lead.first_name = contact.get("first_name")
-       lead.last_name = contact.get("last_name")
-       lead.email_id = contact.get("email")
-       lead.mobile_no = contact.get("sanitized_phone")
-       lead.title = contact.get("title")
-       lead.city = contact.get("city")
-       lead.state = contact.get("state")
-       lead.country = contact.get("country")
-       lead.website = contact.get("website_url")
-       lead.insert()
-       lead.save()
-      
-       salesloft_user = check_salesloft_user(contact.get("email"))
-      
-       if not salesloft_user:
-           create_salesloft_person(email=contact.get("email"), first_name=contact.get("first_name"), last_name= contact.get("last_name"), job_title=contact.get("title"), city= contact.get("city"), state=contact.get("state"), country=contact.get("country"), company='', website=contact.get("website_url"), phone='', phone_ext='', mobile_no=contact.get("sanitized_phone"), lead_owner=frappe.session.user)
-
-
 @frappe.whitelist()
 def get_item_with_warehouse(item_code, parent_warehouse='Warehouse - I'):
     """

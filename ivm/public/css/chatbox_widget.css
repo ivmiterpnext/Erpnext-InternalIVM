@@ -1,0 +1,334 @@
+/* HowieBot Chat Widget */
+
+#howiebot-widget {
+	font-family: var(--font-stack, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+	font-size: var(--text-base, 14px);
+}
+
+/* Smooth transitions for theme switching */
+#howiebot-widget,
+#howiebot-toggle,
+#howiebot-panel,
+#howiebot-header,
+#howiebot-input-area,
+#howiebot-input,
+#howiebot-send,
+.howiebot-msg,
+.howiebot-typing {
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Dark Mode Support - Syncs with Frappe's dark theme */
+[data-theme="dark"] #howiebot-toggle {
+	background: #1a2639;
+	color: #fff;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] #howiebot-toggle:hover {
+	background: #243447;
+}
+
+[data-theme="dark"] #howiebot-panel {
+	background: #fff;
+	border-color: #d1d8dd;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] #howiebot-header {
+	background: #fff;
+	color: #000;
+}
+
+[data-theme="dark"] #howiebot-close {
+	color: #000;
+}
+
+[data-theme="dark"] #howiebot-messages {
+	background: #fff;
+}
+
+[data-theme="dark"] .howiebot-msg.user {
+	background: var(--primary, #2490ef);
+	color: #fff;
+}
+
+[data-theme="dark"] .howiebot-msg.bot {
+	background: var(--control-bg, #f4f5f6);
+	color: var(--text-color, #333);
+}
+
+[data-theme="dark"] .howiebot-msg.error {
+	background: var(--red-100, #fff0f0);
+	color: var(--red-600, #e03636);
+}
+
+[data-theme="dark"] .howiebot-typing {
+	background: var(--control-bg, #f4f5f6);
+}
+
+[data-theme="dark"] .howiebot-typing span {
+	background: var(--text-muted, #8d99a6);
+}
+
+[data-theme="dark"] #howiebot-input-area {
+	background: #fff;
+	border-top-color: #d1d8dd;
+}
+
+[data-theme="dark"] #howiebot-input {
+	background: var(--control-bg, #f4f5f6);
+	color: var(--text-color, #333);
+	border-color: #d1d8dd;
+}
+
+[data-theme="dark"] #howiebot-input:focus {
+	border-color: var(--primary, #4da3ff);
+}
+
+[data-theme="dark"] #howiebot-input::placeholder {
+	color: var(--text-muted, #8d99a6);
+}
+
+[data-theme="dark"] #howiebot-send {
+	background: var(--primary, #2490ef);
+	color: #fff;
+}
+
+[data-theme="dark"] #howiebot-send:hover {
+	background: var(--primary-dark, #2490ef);
+}
+
+[data-theme="light"] #howiebot-toggle {
+	background: #000;
+}
+
+/* Floating toggle button */
+#howiebot-toggle {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	z-index: 1050;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	border: none;
+	color: #fff;
+	cursor: pointer;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.2s, transform 0.15s;
+}
+
+#howiebot-toggle:hover {
+	background: #333;
+	transform: scale(1.05);
+}
+
+#howiebot-toggle svg {
+	width: 24px;
+	height: 24px;
+	fill: currentColor;
+}
+
+/* Chat panel */
+#howiebot-panel {
+	position: fixed;
+	bottom: 88px;
+	right: 24px;
+	z-index: 1050;
+	width: 380px;
+	max-width: calc(100vw - 48px);
+	height: 500px;
+	max-height: calc(100vh - 120px);
+	background: var(--card-bg, #fff);
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 12px;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+	display: none;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+#howiebot-panel.open {
+	display: flex;
+}
+
+/* Header */
+#howiebot-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 16px;
+	background: #000;
+	color: #fff;
+	flex-shrink: 0;
+}
+
+#howiebot-header .howiebot-title {
+	font-weight: 600;
+	font-size: 15px;
+}
+
+#howiebot-close {
+	background: none;
+	border: none;
+	color: #fff;
+	cursor: pointer;
+	font-size: 20px;
+	line-height: 1;
+	padding: 0 4px;
+	opacity: 0.8;
+	transition: opacity 0.15s;
+}
+
+#howiebot-close:hover {
+	opacity: 1;
+}
+
+/* Messages area */
+#howiebot-messages {
+	flex: 1;
+	overflow-y: auto;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.howiebot-msg {
+	max-width: 85%;
+	padding: 10px 14px;
+	border-radius: 12px;
+	line-height: 1.45;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+}
+
+.howiebot-msg.user {
+	align-self: flex-end;
+	background: var(--primary, #2490ef);
+	color: #fff;
+	border-bottom-right-radius: 4px;
+}
+
+.howiebot-msg.bot {
+	align-self: flex-start;
+	background: var(--control-bg, #f4f5f6);
+	color: var(--text-color, #333);
+	border-bottom-left-radius: 4px;
+}
+
+.howiebot-msg.error {
+	align-self: flex-start;
+	background: var(--red-100, #fff0f0);
+	color: var(--red-600, #e03636);
+	border-bottom-left-radius: 4px;
+	font-size: 13px;
+}
+
+/* Typing indicator */
+.howiebot-typing {
+	align-self: flex-start;
+	padding: 10px 14px;
+	background: var(--control-bg, #f4f5f6);
+	border-radius: 12px;
+	border-bottom-left-radius: 4px;
+	display: flex;
+	gap: 4px;
+	align-items: center;
+}
+
+.howiebot-typing span {
+	display: inline-block;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--text-muted, #8d99a6);
+	animation: howiebot-bounce 1.2s ease-in-out infinite;
+}
+
+.howiebot-typing span:nth-child(2) {
+	animation-delay: 0.15s;
+}
+
+.howiebot-typing span:nth-child(3) {
+	animation-delay: 0.3s;
+}
+
+@keyframes howiebot-bounce {
+	0%, 60%, 100% {
+		transform: translateY(0);
+	}
+	30% {
+		transform: translateY(-5px);
+	}
+}
+
+/* Input area */
+#howiebot-input-area {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+	border-top: 1px solid var(--border-color, #d1d8dd);
+	flex-shrink: 0;
+	background: var(--card-bg, #fff);
+}
+
+#howiebot-input {
+	flex: 1;
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 8px;
+	padding: 8px 12px;
+	font-size: 14px;
+	font-family: inherit;
+	outline: none;
+	resize: none;
+	min-height: 20px;
+	max-height: 80px;
+	line-height: 1.4;
+	background: var(--control-bg, #f4f5f6);
+	color: var(--text-color, #333);
+	transition: border-color 0.15s;
+}
+
+#howiebot-input:focus {
+	border-color: var(--primary, #2490ef);
+}
+
+#howiebot-input::placeholder {
+	color: var(--text-muted, #8d99a6);
+}
+
+#howiebot-send {
+	background: var(--primary, #2490ef);
+	border: none;
+	border-radius: 8px;
+	color: #fff;
+	width: 36px;
+	height: 36px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: background 0.15s;
+}
+
+#howiebot-send:hover {
+	background: var(--primary-dark, #1a73e8);
+}
+
+#howiebot-send:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+#howiebot-send svg {
+	width: 18px;
+	height: 18px;
+	fill: currentColor;
+}
