@@ -18,7 +18,7 @@ app_include_css = [
 ]
 
 app_include_js = [
-	"/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js",
+	# "/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js",
 
     "/assets/ivm/js/utils.js",
     "/assets/ivm/js/embedded_form.js",
