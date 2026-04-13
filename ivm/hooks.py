@@ -8,7 +8,8 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 fixtures = [
-    "Workspace", "Dashboard", "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
+    #"Workspace",
+	"Dashboard", "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
     "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role", "Custom Field"
 ]
 # include js, css files in header of desk.html
