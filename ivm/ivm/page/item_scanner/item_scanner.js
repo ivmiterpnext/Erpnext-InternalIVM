@@ -213,7 +213,7 @@ class ItemScanner {
 	lookup_item(barcode) {
 		// Use custom API method to bypass Item Barcode child table permission issues
 		frappe.call({
-			method: 'ivm.api.lookup_item_by_barcode',
+			method: 'ivm.warehouse.services.barcode_manager.lookup_item_by_barcode',
 			args: {
 				barcode: barcode
 			},
