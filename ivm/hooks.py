@@ -12,6 +12,7 @@ fixtures = [
 	"Dashboard", "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
     "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role", "Custom Field"
 ]
+
 # include js, css files in header of desk.html
 app_include_css = [
     "/assets/ivm/css/chatbox_widget.css",
@@ -23,7 +24,17 @@ app_include_js = [
 
     "/assets/ivm/js/utils.js",
     "/assets/ivm/js/embedded_form.js",
-    "/assets/ivm/js/chatbox_widget.js"
+    "/assets/ivm/js/chatbox_widget.js",
+    "/assets/ivm/js/barcode_scanner_override.js"
+]
+
+add_to_apps_screen = [
+	{
+		"name": "ivm",
+		"logo": "/assets/ivm/logo.png",
+		"title": "IVM",
+		"route": "/desk-web-route"
+}
 ]
 
 # include js, css files in header of web template
@@ -145,7 +156,9 @@ doc_events = {
     "Issue": {
         "on_update": "ivm.api.fetching_dates"
     },
-###################### Good stuff v
+    "Item": {
+        "before_save": "ivm.warehouse.hooks.item.before_save"
+    },
 	"Wiki Document": {
 		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
 	},

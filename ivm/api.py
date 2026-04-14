@@ -743,28 +743,3 @@ def warehouse_request_query(doctype, txt, searchfield, start, page_len, filters)
 		'start': start,
 		'page_len': page_len
 	})
-
-@frappe.whitelist()
-def lookup_item_by_barcode(barcode):
-	"""
-	Lookup item by barcode without permission checks.
-	Checks Item Code first (primary use case), then Item Barcode table.
-	Item Barcode is a child table with no permissions, so we use SQL directly.
-	"""
-	# First check if it's an Item Code directly (most common case)
-	exists = frappe.db.exists("Item", barcode)
-	if exists:
-		return barcode
-	
-	# Fallback: Query Item Barcode child table
-	item_code = frappe.db.sql("""
-		SELECT parent 
-		FROM `tabItem Barcode` 
-		WHERE barcode = %s 
-		LIMIT 1
-	""", (barcode,), as_dict=False)
-	
-	if item_code and len(item_code) > 0:
-		return item_code[0][0]
-	
-	return None
