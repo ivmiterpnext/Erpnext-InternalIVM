@@ -16,7 +16,8 @@ fixtures = [
 # include js, css files in header of desk.html
 app_include_css = [
     "/assets/ivm/css/chatbox_widget.css",
-    "/assets/ivm/css/embedded_form.css"
+    "/assets/ivm/css/embedded_form.css",
+    "/assets/ivm/css/ivm_desktop.css"
 ]
 
 app_include_js = [
@@ -33,8 +34,8 @@ add_to_apps_screen = [
 		"name": "ivm",
 		"logo": "/assets/ivm/logo.png",
 		"title": "IVM",
-		"route": "/desk-web-route"
-}
+		"route": "/app/ivm_desktop"
+	}
 ]
 
 # include js, css files in header of web template

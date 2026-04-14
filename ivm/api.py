@@ -743,3 +743,43 @@ def warehouse_request_query(doctype, txt, searchfield, start, page_len, filters)
 		'start': start,
 		'page_len': page_len
 	})
+
+
+@frappe.whitelist()
+def get_desktop_data():
+	"""Get aggregated counts for the IVM Desktop dashboard."""
+	user = frappe.session.user
+	roles = frappe.get_roles(user)
+
+	def safe_count(doctype, filters=None):
+		try:
+			return frappe.db.count(doctype, filters or {})
+		except Exception:
+			return 0
+
+	data = {
+		"roles": roles,
+
+		# Tickets
+		"new_support_tickets": safe_count("Issue", {"issue_type": "Support", "status": "New"}),
+		"my_tickets": safe_count("Issue", {"_assign": ["like", f'%"{user}"%']}),
+		"new_it_tickets": safe_count("Issue", {"issue_type": "IT", "status": "New"}),
+		"open_tickets_total": safe_count("Issue", {"status": ["not in", ["Closed", "Resolved"]]}),
+
+		# Deployments
+		"active_deployments": safe_count("Project", {"project_type": "Deployment", "status": "Open"}),
+		"my_deployments": safe_count("Project", {"project_type": "Deployment", "_assign": ["like", f'%"{user}"%']}),
+
+		# Warehouse Requests
+		"open_warehouse_requests": safe_count("Warehouse Request", {"docstatus": 0}),
+
+		# CRM
+		"open_leads": safe_count("Lead", {"status": ["not in", ["Converted", "Do Not Contact"]]}),
+		"open_opportunities": safe_count("Opportunity", {"status": "Open"}),
+
+		# Custom Issues
+		"ar_issues": safe_count("Issue", {"issue_type": "Receivable", "status": ["not in", ["Closed", "Resolved"]]}),
+		"vending_issues": safe_count("Issue", {"issue_type": "Vending Management", "status": ["not in", ["Closed", "Resolved"]]}),
+	}
+
+	return data

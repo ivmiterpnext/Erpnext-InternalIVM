@@ -1,0 +1,189 @@
+.ivm-desktop {
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+/* KPI Summary Bar */
+.ivm-kpi-bar {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
+	margin-bottom: 32px;
+}
+
+.ivm-kpi-card {
+	background: var(--card-bg, #fff);
+	border-radius: var(--border-radius-lg, 8px);
+	padding: 24px 16px;
+	text-align: center;
+	cursor: pointer;
+	border: 1px solid var(--border-color, #e2e8f0);
+	transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.ivm-kpi-card:hover {
+	box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.12));
+	transform: translateY(-2px);
+}
+
+.ivm-kpi-value {
+	font-size: 36px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.ivm-kpi-label {
+	font-size: 12px;
+	color: var(--text-muted, #718096);
+	margin-top: 6px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	font-weight: 600;
+}
+
+/* Sections Grid */
+.ivm-sections-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+	gap: 24px;
+}
+
+.ivm-section {
+	background: var(--card-bg, #fff);
+	border-radius: var(--border-radius-lg, 8px);
+	border: 1px solid var(--border-color, #e2e8f0);
+	overflow: hidden;
+}
+
+.ivm-section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 14px 20px;
+	border-bottom: 1px solid var(--border-color, #e2e8f0);
+	border-left: 4px solid #ccc;
+	background: var(--bg-color, #f7fafc);
+}
+
+.ivm-section-title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--heading-color, #1a202c);
+}
+
+.ivm-section-body {
+	padding: 16px 20px;
+}
+
+/* Metric Cards Grid */
+.ivm-cards-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+	gap: 12px;
+}
+
+.ivm-metric-card {
+	background: var(--control-bg, #f8f9fa);
+	border-radius: var(--border-radius-md, 6px);
+	padding: 16px 12px;
+	text-align: center;
+	cursor: pointer;
+	transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+	border: 1px solid transparent;
+}
+
+.ivm-metric-card:hover {
+	background: var(--card-bg, #fff);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+	border-color: var(--border-color, #e2e8f0);
+}
+
+.ivm-metric-count {
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.ivm-metric-label {
+	font-size: 12px;
+	color: var(--text-muted, #718096);
+	margin-top: 4px;
+	font-weight: 500;
+}
+
+.ivm-metric-sublabel {
+	font-size: 11px;
+	color: var(--text-light, #a0aec0);
+}
+
+/* Section Links */
+.ivm-section-links {
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 1px solid var(--border-color, #e2e8f0);
+	display: flex;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.ivm-section-link {
+	font-size: 13px;
+	color: var(--text-color, #4a5568);
+	text-decoration: none;
+	font-weight: 500;
+	transition: color 0.15s ease;
+}
+
+.ivm-section-link:hover {
+	color: var(--primary, #2490EF);
+	text-decoration: none;
+}
+
+/* Create Button */
+.ivm-create-btn {
+	font-size: 12px;
+	font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+	.ivm-sections-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 768px) {
+	.ivm-desktop {
+		padding: 12px;
+	}
+
+	.ivm-kpi-bar {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 10px;
+		margin-bottom: 20px;
+	}
+
+	.ivm-kpi-card {
+		padding: 16px 12px;
+	}
+
+	.ivm-kpi-value {
+		font-size: 28px;
+	}
+
+	.ivm-sections-grid {
+		gap: 16px;
+	}
+
+	.ivm-cards-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 8px;
+	}
+
+	.ivm-metric-count {
+		font-size: 22px;
+	}
+}
