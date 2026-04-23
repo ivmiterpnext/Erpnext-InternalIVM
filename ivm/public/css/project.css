@@ -1,0 +1,20 @@
+.ivm-smart-detail-grid .grid-insert-row,
+.ivm-smart-detail-grid .grid-insert-row-below,
+.ivm-smart-detail-grid .grid-duplicate-row,
+.ivm-smart-detail-grid .grid-append-row {
+  display: none !important;
+}
+
+.ivm-bin-number {
+  -moz-appearance: textfield;
+}
+.ivm-bin-number::-webkit-outer-spin-button,
+.ivm-bin-number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ivm-remove-bin-td {
+  text-align: center;
+  vertical-align: middle !important;
+}
