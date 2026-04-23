@@ -8,15 +8,17 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 fixtures = [
-    #"Workspace",
-	"Dashboard", "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
-    "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role", "Custom Field"
+    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
+    "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type",
+    {"dt": "DocType", "filters": [["custom", "=", 1], ["module", "=", "IVM"]]},
+    {"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]}
 ]
 
 # include js, css files in header of desk.html
 app_include_css = [
     "/assets/ivm/css/chatbox_widget.css",
-    "/assets/ivm/css/embedded_form.css"
+    "/assets/ivm/css/embedded_form.css",
+    "/assets/ivm/css/project.css"
 ]
 
 app_include_js = [
@@ -62,7 +64,7 @@ doctype_js = {
     "Project": "public/js/doctype/Project.js",
     "Issue": "public/js/doctype/Issue.js",
     "Delivery Note": "public/js/doctype/Delivery_Note.js",
-    "Stock Entry": "public/js/doctype/Stock_Entry.js"
+    "Stock Entry": "public/js/doctype/Stock_Entry.js",
 }
 
 doctype_list_js = {
@@ -143,9 +145,6 @@ on_session_creation = [
 # override_doctype_class = {
 # "ToDo": "custom_app.overrides.CustomToDo"
 # }
-override_doctype_class = {
-    "Project": "ivm.controllers.project.CustomProjectController"
-}
 # Document Events
 # ---------------
 # Hook on document methods and events
@@ -160,9 +159,14 @@ doc_events = {
     "Item": {
         "before_save": "ivm.warehouse.event_handlers.item.before_save"
     },
-	"Wiki Document": {
-		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
-	},
+    "Wiki Document": {
+        "on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
+    },
+    "Project": {
+        "before_validate": "ivm.deployments.hooks.project.before_validate",
+        "validate": "ivm.deployments.hooks.project.validate",
+        "after_insert": "ivm.deployments.hooks.project.after_insert",
+    },
 }
 
 # Scheduled Tasks

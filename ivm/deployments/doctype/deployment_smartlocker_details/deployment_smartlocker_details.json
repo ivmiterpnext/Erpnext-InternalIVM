@@ -1,0 +1,209 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:machine_name",
+ "creation": "2025-11-26 07:41:18.673313",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_rtas",
+  "machine_name",
+  "3d_printed",
+  "smartscreen",
+  "workflow",
+  "serial_validation",
+  "home_screen_logo",
+  "column_break_gviu",
+  "notes",
+  "section_break_bins",
+  "bins_data",
+  "section_break_uykj",
+  "power_connection",
+  "power_connections",
+  "lan_ports",
+  "bin_door_type",
+  "column_break_dulg",
+  "casters",
+  "plug_type",
+  "interior_lighting",
+  "label_color",
+  "column_break_rzwb",
+  "offline_sales",
+  "connectivity_type",
+  "connectivity_device_quantity",
+  "hidden_fields_section",
+  "machine_type_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "bins_data",
+   "fieldtype": "JSON",
+   "label": "Bins"
+  },
+  {
+   "fieldname": "section_break_rtas",
+   "fieldtype": "Section Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "column_break_gviu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_uykj",
+   "fieldtype": "Section Break",
+   "label": "Specifications"
+  },
+  {
+   "fieldname": "power_connections",
+   "fieldtype": "Select",
+   "label": "Power Connections in Bins",
+   "options": "\nNone\nUSB\n110V\n220V"
+  },
+  {
+   "fieldname": "column_break_rzwb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lan_ports",
+   "fieldtype": "Select",
+   "label": "LAN Ports in Bins",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "casters",
+   "fieldtype": "Select",
+   "label": "Casters",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "plug_type",
+   "fieldtype": "Data",
+   "label": "Plug Type"
+  },
+  {
+   "fieldname": "interior_lighting",
+   "fieldtype": "Select",
+   "label": "Interior Lighting",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "bin_door_type",
+   "fieldtype": "Select",
+   "label": "Bin Door Type",
+   "options": "\nSolid\nGlass"
+  },
+  {
+   "fieldname": "label_color",
+   "fieldtype": "Data",
+   "label": "Label Color"
+  },
+  {
+   "fieldname": "offline_sales",
+   "fieldtype": "Select",
+   "label": "Offline Sales",
+   "options": "\nAll\nStored\nDisabled"
+  },
+  {
+   "fieldname": "connectivity_type",
+   "fieldtype": "Link",
+   "label": "Connectivity Type",
+   "options": "Connectivity Type"
+  },
+  {
+   "fieldname": "connectivity_device_quantity",
+   "fieldtype": "Int",
+   "label": "Connectivity Device Quantity"
+  },
+  {
+   "default": "0",
+   "fieldname": "3d_printed",
+   "fieldtype": "Check",
+   "label": "3D Printed"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "power_connection",
+   "fieldtype": "Select",
+   "label": "Power Connection",
+   "options": "\n110V\n220V"
+  },
+  {
+   "default": "0",
+   "fieldname": "smartscreen",
+   "fieldtype": "Check",
+   "label": "SmartScreen"
+  },
+  {
+   "depends_on": "eval:doc.smartscreen;",
+   "fieldname": "workflow",
+   "fieldtype": "Select",
+   "label": "Workflow",
+   "options": "\nVend/Return"
+  },
+  {
+   "depends_on": "eval:doc.smartscreen;",
+   "fieldname": "serial_validation",
+   "fieldtype": "Select",
+   "label": "Serial Validation",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.smartscreen;",
+   "fieldname": "home_screen_logo",
+   "fieldtype": "Select",
+   "label": "Home Screen Logo"
+  },
+  {
+   "fieldname": "hidden_fields_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden Fields"
+  },
+  {
+   "default": "10",
+   "fieldname": "machine_type_id",
+   "fieldtype": "Int",
+   "label": "Machine Type Id"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_bins",
+   "fieldtype": "Section Break",
+   "label": "Bins"
+  },
+  {
+   "fieldname": "column_break_dulg",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-23 10:22:42.057670",
+ "modified_by": "Administrator",
+ "module": "Deployments",
+ "name": "Deployment SmartLocker Details",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

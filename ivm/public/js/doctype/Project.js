@@ -1,4 +1,22 @@
+const SMART_DETAIL_TABLES = [
+  'custom_deployment_smartlocker_details',
+  'custom_deployment_smartstation_details',
+  'custom_deployment_smartsync_details',
+  'custom_deployment_smartvault_details'
+];
+
+frappe.ui.form.on('Deployment SmartLocker Details', {
+  form_render: (frm, cdt, cdn) => injectBinsEditor(frm, cdt, cdn)
+});
+
+frappe.ui.form.on('Deployment SmartSync Details', {
+  form_render: (frm, cdt, cdn) => injectBinsEditor(frm, cdt, cdn)
+});
+
 frappe.ui.form.on("Project", {
+  refresh: function (frm) {
+    setupSmartDetailGrids(frm);
+  },
   onload: function (frm) {
     frm.set_query("shipping_address", function () {
       return {
@@ -15,147 +33,8 @@ frappe.ui.form.on("Project", {
         filters: [["Address", "address_type", "=", "Deployment"]],
       };
     });
-
-    $(document).ready(function () {
-      const fieldGroups = {
-        input: ['number_of_kiosks', 'opportunity', "po_and_tracking", "associated_deployment_location", "customer"],
-        select: ["install_type", "vault_size", "kiosk_options", "kvm_switch_options", "network_options", "countertop_color", "ada_side_table", "kiosk_side_for_table"],
-        div: ["expedited_delivery", "enhanced_lockers", "number_of_machines", "number_of_primary_lockers", "number_of_secondary_lockers", "number_of_vaults", "opportunity_term"],
-        textarea: ["description", "vault_power_configuration_details", "expedited_delivery_details"]
-      };
-
-      Object.keys(fieldGroups).forEach(group => {
-        fieldGroups[group].forEach(field => {
-          let selector;
-          let backgroundColor = '#e1f0f0';
-
-          if (group === 'div' && (field === "expedited_delivery" || field === "enhanced_lockers")) {
-            selector = `div[data-fieldname="${field}"] .label-area`;
-          } else {
-            selector = `${group}[data-fieldname="${field}"]`;
-            if (group === 'div' && field !== "expedited_delivery" && field !== "enhanced_lockers") {
-              selector = `div[data-fieldname="${field}"] .control-value.like-disabled-input`;
-            }
-          }
-
-          $(selector).css('background-color', backgroundColor);
-        });
-      });
-    });
-    if (frm.doc.__islocal) {
-      if (frm.doc.customer) {
-        frm.set_value("project_type", "");
-        frappe.db.get_doc("Customer", frm.doc.customer).then((r) => {
-          if (r.opportunity_name) {
-            frm.set_value("opportunity", r.opportunity_name);
-          }
-        });
-      }
-      frm.set_value(
-        "number_of_lockers",
-        (frm.doc.number_of_primary_lockers || 0) +
-        (frm.doc.number_of_secondary_lockers || 0)
-      );
-    }
   },
-  customer: function (frm) {
-    if (frm.doc.customer) {
-      frappe.db.get_doc("Customer", frm.doc.customer).then((r) => {
-        if (r.opportunity_name) {
-          frm.set_value("opportunity", r.opportunity_name);
-        }
-      });
-    }
-  },
-  project_type: function (frm) {
-    if (frm.doc.connectivity_type) {
-      frappe.call({
-        method: 'ivm.api.get_connectivity_type_record',
-        args: {
-          record_name: frm.doc.connectivity_type
-        },
-        callback: function (r) {
-          const message = r.message;
-          if (message) {
-            if (message.cell_carrier) {
-              updateSelectFieldOptions(frm, 'cell_carrier', message.cell_carrier);
-            }
-          }
-        }
-      });
-    }
-  },
-  connectivity_type: function (frm) {
-    if (frm.doc.connectivity_type) {
-      frappe.call({
-        method: 'ivm.api.get_connectivity_type_record',
-        args: {
-          record_name: frm.doc.connectivity_type
-        },
-        callback: function (r) {
-          const message = r.message;
-          if (message) {
-            if (message.cell_carrier) {
-              updateSelectFieldOptions(frm, 'cell_carrier', message.cell_carrier);
-            }
-          }
-        }
-      });
-    }
-  },
-  opportunity: function (frm) {
-    frappe.db.get_value("Opportunity", frm.doc.opportunity, "*", (response) => {
-      var doc = response;
-      var fieldsToSet = [
-        "number_of_kiosks",
-        "enhanced_lockers",
-        "expedited_delivery",
-        "expedited_delivery_details",
-        "install_type",
-        "po_and_tracking",
-        "vault_size",
-        "vault_power_configuration_details",
-        "kiosk_options",
-        "kvm_switch_options",
-        "network_options",
-        "countertop_color",
-        "ada_side_table",
-        "description",
-        "number_of_machines",
-        "number_of_primary_lockers",
-        "number_of_secondary_lockers",
-        "number_of_vaults",
-        "kiosk_side_for_table",
-        "customer",
-      ];
-      for (var field of fieldsToSet) {
-        if (doc[field] !== undefined) {
-          frm.set_value(field, doc[field]);
-        }
-      }
-      frm.set_value(
-        "number_of_lockers",
-        (doc.number_of_primary_lockers || 0) +
-        (doc.number_of_secondary_lockers || 0)
-      );
-      frm.set_value("opportunity_term", doc.sv_term);
-      frm.set_value("associated_deployment_location", doc.deployment_address)
-
-      if (doc.customer_name) {
-        frappe.db.get_value(
-          "Customer",
-          { name: doc.customer_name },
-          "name",
-          function (customer_response) {
-            if (customer_response && customer_response.name) {
-              frm.set_value("customer", doc.customer_name);
-            }
-          }
-        );
-      }
-    });
-  },
-
+  connectivity_type: (frm) => loadConnectivityTypeOptions(frm),
   customs_contact: function (frm) {
     fetchContactDetails(
       frm,
@@ -202,6 +81,140 @@ frappe.ui.form.on("Project", {
   },
 });
 
+function setupSmartDetailGrids(frm) {
+  SMART_DETAIL_TABLES.forEach(fieldname => {
+    const grid = frm.fields_dict[fieldname] && frm.fields_dict[fieldname].grid;
+    if (!grid) return;
+    grid.allow_on_grid_editing = () => false;
+    grid.wrapper.addClass('ivm-smart-detail-grid');
+  });
+}
+
+function injectBinsEditor(frm, cdt, cdn) {
+  const $wrapper = cur_frm?.cur_grid?.grid_form?.wrapper;
+  if (!$wrapper || $wrapper.find('.ivm-bins-injected').length) return;
+
+  const $container = $('<div class="ivm-bins-injected" style="padding: 10px 15px 5px;"></div>');
+  $wrapper.find('[data-fieldname="bins_data"]').hide().after($container);
+
+  const row = frappe.get_doc(cdt, cdn);
+  let existing = [];
+  try { existing = row.bins_data ? JSON.parse(row.bins_data) : []; } catch(e) {}
+
+  $container.html(`
+    <table class="table table-bordered table-sm mb-2">
+      <thead><tr>
+        <th style="width:90px">Type</th>
+        <th style="width:70px">#</th>
+        <th style="width:80px">Size (Inches)</th>
+        <th style="width:40px"></th>
+      </tr></thead>
+      <tbody class="ivm-bins-body"></tbody>
+    </table>
+    <button class="btn btn-xs btn-secondary ivm-add-bin">+ Add Row</button>
+    <span class="ivm-bins-warning text-danger small ml-2" style="display:none;"></span>
+  `);
+
+  function saveBins() {
+    const bins = [];
+    const seen = new Set();
+    let duplicate = null;
+    $container.find('.ivm-bin-row').each(function() {
+      const $r = $(this);
+      const bin_type = $r.find('.ivm-bin-type').val();
+      const entry = { bin_type, bin_size: $r.find('.ivm-bin-size').val() };
+      if (bin_type === 'Bin') {
+        const num = $r.find('.ivm-bin-number').val();
+        if (num && seen.has(num)) duplicate = num;
+        if (num) seen.add(num);
+        entry.bin_number = num;
+      }
+      bins.push(entry);
+    });
+    const $warning = $container.find('.ivm-bins-warning');
+    if (duplicate) {
+      $warning.text(`Bin #${duplicate} is duplicated.`).show();
+    } else {
+      $warning.hide();
+      frappe.model.set_value(cdt, cdn, 'bins_data', JSON.stringify(bins));
+    }
+  }
+
+  function nextBinNumber() {
+    let last = null;
+    $container.find('.ivm-bin-row').each(function() {
+      if ($(this).find('.ivm-bin-type').val() === 'Bin') {
+        const n = parseInt($(this).find('.ivm-bin-number').val());
+        if (!isNaN(n)) last = n;
+      }
+    });
+    return last !== null ? String(last + 1) : '';
+  }
+
+  function lastRowSize() {
+    const $rows = $container.find('.ivm-bin-row');
+    return $rows.length ? $rows.last().find('.ivm-bin-size').val() : '4';
+  }
+
+  function setNumberState($row, isBin) {
+    const $input = $row.find('.ivm-bin-number');
+    if (isBin) {
+      $input.prop('disabled', false).val($input.data('saved') || '').css('color', '');
+    } else {
+      $input.data('saved', $input.val()).prop('disabled', true).val('N/A').css('color', '#aaa');
+    }
+  }
+
+  function addRow(bin) {
+    const isNew = !bin;
+    bin = bin || {};
+    const type = bin.bin_type || 'Bin';
+    const $row = $(`
+      <tr class="ivm-bin-row">
+        <td><select class="form-control form-control-sm ivm-bin-type">
+          <option value="Bin">Bin</option>
+          <option value="PWR">PWR</option>
+        </select></td>
+        <td><input type="text" inputmode="numeric" class="form-control form-control-sm ivm-bin-number" /></td>
+        <td><select class="form-control form-control-sm ivm-bin-size">
+          <option>4</option><option>8</option><option>12</option>
+        </select></td>
+        <td class="ivm-remove-bin-td"><button class="btn btn-xs btn-danger ivm-remove-bin">&times;</button></td>
+      </tr>
+    `);
+    $row.find('.ivm-bin-type').val(type);
+    $row.find('.ivm-bin-size').val(isNew ? lastRowSize() : (bin.bin_size || '4'));
+    const binNum = isNew && type === 'Bin' ? nextBinNumber() : (bin.bin_number || '');
+    $row.find('.ivm-bin-number').val(binNum).data('saved', String(binNum));
+    setNumberState($row, type === 'Bin');
+
+    $row.find('.ivm-bin-type').on('change', function() {
+      setNumberState($row, $(this).val() === 'Bin');
+      saveBins();
+    });
+    $row.find('.ivm-bin-number, .ivm-bin-size').on('change', saveBins);
+    $row.find('.ivm-remove-bin').on('click', () => { $row.remove(); saveBins(); });
+    $container.find('.ivm-bins-body').append($row);
+  }
+
+  existing.forEach(b => addRow(b));
+  if (!existing.length) addRow();
+  $container.find('.ivm-add-bin').on('click', () => { addRow(); saveBins(); });
+}
+
+function loadConnectivityTypeOptions(frm) {
+  if (!frm.doc.connectivity_type) return;
+  frappe.call({
+    method: 'ivm.api.get_connectivity_type_record',
+    args: { record_name: frm.doc.connectivity_type },
+    callback: function (r) {
+      if (r.message && r.message.cell_carrier) {
+        updateSelectFieldOptions(frm, 'cell_carrier', r.message.cell_carrier);
+      }
+    }
+  });
+}
+
 function fetchContactDetails(frm, contactField, phoneField, emailField) {
   var contact = frm.doc[contactField];
   if (contact) {
@@ -217,27 +230,23 @@ function fetchContactDetails(frm, contactField, phoneField, emailField) {
       callback: function (response) {
         if (!response.exc) {
           var contactDetails = response.message;
-          // Set the phone field
           if (contactDetails && contactDetails.phone) {
             frm.set_value(phoneField, contactDetails.phone);
           } else {
             frm.set_value(phoneField, "");
           }
-          // Set the email field
           if (contactDetails && contactDetails.email_id) {
             frm.set_value(emailField, contactDetails.email_id);
           } else {
             frm.set_value(emailField, "");
           }
         } else {
-          // Handle errors if any
           frappe.msgprint(__("Error fetching contact details."));
           console.error(response.exc);
         }
       },
     });
   } else {
-    // Clear fields if contact is not selected
     frm.set_value(phoneField, "");
     frm.set_value(emailField, "");
   }
@@ -248,7 +257,6 @@ function updateSelectFieldOptions(frm, fieldname, optionsData) {
   frm.set_df_property(fieldname, 'options', optionsList);
   frm.refresh_field(fieldname);
 }
-
 
 function show_Dialog(reason, frm) {
   const dialog = new frappe.ui.Dialog({
@@ -272,8 +280,7 @@ function show_Dialog(reason, frm) {
       const addAttachments = values.attach_files;
       if (addAttachments) {
         createWarehouseRequest(reason, addAttachments, frm);
-      }
-      else{
+      } else {
         createWarehouseRequest(reason, null, frm);
       }
       dialog.hide();
@@ -282,7 +289,6 @@ function show_Dialog(reason, frm) {
 
   dialog.show();
 }
-
 
 function createWarehouseRequest(reason, attachedFiles, frm) {
   const doc = frm.doc;
@@ -295,39 +301,11 @@ function createWarehouseRequest(reason, attachedFiles, frm) {
       attached_files: attachedFiles,
     },
     callback: function (r) {
-      frm.reload_doc()
-      var reason = r.message
-      if (reason === "Wrap Ready") {
-        //show_alert with indicator
-        frappe.show_alert({
-          message: __(`Warehouse Request <b><span style="color: #FF5733;">${reason} </span> is created`),
-          indicator: 'green'
-        }, 5);
-      }
-      else if (reason === "Build Machine") {
-        frappe.show_alert({
-          message: __(`Warehouse Request <b><span style="color: #FF5733;">${reason} </span> is created`),
-          indicator: 'green'
-        }, 5);
-      }
-      else if (reason === "Build Locker") {
-        frappe.show_alert({
-          message: __(`Warehouse Request <b><span style="color: #FF5733;">${reason} </span> is created`),
-          indicator: 'green'
-        }, 5);
-      }
-      else if (reason === "Build Kiosk") {
-        frappe.show_alert({
-          message: __(`Warehouse Request <b><span style="color: #FF5733;">${reason} </span> is created`),
-          indicator: 'green'
-        }, 5);
-      }
-      else if (reason === "Build Vault") {
-        frappe.show_alert({
-          message: __(`Warehouse Request <b><span style="color: #FF5733;">${reason} </span> is created`),
-          indicator: 'green'
-        }, 5);
-      }
+      frm.reload_doc();
+      frappe.show_alert({
+        message: __(`Warehouse Request <b><span style="color: #FF5733;">${reason}</span> is created`),
+        indicator: 'green'
+      }, 5);
     }
   });
 }
