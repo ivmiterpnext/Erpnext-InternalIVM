@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "creation": "2025-09-03 11:59:49.253455",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "id",
+  "purchase_order_id",
+  "fee_type_id",
+  "column_break_unws",
+  "machine_id",
+  "machine_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "Id"
+  },
+  {
+   "fieldname": "purchase_order_id",
+   "fieldtype": "Data",
+   "label": "Purchase Order Id"
+  },
+  {
+   "fieldname": "fee_type_id",
+   "fieldtype": "Data",
+   "label": "Fee Type"
+  },
+  {
+   "fieldname": "column_break_unws",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "label": "Machine Name"
+  },
+  {
+   "fieldname": "machine_id",
+   "fieldtype": "Link",
+   "label": "Machine",
+   "options": "Machine Link"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_virtual": 1,
+ "links": [],
+ "modified": "2025-09-22 13:16:03.869548",
+ "modified_by": "Administrator",
+ "module": "Machine Hardware Management",
+ "name": "Machine Purchase Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "machine_name",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

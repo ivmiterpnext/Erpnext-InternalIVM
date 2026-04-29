@@ -1,0 +1,34 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-21 14:41:51.604863",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "agreement_fee_type_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "agreement_fee_type_id",
+   "fieldtype": "Link",
+   "label": "Agreement Fee Type",
+   "options": "Agreement Fee Type"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_virtual": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-27 11:53:39.450307",
+ "modified_by": "Administrator",
+ "module": "Machine Hardware Management",
+ "name": "Assigned Fee Type",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
