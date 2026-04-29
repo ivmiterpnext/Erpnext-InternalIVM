@@ -1,44 +1,38 @@
 <div class="item-scanner-page" style="padding: 20px; max-width: 1400px; margin: 0 auto;">
-	<!-- Camera Scanner Modal -->
 	<div id="camera-scanner-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000;">
-		<div style="position: relative; max-width: 800px; margin: 50px auto; background: white; padding: 20px; border-radius: 8px;">
+		<div style="position: relative; max-width: 800px; margin: 50px auto; background: var(--card-bg); padding: 20px; border-radius: 8px;">
 			<button id="close-scanner" style="position: absolute; top: 10px; right: 10px; background: #dc3545; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">Close</button>
 			<h4 style="margin-bottom: 20px;">Scan Barcode with Camera</h4>
 			<div id="camera-reader" style="width: 100%; max-width: 600px; margin: 0 auto;"></div>
 			<div id="scan-result" style="margin-top: 15px; padding: 10px; background: #d4edda; color: #155724; border-radius: 4px; display: none;"></div>
 		</div>
 	</div>
-	
+
 	<div class="page-header" style="margin-bottom: 25px;">
 		<h3>Item Scanner</h3>
-		<div class="warehouse-request-info" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 4px;">
-			<div class="row">
-				<div class="col-md-8">
-					<strong>Warehouse Request:</strong> <span id="wr-name"></span>
-					<span id="wr-subject" style="color: #666; margin-left: 10px;"></span>
-				</div>
-				<div class="col-md-4">
-					<strong>Status:</strong> <span id="wr-status"></span>
-				</div>
-			</div>
-		</div>
 	</div>
-	
-	<div class="scanner-controls" style="margin-bottom: 30px;">
-		<div class="row">
-			<div class="col-md-12">
-				<div class="form-group">
-					<label>Target Warehouse</label>
-					<input type="text" class="form-control" id="target-warehouse" value="Build In Progress - I" readonly>
-				</div>
+
+	<div class="scanner-controls" style="display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+		<div style="flex: 0 0 auto;">
+			<label class="control-label" style="display: block; margin-bottom: 6px;">Warehouse Request</label>
+			<div style="height: 30px; display: flex; align-items: center;">
+				<a id="wr-name" href="#"></a>&nbsp;<span id="wr-subject" style="color: var(--text-muted);"></span>
 			</div>
 		</div>
-		
-		<div class="form-group" style="margin-top: 20px;">
+		<div style="flex: 0 0 auto;">
+			<label class="control-label" style="display: block; margin-bottom: 6px;">Pick List</label>
+			<div style="height: 30px; display: flex; align-items: center;">
+				<a id="pick-list-name" href="#">Loading...</a>
+			</div>
+		</div>
+		<div style="flex: 1 1 200px;">
+			<div id="target-warehouse-field"></div>
+		</div>
+		<div style="flex: 1 1 200px;">
 			<div id="barcode-field"></div>
 		</div>
 	</div>
-	
+
 	<div class="scanned-items" style="margin-bottom: 30px;">
 		<h4 style="margin-bottom: 15px;">Scanned Items</h4>
 		<table class="table table-bordered" id="items-table">
@@ -47,10 +41,10 @@
 					<th>Item Code</th>
 					<th>Item Name</th>
 					<th>Source Warehouse</th>
-					<th>Available</th>
-					<th>Qty</th>
+					<th style="width:5%">Available</th>
+					<th style="width:7%">Quantity</th>
 					<th>UOM</th>
-					<th>Action</th>
+					<th style="width:4%">Action</th>
 				</tr>
 			</thead>
 			<tbody id="items-tbody">
@@ -60,13 +54,16 @@
 			</tbody>
 		</table>
 	</div>
-	
-	<div class="action-buttons" style="margin-top: 30px;">
+
+	<div class="action-buttons" style="margin-top: 30px; display: flex; align-items: center;">
 		<button class="btn btn-primary btn-lg" id="submit-btn" disabled style="margin-right: 10px;">
-			<i class="fa fa-check"></i> Create Stock Entry
+			<i class="fa fa-check"></i> Submit Pick List
 		</button>
 		<button class="btn btn-default btn-lg" id="cancel-btn">
-			<i class="fa fa-times"></i> Cancel
+			<i class="fa fa-floppy-o"></i> Save as Draft
+		</button>
+		<button class="btn btn-danger btn-lg" id="clear-btn" style="margin-left: auto;">
+			<i class="fa fa-trash"></i> Clear List
 		</button>
 	</div>
 </div>

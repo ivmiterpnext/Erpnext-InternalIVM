@@ -157,7 +157,7 @@ doc_events = {
         "on_update": "ivm.api.fetching_dates"
     },
     "Item": {
-        "before_save": "ivm.warehouse.hooks.item.before_save"
+        "before_save": "ivm.warehouse.event_handlers.item.before_save"
     },
 	"Wiki Document": {
 		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",

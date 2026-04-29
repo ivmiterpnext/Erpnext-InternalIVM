@@ -3,7 +3,7 @@ frappe.ui.form.on('Delivery Note', {
 		// Customize Warehouse Request link field to show ID and subject
 		frm.set_query('custom_related_warehouse_request', function() {
 			return {
-				query: 'ivm.api.warehouse_request_query'
+				query: 'ivm.warehouse.services.warehouse_request.warehouse_request_query'
 			};
 		});
 	},
@@ -12,7 +12,7 @@ frappe.ui.form.on('Delivery Note', {
 		// Auto-fetch items whenever warehouse request is selected or changed
 		if (frm.doc.custom_related_warehouse_request) {
 			frappe.call({
-				method: 'ivm.api.get_items_from_warehouse_request',
+				method: 'ivm.warehouse.services.stock_entry.get_stock_entry_items_from_warehouse_request',
 				args: {
 					warehouse_request: frm.doc.custom_related_warehouse_request
 				},
