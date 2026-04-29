@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "creation": "2025-09-29 10:08:41.493545",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "address_id",
+  "is_active",
+  "column_break_milk",
+  "machine_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "address_id",
+   "fieldtype": "Link",
+   "label": "Address",
+   "options": "Address Link"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  },
+  {
+   "fieldname": "machine_id",
+   "fieldtype": "Link",
+   "label": "Machine",
+   "options": "Machine Link"
+  },
+  {
+   "fieldname": "column_break_milk",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_virtual": 1,
+ "links": [],
+ "modified": "2025-11-05 12:55:00.844289",
+ "modified_by": "Administrator",
+ "module": "Machine Hardware Management",
+ "name": "Machine Address",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "address_id"
+}

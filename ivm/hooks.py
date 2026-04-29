@@ -157,7 +157,7 @@ doc_events = {
         "on_update": "ivm.api.fetching_dates"
     },
     "Item": {
-        "before_save": "ivm.warehouse.hooks.item.before_save"
+        "before_save": "ivm.warehouse.event_handlers.item.before_save"
     },
 	"Wiki Document": {
 		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
@@ -193,9 +193,9 @@ doc_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# "frappe.desk.doctype.event.event.get_events": "ivm.event.get_events"
-# }
+override_whitelisted_methods = {
+    "frappe.desk.search.get_value": "ivm.machine_hardware_management.overrides.virtual_get_value.virtual_get_value"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
