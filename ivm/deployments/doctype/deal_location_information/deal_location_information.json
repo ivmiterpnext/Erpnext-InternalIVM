@@ -1,0 +1,268 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:DLI-{######}",
+ "creation": "2026-05-08 12:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "general_section",
+  "crm_deal",
+  "location_name",
+  "column_break_gen1",
+  "equipment_type",
+  "machine_ownership_status",
+  "delivery_and_installation_section",
+  "locale",
+  "ior",
+  "shipping_address",
+  "target_ship_date",
+  "column_break_dep1",
+  "install_type",
+  "expedited_delivery",
+  "devices_tab",
+  "device_quantities_section",
+  "number_of_machines",
+  "column_break_qty1",
+  "number_of_primary_lockers",
+  "column_break_qty2",
+  "number_of_secondary_lockers",
+  "column_break_qty3",
+  "number_of_kiosks",
+  "column_break_qty4",
+  "number_of_vaults",
+  "global_device_configuration_section",
+  "wrap_type",
+  "column_break_iyhn",
+  "per_device_configuration_section",
+  "smartstation_details",
+  "smartlocker_details",
+  "smartsync_details",
+  "smartvault_details",
+  "smartcenter_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "location_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Location Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "crm_deal",
+   "fieldtype": "Link",
+   "label": "CRM Deal",
+   "options": "CRM Deal",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gen1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "New",
+   "fieldname": "equipment_type",
+   "fieldtype": "Select",
+   "label": "Equipment Type",
+   "options": "\nNew\nRefurbished\nNew or Refurbished"
+  },
+  {
+   "fieldname": "machine_ownership_status",
+   "fieldtype": "Select",
+   "label": "Machine Ownership Status",
+   "options": "\nPurchase\nLease"
+  },
+  {
+   "default": "Domestic",
+   "fieldname": "locale",
+   "fieldtype": "Select",
+   "label": "Locale",
+   "options": "\nDomestic\nInternational"
+  },
+  {
+   "depends_on": "eval:doc.locale=='International'",
+   "fieldname": "ior",
+   "fieldtype": "Data",
+   "label": "Importer of Record (IOR)"
+  },
+  {
+   "fieldname": "column_break_dep1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "install_type",
+   "fieldtype": "Select",
+   "label": "Install Type",
+   "options": "\nClient Pays Travel\nIVM Pays Travel\nSelf Install\nVendor Install"
+  },
+  {
+   "default": "0",
+   "fieldname": "expedited_delivery",
+   "fieldtype": "Check",
+   "label": "Expedited Delivery"
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Data",
+   "label": "Shipping Address"
+  },
+  {
+   "description": "4-6 weeks after deal is closed/won",
+   "fieldname": "target_ship_date",
+   "fieldtype": "Date",
+   "label": "Target Ship Date"
+  },
+  {
+   "fieldname": "wrap_type",
+   "fieldtype": "Select",
+   "label": "Wrap Type",
+   "options": "\nIVM Created\nClient Created\nIVM Wrap\nNo Wrap"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_of_machines",
+   "fieldtype": "Int",
+   "label": "SmartStations",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qty1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_of_primary_lockers",
+   "fieldtype": "Int",
+   "label": "SmartLockers",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qty2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_of_secondary_lockers",
+   "fieldtype": "Int",
+   "label": "SmartSyncs",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qty3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_of_kiosks",
+   "fieldtype": "Int",
+   "label": "SmartCenters",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qty4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_of_vaults",
+   "fieldtype": "Int",
+   "label": "SmartVaults",
+   "read_only": 1
+  },
+  {
+   "fieldname": "smartstation_details",
+   "fieldtype": "Table",
+   "label": "SmartStation Details",
+   "options": "Deployment SmartStation Details"
+  },
+  {
+   "fieldname": "smartlocker_details",
+   "fieldtype": "Table",
+   "label": "SmartLocker Details",
+   "options": "Deployment SmartLocker Details"
+  },
+  {
+   "fieldname": "smartsync_details",
+   "fieldtype": "Table",
+   "label": "SmartSync Details",
+   "options": "Deployment SmartSync Details"
+  },
+  {
+   "fieldname": "smartvault_details",
+   "fieldtype": "Table",
+   "label": "SmartVault Details",
+   "options": "Deployment SmartVault Details"
+  },
+  {
+   "fieldname": "smartcenter_details",
+   "fieldtype": "Table",
+   "label": "SmartCenter Details",
+   "options": "Deployment SmartCenter Details"
+  },
+  {
+   "fieldname": "delivery_and_installation_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery & Installation"
+  },
+  {
+   "fieldname": "column_break_iyhn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "devices_tab",
+   "fieldtype": "Tab Break",
+   "label": "Devices"
+  },
+  {
+   "fieldname": "device_quantities_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "global_device_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Global Device Configuration"
+  },
+  {
+   "fieldname": "per_device_configuration_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Per Device Configuration"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-08 10:18:51.919043",
+ "modified_by": "Administrator",
+ "module": "Deployments",
+ "name": "Deal Location Information",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "location_name"
+}

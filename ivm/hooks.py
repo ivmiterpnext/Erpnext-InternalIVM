@@ -27,7 +27,8 @@ app_include_js = [
     "/assets/ivm/js/utils.js",
     "/assets/ivm/js/embedded_form.js",
     "/assets/ivm/js/chatbox_widget.js",
-    "/assets/ivm/js/barcode_scanner_override.js"
+    "/assets/ivm/js/barcode_scanner_override.js",
+    "/assets/ivm/js/smart_detail_grids.js"
 ]
 
 add_to_apps_screen = [
@@ -61,6 +62,7 @@ doctype_js = {
     "Deployment Location": "public/js/doctype/Deployment_location.js",
     "User": "public/js/doctype/user.js",
     "Task": "public/js/doctype/Task.js",
+    "CRM Deal": "public/js/doctype/CRM_Deal.js",
     "Project": "public/js/doctype/Project.js",
     "Issue": "public/js/doctype/Issue.js",
     "Delivery Note": "public/js/doctype/Delivery_Note.js",
@@ -73,7 +75,7 @@ doctype_list_js = {
     "Customer": "public/js/listview/Customer_listview.js",
     "User": "public/js/listview/user_listview.js",
     "Calendar Events": "public/js/calendar.js",
-    "Issue": "public/js/listview/issue_listview.js"
+    "Issue": "public/js/listview/issue_listview.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -161,6 +163,9 @@ doc_events = {
     },
     "Wiki Document": {
         "on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
+    },
+    "CRM Deal": {
+        "on_update": "ivm.deployments.event_handlers.deal.on_update",
     },
     "Project": {
         "before_validate": "ivm.deployments.hooks.project.before_validate",
