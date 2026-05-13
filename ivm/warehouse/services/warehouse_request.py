@@ -16,11 +16,13 @@ def get_or_create_warehouse_request_pick_list(warehouse_request):
 
         items = []
         for loc in pl_doc.locations:
-            available_qty = (
-                frappe.db.get_value("Bin", {"item_code": loc.item_code, "warehouse": loc.warehouse}, "actual_qty") or 0
-                if is_draft
-                else loc.stock_qty
-            )
+            if is_draft:
+                available_qty = frappe.db.get_value(
+                    "Bin", {"item_code": loc.item_code, "warehouse": loc.warehouse}, "actual_qty"
+                ) or 0
+            else:
+                available_qty = loc.stock_qty
+
             items.append({
                 "row_name": loc.name,
                 "item_code": loc.item_code,
@@ -32,7 +34,9 @@ def get_or_create_warehouse_request_pick_list(warehouse_request):
                 "available_qty": available_qty,
             })
 
-        stock_entry = frappe.db.get_value("Stock Entry", {"pick_list": pl_doc.name, "docstatus": ["!=", 2]}, "name")
+        stock_entry = frappe.db.get_value(
+            "Stock Entry", {"pick_list": pl_doc.name, "docstatus": ["!=", 2]}, "name"
+        )
 
         return {
             "pick_list": pl_doc.name,
@@ -42,11 +46,47 @@ def get_or_create_warehouse_request_pick_list(warehouse_request):
             "items": items,
         }
 
-    company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value("Global Defaults", "default_company")
+    company = (
+        frappe.defaults.get_user_default("Company")
+        or frappe.db.get_single_value("Global Defaults", "default_company")
+    )
     pl_name = create_pick_list(company)
     frappe.db.set_value("Warehouse Request", warehouse_request, "pick_list", pl_name)
 
     return {"pick_list": pl_name, "submitted": False, "items": []}
+
+
+@frappe.whitelist()
+def get_warehouse_request_linked_docs(warehouse_request):
+    """
+    Return the linked Pick List, Stock Entry, and Delivery Note for a Warehouse Request
+    in a single call. Used by the form to populate View buttons without multiple round trips.
+    """
+    pick_list = frappe.db.get_value("Warehouse Request", warehouse_request, "pick_list")
+    if not pick_list:
+        return {"pick_list": None, "pick_list_submitted": False, "stock_entry": None, "delivery_note": None}
+
+    docstatus = frappe.db.get_value("Pick List", pick_list, "docstatus")
+
+    stock_entry = None
+    delivery_note = None
+
+    if docstatus == 1:
+        stock_entry = frappe.db.get_value(
+            "Stock Entry", {"pick_list": pick_list, "docstatus": ["!=", 2]}, "name"
+        )
+        delivery_note = frappe.db.get_value(
+            "Delivery Note",
+            {"custom_related_warehouse_request": warehouse_request, "docstatus": ["!=", 2]},
+            "name",
+        )
+
+    return {
+        "pick_list": pick_list,
+        "pick_list_submitted": docstatus == 1,
+        "stock_entry": stock_entry,
+        "delivery_note": delivery_note,
+    }
 
 
 @frappe.whitelist()
@@ -57,8 +97,8 @@ def reset_warehouse_request_pick_list(warehouse_request):
     if not pl_name:
         return {"success": False, "message": "No pick list linked"}
 
-    frappe.db.set_value("Warehouse Request", warehouse_request, "pick_list", None)
     delete_draft_pick_list(pl_name)
+    frappe.db.set_value("Warehouse Request", warehouse_request, "pick_list", None)
 
     return {"success": True}
 
@@ -78,11 +118,10 @@ def warehouse_request_query(doctype, txt, searchfield, start, page_len, filters)
         FROM `tabWarehouse Request`
         WHERE
             (name LIKE %(txt)s OR subject LIKE %(txt)s)
-            AND docstatus < 2
         ORDER BY modified DESC
         LIMIT %(start)s, %(page_len)s
     """, {
         'txt': f'%{txt}%',
         'start': start,
-        'page_len': page_len
+        'page_len': page_len,
     })
