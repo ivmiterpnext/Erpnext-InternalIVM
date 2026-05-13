@@ -61,7 +61,8 @@ doctype_js = {
     "Task": "public/js/doctype/Task.js",
     "Project": "public/js/doctype/Project.js",
     "Issue": "public/js/doctype/Issue.js",
-    "Delivery Note": "public/js/doctype/Delivery_Note.js"
+    "Delivery Note": "public/js/doctype/Delivery_Note.js",
+    "Stock Entry": "public/js/doctype/Stock_Entry.js"
 }
 
 doctype_list_js = {

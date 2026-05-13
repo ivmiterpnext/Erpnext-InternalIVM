@@ -2,8 +2,20 @@ import frappe
 from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry as _create_stock_entry
 
 
+def _get_draft_pick_list(pick_list):
+    """Load a Pick List and ensure it is still a draft."""
+    pl_doc = frappe.get_doc("Pick List", pick_list)
+    if pl_doc.docstatus != 0:
+        frappe.throw(f"Pick List {pick_list} is already submitted and cannot be modified")
+    return pl_doc
+
+
 def create_pick_list(company):
-    """Create and save a new draft Pick List for material transfer. Returns the document name."""
+    """
+    Create and save a new draft Pick List for material transfer.
+
+    Returns: document's name.
+    """
     pl_doc = frappe.new_doc("Pick List")
     pl_doc.company = company
     pl_doc.purpose = "Material Transfer"
@@ -25,7 +37,7 @@ def add_item_to_pick_list(pick_list, item_code, warehouse, qty, item_name=None, 
     if isinstance(qty, str):
         qty = float(qty)
 
-    pl_doc = frappe.get_doc("Pick List", pick_list)
+    pl_doc = _get_draft_pick_list(pick_list)
 
     existing = next(
         (loc for loc in pl_doc.locations if loc.item_code == item_code and loc.warehouse == warehouse),
@@ -65,7 +77,7 @@ def add_item_to_pick_list(pick_list, item_code, warehouse, qty, item_name=None, 
 @frappe.whitelist()
 def remove_pick_list_item(pick_list, row_name):
     """Remove a row from the Pick List locations child table."""
-    pl_doc = frappe.get_doc("Pick List", pick_list)
+    pl_doc = _get_draft_pick_list(pick_list)
     pl_doc.locations = [loc for loc in pl_doc.locations if loc.name != row_name]
     pl_doc.save(ignore_permissions=True)
     return {"success": True}
@@ -77,7 +89,7 @@ def update_pick_list_item_qty(pick_list, row_name, qty):
     if isinstance(qty, str):
         qty = float(qty)
 
-    pl_doc = frappe.get_doc("Pick List", pick_list)
+    pl_doc = _get_draft_pick_list(pick_list)
     for loc in pl_doc.locations:
         if loc.name == row_name:
             loc.qty = qty
@@ -90,9 +102,7 @@ def update_pick_list_item_qty(pick_list, row_name, qty):
 @frappe.whitelist()
 def clear_pick_list_items(pick_list):
     """Remove all rows from a draft Pick List."""
-    pl_doc = frappe.get_doc("Pick List", pick_list)
-    if pl_doc.docstatus != 0:
-        return {"success": False, "message": "Only draft pick lists can be cleared"}
+    pl_doc = _get_draft_pick_list(pick_list)
     pl_doc.locations = []
     pl_doc.save(ignore_permissions=True)
     return {"success": True}
@@ -101,7 +111,7 @@ def clear_pick_list_items(pick_list):
 @frappe.whitelist()
 def submit_pick_list(pick_list, target_warehouse=None):
     """Submit the Pick List and create a draft Stock Entry from it."""
-    pl_doc = frappe.get_doc("Pick List", pick_list)
+    pl_doc = _get_draft_pick_list(pick_list)
     if target_warehouse:
         pl_doc.parent_warehouse = target_warehouse
         pl_doc.save(ignore_permissions=True)
@@ -115,6 +125,13 @@ def submit_pick_list(pick_list, target_warehouse=None):
                 item["t_warehouse"] = target_warehouse
 
     stock_entry = frappe.get_doc(stock_entry_dict)
+
+    warehouse_request = frappe.db.get_value(
+        "Warehouse Request", {"pick_list": pick_list}, "name"
+    )
+    if warehouse_request:
+        stock_entry.custom_warehouse_request = warehouse_request
+
     stock_entry.insert()
 
     return {"pick_list": pl_doc.name, "stock_entry": stock_entry.name}
