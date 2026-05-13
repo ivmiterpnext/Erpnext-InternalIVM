@@ -1,6 +1,13 @@
 frappe.ui.form.on('Delivery Note', {
+	refresh: function(frm) {
+		if (frm.doc.custom_related_warehouse_request) {
+			frm.add_custom_button(__('Warehouse Request'), function() {
+				frappe.set_route('Form', 'Warehouse Request', frm.doc.custom_related_warehouse_request);
+			}, __('View'));
+		}
+	},
+
 	setup: function(frm) {
-		// Customize Warehouse Request link field to show ID and subject
 		frm.set_query('custom_related_warehouse_request', function() {
 			return {
 				query: 'ivm.warehouse.services.warehouse_request.warehouse_request_query'
@@ -9,19 +16,17 @@ frappe.ui.form.on('Delivery Note', {
 	},
 	
 	custom_related_warehouse_request: function(frm) {
-		// Auto-fetch items whenever warehouse request is selected or changed
 		if (frm.doc.custom_related_warehouse_request) {
 			frappe.call({
 				method: 'ivm.warehouse.services.stock_entry.get_stock_entry_items_from_warehouse_request',
 				args: {
 					warehouse_request: frm.doc.custom_related_warehouse_request
 				},
+
 				callback: function(r) {
 					if (r.message && r.message.length > 0) {
-						// Clear existing items
 						frm.clear_table('items');
 						
-						// Add items from warehouse request
 						r.message.forEach(function(item) {
 							var row = frm.add_child('items');
 							row.item_code = item.item_code;
@@ -49,6 +54,7 @@ frappe.ui.form.on('Delivery Note', {
 						});
 					}
 				},
+				
 				error: function(r) {
 					frappe.msgprint({
 						title: __('Error'),

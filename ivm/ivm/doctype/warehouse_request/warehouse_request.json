@@ -9,7 +9,216 @@
  "field_order": [
   "warehouse_request_name",
   "naming_series",
-  "created_date_2"
+  "created_date_2",
+  "related_project",
+  "pick_list",
+  "related_case",
+  "request_reason",
+  "account",
+  "time_spent",
+  "use_existing_plan",
+  "due_date",
+  "time_due",
+  "column_break_hj6v7",
+  "owner_name",
+  "new_request",
+  "bonus_timestamp",
+  "bonus_requirement_met",
+  "issue_found",
+  "explanation",
+  "status",
+  "priority",
+  "number_of_devices",
+  "request",
+  "subject",
+  "description",
+  "internal_notes",
+  "machine_names",
+  "machine_key",
+  "ethernet_port",
+  "power_connections",
+  "machine_ownership_status",
+  "equipment_type",
+  "is_refurbished",
+  "additional_information",
+  "wrap_type",
+  "wrap_layout",
+  "label_color",
+  "offline_sales",
+  "column_break_4jemu",
+  "locker_names",
+  "primary_locker",
+  "secondary_locker",
+  "enhanced_lockers",
+  "attached_to",
+  "locker_configuration_details",
+  "locker_front",
+  "interior_locker_lighting",
+  "additional_locker_information",
+  "vault_size",
+  "vault_power_configuration_details",
+  "device_request_info",
+  "connectivity",
+  "carrier",
+  "card_readers",
+  "column_break_65jdp",
+  "card_reader_type",
+  "card_reader_quantity",
+  "badge_number",
+  "rfid_1_settings",
+  "rfid_2_settings",
+  "rfid_3_settings",
+  "rfid_4_settings",
+  "rfid_5_settings",
+  "shipping_info",
+  "contact",
+  "shipping_phone",
+  "delivery_options",
+  "invoice_client_for_parts",
+  "invoice_notes",
+  "parts_invoiced",
+  "eori_information",
+  "ior",
+  "column_break_kieb6",
+  "shipping_address",
+  "shipping_company",
+  "tracking_number",
+  "return_tracking_number",
+  "invoice",
+  "ivm_parts_invoice_number",
+  "vat",
+  "kiosk_details",
+  "kiosk_options",
+  "kvm_switch_options",
+  "monitor_options",
+  "network_options",
+  "column_break_naxn5",
+  "electrical_outlet_in_bins",
+  "network_port_in_bins",
+  "interior_kiosk_lighting",
+  "locker_bin_door_type",
+  "column_break_rkvns",
+  "countertop_color",
+  "ada_side_table",
+  "kiosk_side_for_table",
+  "monitor_mount",
+  "overhead_light",
+  "section_break_csbpl",
+  "computer_interface_modules",
+  "equipment_numbers",
+  "1_machine_number",
+  "1_motherboard_number",
+  "1_serial_number",
+  "1_mac_address",
+  "send_machine_1_numbers_to_ics",
+  "2_machine_number",
+  "2_motherboard_number",
+  "2_serial_number",
+  "2_mac_address",
+  "send_machine_2_numbers_to_ics",
+  "3_machine_number",
+  "3_motherboard_number",
+  "3_serial_number",
+  "3_mac_address",
+  "send_machine_3_numbers_to_ics",
+  "4_machine_number",
+  "4_motherboard_number",
+  "4_serial_number",
+  "4_mac_address",
+  "send_machine_4_numbers_to_ics",
+  "5_machine_number",
+  "5_motherboard_number",
+  "5_serial_number",
+  "5_mac_address",
+  "send_machine_5_numbers_to_ics",
+  "send_numbers_to_ics",
+  "created_by",
+  "modified_by1",
+  "modified_date",
+  "column_break_sifxz",
+  "6_machine_number",
+  "6_motherboard_number",
+  "6_serial_number",
+  "6_mac_address",
+  "send_machine_6_numbers_to_ics",
+  "7_machine_number",
+  "7_motherboard_number",
+  "7_serial_number",
+  "7_mac_address",
+  "send_machine_7_numbers_to_ics",
+  "8_machine_number",
+  "8_motherboard_number",
+  "8_serial_number",
+  "8_mac_address",
+  "send_machine_8_numbers_to_ics",
+  "9_machine_number",
+  "9_motherboard_number",
+  "9_serial_number",
+  "9_mac_address",
+  "send_machine_9_numbers_to_ics",
+  "10_machine_number",
+  "10_motherboard_number",
+  "10_serial_number",
+  "10_mac_address",
+  "send_machine_10_numbers_to_ics",
+  "locale",
+  "created_date",
+  "column_break_ausuf",
+  "mac_address",
+  "serial_number",
+  "prose_number",
+  "machine_name",
+  "tenth_machine_name",
+  "tenth_prose_number",
+  "tenth_serial_number",
+  "tenth_mac_address",
+  "ninth_machine_name",
+  "ninth_prose_number",
+  "ninth_serial_number",
+  "ninth_mac_address",
+  "eighth_machine_name_",
+  "eighth_prose_number",
+  "eighth_serial_number",
+  "eighth_mac_address",
+  "seventh_machine_name",
+  "seventh_prose_number",
+  "number_10_task_sent",
+  "number_9_task_sent",
+  "number_8_task_sent",
+  "number_6_task_sent",
+  "number_5_task_sent",
+  "number_4_task_sent_1",
+  "column_break_fksy",
+  "seventh_serial_number",
+  "seventh_mac_address",
+  "sixth_machine_name",
+  "sixth_prose_number",
+  "sixth_serial_number",
+  "sixth_mac_address",
+  "fifth_machine_name",
+  "fifth_prose_number",
+  "fifth_serial_number",
+  "fifth_mac_address",
+  "fourth_mac_address",
+  "fourth_prose_number",
+  "fourth_serial_number",
+  "fourth_machine_name",
+  "third_mac_address",
+  "third_serial_number",
+  "third_prose_number",
+  "third_machine_name",
+  "second_mac_address",
+  "second_serial_number",
+  "second_machine_name",
+  "second_prose_number",
+  "number_1_task_sent",
+  "number_2_task_sent",
+  "number_7_task_sent",
+  "number_3_task_sent",
+  "connectivity_device_quantity",
+  "created_and_modified_details",
+  "project_name",
+  "date_and_time_closed"
  ],
  "fields": [
   {
@@ -30,15 +239,1256 @@
    "fieldtype": "Datetime",
    "label": "Created Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "related_project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Related Deployment",
+   "options": "Project"
+  },
+  {
+   "fieldname": "pick_list",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Active Pick List",
+   "no_copy": 1,
+   "options": "Pick List",
+   "read_only": 1
+  },
+  {
+   "fieldname": "related_case",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Related Case",
+   "options": "Issue"
+  },
+  {
+   "fieldname": "request_reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Request Reason",
+   "options": "--None--\nProduct Testing\nBuild Machine\nBuild Locker\nBuild Kiosk\nBuild Vault\nWrap Ready\nPrint Labels\nDevice Request\nShipping Request\nReader Request\nTransport/Relocate Equipment\nShipping Quote\nOther"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "time_spent",
+   "fieldtype": "Duration",
+   "label": "Time Spent"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_existing_plan",
+   "fieldtype": "Check",
+   "label": "Use Existing Plan"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date"
+  },
+  {
+   "fieldname": "time_due",
+   "fieldtype": "Time",
+   "label": "Time Due"
+  },
+  {
+   "fieldname": "column_break_hj6v7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "owner_name",
+   "fieldtype": "Link",
+   "label": "Owner Name",
+   "options": "User"
+  },
+  {
+   "default": "new",
+   "fieldname": "new_request",
+   "fieldtype": "Read Only",
+   "hidden": 1,
+   "label": "New Request",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bonus_timestamp",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Bonus Timestamp"
+  },
+  {
+   "fieldname": "explanation",
+   "fieldtype": "Data",
+   "label": "Explanation"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "New\nIn Progress\nPending\nCrated - Ready to Ship\nClosed"
+  },
+  {
+   "default": "Medium",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "High\nMedium\nLow"
+  },
+  {
+   "fieldname": "number_of_devices",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Number of Devices"
+  },
+  {
+   "fieldname": "request",
+   "fieldtype": "Section Break",
+   "label": "Request"
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Subject"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "internal_notes",
+   "fieldtype": "Text Editor",
+   "label": "Internal Notes"
+  },
+  {
+   "fieldname": "machine_names",
+   "fieldtype": "Data",
+   "label": "Machine Names"
+  },
+  {
+   "fieldname": "machine_key",
+   "fieldtype": "Data",
+   "label": "Machine Key",
+   "translatable": 1
+  },
+  {
+   "fieldname": "ethernet_port",
+   "fieldtype": "Select",
+   "label": "Ethernet Port",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "power_connections",
+   "fieldtype": "Select",
+   "label": "Power Connections",
+   "options": "--None--\nNone\nUSB\n110 Outlets\n220 Outlets"
+  },
+  {
+   "fieldname": "machine_ownership_status",
+   "fieldtype": "Select",
+   "label": "Machine Ownership",
+   "options": "--None--\nPurchase\nLease",
+   "translatable": 1
+  },
+  {
+   "fieldname": "additional_information",
+   "fieldtype": "Small Text",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "wrap_type",
+   "fieldtype": "Select",
+   "label": "Wrap Type",
+   "options": "--None--\nClient\nIVM\nNo Wrap"
+  },
+  {
+   "fieldname": "offline_sales",
+   "fieldtype": "Select",
+   "label": "Offline Sales",
+   "options": "--None--\nAll\nStored\nDisabled"
+  },
+  {
+   "fieldname": "column_break_4jemu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "locker_names",
+   "fieldtype": "Small Text",
+   "label": "Locker Names"
+  },
+  {
+   "default": "0",
+   "fieldname": "primary_locker",
+   "fieldtype": "Check",
+   "label": "Primary Locker"
+  },
+  {
+   "default": "0",
+   "fieldname": "secondary_locker",
+   "fieldtype": "Check",
+   "label": "Secondary Locker"
+  },
+  {
+   "default": "0",
+   "fieldname": "enhanced_lockers",
+   "fieldtype": "Check",
+   "label": "Enhanced Lockers"
+  },
+  {
+   "fieldname": "attached_to",
+   "fieldtype": "Data",
+   "label": "Attached To"
+  },
+  {
+   "fieldname": "locker_configuration_details",
+   "fieldtype": "Small Text",
+   "label": "Locker Configuration Details"
+  },
+  {
+   "fieldname": "locker_front",
+   "fieldtype": "Select",
+   "label": "Locker Front",
+   "options": "--None--\nSolid\nGlass"
+  },
+  {
+   "fieldname": "interior_locker_lighting",
+   "fieldtype": "Select",
+   "label": "Interior Locker Lighting",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "additional_locker_information",
+   "fieldtype": "Small Text",
+   "label": "Additional Locker Information"
+  },
+  {
+   "fieldname": "vault_size",
+   "fieldtype": "Select",
+   "label": "Vault Size",
+   "options": "--None--\nFull\nHalf\nHalf with storage"
+  },
+  {
+   "fieldname": "vault_power_configuration_details",
+   "fieldtype": "Small Text",
+   "label": "Vault Power Configuration Details"
+  },
+  {
+   "fieldname": "device_request_info",
+   "fieldtype": "Section Break",
+   "label": "Device Request Info"
+  },
+  {
+   "fieldname": "connectivity",
+   "fieldtype": "Select",
+   "label": "Connectivity",
+   "options": "--None--\nWiFi\nLAN\nCellular\nNot Needed\nOther"
+  },
+  {
+   "fieldname": "carrier",
+   "fieldtype": "Select",
+   "label": "Carrier",
+   "options": "--None--\nAT&T\nSprint\nNew Deployment\nClient SIM\nVerizon\nUnknown"
+  },
+  {
+   "fieldname": "card_readers",
+   "fieldtype": "Small Text",
+   "label": "Card Readers"
+  },
+  {
+   "fieldname": "column_break_65jdp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "card_reader_type",
+   "fieldtype": "Select",
+   "label": "Card Reader Type",
+   "options": "--None--\nBarcode\nBarcode Reader\n2-D Barcode Reader\nStandard Barcode Reader\nCredit Card\nCredit Card Reader\nDelta3\nHID iCLASS SE\nHID MultiCLASS SE\nHID P300HA\nHID Multi Class\nHID Multiclass\nprox\nProx - HID Iclass SE\nP300 HA\nProx - P300\nP-300AH\nProx - P300 - AH\nP300AH\nP300 - AH\np-300\nFOB - P300 AH\nPin Pad\nQR Code\nQR Code Reader\nWave\nWave ID reader\nMifare\nIndala\ntbd\nOther\nNot Needed"
+  },
+  {
+   "fieldname": "rfid_1_settings",
+   "fieldtype": "Data",
+   "label": "RFID 1 Settings"
+  },
+  {
+   "fieldname": "rfid_2_settings",
+   "fieldtype": "Data",
+   "label": "RFID 2 Settings"
+  },
+  {
+   "fieldname": "shipping_info",
+   "fieldtype": "Section Break",
+   "label": "Shipping Info"
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "shipping_phone",
+   "fieldtype": "Data",
+   "label": "Shipping Phone",
+   "translatable": 1
+  },
+  {
+   "fieldname": "delivery_options",
+   "fieldtype": "Select",
+   "label": "Delivery Options",
+   "options": "--None--\nOvernight\n2-Day\nGround"
+  },
+  {
+   "default": "0",
+   "fieldname": "invoice_client_for_parts",
+   "fieldtype": "Check",
+   "label": "Invoice Client for Parts"
+  },
+  {
+   "default": "0",
+   "fieldname": "parts_invoiced",
+   "fieldtype": "Check",
+   "label": "Parts Invoiced"
+  },
+  {
+   "fieldname": "eori_information",
+   "fieldtype": "Data",
+   "label": "EORI Information"
+  },
+  {
+   "fieldname": "ior",
+   "fieldtype": "Small Text",
+   "label": "IOR"
+  },
+  {
+   "fieldname": "column_break_kieb6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "related_project.address",
+   "fieldname": "shipping_address",
+   "fieldtype": "Small Text",
+   "label": "Shipping Address"
+  },
+  {
+   "fetch_from": "related_project.shipping_company",
+   "fieldname": "shipping_company",
+   "fieldtype": "Data",
+   "label": "Shipping Company"
+  },
+  {
+   "fetch_from": "related_project.shipping_tracking_number",
+   "fieldname": "tracking_number",
+   "fieldtype": "Data",
+   "label": "Tracking Number"
+  },
+  {
+   "fieldname": "return_tracking_number",
+   "fieldtype": "Data",
+   "label": "Return Tracking Number"
+  },
+  {
+   "fieldname": "invoice",
+   "fieldtype": "Select",
+   "label": "Invoice",
+   "options": "--None--\nClient\nIVM"
+  },
+  {
+   "fieldname": "ivm_parts_invoice_number",
+   "fieldtype": "Data",
+   "label": "IVM Parts Invoice Number"
+  },
+  {
+   "fieldname": "vat",
+   "fieldtype": "Data",
+   "label": "VAT"
+  },
+  {
+   "fieldname": "kiosk_details",
+   "fieldtype": "Section Break",
+   "label": "Kiosk Details"
+  },
+  {
+   "fieldname": "kiosk_options",
+   "fieldtype": "Select",
+   "label": "Kiosk Options",
+   "options": "--None--\nNone\nKiosk w/ KVM & All-in-one\nKisok w/ All-in-one\nSide Table"
+  },
+  {
+   "fieldname": "kvm_switch_options",
+   "fieldtype": "Select",
+   "label": "KVM Switch Options",
+   "options": "--None--\nNone\nStandard KVM Switch Raritan DKX3-108 KVM\nClient to Provide"
+  },
+  {
+   "fieldname": "monitor_options",
+   "fieldtype": "Select",
+   "label": "Monitor Options",
+   "options": "--None--\nNone\n27' All-in-One Optiplex 7780\n22' Display Dell P2217\n24' Display Dell E2420HS\n27' Display Dell E2720HS\nClient to Provide and Install"
+  },
+  {
+   "fieldname": "network_options",
+   "fieldtype": "Select",
+   "label": "Network Options",
+   "options": "--None--\n16 Port Netgear Switch\nClient Provided\n32 Port Netgear Switch\n31 Port Netgear Switch\n37 Port Netgear Switch\n26 Port Netgear Switch\n42 Port Netgear Switch\n38 Port Netgear Switch\n21 Port Netgear Switch\n45 Port Netgear Switch\n47 Port Netgear Switch\n35 Port Netgear Switch\n22 Port Netgear Switch\n39 Port Netgear Switch\n46 Port Netgear Switch\n34 Port Netgear Switch\n30 Port Netgear Switch\n43 Port Netgear Switch\n18 Port Netgear Switch\n28 Port Netgear Switch\n27 Port Netgear Switch\n17 Port Netgear Switch\n36 Port Netgear Switch\n33 Port Netgear Switch\n19 Port Netgear Switch\n40 Port Netgear Switch\n25 Port Netgear Switch\n44 Port Netgear Switch\n41 Port Netgear Switch\n20 Port Netgear Switch\n24 Port Netgear Switch\n23 Port Netgear Switch\n16 Port Netgear Switch\n29 Port Netgear Switch"
+  },
+  {
+   "fieldname": "column_break_naxn5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "electrical_outlet_in_bins",
+   "fieldtype": "Select",
+   "label": "Electrical Outlet in Bins",
+   "options": "--None--\nNo\nNone\nUSB\n110 Outlets\n220 Outlets"
+  },
+  {
+   "fieldname": "network_port_in_bins",
+   "fieldtype": "Select",
+   "label": "Network Port in Bins",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "interior_kiosk_lighting",
+   "fieldtype": "Select",
+   "label": "Interior Kiosk Lighting",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "locker_bin_door_type",
+   "fieldtype": "Select",
+   "label": "Locker Bin Door Type",
+   "options": "--None--\nGlass\nSolid"
+  },
+  {
+   "fieldname": "column_break_rkvns",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "countertop_color",
+   "fieldtype": "Select",
+   "label": "Countertop Color",
+   "options": "--None--\nBlue\nBlack\nLight Gray\nDark Gray"
+  },
+  {
+   "fieldname": "ada_side_table",
+   "fieldtype": "Select",
+   "label": "ADA Side Table",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "kiosk_side_for_table",
+   "fieldtype": "Select",
+   "label": "Kiosk Side for Table",
+   "options": "--None--\nRight\nLeft"
+  },
+  {
+   "fieldname": "monitor_mount",
+   "fieldtype": "Select",
+   "label": "Monitor Mount",
+   "options": "--None--\nYes\nNo"
+  },
+  {
+   "fieldname": "overhead_light",
+   "fieldtype": "Select",
+   "label": "Overhead Light",
+   "options": "--None--\nYes\nNo",
+   "translatable": 1
+  },
+  {
+   "fieldname": "section_break_csbpl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "computer_interface_modules",
+   "fieldtype": "Table MultiSelect",
+   "label": "Computer Interface Modules",
+   "options": "Computer Module List"
+  },
+  {
+   "fieldname": "equipment_numbers",
+   "fieldtype": "Section Break",
+   "label": "Equipment Numbers"
+  },
+  {
+   "fieldname": "1_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "1 Machine Number"
+  },
+  {
+   "fieldname": "1_motherboard_number",
+   "fieldtype": "Data",
+   "label": "1 Motherboard Number"
+  },
+  {
+   "fieldname": "1_serial_number",
+   "fieldtype": "Data",
+   "label": "1 Serial Number"
+  },
+  {
+   "fieldname": "1_mac_address",
+   "fieldtype": "Data",
+   "label": "1 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_1_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 1 Numbers to ICS"
+  },
+  {
+   "fieldname": "2_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "2 Machine Number"
+  },
+  {
+   "fieldname": "2_motherboard_number",
+   "fieldtype": "Data",
+   "label": "2 Motherboard Number"
+  },
+  {
+   "fieldname": "2_serial_number",
+   "fieldtype": "Data",
+   "label": "2 Serial Number"
+  },
+  {
+   "fieldname": "2_mac_address",
+   "fieldtype": "Data",
+   "label": "2 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_2_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 2 Numbers to ICS"
+  },
+  {
+   "fieldname": "3_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "3 Machine Number"
+  },
+  {
+   "fieldname": "3_motherboard_number",
+   "fieldtype": "Data",
+   "label": "3 Motherboard Number"
+  },
+  {
+   "fieldname": "3_serial_number",
+   "fieldtype": "Data",
+   "label": "3 Serial Number"
+  },
+  {
+   "fieldname": "3_mac_address",
+   "fieldtype": "Data",
+   "label": "3 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_3_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 3 Numbers to ICS"
+  },
+  {
+   "fieldname": "4_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "4 Machine Number"
+  },
+  {
+   "fieldname": "4_motherboard_number",
+   "fieldtype": "Data",
+   "label": "4 Motherboard Number"
+  },
+  {
+   "fieldname": "4_serial_number",
+   "fieldtype": "Data",
+   "label": "4 Serial Number"
+  },
+  {
+   "fieldname": "4_mac_address",
+   "fieldtype": "Data",
+   "label": "4 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_4_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 4 Numbers to ICS"
+  },
+  {
+   "fieldname": "5_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "5 Machine Number"
+  },
+  {
+   "fieldname": "5_motherboard_number",
+   "fieldtype": "Data",
+   "label": "5 Motherboard Number"
+  },
+  {
+   "fieldname": "5_serial_number",
+   "fieldtype": "Data",
+   "label": "5 Serial Number"
+  },
+  {
+   "fieldname": "5_mac_address",
+   "fieldtype": "Data",
+   "label": "5 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_5_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 5 Numbers to ICS"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Numbers to ICS"
+  },
+  {
+   "fieldname": "created_by",
+   "fieldtype": "Link",
+   "label": "Created By",
+   "options": "User"
+  },
+  {
+   "bold": 1,
+   "fieldname": "modified_by1",
+   "fieldtype": "Data",
+   "label": "Modified By",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "modified_date",
+   "fieldtype": "Datetime",
+   "label": "Modified Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_sifxz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "6_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "6 Machine Number"
+  },
+  {
+   "fieldname": "6_motherboard_number",
+   "fieldtype": "Data",
+   "label": "6 Motherboard Number"
+  },
+  {
+   "fieldname": "6_serial_number",
+   "fieldtype": "Data",
+   "label": "6 Serial Number"
+  },
+  {
+   "fieldname": "6_mac_address",
+   "fieldtype": "Data",
+   "label": "6 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_6_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 6 Numbers to ICS"
+  },
+  {
+   "fieldname": "7_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "7 Machine Number"
+  },
+  {
+   "fieldname": "7_motherboard_number",
+   "fieldtype": "Data",
+   "label": "7 Motherboard Number"
+  },
+  {
+   "fieldname": "7_serial_number",
+   "fieldtype": "Data",
+   "label": "7 Serial Number"
+  },
+  {
+   "fieldname": "7_mac_address",
+   "fieldtype": "Data",
+   "label": "7 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_7_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 7 Numbers to ICS"
+  },
+  {
+   "fieldname": "8_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "8 Machine Number"
+  },
+  {
+   "fieldname": "8_motherboard_number",
+   "fieldtype": "Data",
+   "label": "8 Motherboard Number"
+  },
+  {
+   "fieldname": "8_serial_number",
+   "fieldtype": "Data",
+   "label": "8 Serial Number"
+  },
+  {
+   "fieldname": "8_mac_address",
+   "fieldtype": "Data",
+   "label": "8 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_8_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 8 Numbers to ICS"
+  },
+  {
+   "fieldname": "9_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "9 Machine Number"
+  },
+  {
+   "fieldname": "9_motherboard_number",
+   "fieldtype": "Data",
+   "label": "9 Motherboard Number"
+  },
+  {
+   "fieldname": "9_serial_number",
+   "fieldtype": "Data",
+   "label": "9 Serial Number"
+  },
+  {
+   "fieldname": "9_mac_address",
+   "fieldtype": "Data",
+   "label": "9 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_9_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 9 Numbers to ICS"
+  },
+  {
+   "fieldname": "10_machine_number",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "10 Machine Number"
+  },
+  {
+   "fieldname": "10_motherboard_number",
+   "fieldtype": "Data",
+   "label": "10 Motherboard Number"
+  },
+  {
+   "fieldname": "10_serial_number",
+   "fieldtype": "Data",
+   "label": "10 Serial Number"
+  },
+  {
+   "fieldname": "10_mac_address",
+   "fieldtype": "Data",
+   "label": "10 MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_machine_10_numbers_to_ics",
+   "fieldtype": "Check",
+   "label": "Send Machine 10 Numbers to ICS"
+  },
+  {
+   "fieldname": "locale",
+   "fieldtype": "Select",
+   "label": "Locale",
+   "options": "--None--\nDomestic\nInternational",
+   "translatable": 1
+  },
+  {
+   "fieldname": "created_date",
+   "fieldtype": "Date",
+   "label": "Created Date"
+  },
+  {
+   "fieldname": "column_break_ausuf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "  ",
+   "fieldname": "mac_address",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": "  ",
+   "fieldname": "serial_number",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Serial Number",
+   "translatable": 1
+  },
+  {
+   "default": "  ",
+   "fieldname": "prose_number",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "PROSE Number",
+   "translatable": 1
+  },
+  {
+   "default": " ",
+   "fieldname": "machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Machine Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_10_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 10 Task sent"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_9_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 9 Task sent"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_8_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 8 Task sent"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_6_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 6 Task sent"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_5_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 5 Task sent"
+  },
+  {
+   "fieldname": "created_and_modified_details",
+   "fieldtype": "Section Break",
+   "label": "Created and Modified Details"
+  },
+  {
+   "fetch_from": "related_project.project_name",
+   "fieldname": "project_name",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "Project Name",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "date_and_time_closed",
+   "fieldtype": "Datetime",
+   "label": "Date/Time Closed",
+   "read_only": 1
+  },
+  {
+   "default": " ",
+   "fieldname": "tenth_machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Tenth Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "tenth_prose_number",
+   "fieldtype": "Text",
+   "label": "Tenth PROSE Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "tenth_serial_number",
+   "fieldtype": "Text",
+   "label": "Tenth Serial Number",
+   "translatable": 1
+  },
+  {
+   "default": " ",
+   "fieldname": "tenth_mac_address",
+   "fieldtype": "Text",
+   "label": "Tenth MAC Address"
+  },
+  {
+   "default": " ",
+   "fieldname": "ninth_machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Ninth Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "ninth_prose_number",
+   "fieldtype": "Text",
+   "label": "Ninth PROSE Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "ninth_serial_number",
+   "fieldtype": "Text",
+   "label": "Ninth Serial Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "ninth_mac_address",
+   "fieldtype": "Text",
+   "label": "Ninth MAC Address"
+  },
+  {
+   "default": " ",
+   "fieldname": "eighth_machine_name_",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Eighth Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "eighth_prose_number",
+   "fieldtype": "Text",
+   "label": "Eighth PROSE Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "eighth_serial_number",
+   "fieldtype": "Text",
+   "label": "Eighth Serial Number"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_4_task_sent_1",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 4 Task Sent 1"
+  },
+  {
+   "default": " ",
+   "fieldname": "eighth_mac_address",
+   "fieldtype": "Text",
+   "label": "Eighth MAC Address"
+  },
+  {
+   "default": " ",
+   "fieldname": "seventh_machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Seventh Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "seventh_prose_number",
+   "fieldtype": "Text",
+   "label": "Seventh PROSE Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "seventh_serial_number",
+   "fieldtype": "Text",
+   "label": "Seventh Serial Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "seventh_mac_address",
+   "fieldtype": "Text",
+   "label": "Seventh MAC Address"
+  },
+  {
+   "default": " ",
+   "fieldname": "sixth_machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Sixth Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "sixth_prose_number",
+   "fieldtype": "Text",
+   "label": "Sixth PROSE Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "sixth_serial_number",
+   "fieldtype": "Text",
+   "label": "Sixth Serial Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "sixth_mac_address",
+   "fieldtype": "Text",
+   "label": "Sixth MAC Address"
+  },
+  {
+   "default": " ",
+   "fieldname": "fifth_machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Fifth Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "fifth_prose_number",
+   "fieldtype": "Text",
+   "label": "Fifth PROSE Number"
+  },
+  {
+   "default": "  ",
+   "fieldname": "fifth_serial_number",
+   "fieldtype": "Text",
+   "label": "Fifth Serial Number"
+  },
+  {
+   "default": "  ",
+   "fieldname": "fifth_mac_address",
+   "fieldtype": "Text",
+   "label": "Fifth MAC Address"
+  },
+  {
+   "default": " ",
+   "fieldname": "fourth_mac_address",
+   "fieldtype": "Text",
+   "label": "Fourth MAC Address"
+  },
+  {
+   "default": " ",
+   "fieldname": "fourth_prose_number",
+   "fieldtype": "Text",
+   "label": "Fourth PROSE Number"
+  },
+  {
+   "fieldname": "fourth_serial_number",
+   "fieldtype": "Text",
+   "label": "Fourth Serial Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "fourth_machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Fourth Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "third_mac_address",
+   "fieldtype": "Data",
+   "label": "Third MAC Address",
+   "translatable": 1
+  },
+  {
+   "default": " ",
+   "fieldname": "third_serial_number",
+   "fieldtype": "Text",
+   "label": "Third Serial Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "third_prose_number",
+   "fieldtype": "Text",
+   "label": "Third PROSE Number"
+  },
+  {
+   "default": " ",
+   "fieldname": "third_machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Third Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "second_mac_address",
+   "fieldtype": "Text",
+   "label": "Second MAC Address"
+  },
+  {
+   "fieldname": "second_serial_number",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Second Serial Number"
+  },
+  {
+   "fieldname": "second_machine_name",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Second Machine Name"
+  },
+  {
+   "default": " ",
+   "fieldname": "second_prose_number",
+   "fieldtype": "Text",
+   "in_global_search": 1,
+   "label": "Second PROSE Number"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_1_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 1 Task sent"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_2_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 2 Task sent"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_7_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 7 Task sent"
+  },
+  {
+   "default": "0",
+   "fieldname": "number_3_task_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Number 3 Task sent"
+  },
+  {
+   "fieldname": "invoice_notes",
+   "fieldtype": "Small Text",
+   "label": "Invoice Notes",
+   "mandatory_depends_on": "eval:doc.request_reason==='Shipping Request'",
+   "translatable": 1
+  },
+  {
+   "fetch_from": "related_project.rfid_3_settings",
+   "fieldname": "rfid_3_settings",
+   "fieldtype": "Small Text",
+   "label": "RFID 3 Settings"
+  },
+  {
+   "fetch_from": "related_project.rfid_4_settings",
+   "fieldname": "rfid_4_settings",
+   "fieldtype": "Small Text",
+   "label": "RFID 4 Settings"
+  },
+  {
+   "fetch_from": "related_project.rfid_5_settings",
+   "fieldname": "rfid_5_settings",
+   "fieldtype": "Small Text",
+   "label": "RFID 5 Settings"
+  },
+  {
+   "fetch_from": "related_project.card_readers_quantity",
+   "fieldname": "card_reader_quantity",
+   "fieldtype": "Text",
+   "label": "Card Reader Quantity"
+  },
+  {
+   "fetch_from": "related_project.associated_dbadge_numbereployment_location",
+   "fieldname": "badge_number",
+   "fieldtype": "Text",
+   "label": "Badge Number"
+  },
+  {
+   "fetch_from": "related_project.connectivity_devices_quantity",
+   "fieldname": "connectivity_device_quantity",
+   "fieldtype": "Int",
+   "label": "Connectivity Device Quantity"
+  },
+  {
+   "fetch_from": "related_project.wrap_layout_if_applicable",
+   "fieldname": "wrap_layout",
+   "fieldtype": "Small Text",
+   "label": "Wrap Layout (If Applicable) ",
+   "translatable": 1
+  },
+  {
+   "fetch_from": "related_project.label_color",
+   "fieldname": "label_color",
+   "fieldtype": "Data",
+   "label": "Label Color",
+   "translatable": 1
+  },
+  {
+   "fetch_from": "related_project.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Data",
+   "label": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "related_project.is_refurbished",
+   "fieldname": "is_refurbished",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Refurbished?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bonus_requirement_met",
+   "fieldtype": "Table MultiSelect",
+   "label": "Bonus Requirement Met",
+   "options": "Warehouse Employee List",
+   "permlevel": 9,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "issue_found",
+   "fieldtype": "Table MultiSelect",
+   "label": "Issue Found",
+   "options": "Warehouse Employee List",
+   "permlevel": 9,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_fksy",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-05 12:36:01.455062",
+ "modified": "2026-05-13 04:45:45.994635",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Warehouse Request",
- "name_case": "UPPER CASE",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
@@ -55,6 +1505,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",
