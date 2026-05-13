@@ -3,49 +3,66 @@
 
 frappe.ui.form.on('Warehouse Request', {
 	refresh: function(frm) {
-		// Add button to open item scanner page for Build or Shipping requests
-		if (!frm.is_new() && frm.doc.request_reason &&
-		    (frm.doc.request_reason.includes('Build') || frm.doc.request_reason == 'Shipping Request')) {
+		if (frm.is_new() || !frm.doc.request_reason) return;
 
-			if (frm.doc.pick_list) {
-				frappe.db.get_value('Pick List', frm.doc.pick_list, 'docstatus', function(r) {
-					if (r && r.docstatus === 1) {
-						frappe.db.get_value('Stock Entry', { pick_list: frm.doc.pick_list }, 'name', function(se) {
-							if (se && se.name) {
-								frm.add_custom_button(__('View Stock Entry'), function() {
-									frappe.set_route('Form', 'Stock Entry', se.name);
-								}, __('Stock'));
-							}
-						});
-					} else {
-						frm.add_custom_button(__('Continue Picking'), function() {
-							window.location.href = `/app/item_scanner?warehouse_request=${encodeURIComponent(frm.doc.name)}`;
-						}, __('Stock'));
-						frm.add_custom_button(__('Reset Pick List'), function() {
-							frappe.confirm(
-								__('Delete the current draft Pick List and start fresh?'),
-								function() {
-									frappe.call({
-										method: 'ivm.warehouse.services.warehouse_request.reset_warehouse_request_pick_list',
-										args: { warehouse_request: frm.doc.name },
-										callback: function(r) {
-											if (r.message && r.message.success) {
-												frm.reload_doc();
-											} else {
-												frappe.msgprint(r.message && r.message.message || __('Could not reset pick list'));
-											}
+		var is_pick_request = frm.doc.request_reason.includes('Build') || frm.doc.request_reason == 'Shipping Request';
+		if (!is_pick_request) return;
+
+		frappe.call({
+			method: 'ivm.warehouse.services.warehouse_request.get_warehouse_request_linked_docs',
+			args: { warehouse_request: frm.doc.name },
+			callback: function(r) {
+				if (!r.message) return;
+				var docs = r.message;
+
+				if (!docs.pick_list) {
+					frm.add_custom_button(__('Begin Picking'), function() {
+						frappe.set_route('item_scanner', { warehouse_request: frm.doc.name });
+					}, __('Stock'));
+					return;
+				}
+
+				if (!docs.pick_list_submitted) {
+					frm.add_custom_button(__('Continue Picking'), function() {
+						frappe.set_route('item_scanner', { warehouse_request: frm.doc.name });
+					}, __('Stock'));
+					frm.add_custom_button(__('Reset Pick List'), function() {
+						frappe.confirm(
+							__('Delete the current draft Pick List and start fresh?'),
+							function() {
+								frappe.call({
+									method: 'ivm.warehouse.services.warehouse_request.reset_warehouse_request_pick_list',
+									args: { warehouse_request: frm.doc.name },
+									callback: function(res) {
+										if (res.message && res.message.success) {
+											frm.reload_doc();
+										} else {
+											frappe.msgprint(res.message && res.message.message || __('Could not reset pick list'));
 										}
-									});
-								}
-							);
-						}, __('Stock'));
-					}
-				});
-			} else {
-				frm.add_custom_button(__('Begin Picking'), function() {
-					window.location.href = `/app/item_scanner?warehouse_request=${encodeURIComponent(frm.doc.name)}`;
-				}, __('Stock'));
+									}
+								});
+							}
+						);
+					}, __('Stock'));
+					return;
+				}
+
+				frm.add_custom_button(__('Pick List'), function() {
+					frappe.set_route('Form', 'Pick List', docs.pick_list);
+				}, __('View'));
+
+				if (docs.stock_entry) {
+					frm.add_custom_button(__('Stock Entry'), function() {
+						frappe.set_route('Form', 'Stock Entry', docs.stock_entry);
+					}, __('View'));
+				}
+
+				if (docs.delivery_note) {
+					frm.add_custom_button(__('Delivery Note'), function() {
+						frappe.set_route('Form', 'Delivery Note', docs.delivery_note);
+					}, __('View'));
+				}
 			}
-		}
+		});
 	}
 });
