@@ -1,7 +1,6 @@
 # Copyright (c) 2023, korecent and contributors
 # For license information, please see license.txt
 
-import frappe
 from frappe.model.document import Document
 
 
@@ -22,5 +21,5 @@ class WarehouseRequest(Document):
         )
         if status_changed_to_closed and self.request_reason == "Shipping Request":
             from ivm.warehouse.services.delivery_note import (create_delivery_note_from_warehouse_request)
-            
+
             create_delivery_note_from_warehouse_request(self.name)
