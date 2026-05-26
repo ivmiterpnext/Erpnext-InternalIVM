@@ -2,11 +2,49 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Warehouse Request', {
+	setup: function(frm) {
+		frm.set_query('source_build_request', function() {
+			return {
+				filters: {
+					related_project: frm.doc.related_project,
+					request_reason: ['like', 'Build%'],
+					status: 'Crated - Ready to Ship'
+				}
+			};
+		});
+	},
+
+	onload: function(frm) {
+		if (!frm.is_new()) {
+			frm._server_status = frm.doc.status;
+		}
+	},
+
 	refresh: function(frm) {
 		if (frm.is_new() || !frm.doc.request_reason) return;
 
+		// Update the cached server status on every refresh (which fires after save too)
+		frm._server_status = frm.doc.status;
+
 		var is_pick_request = frm.doc.request_reason.includes('Build') || frm.doc.request_reason == 'Shipping Request';
 		if (!is_pick_request) return;
+
+		// Shipping Requests linked to a Build skip the Item Scanner —
+		// just show a Delivery Note button if one exists
+		if (frm.doc.request_reason == 'Shipping Request' && frm.doc.source_build_request) {
+			frappe.db.get_value('Delivery Note',
+				{custom_related_warehouse_request: frm.doc.name, docstatus: ['!=', 2]},
+				'name',
+				function(r) {
+					if (r && r.name) {
+						frm.add_custom_button(__('Delivery Note'), function() {
+							frappe.set_route('Form', 'Delivery Note', r.name);
+						}, __('View'));
+					}
+				}
+			);
+			return;
+		}
 
 		frappe.call({
 			method: 'ivm.warehouse.services.warehouse_request.get_warehouse_request_linked_docs',
@@ -64,5 +102,28 @@ frappe.ui.form.on('Warehouse Request', {
 				}
 			}
 		});
+	},
+
+	after_save: function(frm) {
+		if (!frm.doc.request_reason || !frm.doc.request_reason.includes('Build')) return;
+		if (frm.doc.status !== 'Crated - Ready to Ship') return;
+
+		// Only prompt if status actually changed to "Crated - Ready to Ship" on this save
+		if (frm._server_status === 'Crated - Ready to Ship') return;
+
+		frappe.confirm(
+			__('Create a Shipping Request for this build?'),
+			function() {
+				frappe.call({
+					method: 'ivm.warehouse.services.warehouse_request.create_shipping_request_from_build',
+					args: { build_warehouse_request: frm.doc.name },
+					callback: function(r) {
+						if (r.message) {
+							frappe.set_route('Form', 'Warehouse Request', r.message);
+						}
+					}
+				});
+			}
+		);
 	}
 });
