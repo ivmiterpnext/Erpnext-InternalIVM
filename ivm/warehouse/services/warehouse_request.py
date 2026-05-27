@@ -104,6 +104,62 @@ def reset_warehouse_request_pick_list(warehouse_request):
 
 
 @frappe.whitelist()
+def create_shipping_request_from_build(build_warehouse_request):
+    """
+    Create a Shipping Request Warehouse Request from a completed Build WR.
+
+    The new Shipping Request links back to the Build via `source_build_request`
+    so that its Delivery Note can be populated from the Build's Pick List items.
+    """
+    build_wr = frappe.get_doc("Warehouse Request", build_warehouse_request)
+
+    if not build_wr.request_reason or not build_wr.request_reason.startswith("Build"):
+        frappe.throw(f"Warehouse Request {build_warehouse_request} is not a Build request.")
+
+    if build_wr.status != "Crated - Ready to Ship":
+        frappe.throw(
+            f"Warehouse Request {build_warehouse_request} must be in "
+            "'Crated - Ready to Ship' status to create a Shipping Request."
+        )
+
+    if not build_wr.pick_list:
+        frappe.throw(f"Warehouse Request {build_warehouse_request} has no Pick List.")
+
+    pl_docstatus = frappe.db.get_value("Pick List", build_wr.pick_list, "docstatus")
+    if pl_docstatus != 1:
+        frappe.throw(
+            f"Pick List {build_wr.pick_list} must be submitted before "
+            "creating a Shipping Request."
+        )
+
+    # Check if a Shipping Request already exists for this Build
+    existing = frappe.db.get_value(
+        "Warehouse Request",
+        {"source_build_request": build_warehouse_request, "request_reason": "Shipping Request"},
+        "name",
+    )
+    if existing:
+        frappe.msgprint(
+            f'Shipping Request <a href="/app/warehouse-request/{existing}">{existing}</a> '
+            "already exists for this Build.",
+            title="Shipping Request Exists",
+            indicator="blue",
+        )
+        return existing
+
+    shipping_wr = frappe.new_doc("Warehouse Request")
+    shipping_wr.request_reason = "Shipping Request"
+    shipping_wr.source_build_request = build_warehouse_request
+    shipping_wr.related_project = build_wr.related_project
+    shipping_wr.account = build_wr.account
+    shipping_wr.status = "New"
+    shipping_wr.subject = f"Ship {build_wr.request_reason} - {build_wr.name}"
+    shipping_wr.insert(ignore_permissions=True)
+
+    return shipping_wr.name
+
+
+@frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def warehouse_request_query(doctype, txt, searchfield, start, page_len, filters):
     """Custom query for Warehouse Request link fields — shows name and subject."""
