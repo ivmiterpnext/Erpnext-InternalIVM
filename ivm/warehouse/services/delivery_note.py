@@ -6,6 +6,9 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
     """
     Automatically create and submit a Delivery Note for a Shipping Request.
 
+    If the Shipping Request has a `source_build_request`, items are pulled from
+    a Build WR's submitted Stock Entry, otherwise from the Shipping Request's own Stock Entries.
+
     Returns the Delivery Note name, or None if no items were found.
     """
     existing_dn = frappe.db.get_value(
@@ -25,7 +28,11 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
 
     wr = frappe.get_doc("Warehouse Request", warehouse_request_name)
 
-    items = get_stock_entry_items_from_warehouse_request(warehouse_request_name)
+    if wr.source_build_request:
+        items = get_stock_entry_items_from_warehouse_request(wr.source_build_request)
+    else:
+        items = get_stock_entry_items_from_warehouse_request(warehouse_request_name)
+
     if not items:
         frappe.log_error(
             title="Delivery Note Auto-Creation Skipped",
@@ -74,5 +81,10 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
         title="Delivery Note Created",
         indicator="green",
     )
+
+    if wr.source_build_request:
+        frappe.db.set_value(
+            "Warehouse Request", wr.source_build_request, "status", "Closed"
+        )
 
     return dn.name
