@@ -53,7 +53,16 @@ def get_or_create_warehouse_request_pick_list(warehouse_request):
     pl_name = create_pick_list(company)
     frappe.db.set_value("Warehouse Request", warehouse_request, "pick_list", pl_name)
 
-    return {"pick_list": pl_name, "submitted": False, "items": []}
+    default_target_warehouse = _get_default_target_warehouse()
+    if default_target_warehouse:
+        frappe.db.set_value("Pick List", pl_name, "parent_warehouse", default_target_warehouse)
+
+    return {
+        "pick_list": pl_name,
+        "submitted": False,
+        "target_warehouse": default_target_warehouse,
+        "items": [],
+    }
 
 
 @frappe.whitelist()
@@ -97,8 +106,8 @@ def reset_warehouse_request_pick_list(warehouse_request):
     if not pl_name:
         return {"success": False, "message": "No pick list linked"}
 
-    delete_draft_pick_list(pl_name)
     frappe.db.set_value("Warehouse Request", warehouse_request, "pick_list", None)
+    delete_draft_pick_list(pl_name)
 
     return {"success": True}
 
@@ -181,3 +190,11 @@ def warehouse_request_query(doctype, txt, searchfield, start, page_len, filters)
         'start': start,
         'page_len': page_len,
     })
+
+DEFAULT_TARGET_WAREHOUSE = "Build In Progress - I"
+
+def _get_default_target_warehouse():
+    """Return the default target warehouse for new Pick Lists, or None if it doesn't exist."""
+    if frappe.db.exists("Warehouse", DEFAULT_TARGET_WAREHOUSE):
+        return DEFAULT_TARGET_WAREHOUSE
+    return None
