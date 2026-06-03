@@ -1,0 +1,23 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "CRM Pipeline",
+  "hubspot_pipeline_id": "default",
+  "modified": "2026-06-02 05:32:47.311407",
+  "name": "Commercial Sales"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "CRM Pipeline",
+  "hubspot_pipeline_id": "1563612861",
+  "modified": "2026-06-02 05:32:47.307345",
+  "name": "Government Sales"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "CRM Pipeline",
+  "hubspot_pipeline_id": "1688735440",
+  "modified": "2026-06-02 05:32:47.314442",
+  "name": "Commercial Partner Deals"
+ }
+]

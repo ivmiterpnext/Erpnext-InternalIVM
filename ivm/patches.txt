@@ -1,6 +1,9 @@
 [pre_model_sync]
 ivm.warehouse.patches.backfill_item_barcodes
 ivm.deployments.patches.remap_selection_field_options
+ivm.deployments.patches.rebuild_deployment_location
 
 [post_model_sync]
 ivm.deployments.patches.set_legacy_schema_version
+ivm.deployments.patches.remove_default_deal_statuses
+ivm.ivm_integrations.patches.provision_hubspot_service_account

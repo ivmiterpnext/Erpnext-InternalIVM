@@ -1,3 +1,4 @@
+Deals
 Deployments
 IVM
 IVM Integrations

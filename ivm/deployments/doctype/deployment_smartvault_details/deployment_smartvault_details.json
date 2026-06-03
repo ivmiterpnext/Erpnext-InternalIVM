@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:machine_name",
  "creation": "2026-02-26 10:27:12.243169",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -45,8 +44,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Machine Name",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "column_break_gviu",
@@ -150,13 +148,15 @@
    "fieldname": "workflow",
    "fieldtype": "Select",
    "label": "Workflow",
-   "options": "\nVend/Return"
+   "mandatory_depends_on": "eval:doc.smartscreen",
+   "options": "\nVend and Return"
   },
   {
    "depends_on": "eval:doc.smartscreen;",
    "fieldname": "serial_validation",
    "fieldtype": "Select",
    "label": "Serial Validation",
+   "mandatory_depends_on": "eval:doc.smartscreen",
    "options": "\nYes\nNo"
   },
   {
@@ -164,6 +164,7 @@
    "fieldname": "home_screen_logo",
    "fieldtype": "Select",
    "label": "Home Screen Logo",
+   "mandatory_depends_on": "eval:doc.smartscreen",
    "options": "\nIVM Logo\nCient Logo"
   },
   {
@@ -187,11 +188,11 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-23 10:21:18.760691",
+ "modified": "2026-06-02 04:09:57.563805",
  "modified_by": "Administrator",
  "module": "Deployments",
  "name": "Deployment SmartVault Details",
- "naming_rule": "By fieldname",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

@@ -1,25 +1,27 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:DLI-{######}",
+ "autoname": "format:DL-{######}",
  "creation": "2026-05-08 12:00:00",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "general_section",
-  "crm_deal",
   "location_name",
-  "column_break_gen1",
   "equipment_type",
-  "machine_ownership_status",
-  "delivery_and_installation_section",
+  "install_type",
+  "column_break_gen1",
+  "crm_deal",
+  "hubspot_site_id",
+  "target_ship_date",
+  "delivery_section",
   "locale",
   "ior",
-  "shipping_address",
-  "target_ship_date",
+  "billing_address",
   "column_break_dep1",
-  "install_type",
+  "shipping_address",
+  "po_and_tracking",
   "expedited_delivery",
   "devices_tab",
   "device_quantities_section",
@@ -64,21 +66,15 @@
    "reqd": 1
   },
   {
+   "fieldname": "hubspot_site_id",
+   "fieldtype": "Data",
+   "label": "HubSpot Site ID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
    "fieldname": "column_break_gen1",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "New",
-   "fieldname": "equipment_type",
-   "fieldtype": "Select",
-   "label": "Equipment Type",
-   "options": "\nNew\nRefurbished\nNew or Refurbished"
-  },
-  {
-   "fieldname": "machine_ownership_status",
-   "fieldtype": "Select",
-   "label": "Machine Ownership Status",
-   "options": "\nPurchase\nLease"
   },
   {
    "default": "Domestic",
@@ -208,11 +204,6 @@
    "options": "Deployment SmartCenter Details"
   },
   {
-   "fieldname": "delivery_and_installation_section",
-   "fieldtype": "Section Break",
-   "label": "Delivery & Installation"
-  },
-  {
    "fieldname": "column_break_iyhn",
    "fieldtype": "Column Break"
   },
@@ -235,14 +226,35 @@
    "fieldtype": "Section Break",
    "hide_border": 1,
    "label": "Per Device Configuration"
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Data",
+   "label": "Billing Address"
+  },
+  {
+   "fieldname": "po_and_tracking",
+   "fieldtype": "Data",
+   "label": "PO and Tracking"
+  },
+  {
+   "fieldname": "equipment_type",
+   "fieldtype": "Select",
+   "label": "Equipment Type",
+   "options": "\nNew\nRefurbished"
+  },
+  {
+   "fieldname": "delivery_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-08 10:18:51.919043",
+ "modified": "2026-05-29 10:02:49.560144",
  "modified_by": "Administrator",
- "module": "Deployments",
- "name": "Deal Location Information",
+ "module": "Deals",
+ "name": "Deployment Location",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [

@@ -1,11 +1,18 @@
-import frappe
-from ivm.deployments.services.provision_from_deal import create_project_from_deal
+"""
+Event handlers for CRM Deal documents.
+"""
 
-# Set to True to re-enable automatic Project creation when a CRM Deal is won.
+import frappe
+from frappe.model.document import Document
+
+from ivm.deployments.services.provision_project_from_deal import create_project_from_deal
+
+# TODO: Set to True or remove logic to re-enable automatic Project creation when a CRM Deal is won.
+# Need to make sure the mapping is correct in create_project_from_deal.
 AUTO_CREATE_PROJECT_FROM_DEAL = False
 
 
-def on_update(doc, method=None):
+def on_update(doc: Document, method: str | None = None) -> None:
     """When a CRM Deal status changes to Won, create a deployment Project."""
     if not AUTO_CREATE_PROJECT_FROM_DEAL:
         return
@@ -13,11 +20,11 @@ def on_update(doc, method=None):
     if doc.status != "Won":
         return
 
-    previous = doc.get_doc_before_save()
-    if previous and previous.status == "Won":
+    if not doc.has_value_changed("status"):
         return
 
-    deal_key = doc.get("custom_hubspot_deal") or doc.name
+    deal_key = doc.get("custom_hubspot_deal_id") or doc.name
+
     if frappe.db.exists("Project", {"custom_hubspot_deal_id": deal_key}):
         frappe.logger("deployments").info(
             f"Project already exists for CRM Deal {doc.name}, skipping"
@@ -31,6 +38,7 @@ def on_update(doc, method=None):
             title="Deployment Project Created",
             indicator="green",
         )
+
     except Exception:
         frappe.log_error(
             title=f"Failed to create Project from CRM Deal {doc.name}",

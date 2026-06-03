@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:machine_name",
  "creation": "2025-11-26 07:41:18.673313",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -41,8 +40,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Machine Name",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "bins_data",
@@ -152,6 +150,7 @@
    "fieldname": "workflow",
    "fieldtype": "Select",
    "label": "Workflow",
+   "mandatory_depends_on": "eval:doc.smartscreen",
    "options": "\nVend/Return"
   },
   {
@@ -159,13 +158,16 @@
    "fieldname": "serial_validation",
    "fieldtype": "Select",
    "label": "Serial Validation",
-   "options": "\nYes\nNo"
+   "options": "\nYes\nNo",
+   "mandatory_depends_on": "eval:doc.smartscreen"
   },
   {
    "depends_on": "eval:doc.smartscreen;",
    "fieldname": "home_screen_logo",
    "fieldtype": "Select",
-   "label": "Home Screen Logo"
+   "label": "Home Screen Logo",
+   "options": "\nIVM Logo\nClient Logo",
+   "mandatory_depends_on": "eval:doc.smartscreen"
   },
   {
    "fieldname": "hidden_fields_section",
@@ -194,11 +196,11 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-23 10:22:42.057670",
+ "modified": "2026-05-29 03:37:14.617621",
  "modified_by": "Administrator",
  "module": "Deployments",
  "name": "Deployment SmartLocker Details",
- "naming_rule": "By fieldname",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

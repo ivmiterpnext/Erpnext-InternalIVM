@@ -104,7 +104,6 @@ def make_project(source_name, target_doc=None):
     def set_missing_values(source, target):
         target.opportunity_name = source.name
     field_mappings = {
-        "deployment_address": "associated_deployment_location",
         "sv_term": "opportunity_term",
     }
     if customer_exists:
@@ -263,19 +262,6 @@ def calculate_closed_opportunity_total(customer_name):
              opportunity.per_secondary_locker_monthly_lease_feeee) * sv_term_numeric
         )
     return total_value
-
-
-@frappe.whitelist()
-def deployment_location_equipments(opportunity, machines, lockers):
-    doc = frappe.get_doc("Opportunity", opportunity)
-    doc.custom_total_machines_from_dls = machines
-    doc.custom_total_lockers_from_dls = lockers
-    machines = int(machines)
-    lockers = int(lockers)
-    doc.equipment_total = machines+lockers
-
-    doc.save(ignore_permissions=True)
-
 
 @frappe.whitelist()
 def create_warehouse_request(doc, reason, attached_files=None):

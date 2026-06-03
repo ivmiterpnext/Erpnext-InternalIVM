@@ -8,9 +8,10 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 fixtures = [
-    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
-    "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type",
-    {"dt": "DocType", "filters": [["custom", "=", 1], ["module", "=", "IVM"]]},
+    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", 
+    "List View Settings", "Workflow Action Master", "Custom DocPerm", "Workflow", "Property Setter", 
+    "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type", "CRM Pipeline", 
+    "CRM Deal Status",
     {"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]}
 ]
 
@@ -28,7 +29,7 @@ app_include_js = [
     "/assets/ivm/js/embedded_form.js",
     "/assets/ivm/js/chatbox_widget.js",
     "/assets/ivm/js/barcode_scanner_override.js",
-    "/assets/ivm/js/smart_detail_grids.js"
+    "/assets/ivm/js/machine_detail_grids.js"
 ]
 
 add_to_apps_screen = [
@@ -59,7 +60,6 @@ add_to_apps_screen = [
 doctype_js = {
     # "Opportunity": "public/js/doctype/Opportunity.js",
     "Customer": "public/js/doctype/Customer.js",
-    "Deployment Location": "public/js/doctype/Deployment_location.js",
     "User": "public/js/doctype/user.js",
     "Task": "public/js/doctype/Task.js",
     "CRM Deal": "public/js/doctype/CRM_Deal.js",
@@ -76,6 +76,7 @@ doctype_list_js = {
     "User": "public/js/listview/user_listview.js",
     "Calendar Events": "public/js/calendar.js",
     "Issue": "public/js/listview/issue_listview.js",
+    # "Project": "public/js/listview/project_listview.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -115,6 +116,8 @@ on_session_creation = [
 
 # before_install = "ivm.install.before_install"
 # after_install = "ivm.install.after_install"
+
+
 
 # Uninstallation
 # ------------
@@ -167,11 +170,11 @@ doc_events = {
     "CRM Deal": {
         "on_update": "ivm.deployments.event_handlers.deal.on_update",
     },
-    "Project": {
-        "before_validate": "ivm.deployments.hooks.project.before_validate",
-        "validate": "ivm.deployments.hooks.project.validate",
-        "after_insert": "ivm.deployments.hooks.project.after_insert",
-    },
+    # "Project": {
+    #     "before_validate": "ivm.deployments.event_handlers.project.before_validate",
+    #     "validate": "ivm.deployments.event_handlers.project.validate",
+    #     "after_insert": "ivm.deployments.event_handlers.project.after_insert",
+    # },
 }
 
 # Scheduled Tasks

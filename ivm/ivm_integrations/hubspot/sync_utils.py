@@ -1,0 +1,135 @@
+"""Generic sync utilities for HubSpot to Frappe document synchronization."""
+
+from typing import Any, Callable
+
+import frappe
+
+from ivm.ivm_integrations.hubspot.constants import HUBSPOT_USER
+
+# A value transform receives (doc, raw_value) and mutates the doc directly.
+ValueTransform = Callable[[Any, Any], None]
+
+# Values HubSpot uses for booleans (case-insensitive).
+_TRUTHY = frozenset({"true", "1", "yes"})
+_FALSY = frozenset({"false", "0", "no"})
+_BOOLEAN_ISH = _TRUTHY | _FALSY
+
+
+def coerce_value(value: Any, df: Any = None) -> Any:
+    """Coerce a single HubSpot value based on the target Frappe field type."""
+    if df is None:
+        if isinstance(value, str) and value.lower() in _BOOLEAN_ISH:
+            return 1 if value.lower() in _TRUTHY else 0
+        return value
+
+    str_lower = str(value).lower().strip()
+    is_boolean_ish = str_lower in _BOOLEAN_ISH
+
+    if df.fieldtype == "Check":
+        if is_boolean_ish:
+            return 1 if str_lower in _TRUTHY else 0
+        return value
+
+    if df.fieldtype == "Select":
+        options = [o for o in (df.options or "").split("\n") if o]
+
+        if is_boolean_ish and "Yes" in options and "No" in options:
+            return "Yes" if str_lower in _TRUTHY else "No"
+
+        if str(value) in options:
+            return str(value)
+
+        if is_boolean_ish:
+            return ""
+
+        frappe.logger("hubspot").warning(
+            f"HubSpot value '{value}' is not a valid option for "
+            f"Select field '{df.fieldname}' (options: {options}) — clearing"
+        )
+        return ""
+
+    return value
+
+
+def apply_field_map(
+    doc: Any,
+    properties: dict[str, Any],
+    field_map: dict[str, str],
+    value_transforms: dict[str, ValueTransform] | None = None,
+) -> None:
+    """Map HubSpot properties onto a Frappe doc using *field_map*.
+
+    Custom transforms take precedence. The generic path skips empty values,
+    validates Link fields, and truncates ISO timestamps for Date fields.
+    """
+    transforms = value_transforms or {}
+    meta = frappe.get_meta(doc.doctype)
+
+    for hs_key, frappe_field in field_map.items():
+        value = properties.get(hs_key)
+
+        # --- Custom transform takes precedence ---
+        if frappe_field in transforms:
+            transforms[frappe_field](doc, value)
+            continue
+
+        # --- Generic path ---
+        if value is None or value == "":
+            continue
+
+        df = meta.get_field(frappe_field)
+
+        # Validate Link fields
+        if df and df.fieldtype == "Link" and df.options:
+            if not frappe.db.exists(df.options, value):
+                frappe.logger("hubspot").warning(
+                    f"{df.options} '{value}' (from {hs_key}) not found — skipping {frappe_field}"
+                )
+                continue
+
+        # Truncate ISO datetime strings for Date fields
+        if df and df.fieldtype == "Date" and isinstance(value, str) and "T" in value:
+            value = value.split("T")[0]
+
+        doc.set(frappe_field, value)
+
+
+def save_doc(doc: Any, logger_prefix: str = "hubspot") -> None:
+    """Save a Frappe doc with ignore_permissions and log the result."""
+    doc.save(ignore_permissions=True)
+    frappe.logger("hubspot").info(
+        f"Synced {logger_prefix} fields on {doc.doctype} {doc.name}"
+    )
+
+
+def lookup_or_create(
+    doctype: str,
+    hubspot_id_field: str,
+    hubspot_id: str,
+    defaults: dict[str, Any] | None = None,
+) -> tuple[Any, bool]:
+    """Return ``(doc, is_new)`` for the given HubSpot ID, creating the doc if it doesn't exist."""
+    hubspot_id = str(hubspot_id)
+
+    existing_name = frappe.db.get_value(
+        doctype, {hubspot_id_field: hubspot_id}, "name",
+    )
+
+    if existing_name:
+        return frappe.get_doc(doctype, existing_name), False
+
+    doc = frappe.new_doc(doctype)
+    doc.set(hubspot_id_field, hubspot_id)
+    for key, val in (defaults or {}).items():
+        doc.set(key, val)
+    doc.insert(ignore_permissions=True)
+
+    frappe.logger("hubspot").info(
+        f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})"
+    )
+    return doc, True
+
+
+def set_hubspot_user() -> None:
+    """Set the current Frappe user to the HubSpot service account."""
+    frappe.set_user(HUBSPOT_USER)
