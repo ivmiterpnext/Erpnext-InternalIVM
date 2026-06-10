@@ -17,6 +17,30 @@ HUBSPOT_ROLE = "Integration"
 TARGET_SHIP_WEEKS = 5
 
 # ---------------------------------------------------------------------------
+# HubSpot standard CRM object type IDs
+# ---------------------------------------------------------------------------
+
+DEAL_TYPE_ID = "0-3"
+CONTACT_TYPE_ID = "0-1"
+COMPANY_TYPE_ID = "0-2"
+
+# Engagement object type IDs (per HubSpot docs: understanding-the-crm#object-type-ids)
+CALL_TYPE_ID = "0-48"
+NOTE_TYPE_ID = "0-46"
+EMAIL_TYPE_ID = "0-49"
+TASK_TYPE_ID = "0-27"
+MEETING_TYPE_ID = "0-47"
+
+# Maps engagement objectTypeId → engagement type name (used in API paths).
+ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID: dict[str, str] = {
+    CALL_TYPE_ID: "calls",
+    NOTE_TYPE_ID: "notes",
+    EMAIL_TYPE_ID: "emails",
+    TASK_TYPE_ID: "tasks",
+    MEETING_TYPE_ID: "meetings",
+}
+
+# ---------------------------------------------------------------------------
 # HubSpot custom object type IDs
 # ---------------------------------------------------------------------------
 
@@ -113,16 +137,88 @@ PIPELINE_MAP: dict[str, str] = {
     "1688735440": "Commercial Partner Deals",
 }
 
+# Maps HubSpot industry enum keys to existing CRM Industry record names.
+# Only keys that match a record already in the CRM Industry doctype are listed.
+# Unmapped keys will be silently skipped (no industry set on the org).
+HUBSPOT_INDUSTRY_LABELS: dict[str, str] = {
+    "ACCOUNTING": "Accounting",
+    "AIRLINES_AVIATION": "Airline",
+    "AVIATION_AEROSPACE": "Aerospace",
+    "AUTOMOTIVE": "Automotive",
+    "BANKING": "Banking",
+    "BIOTECHNOLOGY": "Biotechnology",
+    "BROADCAST_MEDIA": "Broadcasting",
+    "CAPITAL_MARKETS": "Brokerage",
+    "CHEMICALS": "Chemical",
+    "COMPUTER_HARDWARE": "Computer",
+    "COMPUTER_NETWORKING": "Computer",
+    "COMPUTER_SOFTWARE": "Software",
+    "INTERNET": "Internet Publishing",
+    "CONSUMER_GOODS": "Consumer Products",
+    "COSMETICS": "Cosmetics",
+    "DEFENSE_SPACE": "Defense",
+    "EDUCATION_MANAGEMENT": "Education",
+    "HIGHER_EDUCATION": "Education",
+    "PRIMARY_SECONDARY_EDUCATION": "Education",
+    "CONSUMER_ELECTRONICS": "Electronics",
+    "ELECTRICAL_ELECTRONIC_MANUFACTURING": "Electronics",
+    "OIL_ENERGY": "Energy",
+    "UTILITIES": "Energy",
+    "ENTERTAINMENT": "Entertainment & Leisure, Executive Search",
+    "FINANCIAL_SERVICES": "Financial Services",
+    "FOOD_BEVERAGES": "Food",
+    "FOOD_PRODUCTION": "Food",
+    "DAIRY": "Food",
+    "SUPERMARKETS": "Grocery",
+    "HOSPITAL_HEALTH_CARE": "Health Care",
+    "HEALTH_WELLNESS_AND_FITNESS": "Health Care",
+    "INVESTMENT_BANKING": "Investment Banking",
+    "LAW_PRACTICE": "Legal",
+    "LEGAL_SERVICES": "Legal",
+    "INDUSTRIAL_AUTOMATION": "Manufacturing",
+    "MACHINERY": "Manufacturing",
+    "MOTION_PICTURES_AND_FILM": "Motion Picture & Video",
+    "MUSIC": "Music",
+    "NEWSPAPERS": "Newspaper Publishers",
+    "PHARMACEUTICALS": "Pharmaceuticals",
+    "VENTURE_CAPITAL_PRIVATE_EQUITY": "Private Equity",
+    "PUBLISHING": "Publishing",
+    "REAL_ESTATE": "Real Estate",
+    "COMMERCIAL_REAL_ESTATE": "Real Estate",
+    "RETAIL": "Retail & Wholesale",
+    "WHOLESALE": "Retail & Wholesale",
+    "STAFFING_AND_RECRUITING": "Service",
+    "CONSUMER_SERVICES": "Service",
+    "SPORTS": "Sports",
+    "INFORMATION_TECHNOLOGY_AND_SERVICES": "Technology",
+    "INFORMATION_SERVICES": "Technology",
+    "TELECOMMUNICATIONS": "Telecommunications",
+    "WIRELESS": "Telecommunications",
+    "TRANSPORTATION_TRUCKING_RAILROAD": "Transportation",
+    "LOGISTICS_AND_SUPPLY_CHAIN": "Transportation",
+}
+
 # HubSpot company property to CRM Organization field
 COMPANY_FIELD_MAP: dict[str, str] = {
-    # To be populated when field mapping is finalized.
-    # Example entries:
-    # "name": "organization_name",
-    # "domain": "website",
-    # "numberofemployees": "no_of_employees",
-    # "annualrevenue": "annual_revenue",
-    # "industry": "industry",
+    "name": "organization_name",
+    "website": "website",
+    "annualrevenue": "annual_revenue",
+    "industry": "industry",
+    "numberofemployees": "no_of_employees",
+    "hs_lead_status": "custom_lead_status",
+    "lifecyclestage": "custom_lifecycle_stage",
+    "type": "custom_company_type",
+    "description": "custom_description",
+    "phone": "custom_phone",
+    "timezone": "custom_timezone",
+    "hs_logo_url": "organization_logo",
 }
+
+# HubSpot company address properties fetched separately from the field map
+# and used to create/update an Address doc linked to the CRM Organization.
+COMPANY_ADDRESS_PROPERTIES: list[str] = [
+    "address", "city", "state", "country", "zip",
+]
 
 # HubSpot deal property to CRM Deal field
 DEAL_FIELD_MAP: dict[str, str] = {
@@ -131,12 +227,19 @@ DEAL_FIELD_MAP: dict[str, str] = {
     "dealstage": "status",
     "pipeline": "custom_pipeline",
     "closedate": "custom_expected_close_date",
+    "dealtype": "custom_deal_type",
     "equipment_type": "custom_equipment_type",
     "machine_ownership_status": "custom_machine_ownership_status",
     "opportunity_term": "custom_opportunity_term",
     "hubspot_owner_id": "deal_owner",
     "client_id": "custom_client_id",
     "master_client_id": "custom_master_client_id",
+}
+
+# HubSpot dealtype enum key → human-readable label stored in custom_deal_type
+HUBSPOT_DEAL_TYPE_LABELS: dict[str, str] = {
+    "newbusiness": "New Business",
+    "existingbusiness": "Existing Business",
 }
 
 # HubSpot contact property to Frappe Contact field
@@ -147,7 +250,21 @@ CONTACT_FIELD_MAP: dict[str, str] = {
     "mobilephone": "mobile_no",
     "phone": "phone",
     "company": "company_name",
+    "salutation": "salutation",
+    "jobtitle": "designation",
+    "linkedin_account": "custom_linkedin_account",
+    "lead_source": "custom_lead_source",
+    "prospect_category": "custom_prospect_category",
+    "hs_timezone": "custom_timezone",
+    "hs_state_code": "custom_state_code",
+    "hs_role": "custom_role",
 }
+
+# HubSpot contact address properties fetched separately from the field map
+# and used to create/update an Address doc linked to the Contact.
+CONTACT_ADDRESS_PROPERTIES: list[str] = [
+    "address", "city", "state", "country",
+]
 
 # HubSpot deployment site property to Deployment Location field
 SITE_FIELD_MAP: dict[str, str] = {
@@ -255,3 +372,131 @@ MACHINE_PROPERTIES: dict[str, list[str]] = {
 }
 
 BIN_PROPERTIES = list(BIN_FIELD_MAP.keys())
+
+
+# ---------------------------------------------------------------------------
+# HubSpot engagement / activity constants
+# ---------------------------------------------------------------------------
+
+# Custom field added to FCRM Note, CRM Task, and CRM Call Log for
+# deduplication during activity sync.
+HUBSPOT_ENGAGEMENT_ID_FIELD = "custom_hubspot_engagement_id"
+
+# HubSpot CRM v3 object type names for engagements.
+ENGAGEMENT_TYPE_NOTES = "notes"
+ENGAGEMENT_TYPE_CALLS = "calls"
+ENGAGEMENT_TYPE_EMAILS = "emails"
+ENGAGEMENT_TYPE_TASKS = "tasks"
+ENGAGEMENT_TYPE_MEETINGS = "meetings"
+
+ALL_ENGAGEMENT_TYPES: list[str] = [
+    ENGAGEMENT_TYPE_NOTES,
+    ENGAGEMENT_TYPE_CALLS,
+    ENGAGEMENT_TYPE_EMAILS,
+    ENGAGEMENT_TYPE_TASKS,
+    ENGAGEMENT_TYPE_MEETINGS,
+]
+
+# Properties to request from HubSpot for each engagement type.
+NOTE_PROPERTIES: list[str] = [
+    "hs_note_body",
+    "hs_timestamp",
+    "hubspot_owner_id",
+    "hs_attachment_ids",
+]
+
+CALL_PROPERTIES: list[str] = [
+    "hs_call_title",
+    "hs_call_body",
+    "hs_call_direction",
+    "hs_call_duration",
+    "hs_call_from_number",
+    "hs_call_to_number",
+    "hs_call_recording_url",
+    "hs_call_status",
+    "hs_timestamp",
+    "hubspot_owner_id",
+    "hs_attachment_ids",
+]
+
+EMAIL_PROPERTIES: list[str] = [
+    "hs_email_subject",
+    "hs_email_text",
+    "hs_email_html",
+    "hs_email_sender_email",
+    "hs_email_from_email",    # actual From: address (populated for inbound emails)
+    "hs_email_to_email",
+    "hs_email_cc_email",
+    "hs_email_bcc_email",
+    "hs_email_direction",
+    "hs_email_status",
+    "hs_timestamp",
+    "hubspot_owner_id",
+    "hs_attachment_ids",
+]
+
+TASK_PROPERTIES: list[str] = [
+    "hs_task_subject",
+    "hs_task_body",
+    "hs_task_status",
+    "hs_task_priority",
+    "hs_timestamp",
+    "hubspot_owner_id",
+    "hs_attachment_ids",
+]
+
+MEETING_PROPERTIES: list[str] = [
+    "hs_meeting_title",
+    "hs_meeting_body",
+    "hs_meeting_start_time",
+    "hs_meeting_end_time",
+    "hs_timestamp",
+    "hubspot_owner_id",
+    "hs_attachment_ids",
+]
+
+# Maps engagement type → list of properties to request.
+ENGAGEMENT_PROPERTIES: dict[str, list[str]] = {
+    ENGAGEMENT_TYPE_NOTES: NOTE_PROPERTIES,
+    ENGAGEMENT_TYPE_CALLS: CALL_PROPERTIES,
+    ENGAGEMENT_TYPE_EMAILS: EMAIL_PROPERTIES,
+    ENGAGEMENT_TYPE_TASKS: TASK_PROPERTIES,
+    ENGAGEMENT_TYPE_MEETINGS: MEETING_PROPERTIES,
+}
+
+# HubSpot call direction values → CRM Call Log type.
+CALL_DIRECTION_MAP: dict[str, str] = {
+    "INBOUND": "Incoming",
+    "OUTBOUND": "Outgoing",
+}
+
+# HubSpot call status → CRM Call Log status.
+CALL_STATUS_MAP: dict[str, str] = {
+    "BUSY": "Busy",
+    "CALLING_CRM_USER": "Initiated",
+    "CANCELED": "Canceled",
+    "COMPLETED": "Completed",
+    "CONNECTING": "Ringing",
+    "FAILED": "Failed",
+    "IN_PROGRESS": "In Progress",
+    "NO_ANSWER": "No Answer",
+    "QUEUED": "Queued",
+    "RINGING": "Ringing",
+}
+
+# HubSpot task status → CRM Task status.
+TASK_STATUS_MAP: dict[str, str] = {
+    "NOT_STARTED": "Todo",
+    "IN_PROGRESS": "In Progress",
+    "WAITING": "Todo",
+    "DEFERRED": "Backlog",
+    "COMPLETED": "Done",
+}
+
+# HubSpot task priority → CRM Task priority.
+TASK_PRIORITY_MAP: dict[str, str] = {
+    "NONE": "Low",
+    "LOW": "Low",
+    "MEDIUM": "Medium",
+    "HIGH": "High",
+}

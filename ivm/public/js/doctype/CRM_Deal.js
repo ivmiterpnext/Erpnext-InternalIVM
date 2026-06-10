@@ -2,10 +2,10 @@
 // Sites tab – table of Deal Location Information docs linked to this CRM Deal
 // ---------------------------------------------------------------------------
 
-const SITE_DOCTYPE = "Deal Location Information";
+const SITE_DOCTYPE = "Deployment Location";
 
 const SITE_LIST_FIELDS = [
-  "name", "location_name", "locale", "equipment_type",
+  "name", "location_name", "locale",
   "number_of_machines", "number_of_primary_lockers",
   "number_of_secondary_lockers", "number_of_kiosks", "number_of_vaults",
 ];
@@ -85,7 +85,6 @@ function renderSitesTable($container, sites, frm) {
         <tr>
           <th>Location</th>
           <th>Locale</th>
-          <th>Equipment Type</th>
           <th class="text-center">SS</th>
           <th class="text-center">SL</th>
           <th class="text-center">SSy</th>
@@ -111,7 +110,6 @@ function renderSitesTable($container, sites, frm) {
       <tr style="cursor: pointer;" data-site="${site.name}">
         <td>${frappe.utils.escape_html(site.location_name || site.name)}</td>
         <td>${frappe.utils.escape_html(site.locale || "")}</td>
-        <td>${frappe.utils.escape_html(site.equipment_type || "")}</td>
         <td class="text-center">${site.number_of_machines || 0}</td>
         <td class="text-center">${site.number_of_primary_lockers || 0}</td>
         <td class="text-center">${site.number_of_secondary_lockers || 0}</td>
@@ -165,9 +163,213 @@ function addNewSite(frm) {
 }
 
 // ---------------------------------------------------------------------------
+// Comments tab – FCRM Notes linked to this CRM Deal
+// ---------------------------------------------------------------------------
+
+const NOTES_API = "ivm.deployments.event_handlers.deal_notes";
+
+function renderNotesTab(frm) {
+  if (frm.is_new()) return;
+
+  const wrapper = frm.fields_dict.custom_notes_html?.$wrapper;
+  if (!wrapper) return;
+
+  wrapper.empty();
+
+  frappe.call({
+    method: `${NOTES_API}.get_notes`,
+    args: { deal_name: frm.doc.name },
+    callback(r) {
+      const notes = r.message || [];
+      const $container = $('<div class="deal-notes-container"></div>').appendTo(wrapper);
+
+      // New Note button
+      $(`<div class="text-right pb-3">
+          <button class="btn btn-sm small new-note-btn">
+            <svg class="icon icon-sm"><use href="#icon-add"></use></svg>
+            ${__("New Note")}
+          </button>
+        </div>`)
+        .appendTo($container)
+        .find(".new-note-btn")
+        .on("click", () => addDealNote(frm));
+
+      if (!notes.length) {
+        $container.append(
+          '<div class="text-muted pt-6" style="min-height:100px;text-align:center;">' +
+            __("No Notes") +
+          "</div>"
+        );
+        return;
+      }
+
+      const $list = $('<div class="all-notes"></div>').appendTo($container);
+
+      notes.forEach((note) => {
+        const $row = $(`
+          <div class="comment-content p-3 row" data-note="${note.name}"
+               style="border:1px solid var(--border-color);border-bottom:none;">
+            <div class="mb-2 head col-xs-3">
+              <div class="row">
+                <div class="col-xs-2">${frappe.avatar(note.owner)}</div>
+                <div class="col-xs-10">
+                  <div class="font-weight-bold ellipsis" title="${frappe.utils.escape_html(note.owner)}">
+                    ${frappe.utils.escape_html(note.owner)}
+                  </div>
+                  <div class="small text-muted">
+                    ${frappe.datetime.global_date_format(note.modified)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xs-8">
+              <div class="font-weight-bold mb-1">${frappe.utils.escape_html(note.title)}</div>
+              <div class="note-content">${note.content || ""}</div>
+            </div>
+            <div class="col-xs-1 text-right">
+              <span class="edit-note-btn btn btn-link" style="padding:0.2rem;">
+                <svg class="icon icon-sm"><use xlink:href="#icon-edit"></use></svg>
+              </span>
+              <span class="delete-note-btn btn btn-link pl-2" style="padding:0.2rem;">
+                <svg class="icon icon-xs"><use xlink:href="#icon-delete"></use></svg>
+              </span>
+            </div>
+          </div>
+        `).appendTo($list);
+
+        $row.find(".edit-note-btn").on("click", () => editDealNote(frm, note));
+        $row.find(".delete-note-btn").on("click", () => deleteDealNote(frm, note));
+      });
+
+      // Bottom border on last row
+      $list.find(".comment-content:last-child").css("border-bottom", "1px solid var(--border-color)");
+    },
+  });
+}
+
+function addDealNote(frm) {
+  const d = new frappe.ui.Dialog({
+    title: __("Add a Note"),
+    fields: [
+      { label: "Title", fieldname: "title", fieldtype: "Data", reqd: 1 },
+      { label: "Content", fieldname: "content", fieldtype: "Text Editor", reqd: 1, enable_mentions: true },
+    ],
+    primary_action(values) {
+      frappe.call({
+        method: `${NOTES_API}.add_note`,
+        args: { deal_name: frm.doc.name, title: values.title, content: values.content },
+        freeze: true,
+        callback(r) {
+          if (!r.exc) {
+            renderNotesTab(frm);
+          }
+          d.hide();
+        },
+      });
+    },
+    primary_action_label: __("Add"),
+  });
+  d.show();
+}
+
+function editDealNote(frm, note) {
+  const d = new frappe.ui.Dialog({
+    title: __("Edit Note"),
+    fields: [
+      { label: "Title", fieldname: "title", fieldtype: "Data", reqd: 1, default: note.title },
+      { label: "Content", fieldname: "content", fieldtype: "Text Editor", default: note.content },
+    ],
+    primary_action(values) {
+      frappe.call({
+        method: `${NOTES_API}.edit_note`,
+        args: { note_name: note.name, title: values.title, content: values.content },
+        freeze: true,
+        callback(r) {
+          if (!r.exc) {
+            renderNotesTab(frm);
+            d.hide();
+          }
+        },
+      });
+    },
+    primary_action_label: __("Done"),
+  });
+  d.show();
+}
+
+function deleteDealNote(frm, note) {
+  frappe.confirm(
+    __("Delete this note?"),
+    () => {
+      frappe.call({
+        method: `${NOTES_API}.delete_note`,
+        args: { note_name: note.name },
+        freeze: true,
+        callback(r) {
+          if (!r.exc) {
+            renderNotesTab(frm);
+          }
+        },
+      });
+    }
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Status filtering – only show statuses matching the deal's pipeline
+// (or statuses with no pipeline set, i.e. shared across all pipelines)
+// ---------------------------------------------------------------------------
+
+function applyStatusFilter(frm) {
+  frm.set_query("status", () => {
+    const pipeline = frm.doc.custom_pipeline;
+    if (!pipeline) {
+      // No pipeline selected – show all statuses
+      return {};
+    }
+    return {
+      query: "ivm.deals.queries.get_statuses_for_pipeline",
+      filters: { pipeline: pipeline },
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+
+function applyDealTypeVisibility(frm) {
+  const isExisting = frm.doc.custom_deal_type === "Existing Business";
+  frm.toggle_display("custom_client_id", isExisting);
+  frm.toggle_reqd("custom_client_id", isExisting);
+}
 
 frappe.ui.form.on("CRM Deal", {
   refresh(frm) {
     renderSitesTab(frm);
+    renderNotesTab(frm);
+    applyStatusFilter(frm);
+    applyDealTypeVisibility(frm);
+
+    // "View in HubSpot" button
+    if (frm.doc.custom_hubspot_deal_id) {
+      frm.add_custom_button(__("View in HubSpot"), () => {
+        frappe.xcall(
+          "ivm.ivm_integrations.hubspot.hubspot_client.get_hubspot_deal_url",
+          { deal_id: frm.doc.custom_hubspot_deal_id }
+        ).then((url) => {
+          window.open(url, "_blank");
+        });
+      });
+    }
+  },
+
+  custom_deal_type(frm) {
+    applyDealTypeVisibility(frm);
+  },
+
+  custom_pipeline(frm) {
+    // Re-apply filter when pipeline changes; clear status if it no longer fits
+    applyStatusFilter(frm);
   },
 });

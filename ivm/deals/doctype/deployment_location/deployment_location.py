@@ -7,7 +7,7 @@ containing site-level information and one or more machine child tables
 import frappe
 from frappe.model.document import Document
 from ivm.deals.constants import TABLE_LABELS, TABLE_TO_QUANTITY
-from ivm.ivm_integrations.hubspot.deployment_site_handler import _coerce_value
+from ivm.ivm_integrations.hubspot.sync_utils import coerce_value
 
 
 class DeploymentLocation(Document):
@@ -38,7 +38,7 @@ class DeploymentLocation(Document):
                     if value is None or value == "":
                         continue
 
-                    coerced = _coerce_value(value, df)
+                    coerced = coerce_value(value, df)
                     if coerced != value:
                         row.set(df.fieldname, coerced)
 

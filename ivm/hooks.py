@@ -180,23 +180,24 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# "all": [
-# "ivm.tasks.all"
-# ],
-# "daily": [
-# "ivm.tasks.daily"
-# ],
-# "hourly": [
-# "ivm.tasks.hourly"
-# ],
-# "weekly": [
-# "ivm.tasks.weekly"
-# ],
-# "monthly": [
-# "ivm.tasks.monthly"
-# ],
-# }
+scheduler_events = {
+    # "all": [
+    # "ivm.tasks.all"
+    # ],
+    # "daily": [
+    # "ivm.tasks.daily"
+    # ],
+    "hourly": [
+        # Catch inbound reply emails that HubSpot does not surface via webhooks.
+        "ivm.ivm_integrations.hubspot.scheduled_tasks.sync_inbound_emails",
+    ],
+    # "weekly": [
+    # "ivm.tasks.weekly"
+    # ],
+    # "monthly": [
+    # "ivm.tasks.monthly"
+    # ],
+}
 
 # Testing
 # -------

@@ -12,7 +12,13 @@ _PERMITTED_DOCTYPES: list[str] = [
     "CRM Deal",
     "CRM Organization",
     "Contact",
+    "Address",
     "Deployment Location",
+    "FCRM Note",
+    "CRM Task",
+    "CRM Call Log",
+    "Communication",
+    "File",
 ]
 
 

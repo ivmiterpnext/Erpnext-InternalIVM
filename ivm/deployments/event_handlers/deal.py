@@ -5,42 +5,38 @@ Event handlers for CRM Deal documents.
 import frappe
 from frappe.model.document import Document
 
-from ivm.deployments.services.provision_project_from_deal import create_project_from_deal
-
-# TODO: Set to True or remove logic to re-enable automatic Project creation when a CRM Deal is won.
-# Need to make sure the mapping is correct in create_project_from_deal.
-AUTO_CREATE_PROJECT_FROM_DEAL = False
+from ivm.deployments.services.provision_project_from_deal import create_projects_from_deal
 
 
 def on_update(doc: Document, method: str | None = None) -> None:
-    """When a CRM Deal status changes to Won, create a deployment Project."""
-    if not AUTO_CREATE_PROJECT_FROM_DEAL:
-        return
-
+    """When a CRM Deal status changes to Won, create one deployment Project per Deployment Location."""
     if doc.status != "Won":
         return
 
     if not doc.has_value_changed("status"):
         return
 
-    deal_key = doc.get("custom_hubspot_deal_id") or doc.name
-
-    if frappe.db.exists("Project", {"custom_hubspot_deal_id": deal_key}):
-        frappe.logger("deployments").info(
-            f"Project already exists for CRM Deal {doc.name}, skipping"
-        )
-        return
-
     try:
-        project_name = create_project_from_deal(doc.name)
-        frappe.msgprint(
-            f'Project <a href="/app/project/{project_name}">{project_name}</a> created from deal.',
-            title="Deployment Project Created",
-            indicator="green",
-        )
+        created = create_projects_from_deal(doc.name)
+
+        if created:
+            links = ", ".join(
+                f'<a href="/app/project/{n}">{n}</a>' for n in created
+            )
+            frappe.msgprint(
+                f"Created {len(created)} deployment Project(s): {links}",
+                title="Deployment Projects Created",
+                indicator="green",
+            )
+        else:
+            frappe.msgprint(
+                "No Deployment Locations found on this deal — no Projects were created.",
+                title="No Projects Created",
+                indicator="orange",
+            )
 
     except Exception:
         frappe.log_error(
-            title=f"Failed to create Project from CRM Deal {doc.name}",
+            title=f"Failed to create Projects from CRM Deal {doc.name}",
             message=frappe.get_traceback(with_context=True),
         )

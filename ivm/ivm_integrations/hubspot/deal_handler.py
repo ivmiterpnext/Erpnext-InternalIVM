@@ -1,22 +1,119 @@
-from datetime import timedelta
+"""
+Sync HubSpot deals to CRM Deal records, including contacts and deployment sites.
+"""
+
 from typing import Any
 
 import frappe
 
 from ivm.ivm_integrations.hubspot import hubspot_client
+from ivm.ivm_integrations.hubspot.constants import (
+    CONTACT_FIELD_MAP,
+    DEAL_FIELD_MAP,
+    DEALSTAGE_TO_STATUS,
+    HUBSPOT_DEAL_TYPE_LABELS,
+    MACHINE_TYPE_TO_CHILD_TABLE,
+    PIPELINE_MAP,
+)
+from ivm.ivm_integrations.hubspot.sync_utils import (
+    apply_field_map,
+    coerce_value,
+    lookup_or_create,
+    save_doc,
+    set_acting_user,
+)
 
-# Weeks to add to the deal close date to calculate the target ship date.
-_TARGET_SHIP_WEEKS = 5
+
+# ---------------------------------------------------------------------------
+# Deal-specific value transforms
+# ---------------------------------------------------------------------------
 
 
-def handle_deal_created(hubspot_deal_id: int | str) -> None:
-    """Create a CRM Deal from a newly created HubSpot deal.
+def _apply_deal_value(doc: Any, value: Any) -> None:
+    doc.deal_value = frappe.utils.flt(value)
 
-    Populates the deal's deployment fields from HubSpot data.
-    Called asynchronously via frappe.enqueue from the webhook handler.
-    """
+
+def _apply_status(doc: Any, value: Any) -> None:
+    mapped = DEALSTAGE_TO_STATUS.get(value or "")
+    if mapped:
+        doc.status = mapped
+
+
+def _apply_pipeline(doc: Any, value: Any) -> None:
+    mapped = PIPELINE_MAP.get(value or "")
+    if mapped:
+        if frappe.db.exists("CRM Pipeline", mapped):
+            doc.custom_pipeline = mapped
+        else:
+            frappe.logger("hubspot").warning(
+                f"CRM Pipeline '{mapped}' (from HubSpot pipeline '{value}') "
+                f"not found — skipping custom_pipeline"
+            )
+    elif value:
+        frappe.logger("hubspot").warning(
+            f"Unknown HubSpot pipeline ID '{value}' — skipping custom_pipeline"
+        )
+
+
+def _apply_deal_type(doc: Any, value: Any) -> None:
+    if not value:
+        return
+    label = HUBSPOT_DEAL_TYPE_LABELS.get(value)
+    if label:
+        doc.custom_deal_type = label
+    else:
+        frappe.logger("hubspot").warning(
+            f"Unknown HubSpot dealtype '{value}' — skipping custom_deal_type"
+        )
+
+
+def _apply_deal_owner(doc: Any, value: Any) -> None:
+    if not value:
+        return
+    owner_email = hubspot_client.get_owner_email(value)
+    if owner_email and frappe.db.exists("User", owner_email):
+        doc.deal_owner = owner_email
+    else:
+        frappe.logger("hubspot").warning(
+            f"HubSpot owner {value} resolved to '{owner_email}' "
+            f"which is not a Frappe User — skipping deal_owner"
+        )
+
+
+DEAL_TRANSFORMS = {
+    "deal_value": _apply_deal_value,
+    "status": _apply_status,
+    "custom_pipeline": _apply_pipeline,
+    "custom_deal_type": _apply_deal_type,
+    "deal_owner": _apply_deal_owner,
+}
+
+
+# ---------------------------------------------------------------------------
+# Public entry points (called from webhook.py via frappe.enqueue)
+# ---------------------------------------------------------------------------
+
+
+def handle_deal_created(
+    hubspot_deal_id: int | str,
+    hubspot_user_id: int | str | None = None,
+) -> None:
+    """Create a CRM Deal from a newly created HubSpot deal and sync all data."""
+    set_acting_user(hubspot_user_id)
     try:
-        _create_crm_deal(hubspot_deal_id)
+        doc, is_new = lookup_or_create(
+            doctype="CRM Deal",
+            hubspot_id_field="custom_hubspot_deal_id",
+            hubspot_id=str(hubspot_deal_id),
+            defaults={"status": "Discovery"},
+        )
+        if not is_new:
+            frappe.log_error(
+                title=f"HubSpot: CRM Deal already exists for deal {hubspot_deal_id}",
+                message="Skipping duplicate deal creation.",
+            )
+            return
+        _sync_deal(hubspot_deal_id, doc.name)
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to create CRM Deal for deal {hubspot_deal_id}",
@@ -24,291 +121,206 @@ def handle_deal_created(hubspot_deal_id: int | str) -> None:
         )
 
 
-def handle_deal_closed_won(hubspot_deal_id: int | str) -> None:
-    """Handle a HubSpot deal moving to the won stage.
-
-    Updates the existing CRM Deal status to Won. The CRM Deal on_update hook
-    in ivm.deployments.hooks.deal will handle Project creation.
-
-    Called asynchronously via frappe.enqueue from the webhook handler.
-    """
+def handle_deal_updated(
+    hubspot_deal_id: int | str,
+    hubspot_user_id: int | str | None = None,
+) -> None:
+    """Sync a HubSpot deal's current state to the matching CRM Deal."""
+    set_acting_user(hubspot_user_id)
     try:
-        crm_deal_name = _update_crm_deal_to_won(hubspot_deal_id)
-        if crm_deal_name:
-            _populate_deployment_fields(hubspot_deal_id, crm_deal_name)
+        crm_deal_name = frappe.db.get_value(
+            "CRM Deal", {"custom_hubspot_deal_id": str(hubspot_deal_id)}, "name",
+        )
+        if not crm_deal_name:
+            frappe.logger("hubspot").warning(
+                f"No CRM Deal found for HubSpot deal {hubspot_deal_id}, skipping update"
+            )
+            return
+        _sync_deal(hubspot_deal_id, crm_deal_name)
     except Exception:
         frappe.log_error(
-            title=f"HubSpot: failed to handle closedwon for deal {hubspot_deal_id}",
+            title=f"HubSpot: failed to sync deal {hubspot_deal_id}",
             message=frappe.get_traceback(with_context=True),
         )
 
 
-def _create_crm_deal(hubspot_deal_id: int | str) -> str | None:
-    """Fetch deal data from HubSpot and create a CRM Deal document.
+# ---------------------------------------------------------------------------
+# Internal sync orchestration
+# ---------------------------------------------------------------------------
 
-    Returns the name of the created CRM Deal, or None if it already exists.
+
+def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
+    """Sync deal-level fields and contacts.
+
+    Deployment locations, machines, bins, and activities are no longer
+    synced here — they have their own generic webhook subscriptions and
+    are handled independently by ``deployment_site_handler`` and
+    ``activity_handler``.
     """
-    hubspot_deal_id_str = str(hubspot_deal_id)
-
-    # Idempotency check
-    if frappe.db.exists("CRM Deal", {"custom_hubspot_deal": hubspot_deal_id_str}):
-        frappe.log_error(
-            title=f"HubSpot: CRM Deal already exists for deal {hubspot_deal_id_str}",
-            message="Skipping duplicate deal creation.",
-        )
-        return None
-
-    hubspot_data = hubspot_client.get_deal(hubspot_deal_id)
+    hubspot_data = hubspot_client.get_deal(
+        hubspot_deal_id, properties=list(DEAL_FIELD_MAP.keys())
+    )
     properties: dict[str, Any] = hubspot_data.get("properties", {})
 
-    deal = frappe.new_doc("CRM Deal")
-    deal.update(
-        {
-            "custom_hubspot_deal": hubspot_deal_id_str,
-            "deal_value": _parse_amount(properties.get("amount")),
-            "status": "Qualification",
-            "custom_hubspot_id": properties.get("dealname"),
-        }
-    )
-    deal.insert(ignore_permissions=True)
-    frappe.db.commit()
-
-    frappe.logger("hubspot").info(f"Created CRM Deal {deal.name} for HubSpot deal {hubspot_deal_id_str}")
-    return deal.name
+    _sync_deal_fields(crm_deal_name, properties)
+    _sync_organization(hubspot_deal_id, crm_deal_name)
+    _sync_contacts(hubspot_deal_id, crm_deal_name)
 
 
-def _update_crm_deal_to_won(hubspot_deal_id: int | str) -> str | None:
-    """Find the CRM Deal by HubSpot ID and update its status to Won.
+def _sync_deal_fields(crm_deal_name: str, properties: dict[str, Any]) -> None:
+    """Update deal-level fields on the CRM Deal from HubSpot deal properties."""
+    deal = frappe.get_doc("CRM Deal", crm_deal_name)
+    apply_field_map(deal, properties, DEAL_FIELD_MAP, DEAL_TRANSFORMS)
+    save_doc(deal, "deal")
 
-    Returns the CRM Deal name, or None if not found.
-    """
-    hubspot_deal_id_str = str(hubspot_deal_id)
 
-    crm_deal_name = frappe.db.get_value(
-        "CRM Deal",
-        {"custom_hubspot_deal": hubspot_deal_id_str},
+# ---------------------------------------------------------------------------
+# Organization sync
+# ---------------------------------------------------------------------------
+
+
+def _sync_organization(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
+    """Link the first associated HubSpot company to the CRM Deal's organization field."""
+    try:
+        company_ids = hubspot_client.get_deal_company_ids(hubspot_deal_id)
+    except Exception:
+        frappe.log_error(
+            title=f"HubSpot: failed to fetch company associations for deal {hubspot_deal_id}",
+            message=frappe.get_traceback(with_context=True),
+        )
+        return
+
+    if not company_ids:
+        return
+
+    # Use the first associated company (deals typically have one)
+    org_name = frappe.db.get_value(
+        "CRM Organization",
+        {"custom_hubspot_company_id": str(company_ids[0])},
         "name",
     )
-
-    if not crm_deal_name:
-        frappe.log_error(
-            title=f"HubSpot: CRM Deal not found for deal {hubspot_deal_id_str}",
-            message="Cannot update status to Won — no matching CRM Deal found.",
+    if not org_name:
+        frappe.logger("hubspot").info(
+            f"No CRM Organization found for HubSpot company {company_ids[0]} "
+            f"— provisioning from HubSpot"
         )
-        return None
-
-    frappe.db.set_value("CRM Deal", crm_deal_name, "status", "Won")
-    frappe.db.commit()
-
-    frappe.logger("hubspot").info(
-        f"Updated CRM Deal {crm_deal_name} to Won for HubSpot deal {hubspot_deal_id_str}"
-    )
-    return crm_deal_name
-
-
-def _populate_deployment_fields(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
-    """Fetch deployment site data from HubSpot and populate CRM Deal fields.
-
-    Writes flat fields and child table rows (machine details) onto the CRM Deal
-    so that the on_update hook can create the Project from them.
-    """
-    from ivm.ivm_integrations.hubspot.deployment_site_handler import (
-        fetch_first_deployment_site,
-    )
-
-    site_properties = fetch_first_deployment_site(hubspot_deal_id)
-    if not site_properties:
-        return
-
-    # Map HubSpot site properties to CRM Deal custom fields
-    SITE_TO_DEAL_FIELDS: dict[str, str] = {
-        "site_location_name": "custom_location_name",
-        "equipment_type": "custom_equipment_type",
-        "machine_ownership_status": "custom_machine_ownership_status",
-        "wrap_type": "custom_wrap_type",
-        "card_reader_type": "custom_card_reader_type",
-        "connectivity_type": "custom_connectivity_type",
-        "locale": "custom_locale",
-        "expedited_delivery": "custom_expedited_delivery",
-        "install_type": "custom_install_type",
-        "sales_rep": "custom_sales_rep",
-        "ior": "custom_ior",
-        "opportunity_term": "custom_opportunity_term",
-        "custom_shipping_address": "custom_shipping_address",
-        "billing_address": "custom_billing_address",
-        "po_and_tracking": "custom_po_and_tracking",
-    }
-
-    # Customer Link fields — resolved separately because they need a DB lookup
-    CUSTOMER_LINK_FIELDS: dict[str, str] = {
-        "client_id": "custom_client_id",
-        "master_client_id": "custom_master_client_id",
-    }
-
-    # Map HubSpot nested machine lists to CRM Deal child table fields
-    SITE_TO_DEAL_CHILD_TABLES: dict[str, str] = {
-        "smartstations": "custom_deal_smartstation_details",
-        "smartlockers": "custom_deal_smartlocker_details",
-        "smartsyncs": "custom_deal_smartsync_details",
-        "smartvaults": "custom_deal_smartvault_details",
-        "smartcenters": "custom_deal_smartcenter_details",
-    }
+        from ivm.ivm_integrations.hubspot.company_handler import handle_company_created
+        handle_company_created(company_ids[0])
+        org_name = frappe.db.get_value(
+            "CRM Organization",
+            {"custom_hubspot_company_id": str(company_ids[0])},
+            "name",
+        )
+        if not org_name:
+            frappe.logger("hubspot").warning(
+                f"Failed to provision CRM Organization for HubSpot company {company_ids[0]} "
+                f"— skipping organization link on deal {crm_deal_name}"
+            )
+            return
 
     deal = frappe.get_doc("CRM Deal", crm_deal_name)
+    if deal.organization == org_name:
+        return
 
-    # Populate flat fields
-    for site_key, deal_field in SITE_TO_DEAL_FIELDS.items():
-        value = site_properties.get(site_key)
-        if value is not None and value != "":
-            deal.set(deal_field, value)
+    deal.organization = org_name
+    save_doc(deal, "deal")
+    frappe.logger("hubspot").info(
+        f"Linked CRM Organization '{org_name}' to CRM Deal {crm_deal_name}"
+    )
 
-    # Resolve Customer Link fields (HubSpot sends a customer name string;
-    # we look up the matching Customer record by name).
-    for site_key, deal_field in CUSTOMER_LINK_FIELDS.items():
-        value = site_properties.get(site_key)
-        if value and frappe.db.exists("Customer", value):
-            deal.set(deal_field, value)
-        elif value:
-            frappe.logger("hubspot").warning(
-                f"Customer '{value}' (from {site_key}) not found — skipping {deal_field}"
+
+# ---------------------------------------------------------------------------
+# Contact sync
+# ---------------------------------------------------------------------------
+
+
+def _sync_contacts(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
+    """Fetch contacts associated with the HubSpot deal and link them to the CRM Deal."""
+    try:
+        contact_ids = hubspot_client.get_deal_contact_ids(hubspot_deal_id)
+    except Exception:
+        frappe.log_error(
+            title=f"HubSpot: failed to fetch contact associations for deal {hubspot_deal_id}",
+            message=frappe.get_traceback(with_context=True),
+        )
+        return
+
+    if not contact_ids:
+        return
+
+    hs_properties = list(CONTACT_FIELD_MAP.keys())
+    contacts: list[dict[str, Any]] = []
+
+    for contact_id in contact_ids:
+        try:
+            contact_data = hubspot_client.get_contact(contact_id, properties=hs_properties)
+            props = contact_data.get("properties", {})
+            contacts.append({
+                frappe_key: props.get(hs_key) or ""
+                for hs_key, frappe_key in CONTACT_FIELD_MAP.items()
+            })
+        except Exception:
+            frappe.log_error(
+                title=f"HubSpot: failed to fetch contact {contact_id} for deal {hubspot_deal_id}",
+                message=frappe.get_traceback(with_context=True),
             )
 
-    # Calculate target ship date (N weeks after deal close)
-    close_date = deal.get("closed_date") or frappe.utils.today()
-    deal.set(
-        "custom_target_ship_date",
-        frappe.utils.add_to_date(close_date, weeks=_TARGET_SHIP_WEEKS),
-    )
-
-    # Populate child table rows from nested machine objects
-    for source_key, table_field in SITE_TO_DEAL_CHILD_TABLES.items():
-        machines = site_properties.get(source_key)
-        if not machines:
-            continue
-        if isinstance(machines, dict):
-            machines = [machines]
-        if not isinstance(machines, list):
-            continue
-
-        for machine in machines:
-            if not isinstance(machine, dict):
-                continue
-            row = {k: v for k, v in machine.items() if v is not None and v != ""}
-            if row:
-                deal.append(table_field, row)
-
-    deal.save(ignore_permissions=True)
-    frappe.db.commit()
-
-    # Create / link contacts from the deployment site data
-    _ensure_contacts(crm_deal_name, site_properties.get("contacts") or [])
-
-    frappe.logger("hubspot").info(
-        f"Populated deployment fields on CRM Deal {crm_deal_name} from HubSpot"
-    )
+    if contacts:
+        _ensure_contacts(crm_deal_name, contacts)
 
 
-def _ensure_contacts(
-    crm_deal_name: str,
-    contacts: list[dict[str, Any]],
-) -> None:
-    """Create Contact records (if needed) and link them to the CRM Deal.
-
-    Each entry in *contacts* should be a dict with any of:
-        first_name, last_name, email, mobile_no, phone, company_name
-
-    De-duplicates on email: if a Contact with the same primary email already
-    exists, it is reused rather than created again.  The first contact in the
-    list is marked ``is_primary`` on the deal.
-
-    Example call from a HubSpot handler::
-
-        _ensure_contacts(deal_name, [
-            {
-                "first_name": "Jane",
-                "last_name": "Doe",
-                "email": "jane@example.com",
-                "mobile_no": "555-0100",
-            },
-        ])
-    """
-    if not contacts:
-        return
+def _ensure_contacts(crm_deal_name: str, contacts: list[dict[str, Any]]) -> None:
+    """Create Contact records (if needed) and link them to the CRM Deal."""
+    from ivm.ivm_integrations.hubspot.contact_handler import upsert_contact
 
     deal = frappe.get_doc("CRM Deal", crm_deal_name)
 
     for idx, entry in enumerate(contacts):
-        email = (entry.get("email") or "").strip()
-        first_name = (entry.get("first_name") or "").strip()
-        last_name = (entry.get("last_name") or "").strip()
-
-        if not first_name and not email:
-            continue
-
-        # Try to find an existing Contact by email first
-        contact_name = None
-        if email:
-            contact_name = frappe.db.get_value(
-                "Contact",
-                {"email_id": email},
-                "name",
-            )
-
+        contact_name = upsert_contact(entry)
         if not contact_name:
-            # Create a new Contact
-            contact_doc = frappe.new_doc("Contact")
-            contact_doc.first_name = first_name or email
-            contact_doc.last_name = last_name
-            contact_doc.company_name = entry.get("company_name") or ""
-
-            if email:
-                contact_doc.append(
-                    "email_ids",
-                    {"email_id": email, "is_primary": 1},
-                )
-
-            mobile_no = (entry.get("mobile_no") or "").strip()
-            if mobile_no:
-                contact_doc.append(
-                    "phone_nos",
-                    {"phone": mobile_no, "is_primary_mobile_no": 1},
-                )
-
-            phone = (entry.get("phone") or "").strip()
-            if phone:
-                contact_doc.append(
-                    "phone_nos",
-                    {"phone": phone, "is_primary_phone": 1},
-                )
-
-            contact_doc.insert(ignore_permissions=True)
-            contact_name = contact_doc.name
-
-            frappe.logger("hubspot").info(
-                f"Created Contact {contact_name} ({first_name} {last_name})"
-            )
-
-        # Skip if this contact is already linked to the deal
-        already_linked = any(
-            row.contact == contact_name for row in (deal.get("contacts") or [])
-        )
-        if already_linked:
             continue
 
-        deal.append(
-            "contacts",
-            {"contact": contact_name, "is_primary": 1 if idx == 0 else 0},
-        )
+        if any(row.contact == contact_name for row in (deal.get("contacts") or [])):
+            continue
+
+        deal.append("contacts", {"contact": contact_name, "is_primary": 1 if idx == 0 else 0})
 
     deal.save(ignore_permissions=True)
-    frappe.db.commit()
 
 
-def _parse_amount(value: Any) -> float:
-    """Safely parse a deal amount to a float, defaulting to 0."""
-    if value is None:
-        return 0.0
-    try:
-        return float(value)
-    except (ValueError, TypeError):
-        return 0.0
+# ---------------------------------------------------------------------------
+# Deployment location helpers (used by deployment_site_handler)
+# ---------------------------------------------------------------------------
+# These remain here to avoid circular imports — deployment_site_handler
+# imports them for its webhook-driven upserts.
+
+
+def _apply_site_properties(loc: Any, site_properties: dict[str, Any]) -> None:
+    """Apply HubSpot site properties to a Deployment Location doc."""
+    from ivm.ivm_integrations.hubspot.constants import SITE_FIELD_MAP
+
+    meta = frappe.get_meta("Deployment Location")
+
+    for hs_key, loc_field in SITE_FIELD_MAP.items():
+        value = site_properties.get(hs_key)
+        if value is None or value == "":
+            continue
+
+        df = meta.get_field(loc_field)
+        loc.set(loc_field, coerce_value(value, df))
+
+
+def _apply_machine_data(
+    loc: Any,
+    machines: dict[str, list[dict[str, Any]]],
+) -> None:
+    """Replace machine child tables on the Deployment Location with fresh data."""
+    all_child_tables = set(MACHINE_TYPE_TO_CHILD_TABLE.values())
+
+    for child_table in all_child_tables:
+        loc.set(child_table, [])
+
+    for child_table, rows in machines.items():
+        for row in rows:
+            if row:
+                loc.append(child_table, row)
