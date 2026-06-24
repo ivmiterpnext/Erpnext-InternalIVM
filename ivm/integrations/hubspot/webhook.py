@@ -1,32 +1,21 @@
-"""
-HubSpot webhook receiver.
-
-Exposes ``handle_webhook`` — verifies the HubSpot request signature and
-enqueues the appropriate handler for each incoming subscription event.
-"""
+"""HubSpot webhook receiver — verifies signatures and enqueues handlers."""
 
 import json
 import time
 from typing import Any
 
 import frappe
-from ivm.integrations.hubspot import hubspot_client
+from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
     BIN_TYPE_ID,
-    CALL_TYPE_ID,
     COMPANY_TYPE_ID,
     CONTACT_TYPE_ID,
     DEAL_TYPE_ID,
     DEPLOYMENT_SITE_TYPE_ID,
-    EMAIL_TYPE_ID,
     ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID,
     MACHINE_TYPE_TO_CHILD_TABLE,
-    MEETING_TYPE_ID,
-    NOTE_TYPE_ID,
-    TASK_TYPE_ID,
 )
 
-# Maximum seconds for webhook timestamp to be considered valid.
 MAX_TIMESTAMP_AGE_SECONDS = 300
 
 _logger = frappe.logger("hubspot_webhook")
@@ -34,7 +23,7 @@ _HANDLER_PREFIX = "ivm.integrations.hubspot"
 
 
 def _id_kwarg(key: str):
-    """Factory for simple kwargs builders that map object_id to a single named key."""
+    """Return a kwargs builder that maps ``object_id`` to *key*."""
     def _builder(object_id: str, _event: dict) -> dict:
         return {key: object_id}
     return _builder
@@ -62,8 +51,6 @@ def _engagement_kwargs(object_id: str, event: dict) -> dict:
     }
 
 
-# Maps objectTypeId → {subscriptionType: (handler method path, kwargs builder)}.
-# Add a new entry here when a new HubSpot object type needs handling.
 _OBJECT_TYPE_HANDLERS: dict[str, dict[str, tuple[str, Any]]] = {
     DEAL_TYPE_ID: {
         "object.creation":         (f"{_HANDLER_PREFIX}.deal_handler.handle_deal_created", _deal_kwargs),
@@ -96,7 +83,7 @@ for _machine_type_id in MACHINE_TYPE_TO_CHILD_TABLE:
         "object.propertyChange": (f"{_HANDLER_PREFIX}.deployment_site_handler.handle_machine_webhook", _machine_kwargs),
     }
 
-for _engagement_type_id in (NOTE_TYPE_ID, CALL_TYPE_ID, EMAIL_TYPE_ID, TASK_TYPE_ID, MEETING_TYPE_ID):
+for _engagement_type_id in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID:
     _OBJECT_TYPE_HANDLERS[_engagement_type_id] = {
         "object.creation":       (f"{_HANDLER_PREFIX}.activity_handler.handle_engagement_webhook", _engagement_kwargs),
         "object.propertyChange": (f"{_HANDLER_PREFIX}.activity_handler.handle_engagement_webhook", _engagement_kwargs),
@@ -112,7 +99,7 @@ def _verify_request(body: str, signature: str, timestamp: str) -> None:
     except (ValueError, TypeError):
         frappe.throw("Invalid webhook timestamp", frappe.AuthenticationError)
 
-    if not hubspot_client.verify_signature(body, signature):
+    if not api.verify_signature(body, signature):
         frappe.throw("Invalid webhook signature", frappe.AuthenticationError)
 
 

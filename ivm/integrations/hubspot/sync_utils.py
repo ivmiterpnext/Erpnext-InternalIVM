@@ -7,15 +7,13 @@ from frappe.utils import flt
 
 from ivm.integrations.hubspot.constants import HUBSPOT_USER
 
-# A value transform receives (doc, raw_value) and mutates the doc directly.
 ValueTransform = Callable[[Any, Any], None]
+"""A value transform receives ``(doc, raw_value)`` and mutates the doc directly."""
 
-# Values HubSpot uses for booleans (case-insensitive).
+_LOG = "hubspot"
 _TRUTHY = frozenset({"true", "1", "yes"})
 _FALSY = frozenset({"false", "0", "no"})
 _BOOLEAN_ISH = _TRUTHY | _FALSY
-
-
 
 
 def coerce_value(value: Any, df: Any = None) -> Any:
@@ -45,7 +43,7 @@ def coerce_value(value: Any, df: Any = None) -> Any:
         if is_boolean_ish:
             return ""
 
-        frappe.logger("hubspot").warning(
+        frappe.logger(_LOG).warning(
             f"HubSpot value '{value}' is not a valid option for "
             f"Select field '{df.fieldname}' (options: {options}) — clearing"
         )
@@ -71,37 +69,33 @@ def apply_field_map(
     for hs_key, frappe_field in field_map.items():
         value = properties.get(hs_key)
 
-        # --- Custom transform takes precedence ---
         if frappe_field in transforms:
             transforms[frappe_field](doc, value)
             continue
 
-        # --- Generic path ---
         if value is None or value == "":
             continue
 
         df = meta.get_field(frappe_field)
 
-        # Validate Link fields
         if df and df.fieldtype == "Link" and df.options:
             if not frappe.db.exists(df.options, value):
-                frappe.logger("hubspot").warning(
+                frappe.logger(_LOG).warning(
                     f"{df.options} '{value}' (from {hs_key}) not found — skipping {frappe_field}"
                 )
                 continue
 
-        # Truncate ISO datetime strings for Date fields
         if df and df.fieldtype == "Date" and isinstance(value, str) and "T" in value:
             value = value.split("T")[0]
 
         doc.set(frappe_field, value)
 
 
-def save_doc(doc: Any, logger_prefix: str = "hubspot") -> None:
+def save_doc(doc: Any, label: str = "hubspot") -> None:
     """Save a Frappe doc with ignore_permissions and log the result."""
     doc.save(ignore_permissions=True)
-    frappe.logger("hubspot").info(
-        f"Synced {logger_prefix} fields on {doc.doctype} {doc.name}"
+    frappe.logger(_LOG).info(
+        f"Synced {label} fields on {doc.doctype} {doc.name}"
     )
 
 
@@ -127,15 +121,10 @@ def lookup_or_create(
         doc.set(key, val)
     doc.insert(ignore_permissions=True)
 
-    frappe.logger("hubspot").info(
+    frappe.logger(_LOG).info(
         f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})"
     )
     return doc, True
-
-
-def set_hubspot_user() -> None:
-    """Set the current Frappe user to the HubSpot service account."""
-    frappe.set_user(HUBSPOT_USER)
 
 
 def upsert_address(
@@ -147,62 +136,36 @@ def upsert_address(
     link_doctype: str = "",
     link_name: str = "",
 ) -> str | None:
-    """Create or update an Address doc linked to a Frappe document.
+    """Create or update an Address linked to *link_doctype* / *link_name*.
 
-    Parameters
-    ----------
-    address_line1:
-        The street address.  If empty, the Address doc is **skipped entirely**.
-    city, state, country, pincode:
-        Additional address fields.
-    link_doctype:
-        The DocType to link the address to (e.g. ``"Contact"``, ``"CRM Organization"``).
-    link_name:
-        The ``name`` of the document to link the address to.
-
-    Returns
-    -------
-    str | None
-        The Address ``name``, or ``None`` if skipped.
+    Returns the Address ``name``, or ``None`` if *address_line1* is empty.
     """
     address_line1 = (address_line1 or "").strip()
     if not address_line1:
         return None
 
-    city = (city or "").strip()
-    state = (state or "").strip()
-    country = (country or "").strip()
-    pincode = (pincode or "").strip()
+    city, state, country, pincode = (
+        (v or "").strip() for v in (city, state, country, pincode)
+    )
 
-    # Validate country against Frappe's Country doctype
     if country and not frappe.db.exists("Country", country):
-        frappe.logger("hubspot").warning(
-            f"Country '{country}' not found in Country doctype — skipping address "
-            f"for {link_doctype} {link_name}"
+        frappe.logger(_LOG).warning(
+            f"Country '{country}' not found — skipping address for {link_doctype} {link_name}"
         )
         return None
 
-    # Check for an existing Address linked to this document
     existing_address = _find_linked_address(link_doctype, link_name)
 
     if existing_address:
         doc = frappe.get_doc("Address", existing_address)
         doc.address_line1 = address_line1
-        if city:
-            doc.city = city
-        if state:
-            doc.state = state
-        if country:
-            doc.country = country
-        if pincode:
-            doc.pincode = pincode
+        for field, value in {"city": city, "state": state, "country": country, "pincode": pincode}.items():
+            if value:
+                doc.set(field, value)
         doc.save(ignore_permissions=True)
-        frappe.logger("hubspot").info(
-            f"Updated Address {doc.name} for {link_doctype} {link_name}"
-        )
+        frappe.logger(_LOG).info(f"Updated Address {doc.name} for {link_doctype} {link_name}")
         return doc.name
 
-    # Create a new Address doc
     doc = frappe.get_doc({
         "doctype": "Address",
         "address_title": link_name,
@@ -217,11 +180,8 @@ def upsert_address(
         ],
     })
     doc.insert(ignore_permissions=True)
-    frappe.logger("hubspot").info(
-        f"Created Address {doc.name} for {link_doctype} {link_name}"
-    )
+    frappe.logger(_LOG).info(f"Created Address {doc.name} for {link_doctype} {link_name}")
 
-    # Link the address back to the parent document if it has an address field
     parent_meta = frappe.get_meta(link_doctype)
     if parent_meta.get_field("address"):
         frappe.db.set_value(link_doctype, link_name, "address", doc.name)
@@ -242,11 +202,7 @@ def _find_linked_address(link_doctype: str, link_name: str) -> str | None:
 
 
 def bucket_employee_count(count_str: str | None) -> str:
-    """Convert a raw employee count (e.g. ``"150"``) to a Frappe select range.
-
-    Returns one of: ``"1-10"``, ``"11-50"``, ``"51-200"``, ``"201-500"``,
-    ``"501-1000"``, ``"1000+"``, or ``""`` if the value cannot be parsed.
-    """
+    """Convert a raw employee count to a Frappe select range."""
     if not count_str:
         return ""
     try:
@@ -272,11 +228,11 @@ def set_acting_user(hubspot_user_id: int | str | None = None) -> None:
     """Set the Frappe session user based on the HubSpot user who triggered the event.
 
     Resolves the HubSpot user/owner ID to an email via the Owners API,
-    then checks if that email corresponds to a Frappe User.  Falls back
+    then checks if that email corresponds to a Frappe User. Falls back
     to the HubSpot service account when resolution fails or no matching
     Frappe user exists.
 
-    Owner email resolution is cached in ``hubspot_client.get_owner_email``
+    Owner email resolution is cached in ``api.get_owner_email``
     so repeated calls for the same owner ID within a single worker process
     don't hit the HubSpot API again.
     """
@@ -284,9 +240,9 @@ def set_acting_user(hubspot_user_id: int | str | None = None) -> None:
         frappe.set_user(HUBSPOT_USER)
         return
 
-    from ivm.integrations.hubspot import hubspot_client
+    from ivm.integrations.hubspot import api
 
-    email = hubspot_client.get_owner_email(hubspot_user_id)
+    email = api.get_owner_email(hubspot_user_id)
 
     if email and frappe.db.exists("User", email):
         frappe.set_user(email)

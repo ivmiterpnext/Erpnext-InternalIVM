@@ -6,7 +6,7 @@ import frappe
 import requests
 
 from ivm.integrations.keyvault import get_config_value, get_secret_client
-from ivm.machine_hardware_management.utils.case_utils import (dict_keys_to_camel_case, dict_keys_to_snake_case)
+from ivm.integrations.icorp.utils import dict_keys_to_camel_case, dict_keys_to_snake_case
 
 _LOG = "ivm.integrations.headwind"
 

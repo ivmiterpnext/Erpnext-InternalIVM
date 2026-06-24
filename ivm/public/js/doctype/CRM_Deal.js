@@ -320,7 +320,7 @@ frappe.ui.form.on("CRM Deal", {
     if (frm.doc.custom_hubspot_deal_id) {
       frm.add_custom_button(__("View in HubSpot"), () => {
         frappe.xcall(
-          "ivm.integrations.hubspot.hubspot_client.get_hubspot_deal_url",
+          "ivm.integrations.hubspot.api.get_hubspot_deal_url",
           { deal_id: frm.doc.custom_hubspot_deal_id }
         ).then((url) => {
           window.open(url, "_blank");

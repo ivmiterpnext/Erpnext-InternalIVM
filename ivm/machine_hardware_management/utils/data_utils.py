@@ -2,7 +2,7 @@ from datetime import datetime
 from urllib.parse import unquote_plus
 import re
 import frappe
-from ivm.machine_hardware_management.utils.case_utils import to_camel_case
+from ivm.integrations.icorp.utils import to_camel_case
 
 
 def build_sort_params(order_by, sort_field_map: dict, *, add_tie_breaker=False):

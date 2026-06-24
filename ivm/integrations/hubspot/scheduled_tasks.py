@@ -25,8 +25,13 @@ API cost per run
 
 import frappe
 
-from ivm.integrations.hubspot import activity_handler, hubspot_client
-from ivm.integrations.hubspot.constants import EMAIL_PROPERTIES
+from ivm.integrations.hubspot import activity_handler
+from ivm.integrations.hubspot import api
+from ivm.integrations.hubspot.constants import (
+    EMAIL_PROPERTIES,
+    ENGAGEMENT_TYPE_EMAILS,
+    HUBSPOT_DEAL_ID_FIELD,
+)
 
 _LOG = "hubspot"
 
@@ -42,10 +47,10 @@ def sync_inbound_emails() -> None:
     open_deals = frappe.get_all(
         "CRM Deal",
         filters=[
-            ["custom_hubspot_deal_id", "is", "set"],
+            [HUBSPOT_DEAL_ID_FIELD, "is", "set"],
             ["status", "not in", list(_CLOSED_STATUSES)],
         ],
-        fields=["name", "custom_hubspot_deal_id"],
+        fields=["name", HUBSPOT_DEAL_ID_FIELD],
     )
 
     if not open_deals:
@@ -53,7 +58,7 @@ def sync_inbound_emails() -> None:
 
     # Build lookup: hubspot_deal_id → crm_deal_name
     deal_map: dict[str, str] = {
-        d["custom_hubspot_deal_id"]: d["name"] for d in open_deals
+        d[HUBSPOT_DEAL_ID_FIELD]: d["name"] for d in open_deals
     }
     hubspot_ids = list(deal_map.keys())
 
@@ -63,7 +68,7 @@ def sync_inbound_emails() -> None:
 
     # --- 2. Batch fetch all email IDs for all deals (1 API call per 100 deals) ---
     try:
-        deal_email_ids = hubspot_client.get_deal_email_ids_batch(hubspot_ids)
+        deal_email_ids = api.get_deal_email_ids_batch(hubspot_ids)
     except Exception:
         frappe.log_error(
             title="HubSpot: batch email association fetch failed",
@@ -122,7 +127,7 @@ def sync_inbound_emails() -> None:
 def _sync_one_email(email_id: str, crm_deal_names: list[str]) -> None:
     """Fetch and sync a single new email engagement to its associated deals."""
     try:
-        data = hubspot_client.get_engagement("emails", email_id, EMAIL_PROPERTIES)
+        data = api.get_engagement(ENGAGEMENT_TYPE_EMAILS, email_id, EMAIL_PROPERTIES)
         props = data.get("properties", {})
         if "createdAt" not in props and data.get("createdAt"):
             props["_createdAt"] = data["createdAt"]

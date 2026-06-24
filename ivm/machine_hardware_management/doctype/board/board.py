@@ -4,7 +4,7 @@
 import frappe
 from ivm.machine_hardware_management.utils.base_virtual_doctype import BaseVirtualDoctype
 from ivm.integrations.icorp import icorp_api_get
-from ivm.machine_hardware_management.utils.case_utils import api_data_to_frappe_dict
+from ivm.integrations.icorp.utils import api_data_to_frappe_dict
 from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict, to_iso8601
 
 

@@ -13,13 +13,11 @@ from ivm.deals.constants import SKIP_CHILD_FIELDS
 
 _LOG = "deployments"
 
-# Flat fields copied from CRM Deal → Project (deal_field: project_field).
 DEAL_TO_PROJECT_FIELDS: dict[str, str] = {
     "custom_machine_ownership_status": "machine_ownership_status",
     "custom_opportunity_term": "opportunity_term",
 }
 
-# Flat fields copied from Deployment Location → Project (location_field: project_field).
 LOCATION_TO_PROJECT_FIELDS: dict[str, str] = {
     "equipment_type": "equipment_type",
     "wrap_type": "wrap_type",
@@ -40,8 +38,6 @@ LOCATION_TO_PROJECT_FIELDS: dict[str, str] = {
     "number_of_vaults": "number_of_vaults",
 }
 
-# Child tables copied from Deployment Location → Project
-# (location_table_field: project_table_field).
 LOCATION_TO_PROJECT_CHILD_TABLES: dict[str, str] = {
     "smartstation_details": "custom_deployment_smartstation_details",
     "smartlocker_details": "custom_deployment_smartlocker_details",
@@ -58,6 +54,26 @@ def _copy_flat_fields(doc: Any, mapping: dict[str, str]) -> dict[str, Any]:
         for src, dst in mapping.items()
         if (value := doc.get(src)) is not None and value != ""
     }
+
+
+def _copy_child_tables(
+    doc: Any, mapping: dict[str, str],
+) -> dict[str, list[dict[str, Any]]]:
+    """Return {dest_table: [row_dicts]} for all non-empty mapped child tables on doc."""
+    result: dict[str, list[dict[str, Any]]] = {}
+    for src_table, dst_table in mapping.items():
+        rows = doc.get(src_table) or []
+        if not rows:
+            continue
+        copied = [
+            {k: v for k, v in row.as_dict().items()
+             if k not in SKIP_CHILD_FIELDS and v is not None and v != ""}
+            for row in rows
+        ]
+        copied = [r for r in copied if r]
+        if copied:
+            result[dst_table] = copied
+    return result
 
 
 def create_projects_from_deal(crm_deal_name: str) -> list[str]:
@@ -80,7 +96,6 @@ def create_projects_from_deal(crm_deal_name: str) -> list[str]:
     # Build deal-level field values once; shared across all Projects.
     deal_fields = _copy_flat_fields(deal, DEAL_TO_PROJECT_FIELDS)
 
-    # Resolve iCorp client ID from the linked Customer record.
     customer_name = deal.get("custom_client_id")
     if customer_name:
         deal_fields["customer"] = customer_name
@@ -116,7 +131,6 @@ def _create_project_for_location(
     Returns the new Project name, or None if a Project already exists for this location."""
     location = frappe.get_doc("Deployment Location", location_name)
 
-    # Dedup: skip if a Project already exists for this location.
     if frappe.db.exists("Project", {"custom_hubspot_deployment_site_id": location.hubspot_site_id or ""}):
         frappe.logger(_LOG).info(
             f"Deployment already exists for Deployment Location {location_name}, skipping"
@@ -124,21 +138,7 @@ def _create_project_for_location(
         return None
 
     location_fields = _copy_flat_fields(location, LOCATION_TO_PROJECT_FIELDS)
-
-    # Child table rows from the Deployment Location.
-    child_rows: dict[str, list[dict[str, Any]]] = {}
-    for loc_table, proj_table in LOCATION_TO_PROJECT_CHILD_TABLES.items():
-        rows = location.get(loc_table) or []
-        if not rows:
-            continue
-        copied = [
-            {k: v for k, v in row.as_dict().items()
-             if k not in SKIP_CHILD_FIELDS and v is not None and v != ""}
-            for row in rows
-        ]
-        copied = [r for r in copied if r]  # drop rows that were entirely skip/null fields
-        if copied:
-            child_rows[proj_table] = copied
+    child_rows = _copy_child_tables(location, LOCATION_TO_PROJECT_CHILD_TABLES)
 
     site_name = location.location_name or location_name
     start_date = location.target_ship_date or today()
@@ -157,8 +157,7 @@ def _create_project_for_location(
         **child_rows,
     })
 
-    # System-initiated creation on behalf of the user; permissions are
-    # enforced at the CRM Deal level before this function is called.
+    # System-initiated creation; permissions enforced at the CRM Deal level.
     project.insert(ignore_permissions=True, ignore_mandatory=True)
 
     frappe.logger(_LOG).info(
