@@ -96,7 +96,7 @@ def create_projects_from_deal(crm_deal_name: str) -> list[str]:
     # Build deal-level field values once; shared across all Projects.
     deal_fields = _copy_flat_fields(deal, DEAL_TO_PROJECT_FIELDS)
 
-    customer_name = deal.get("custom_client_id")
+    customer_name = deal.get("custom_customer")
     if customer_name:
         deal_fields["customer"] = customer_name
         icorp_client_id = frappe.db.get_value("Customer", customer_name, "icorp_client_id")

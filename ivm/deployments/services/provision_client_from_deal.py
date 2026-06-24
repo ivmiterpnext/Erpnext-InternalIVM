@@ -1,8 +1,8 @@
 """
-Provision a Customer and iCorp client/contact when a New Business CRM Deal is won.
+Provision a Customer and iCorp client/contact when a CRM Deal is won.
 
-Flow
-----
+New Business flow
+-----------------
 1. Create a Frappe **Customer** from the deal's CRM Organization (or reuse an
    existing one if a match is found).
 2. Create an **iCorp Contact** from the deal's primary Frappe Contact.
@@ -10,7 +10,18 @@ Flow
 4. Store the iCorp client ID on the Customer and link the Customer back to
    the CRM Deal so downstream project provisioning inherits the link.
 
-If any iCorp API call fails the Customer is still created — an error is
+Existing Business flow
+----------------------
+1. Check ``custom_customer`` already set on the deal — either synced from
+   HubSpot's ``client_id`` property or manually selected in Frappe.
+2. If not set, fall back to matching by CRM Organization name (only available
+   for deals where the org was synced from HubSpot).
+3. If neither resolves a Customer, raise an error — the deal cannot be won
+   without a linked Customer.
+4. Write the resolved Customer back to ``custom_customer`` on the deal so
+   downstream project provisioning inherits the link.
+
+If any iCorp API call fails the Customer is still created/linked — an error is
 logged for manual follow-up and the deal is not blocked from moving to Won.
 """
 
@@ -94,8 +105,59 @@ def provision_customer_and_icorp_client(crm_deal_name: str) -> str | None:
         frappe.db.set_value("Customer", customer_name, "icorp_client_id", str(icorp_client_id))
         log.info(f"Linked Customer '{customer_name}' to iCorp client {icorp_client_id}")
 
-    frappe.db.set_value("CRM Deal", crm_deal_name, "custom_client_id", customer_name)
+    frappe.db.set_value("CRM Deal", crm_deal_name, "custom_customer", customer_name)
 
+    return customer_name
+
+
+def link_existing_customer_to_deal(crm_deal_name: str) -> str:
+    """Resolve and link an existing Customer to an Existing Business deal.
+
+    Resolution order:
+    1. ``custom_customer`` already set on the deal (synced from HubSpot or
+       manually selected in Frappe).
+    2. Match a Customer by the deal's CRM Organization name, if an org is
+       linked (only reliable for deals where the org was synced from HubSpot).
+
+    Returns the Customer name.
+    Raises ``frappe.ValidationError`` if no Customer can be resolved.
+    """
+    deal = frappe.get_doc("CRM Deal", crm_deal_name)
+
+    # 1. Check custom_customer already on the deal.  The HubSpot sync
+    #    resolves the iCorp numeric client ID → Customer name at sync time
+    #    (see _apply_client_id in deal_handler.py), so this field should
+    #    already hold a valid Customer name for deals coming from HubSpot.
+    #    It may also be set manually in Frappe.
+    customer_name: str | None = None
+    if deal.custom_customer and frappe.db.exists("Customer", deal.custom_customer):
+        customer_name = deal.custom_customer
+        frappe.logger(_LOG).info(
+            f"Resolved existing Customer '{customer_name}' from "
+            f"custom_customer on deal {crm_deal_name}"
+        )
+
+    # 2. Fall back to matching by CRM Organization name if an org is linked.
+    #    Not available for older deals where the org was never synced from HubSpot.
+    if not customer_name and deal.organization:
+        org = frappe.get_doc("CRM Organization", deal.organization)
+        customer_name = _find_existing_customer(org)
+        if customer_name:
+            frappe.logger(_LOG).info(
+                f"Resolved existing Customer '{customer_name}' from org name "
+                f"'{org.organization_name}' for deal {crm_deal_name}"
+            )
+
+    if not customer_name:
+        frappe.throw(
+            "Cannot mark this deal as Won — no matching Customer was found. "
+            "Please set the 'Client' field on the deal to the correct Customer "
+            "before winning an Existing Business deal.",
+            title="Customer Not Found",
+        )
+
+    # Write back so project provisioning picks it up.
+    frappe.db.set_value("CRM Deal", crm_deal_name, "custom_customer", customer_name)
     return customer_name
 
 

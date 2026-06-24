@@ -75,12 +75,35 @@ def _apply_deal_owner(doc: Any, value: Any) -> None:
         )
 
 
+def _apply_client_id(doc: Any, value: Any) -> None:
+    """Resolve HubSpot's numeric iCorp client ID to a Frappe Customer name.
+
+    HubSpot stores the iCorp numeric client ID in the ``client_id`` property
+    (e.g. ``"1042"``).  ``custom_customer`` is a Link → Customer field, so
+    we must look up the Customer whose ``icorp_client_id`` matches before
+    writing the value, otherwise Frappe silently discards the raw numeric string.
+    """
+    if not value:
+        return
+    customer_name = frappe.db.get_value(
+        "Customer", {"icorp_client_id": str(value)}, "name"
+    )
+    if customer_name:
+        doc.custom_customer = customer_name
+    else:
+        frappe.logger("hubspot").warning(
+            f"HubSpot client_id '{value}' did not match any Customer "
+            f"(icorp_client_id) — skipping custom_customer"
+        )
+
+
 DEAL_TRANSFORMS = {
     "deal_value": _apply_deal_value,
     "status": _apply_status,
     "custom_pipeline": _apply_pipeline,
     "custom_deal_type": _apply_deal_type,
     "deal_owner": _apply_deal_owner,
+    "custom_customer": _apply_client_id,
 }
 
 

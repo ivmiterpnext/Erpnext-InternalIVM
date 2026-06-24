@@ -20,15 +20,22 @@ def on_update(doc: Document, method: str | None = None) -> None:
             title="No Deployment Locations",
         )
 
-    # Provision Customer + iCorp client for New Business deals.
-    # Must run before project creation so custom_client_id is available.
+    # Provision/resolve Customer before project creation so custom_customer is available.
     if doc.custom_deal_type == "New Business":
         from ivm.deployments.services.provision_client_from_deal import (
             provision_customer_and_icorp_client,
         )
 
         provision_customer_and_icorp_client(doc.name)
-        doc.reload()  # pick up custom_client_id set by provisioning
+        doc.reload()  # pick up custom_customer set by provisioning
+
+    elif doc.custom_deal_type == "Existing Business":
+        from ivm.deployments.services.provision_client_from_deal import (
+            link_existing_customer_to_deal,
+        )
+
+        link_existing_customer_to_deal(doc.name)
+        doc.reload()  # pick up custom_customer resolved by lookup
 
     try:
         created = create_projects_from_deal(doc.name)

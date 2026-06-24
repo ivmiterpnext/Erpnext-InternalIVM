@@ -211,7 +211,7 @@ DEAL_FIELD_MAP: dict[str, str] = {
     "machine_ownership_status": "custom_machine_ownership_status",
     "opportunity_term": "custom_opportunity_term",
     "hubspot_owner_id": "deal_owner",
-    "client_id": "custom_client_id",
+    "client_id": "custom_customer",
     "master_client_id": "custom_master_client_id",
 }
 

@@ -306,8 +306,8 @@ function applyStatusFilter(frm) {
 
 function applyDealTypeVisibility(frm) {
   const isExisting = frm.doc.custom_deal_type === "Existing Business";
-  frm.toggle_display("custom_client_id", isExisting);
-  frm.toggle_reqd("custom_client_id", isExisting);
+ frm.toggle_display("custom_customer", isExisting);
+ frm.toggle_reqd("custom_customer", isExisting);
 }
 
 frappe.ui.form.on("CRM Deal", {
