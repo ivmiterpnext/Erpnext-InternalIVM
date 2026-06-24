@@ -39,7 +39,7 @@
    "fieldname": "card_reader_type",
    "fieldtype": "Select",
    "label": "Card Reader Type",
-   "options": "\nBarcode\nBarcode Reader\n2-D Barcode Reader\nStandard Barcode Reader\nCredit Card\nCredit Card Reader\nDelta3\nHID iCLASS SE\nHID MultiCLASS SE\nHID P300HA\nHID Multi Class\nHID Multiclass\nprox\nProx - HID Iclass SE\nP300 HA\nProx - P300\nP-300AH\nProx - P300 - AH\nP300AH\nP300 - AH\np-300\nFOB - P300 AH\nPin Pad\nQR Code\nQR Code Reader\nWave\nWave ID reader\nMifare\nIndala\ntbd\nOther\nNot Needed"
+   "options": "\nNot Needed\nQR Code Reader\nP300-H-A\nHID Omnikey\nHID Signo\nHID MultiCLASS SE\nKeypad\nDelta3\nWave\nOther"
   },
   {
    "fieldname": "machine_name",
@@ -54,8 +54,8 @@
    "fieldname": "workflow",
    "fieldtype": "Select",
    "label": "Workflow",
-   "options": "\nVend and Return",
-   "mandatory_depends_on": "eval:doc.smartscreen"
+   "mandatory_depends_on": "eval:doc.smartscreen",
+   "options": "\nVend and Return"
   },
   {
    "fieldname": "casters",
@@ -79,8 +79,8 @@
    "fieldname": "serial_validaton",
    "fieldtype": "Select",
    "label": "Serial Validaton",
-   "options": "\nYes\nNo",
-   "mandatory_depends_on": "eval:doc.smartscreen"
+   "mandatory_depends_on": "eval:doc.smartscreen",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "column_break_upml",
@@ -91,8 +91,8 @@
    "fieldname": "home_screen_logo",
    "fieldtype": "Select",
    "label": "Home Screen Logo",
-   "options": "\nIVM Logo\nClient Logo",
-   "mandatory_depends_on": "eval:doc.smartscreen"
+   "mandatory_depends_on": "eval:doc.smartscreen",
+   "options": "\nIVM Logo\nClient Logo"
   },
   {
    "fieldname": "offline_sales",
@@ -132,12 +132,13 @@
    "default": "2",
    "fieldname": "machine_type_id",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Machine Type Id"
   },
   {
    "fieldname": "general_section",
    "fieldtype": "Section Break",
-   "label": "General"
+   "label": "SmartStation Details"
   },
   {
    "fieldname": "column_break_emlq",
@@ -157,7 +158,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-23 10:21:37.910758",
+ "modified": "2026-06-10 10:25:48.270935",
  "modified_by": "Administrator",
  "module": "Deployments",
  "name": "Deployment SmartStation Details",

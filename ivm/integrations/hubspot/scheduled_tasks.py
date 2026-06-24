@@ -25,8 +25,8 @@ API cost per run
 
 import frappe
 
-from ivm.ivm_integrations.hubspot import activity_handler, hubspot_client
-from ivm.ivm_integrations.hubspot.constants import EMAIL_PROPERTIES
+from ivm.integrations.hubspot import activity_handler, hubspot_client
+from ivm.integrations.hubspot.constants import EMAIL_PROPERTIES
 
 _LOG = "hubspot"
 
@@ -112,7 +112,7 @@ def sync_inbound_emails() -> None:
     # --- 5. Fetch and sync each new email (1 API call per new email) ---
     for email_id in new_email_ids:
         frappe.enqueue(
-            "ivm.ivm_integrations.hubspot.scheduled_tasks._sync_one_email",
+            "ivm.integrations.hubspot.scheduled_tasks._sync_one_email",
             queue="short",
             email_id=email_id,
             crm_deal_names=email_to_deals[email_id],

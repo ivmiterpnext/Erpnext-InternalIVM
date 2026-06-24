@@ -1,5 +1,9 @@
 """
-Provision a deployment Project from a won CRM Deal.
+Provision one deployment Project per Deployment Location when a CRM Deal is won.
+
+Data sources:
+* CRM Deal            — deal-level fields (client, ownership, opportunity term, etc.)
+* Deployment Location — site-level fields (location name, shipping address, devices, etc.)
 """
 
 from typing import Any
@@ -7,82 +11,149 @@ import frappe
 from frappe.utils import today, add_days
 from ivm.deals.constants import SKIP_CHILD_FIELDS
 
+_LOG = "deployments"
+
+# Flat fields copied from CRM Deal → Project (deal_field: project_field).
 DEAL_TO_PROJECT_FIELDS: dict[str, str] = {
-    "custom_location_name": "site_location_name",
-    "custom_equipment_type": "equipment_type",
     "custom_machine_ownership_status": "machine_ownership_status",
-    "custom_wrap_type": "wrap_type",
-    "custom_card_reader_type": "card_reader_type",
-    "custom_connectivity_type": "connectivity_type",
-    "custom_locale": "locale",
-    "custom_expedited_delivery": "expedited_delivery",
-    "custom_install_type": "install_type",
-    "custom_client_id": "client_id",
-    "custom_master_client_id": "master_client_id",
-    "custom_sales_rep": "sales_rep",
-    "custom_ior": "ior",
     "custom_opportunity_term": "opportunity_term",
-    "custom_shipping_address": "custom_shipping_address",
-    "custom_billing_address": "billing_address",
-    "custom_po_and_tracking": "po_and_tracking",
-    "custom_target_ship_date": "target_ship_date",
 }
 
-DEAL_TO_PROJECT_CHILD_TABLES: dict[str, str] = {
-    "custom_deal_smartstation_details": "custom_deployment_smartstation_details",
-    "custom_deal_smartlocker_details": "custom_deployment_smartlocker_details",
-    "custom_deal_smartsync_details": "custom_deployment_smartsync_details",
-    "custom_deal_smartvault_details": "custom_deployment_smartvault_details",
-    "custom_deal_smartcenter_details": "custom_deployment_smartcenter_details",
+# Flat fields copied from Deployment Location → Project (location_field: project_field).
+LOCATION_TO_PROJECT_FIELDS: dict[str, str] = {
+    "equipment_type": "equipment_type",
+    "wrap_type": "wrap_type",
+    "card_reader_type": "card_reader_type",
+    "connectivity_type": "connectivity_type",
+    "locale": "locale",
+    "ior": "ior",
+    "expedited_delivery": "expedited_delivery",
+    "install_type": "install_type",
+    "shipping_address": "custom_shipping_address",
+    "billing_address": "billing_address",
+    "po_and_tracking": "po_and_tracking",
+    "target_ship_date": "target_ship_date",
+    "number_of_machines": "number_of_machines",
+    "number_of_primary_lockers": "number_of_primary_lockers",
+    "number_of_secondary_lockers": "number_of_secondary_lockers",
+    "number_of_kiosks": "number_of_kiosks",
+    "number_of_vaults": "number_of_vaults",
+}
+
+# Child tables copied from Deployment Location → Project
+# (location_table_field: project_table_field).
+LOCATION_TO_PROJECT_CHILD_TABLES: dict[str, str] = {
+    "smartstation_details": "custom_deployment_smartstation_details",
+    "smartlocker_details": "custom_deployment_smartlocker_details",
+    "smartsync_details": "custom_deployment_smartsync_details",
+    "smartvault_details": "custom_deployment_smartvault_details",
+    "smartcenter_details": "custom_deployment_smartcenter_details",
 }
 
 
-def create_project_from_deal(crm_deal_name: str) -> str:
-    """
-    Reads flat fields and child table rows from the CRM Deal and creates
-    a Project with matching data.
-    """
+def _copy_flat_fields(doc: Any, mapping: dict[str, str]) -> dict[str, Any]:
+    """Return {dest_field: value} for all non-empty mapped fields on doc."""
+    return {
+        dst: value
+        for src, dst in mapping.items()
+        if (value := doc.get(src)) is not None and value != ""
+    }
 
+
+def create_projects_from_deal(crm_deal_name: str) -> list[str]:
+    """Create one Project per Deployment Location linked to the given CRM Deal.
+    Returns a list of created Project names."""
     deal = frappe.get_doc("CRM Deal", crm_deal_name)
 
-    project_fields: dict[str, Any] = {}
-    for deal_field, project_field in DEAL_TO_PROJECT_FIELDS.items():
-        value = deal.get(deal_field)
-        if value is not None and value != "":
-            project_fields[project_field] = value
+    locations = frappe.get_all(
+        "Deployment Location",
+        filters={"crm_deal": crm_deal_name},
+        pluck="name",
+    )
 
+    if not locations:
+        frappe.logger(_LOG).warning(
+            f"CRM Deal {crm_deal_name} has no Deployment Locations — no Deployments created"
+        )
+        return []
+
+    # Build deal-level field values once; shared across all Projects.
+    deal_fields = _copy_flat_fields(deal, DEAL_TO_PROJECT_FIELDS)
+
+    # Resolve iCorp client ID from the linked Customer record.
+    customer_name = deal.get("custom_client_id")
+    if customer_name:
+        deal_fields["customer"] = customer_name
+        icorp_client_id = frappe.db.get_value("Customer", customer_name, "icorp_client_id")
+        if icorp_client_id:
+            deal_fields["client_id"] = icorp_client_id
+
+    contacts = deal.get("contacts") or []
+    primary_contact = next((r for r in contacts if r.is_primary), contacts[0] if contacts else None)
+    if primary_contact:
+        deal_fields["contact_name"] = primary_contact.contact
+
+    created: list[str] = []
+
+    for location_name in locations:
+        project_name = _create_project_for_location(
+            deal=deal,
+            deal_fields=deal_fields,
+            location_name=location_name,
+        )
+        if project_name:
+            created.append(project_name)
+
+    return created
+
+
+def _create_project_for_location(
+    deal: Any,
+    deal_fields: dict[str, Any],
+    location_name: str,
+) -> str | None:
+    """Create a single Project from one Deployment Location.
+    Returns the new Project name, or None if a Project already exists for this location."""
+    location = frappe.get_doc("Deployment Location", location_name)
+
+    # Dedup: skip if a Project already exists for this location.
+    if frappe.db.exists("Project", {"custom_hubspot_deployment_site_id": location.hubspot_site_id or ""}):
+        frappe.logger(_LOG).info(
+            f"Deployment already exists for Deployment Location {location_name}, skipping"
+        )
+        return None
+
+    location_fields = _copy_flat_fields(location, LOCATION_TO_PROJECT_FIELDS)
+
+    # Child table rows from the Deployment Location.
     child_rows: dict[str, list[dict[str, Any]]] = {}
-    for deal_table, project_table in DEAL_TO_PROJECT_CHILD_TABLES.items():
-        deal_rows = deal.get(deal_table) or []
-        if not deal_rows:
+    for loc_table, proj_table in LOCATION_TO_PROJECT_CHILD_TABLES.items():
+        rows = location.get(loc_table) or []
+        if not rows:
             continue
+        copied = [
+            {k: v for k, v in row.as_dict().items()
+             if k not in SKIP_CHILD_FIELDS and v is not None and v != ""}
+            for row in rows
+        ]
+        copied = [r for r in copied if r]  # drop rows that were entirely skip/null fields
+        if copied:
+            child_rows[proj_table] = copied
 
-        rows: list[dict[str, Any]] = []
-        for deal_row in deal_rows:
-            row = {
-                k: v for k, v in deal_row.as_dict().items()
-                if k not in SKIP_CHILD_FIELDS and v is not None and v != ""
-            }
-            if row:
-                rows.append(row)
-
-        if rows:
-            child_rows[project_table] = rows
-
-    site_name = deal.get("custom_location_name") or crm_deal_name
-    project_name = f"{site_name} - {crm_deal_name}"
-
-    start_date = today()
+    site_name = location.location_name or location_name
+    start_date = location.target_ship_date or today()
 
     project = frappe.new_doc("Project")
     project.update({
-        "project_name": project_name,
+        "project_name": f"{site_name} - {deal.name}",
         "project_type": "Deployment",
         "stage": "Waiting Assignment",
         "expected_start_date": start_date,
         "expected_end_date": add_days(start_date, 56),
         "custom_hubspot_deal_id": deal.get("custom_hubspot_deal_id") or "",
-        **project_fields,
+        "custom_hubspot_deployment_site_id": location.hubspot_site_id or "",
+        **deal_fields,
+        **location_fields,
         **child_rows,
     })
 
@@ -90,8 +161,9 @@ def create_project_from_deal(crm_deal_name: str) -> str:
     # enforced at the CRM Deal level before this function is called.
     project.insert(ignore_permissions=True, ignore_mandatory=True)
 
-    frappe.logger("deployments").info(
-        f"Created Project {project.name} from CRM Deal {crm_deal_name}"
+    frappe.logger(_LOG).info(
+        f"Created Deployment {project.name} from CRM Deal {deal.name} / "
+        f"Deployment Location {location_name}"
     )
 
     return project.name

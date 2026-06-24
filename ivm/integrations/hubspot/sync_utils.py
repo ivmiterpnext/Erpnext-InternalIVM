@@ -5,7 +5,7 @@ from typing import Any, Callable
 import frappe
 from frappe.utils import flt
 
-from ivm.ivm_integrations.hubspot.constants import HUBSPOT_USER
+from ivm.integrations.hubspot.constants import HUBSPOT_USER
 
 # A value transform receives (doc, raw_value) and mutates the doc directly.
 ValueTransform = Callable[[Any, Any], None]
@@ -284,7 +284,7 @@ def set_acting_user(hubspot_user_id: int | str | None = None) -> None:
         frappe.set_user(HUBSPOT_USER)
         return
 
-    from ivm.ivm_integrations.hubspot import hubspot_client
+    from ivm.integrations.hubspot import hubspot_client
 
     email = hubspot_client.get_owner_email(hubspot_user_id)
 

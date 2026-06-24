@@ -165,7 +165,7 @@ doc_events = {
         "before_save": "ivm.warehouse.event_handlers.item.before_save"
     },
     "Wiki Document": {
-        "on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
+        "on_update": "ivm.integrations.wiki.content_webhook.on_wiki_document_update",
     },
     "CRM Deal": {
         "on_update": "ivm.deployments.event_handlers.deal.on_update",
@@ -189,7 +189,7 @@ scheduler_events = {
     # ],
     "hourly": [
         # Catch inbound reply emails that HubSpot does not surface via webhooks.
-        "ivm.ivm_integrations.hubspot.scheduled_tasks.sync_inbound_emails",
+        "ivm.integrations.hubspot.scheduled_tasks.sync_inbound_emails",
     ],
     # "weekly": [
     # "ivm.tasks.weekly"

@@ -25,11 +25,6 @@ frappe.ui.form.on("Project", {
         filters: [["Address", "address_type", "=", "Shipping"]],
       };
     });
-    frm.set_query("billing_address", function () {
-      return {
-        filters: [["Address", "address_type", "=", "Billing"]],
-      };
-    });
   },
 
   connectivity_type: (frm) => loadConnectivityTypeOptions(frm),
@@ -89,17 +84,7 @@ frappe.ui.form.on("Project", {
       frappe.msgprint(__('Planogram must be approved and Label File must be created before generating SmartStation Build requests.'));
       return;
     }
-    // TODO: Add logic for generating SmartStation Build Requests here
-    frappe.msgprint(__('SmartStation Build Requests logic not yet implemented.'));
-  },
-
-  custom_generate_smartsync_build_requests: function(frm) {
-    if (!frm.doc.locker_configuration_approved_date || !frm.doc.custom_locker_configuration_approved_by) {
-      frappe.msgprint(__('Locker Configuration must be approved before generating SmartSync Build requests.'));
-      return;
-    }
-    // TODO: Add logic for generating SmartSync Build Requests here
-    frappe.msgprint(__('SmartSync Build Requests logic not yet implemented.'));
+    _generate_build_requests(frm, 'custom_deployment_smartstation_details', 'SmartStation');
   },
 
   custom_generate_smartlocker_build_requests: function(frm) {
@@ -107,8 +92,15 @@ frappe.ui.form.on("Project", {
       frappe.msgprint(__('Locker Configuration must be approved before generating SmartLocker Build requests.'));
       return;
     }
-    // TODO: Add logic for generating SmartLocker Build Requests here
-    frappe.msgprint(__('SmartLocker Build Requests logic not yet implemented.'));
+    _generate_build_requests(frm, 'custom_deployment_smartlocker_details', 'SmartLocker');
+  },
+
+  custom_generate_smartsync_build_requests: function(frm) {
+    if (!frm.doc.locker_configuration_approved_date || !frm.doc.custom_locker_configuration_approved_by) {
+      frappe.msgprint(__('Locker Configuration must be approved before generating SmartSync Build requests.'));
+      return;
+    }
+    _generate_build_requests(frm, 'custom_deployment_smartsync_details', 'SmartSync');
   },
 
   custom_generate_smartvault_build_requests: function(frm) {
@@ -116,8 +108,7 @@ frappe.ui.form.on("Project", {
       frappe.msgprint(__('Vault Configuration must be approved before generating SmartVault Build requests.'));
       return;
     }
-    // TODO: Add logic for generating SmartVault Build Requests here
-    frappe.msgprint(__('SmartVault Build Requests logic not yet implemented.'));
+    _generate_build_requests(frm, 'custom_deployment_smartvault_details', 'SmartVault');
   },
 
   custom_generate_smartcenter_build_requests: function(frm) {
@@ -125,27 +116,9 @@ frappe.ui.form.on("Project", {
       frappe.msgprint(__('Kiosk Configuration must be approved before generating SmartCenter Build requests.'));
       return;
     }
-    // TODO: Add logic for generating SmartCenter Build Requests here
-    frappe.msgprint(__('SmartCenter Build Requests logic not yet implemented.'));
+    _generate_build_requests(frm, 'custom_deployment_smartcenter_details', 'SmartCenter');
   },
   
-  after_save(frm) {
-    if (frm.doc.graphic_design_approved_date) {
-      show_Dialog('Wrap Ready', frm);
-    }
-    if (frm.doc.planogram_approved_date) {
-      createWarehouseRequest('Build Machine', null, frm);
-    }
-    if (frm.doc.locker_configuration_approved_date) {
-      createWarehouseRequest('Build Locker', null, frm);
-    }
-    if (frm.doc.kiosk_configuration_approved_date) {
-      createWarehouseRequest('Build Kiosk', null, frm);
-    }
-    if (frm.doc.vault_configuration_approved_date) {
-      createWarehouseRequest('Build Vault', null, frm);
-    }
-  },
 });
 
 function loadConnectivityTypeOptions(frm) {
@@ -204,54 +177,52 @@ function updateSelectFieldOptions(frm, fieldname, optionsData) {
   frm.refresh_field(fieldname);
 }
 
-function show_Dialog(reason, frm) {
-  const dialog = new frappe.ui.Dialog({
-    title: 'Add Attachments',
-    fields: [
-      {
-        label: 'Do you want to add attachments?',
-        fieldname: 'add_attachments',
-        fieldtype: 'Select',
-        options: 'Yes\nNo',
-        default: 'No',
-      },
-      {
-        fieldname: 'attach_files',
-        fieldtype: 'Attach',
-        depends_on: 'eval:doc.add_attachments=="Yes"',
-      },
-    ],
-    primary_action_label: 'Submit',
-    primary_action(values) {
-      const addAttachments = values.attach_files;
-      if (addAttachments) {
-        createWarehouseRequest(reason, addAttachments, frm);
-      } else {
-        createWarehouseRequest(reason, null, frm);
-      }
-      dialog.hide();
-    },
-  });
-
-  dialog.show();
-}
-
-function createWarehouseRequest(reason, attachedFiles, frm) {
-  const doc = frm.doc;
+function _generate_build_requests(frm, detail_table, label) {
+  const rows = frm.doc[detail_table] || [];
+  if (!rows.length) {
+    frappe.msgprint(__(`No ${label} rows found on this deployment.`));
+    return;
+  }
 
   frappe.call({
-    method: 'ivm.api.create_warehouse_request',
+    method: 'ivm.warehouse.services.warehouse_request.create_build_requests_from_detail_rows',
     args: {
-      doc: doc,
-      reason: reason,
-      attached_files: attachedFiles,
+      project_name: frm.doc.name,
+      detail_table: detail_table,
     },
-    callback: function (r) {
-      frm.reload_doc();
-      frappe.show_alert({
-        message: __(`Warehouse Request <b><span style="color: #FF5733;">${reason}</span> is created`),
-        indicator: 'green'
-      }, 5);
+    freeze: true,
+    freeze_message: __(`Creating ${label} Build Requests...`),
+    callback: function(r) {
+      if (!r.exc && r.message) {
+        const { created, skipped, failed } = r.message;
+
+        if (failed && failed.length) {
+          frappe.msgprint({
+            title: __('Could not generate build requests'),
+            message: __(
+              'The following machines were not found in iCorp. ' +
+              'Please ensure the records are created before generating build requests:'
+            ) + '<ul>' + failed.map(n => `<li><strong>${n}</strong></li>`).join('') + '</ul>',
+            indicator: 'red'
+          });
+          return;
+        }
+
+        frm.reload_doc();
+        if (created.length) {
+          frappe.show_alert({
+            message: __(`Created ${created.length} ${label} Build Request(s).`) +
+              (skipped ? __(' ' + skipped + ' already existed and were skipped.') : ''),
+            indicator: 'green'
+          }, 7);
+        } else {
+          frappe.msgprint({
+            title: __('Already Created'),
+            message: __(`All ${label} Build Requests have already been created.`),
+            indicator: 'orange'
+          });
+        }
+      }
     }
   });
 }

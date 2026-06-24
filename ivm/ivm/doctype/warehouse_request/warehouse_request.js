@@ -1,8 +1,26 @@
 // Copyright (c) 2023, korecent and contributors
 // For license information, please see license.txt
 
+const MAX_RFID_SETTINGS_ROWS = 5;
+
 frappe.ui.form.on('Warehouse Request', {
 	refresh: function(frm) {
+		toggle_rfid_add_row(frm);
+		if (frm.doc.schema_version >= 2 && frm.doc.source_detail_doctype && frm.doc.source_detail_row) {
+			if (!frm._machine_details) {
+			frm._machine_details = new ivm.EmbeddedForm({
+				parent_form: frm,
+				html_field_name: 'machine_details_html',
+				embedded_doctype_field: 'source_detail_doctype',
+				dynamic_link_field: 'source_detail_row',
+				readOnly: true,
+				custom_renderers: {
+					bins_data: renderBinsReadOnly,
+				},
+			});
+			}
+			frm._machine_details.render();
+		}
 		if (frm.is_new() || !frm.doc.request_reason) return;
 
 		var is_pick_request = frm.doc.request_reason.includes('Build') || frm.doc.request_reason == 'Shipping Request';
@@ -64,5 +82,21 @@ frappe.ui.form.on('Warehouse Request', {
 				}
 			}
 		});
+	}
+});
+
+function toggle_rfid_add_row(frm) {
+	var grid = frm.fields_dict.rfid_settings.grid;
+	var at_limit = (frm.doc.rfid_settings || []).length >= MAX_RFID_SETTINGS_ROWS;
+	grid.cannot_add_rows = at_limit;
+	grid.refresh();
+}
+
+frappe.ui.form.on('Board RFID Settings', {
+	rfid_settings_add: function(frm) {
+		toggle_rfid_add_row(frm);
+	},
+	rfid_settings_remove: function(frm) {
+		toggle_rfid_add_row(frm);
 	}
 });

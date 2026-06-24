@@ -6,7 +6,8 @@ from ivm.machine_hardware_management.utils.cache_util import LIST_CACHE_EXPIRES,
 from ivm.machine_hardware_management.utils.case_utils import api_data_to_frappe_dict, convert_fields_to_bool
 from ivm.machine_hardware_management.utils.filter_utils import frappe_filters_to_dict, frappe_sort_to_dict
 from ivm.machine_hardware_management.utils.data_utils import ensure_meta_is_ready, set_attrs_from_dict
-from ivm.machine_hardware_management.utils.api_utils import headwind_api_request, icorp_api_get, icorp_api_post, icorp_api_put, icorp_api_delete
+from ivm.integrations.icorp import icorp_api_get, icorp_api_post, icorp_api_put, icorp_api_delete
+from ivm.integrations.headwind import headwind_api_request
 
 
 class BaseVirtualDoctype(Document):

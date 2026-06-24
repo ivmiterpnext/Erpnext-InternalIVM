@@ -6,7 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_break_rtas",
+  "general_section",
   "machine_name",
   "3d_printed",
   "smartscreen",
@@ -35,11 +35,6 @@
   "machine_type_id"
  ],
  "fields": [
-  {
-   "fieldname": "section_break_rtas",
-   "fieldtype": "Section Break",
-   "label": "General"
-  },
   {
    "fieldname": "machine_name",
    "fieldtype": "Data",
@@ -179,6 +174,7 @@
    "default": "11",
    "fieldname": "machine_type_id",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Machine Type Id"
   },
   {
@@ -189,13 +185,18 @@
   {
    "fieldname": "column_break_epfb",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "SmartSync Details"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-02 04:09:47.939909",
+ "modified": "2026-06-10 10:26:04.057685",
  "modified_by": "Administrator",
  "module": "Deployments",
  "name": "Deployment SmartSync Details",

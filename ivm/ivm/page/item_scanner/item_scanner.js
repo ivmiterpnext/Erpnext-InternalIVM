@@ -390,7 +390,8 @@ class ItemScanner {
 		}
 
 		tbody.empty();
-		this.scanned_items.forEach((item, index) => {
+		[...this.scanned_items].reverse().forEach((item) => {
+			const index = this.scanned_items.indexOf(item);
 			const qty_class = item.qty > item.available_qty ? 'text-danger' : '';
 			tbody.append(`
 				<tr>

@@ -7,7 +7,7 @@ containing site-level information and one or more machine child tables
 import frappe
 from frappe.model.document import Document
 from ivm.deals.constants import TABLE_LABELS, TABLE_TO_QUANTITY
-from ivm.ivm_integrations.hubspot.sync_utils import coerce_value
+from ivm.integrations.hubspot.sync_utils import coerce_value
 
 
 class DeploymentLocation(Document):

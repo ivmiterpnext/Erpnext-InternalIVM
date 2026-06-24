@@ -7,35 +7,35 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "warehouse_request_name",
-  "naming_series",
-  "created_date_2",
-  "related_project",
-  "pick_list",
-  "related_case",
   "request_reason",
-  "account",
-  "time_spent",
-  "use_existing_plan",
-  "due_date",
-  "time_due",
+  "related_project",
+  "related_case",
+  "customer",
   "column_break_hj6v7",
-  "owner_name",
-  "new_request",
-  "bonus_timestamp",
-  "bonus_requirement_met",
-  "issue_found",
-  "explanation",
   "status",
   "priority",
-  "number_of_devices",
-  "request",
+  "due_date",
+  "machine_details_section",
+  "machine_details_html",
+  "device_numbers_section",
+  "serial_number",
+  "column_break_sijq",
+  "prose_number",
+  "column_break_szyd",
+  "mac_address",
+  "rfid_settings_section",
+  "rfid_settings",
+  "hidden_fields_section",
+  "schema_version",
   "subject",
-  "description",
-  "internal_notes",
-  "machine_names",
+  "source_detail_doctype",
+  "source_detail_row",
+  "naming_series",
+  "pick_list",
+  "request",
   "machine_key",
-  "ethernet_port",
+  "description",
+  "machine_names",
   "power_connections",
   "machine_ownership_status",
   "equipment_type",
@@ -45,8 +45,9 @@
   "wrap_layout",
   "label_color",
   "offline_sales",
-  "column_break_4jemu",
   "locker_names",
+  "column_break_4jemu",
+  "ethernet_port",
   "primary_locker",
   "secondary_locker",
   "enhanced_lockers",
@@ -56,6 +57,7 @@
   "interior_locker_lighting",
   "additional_locker_information",
   "vault_size",
+  "internal_notes",
   "vault_power_configuration_details",
   "device_request_info",
   "connectivity",
@@ -103,7 +105,6 @@
   "kiosk_side_for_table",
   "monitor_mount",
   "overhead_light",
-  "section_break_csbpl",
   "computer_interface_modules",
   "equipment_numbers",
   "1_machine_number",
@@ -164,9 +165,6 @@
   "locale",
   "created_date",
   "column_break_ausuf",
-  "mac_address",
-  "serial_number",
-  "prose_number",
   "machine_name",
   "tenth_machine_name",
   "tenth_prose_number",
@@ -223,22 +221,11 @@
  "fields": [
   {
    "default": "WR-",
-   "fieldname": "warehouse_request_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Warehouse Request Name"
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "WR-"
-  },
-  {
-   "fieldname": "created_date_2",
-   "fieldtype": "Datetime",
-   "label": "Created Date",
-   "read_only": 1
   },
   {
    "fieldname": "related_project",
@@ -268,24 +255,15 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Request Reason",
-   "options": "--None--\nProduct Testing\nBuild Machine\nBuild Locker\nBuild Kiosk\nBuild Vault\nWrap Ready\nPrint Labels\nDevice Request\nShipping Request\nReader Request\nTransport/Relocate Equipment\nShipping Quote\nOther"
+   "options": "Product Testing\nBuild Machine\nBuild Locker\nBuild Kiosk\nBuild Vault\nWrap Ready\nPrint Labels\nDevice Request\nShipping Request\nReader Request\nTransport/Relocate Equipment\nShipping Quote\nOther",
+   "reqd": 1
   },
   {
-   "fieldname": "account",
+   "fieldname": "customer",
    "fieldtype": "Link",
-   "label": "Account",
+   "in_list_view": 1,
+   "label": "Customer",
    "options": "Customer"
-  },
-  {
-   "fieldname": "time_spent",
-   "fieldtype": "Duration",
-   "label": "Time Spent"
-  },
-  {
-   "default": "0",
-   "fieldname": "use_existing_plan",
-   "fieldtype": "Check",
-   "label": "Use Existing Plan"
   },
   {
    "fieldname": "due_date",
@@ -293,41 +271,11 @@
    "label": "Due Date"
   },
   {
-   "fieldname": "time_due",
-   "fieldtype": "Time",
-   "label": "Time Due"
-  },
-  {
    "fieldname": "column_break_hj6v7",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "owner_name",
-   "fieldtype": "Link",
-   "label": "Owner Name",
-   "options": "User"
-  },
-  {
-   "default": "new",
-   "fieldname": "new_request",
-   "fieldtype": "Read Only",
-   "hidden": 1,
-   "label": "New Request",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "bonus_timestamp",
-   "fieldtype": "Datetime",
-   "hidden": 1,
-   "label": "Bonus Timestamp"
-  },
-  {
-   "fieldname": "explanation",
-   "fieldtype": "Data",
-   "label": "Explanation"
-  },
-  {
+   "default": "New",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -342,12 +290,8 @@
    "options": "High\nMedium\nLow"
   },
   {
-   "fieldname": "number_of_devices",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "Number of Devices"
-  },
-  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.schema_version == 1;",
    "fieldname": "request",
    "fieldtype": "Section Break",
    "label": "Request"
@@ -481,6 +425,8 @@
    "label": "Vault Power Configuration Details"
   },
   {
+   "collapsible": 1,
+   "depends_on": "eval:doc.schema_version == 1;",
    "fieldname": "device_request_info",
    "fieldtype": "Section Break",
    "label": "Device Request Info"
@@ -523,6 +469,8 @@
    "label": "RFID 2 Settings"
   },
   {
+   "collapsible": 1,
+   "depends_on": "eval:doc.schema_version == 1 \n|| doc.request_reason === 'Shipping Request';",
    "fieldname": "shipping_info",
    "fieldtype": "Section Break",
    "label": "Shipping Info"
@@ -611,6 +559,8 @@
    "label": "VAT"
   },
   {
+   "collapsible": 1,
+   "depends_on": "eval:doc.schema_version == 1;",
    "fieldname": "kiosk_details",
    "fieldtype": "Section Break",
    "label": "Kiosk Details"
@@ -703,8 +653,44 @@
    "translatable": 1
   },
   {
-   "fieldname": "section_break_csbpl",
+   "depends_on": "eval:doc.schema_version >= 2 \n&& (doc.request_reason || '').includes('Build');",
+   "fieldname": "machine_details_section",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.schema_version >= 2",
+   "fieldname": "machine_details_html",
+   "fieldtype": "HTML",
+   "label": "Machine Details"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "hidden_fields_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden Fields"
+  },
+  {
+   "default": "2",
+   "fieldname": "schema_version",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Schema Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_detail_doctype",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Source Detail DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_detail_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Source Detail Row",
+   "read_only": 1
   },
   {
    "fieldname": "computer_interface_modules",
@@ -713,6 +699,8 @@
    "options": "Computer Module List"
   },
   {
+   "collapsible": 1,
+   "depends_on": "eval:doc.schema_version == 1;",
    "fieldname": "equipment_numbers",
    "fieldtype": "Section Break",
    "label": "Equipment Numbers"
@@ -1044,34 +1032,28 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "  ",
    "fieldname": "mac_address",
-   "fieldtype": "Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "MAC Address",
-   "translatable": 1
+   "label": "MAC Address"
   },
   {
    "default": "  ",
    "fieldname": "serial_number",
-   "fieldtype": "Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Serial Number",
    "translatable": 1
   },
   {
-   "default": "  ",
    "fieldname": "prose_number",
-   "fieldtype": "Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "PROSE Number",
-   "translatable": 1
+   "label": "PROSE Number"
   },
   {
-   "default": " ",
    "fieldname": "machine_name",
-   "fieldtype": "Text",
-   "in_global_search": 1,
+   "fieldtype": "Data",
    "label": "Machine Name"
   },
   {
@@ -1110,6 +1092,8 @@
    "label": "Number 5 Task sent"
   },
   {
+   "collapsible": 1,
+   "depends_on": "eval:doc.schema_version == 1;",
    "fieldname": "created_and_modified_details",
    "fieldtype": "Section Break",
    "label": "Created and Modified Details"
@@ -1463,29 +1447,45 @@
    "read_only": 1
   },
   {
-   "fieldname": "bonus_requirement_met",
-   "fieldtype": "Table MultiSelect",
-   "label": "Bonus Requirement Met",
-   "options": "Warehouse Employee List",
-   "permlevel": 9,
-   "print_hide": 1
-  },
-  {
-   "fieldname": "issue_found",
-   "fieldtype": "Table MultiSelect",
-   "label": "Issue Found",
-   "options": "Warehouse Employee List",
-   "permlevel": 9,
-   "print_hide": 1
-  },
-  {
    "fieldname": "column_break_fksy",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "hidden_fields_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden Fields"
+  },
+  {
+   "depends_on": "eval:doc.schema_version >= 2 \n&& (doc.request_reason || '').includes('Build');",
+   "fieldname": "device_numbers_section",
+   "fieldtype": "Section Break",
+   "label": "Device Numbers"
+  },
+  {
+   "fieldname": "column_break_sijq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_szyd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.schema_version >= 2 \n&& (doc.request_reason || '').includes('Build');",
+   "fieldname": "rfid_settings_section",
+   "fieldtype": "Section Break",
+   "label": "RFID Settings"
+  },
+  {
+   "fieldname": "rfid_settings",
+   "fieldtype": "Table",
+   "options": "Board RFID Settings"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-13 04:45:45.994635",
+ "modified": "2026-06-12 10:19:32.050756",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Warehouse Request",
@@ -1506,9 +1506,12 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "subject",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
+ "title_field": "subject",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

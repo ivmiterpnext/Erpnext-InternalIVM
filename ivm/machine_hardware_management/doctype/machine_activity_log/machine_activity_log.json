@@ -32,7 +32,7 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Client",
-   "options": "Client Link"
+   "options": "Customer"
   },
   {
    "fieldname": "secure_trak_machine_message",

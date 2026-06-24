@@ -1,13 +1,17 @@
-// ---------------------------------------------------------------------------
-// Sites tab – table of Deal Location Information docs linked to this CRM Deal
-// ---------------------------------------------------------------------------
-
 const SITE_DOCTYPE = "Deployment Location";
 
 const SITE_LIST_FIELDS = [
   "name", "location_name", "locale",
   "number_of_machines", "number_of_primary_lockers",
   "number_of_secondary_lockers", "number_of_kiosks", "number_of_vaults",
+];
+
+const DEVICE_FIELDS = [
+  { field: "number_of_machines",          label: "SmartStations" },
+  { field: "number_of_primary_lockers",   label: "SmartLockers"  },
+  { field: "number_of_secondary_lockers", label: "SmartSyncs"    },
+  { field: "number_of_kiosks",            label: "SmartCenters"  },
+  { field: "number_of_vaults",            label: "SmartVaults"   },
 ];
 
 function renderSitesTab(frm) {
@@ -20,7 +24,6 @@ function renderSitesTab(frm) {
 
   const $container = $('<div class="deal-sites-container"></div>').appendTo(wrapper);
 
-  // Load existing sites, then add button below
   frappe.call({
     method: "frappe.client.get_list",
     args: {
@@ -32,7 +35,6 @@ function renderSitesTab(frm) {
     callback(r) {
       const sites = r.message || [];
 
-      // Total device counts across all sites
       renderDeviceTotals($container, sites);
 
       if (!sites.length) {
@@ -41,7 +43,6 @@ function renderSitesTab(frm) {
         renderSitesTable($container, sites, frm);
       }
 
-      // Add Site button after the table
       $(`<button class="btn btn-xs btn-primary mb-3">+ Add Site</button>`)
         .appendTo($container)
         .on("click", () => addNewSite(frm));
@@ -50,32 +51,21 @@ function renderSitesTab(frm) {
 }
 
 function renderDeviceTotals($container, sites) {
-  const totals = {
-    SmartStations: 0,
-    SmartLockers: 0,
-    SmartSyncs: 0,
-    SmartCenters: 0,
-    SmartVaults: 0,
-  };
-
-  sites.forEach((s) => {
-    totals.SmartStations += s.number_of_machines || 0;
-    totals.SmartLockers += s.number_of_primary_lockers || 0;
-    totals.SmartSyncs += s.number_of_secondary_lockers || 0;
-    totals.SmartCenters += s.number_of_kiosks || 0;
-    totals.SmartVaults += s.number_of_vaults || 0;
-  });
+  const totals = DEVICE_FIELDS.map(({ field, label }) => ({
+    label,
+    count: sites.reduce((sum, s) => sum + (s[field] || 0), 0),
+  }));
 
   const $row = $('<div class="row mb-3" style="font-size:13px;"></div>').appendTo($container);
 
-  for (const [label, count] of Object.entries(totals)) {
+  totals.forEach(({ label, count }) => {
     $row.append(`
       <div class="col text-center">
         <div class="text-muted small">${label}</div>
         <div class="font-weight-bold" style="font-size:16px;">${count}</div>
       </div>
     `);
-  }
+  });
 }
 
 function renderSitesTable($container, sites, frm) {
@@ -100,12 +90,6 @@ function renderSitesTable($container, sites, frm) {
   const $tbody = $table.find("tbody");
 
   sites.forEach((site) => {
-    const equipTotal = (site.number_of_machines || 0)
-      + (site.number_of_primary_lockers || 0)
-      + (site.number_of_secondary_lockers || 0)
-      + (site.number_of_kiosks || 0)
-      + (site.number_of_vaults || 0);
-
     const $row = $(`
       <tr style="cursor: pointer;" data-site="${site.name}">
         <td>${frappe.utils.escape_html(site.location_name || site.name)}</td>
@@ -122,13 +106,11 @@ function renderSitesTable($container, sites, frm) {
       </tr>
     `).appendTo($tbody);
 
-    // Click row -> navigate to site form
     $row.on("click", (e) => {
       if ($(e.target).hasClass("btn-delete-site")) return;
       frappe.set_route("Form", SITE_DOCTYPE, site.name);
     });
 
-    // Delete button
     $row.find(".btn-delete-site").on("click", (e) => {
       e.stopPropagation();
       frappe.confirm(
@@ -149,7 +131,7 @@ function renderSitesTable($container, sites, frm) {
 }
 
 function addNewSite(frm) {
-  // Save the CRM Deal first if dirty, then navigate to a new site form
+  // Save the CRM Deal first if dirty, then navigate to a new site form.
   const doNavigate = () => {
     frappe.route_options = { crm_deal: frm.doc.name };
     frappe.set_route("Form", SITE_DOCTYPE, "new");
@@ -162,9 +144,7 @@ function addNewSite(frm) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Comments tab – FCRM Notes linked to this CRM Deal
-// ---------------------------------------------------------------------------
+// --- Notes tab ---
 
 const NOTES_API = "ivm.deployments.event_handlers.deal_notes";
 
@@ -183,7 +163,6 @@ function renderNotesTab(frm) {
       const notes = r.message || [];
       const $container = $('<div class="deal-notes-container"></div>').appendTo(wrapper);
 
-      // New Note button
       $(`<div class="text-right pb-3">
           <button class="btn btn-sm small new-note-btn">
             <svg class="icon icon-sm"><use href="#icon-add"></use></svg>
@@ -228,10 +207,10 @@ function renderNotesTab(frm) {
             </div>
             <div class="col-xs-1 text-right">
               <span class="edit-note-btn btn btn-link" style="padding:0.2rem;">
-                <svg class="icon icon-sm"><use xlink:href="#icon-edit"></use></svg>
+                <svg class="icon icon-sm"><use href="#icon-edit"></use></svg>
               </span>
               <span class="delete-note-btn btn btn-link pl-2" style="padding:0.2rem;">
-                <svg class="icon icon-xs"><use xlink:href="#icon-delete"></use></svg>
+                <svg class="icon icon-xs"><use href="#icon-delete"></use></svg>
               </span>
             </div>
           </div>
@@ -241,7 +220,6 @@ function renderNotesTab(frm) {
         $row.find(".delete-note-btn").on("click", () => deleteDealNote(frm, note));
       });
 
-      // Bottom border on last row
       $list.find(".comment-content:last-child").css("border-bottom", "1px solid var(--border-color)");
     },
   });
@@ -262,8 +240,8 @@ function addDealNote(frm) {
         callback(r) {
           if (!r.exc) {
             renderNotesTab(frm);
+            d.hide();
           }
-          d.hide();
         },
       });
     },
@@ -315,28 +293,16 @@ function deleteDealNote(frm, note) {
   );
 }
 
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Status filtering – only show statuses matching the deal's pipeline
-// (or statuses with no pipeline set, i.e. shared across all pipelines)
-// ---------------------------------------------------------------------------
-
 function applyStatusFilter(frm) {
   frm.set_query("status", () => {
     const pipeline = frm.doc.custom_pipeline;
-    if (!pipeline) {
-      // No pipeline selected – show all statuses
-      return {};
-    }
+    if (!pipeline) return {};
     return {
       query: "ivm.deals.queries.get_statuses_for_pipeline",
       filters: { pipeline: pipeline },
     };
   });
 }
-
-// ---------------------------------------------------------------------------
 
 function applyDealTypeVisibility(frm) {
   const isExisting = frm.doc.custom_deal_type === "Existing Business";
@@ -351,11 +317,10 @@ frappe.ui.form.on("CRM Deal", {
     applyStatusFilter(frm);
     applyDealTypeVisibility(frm);
 
-    // "View in HubSpot" button
     if (frm.doc.custom_hubspot_deal_id) {
       frm.add_custom_button(__("View in HubSpot"), () => {
         frappe.xcall(
-          "ivm.ivm_integrations.hubspot.hubspot_client.get_hubspot_deal_url",
+          "ivm.integrations.hubspot.hubspot_client.get_hubspot_deal_url",
           { deal_id: frm.doc.custom_hubspot_deal_id }
         ).then((url) => {
           window.open(url, "_blank");
@@ -369,7 +334,6 @@ frappe.ui.form.on("CRM Deal", {
   },
 
   custom_pipeline(frm) {
-    // Re-apply filter when pipeline changes; clear status if it no longer fits
     applyStatusFilter(frm);
   },
 });

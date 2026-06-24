@@ -157,5 +157,35 @@ function validateUniqueMachineNames(frm, tableFieldnames) {
   }
 }
 
+/**
+ * Render bins_data JSON as a read-only HTML table.
+ * Intended for use as an EmbeddedForm custom_renderer.
+ * @param {jQuery} $container - Wrapper element to render into
+ * @param {string|null} value - The raw bins_data JSON string
+ * @param {object} df - The field definition
+ */
+function renderBinsReadOnly($container, value, df) {
+  let bins = [];
+  try { bins = value ? JSON.parse(value) : []; } catch(e) {}
+
+  if (!bins.length) {
+    $container.html('<div class="text-muted small" style="padding:4px 0;">No bins configured</div>');
+    return;
+  }
+
+  let html = '<table class="table table-bordered table-sm mb-0">';
+  html += '<thead><tr><th>Type</th><th>#</th><th>Size (Inches)</th></tr></thead><tbody>';
+  bins.forEach(function(bin) {
+    const num = bin.bin_type === 'Storage' ? (bin.bin_number || '') : 'N/A';
+    html += `<tr><td>${frappe.utils.escape_html(bin.bin_type || '')}</td>`;
+    html += `<td>${frappe.utils.escape_html(String(num))}</td>`;
+    html += `<td>${frappe.utils.escape_html(bin.bin_size || '')}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  $container.html(html);
+}
+
 // Expose globally for use in doctype JS files
-Object.assign(window, { setupMachineDetailGrids, injectBinsEditor, validateUniqueMachineNames });
+Object.assign(window, {
+  setupMachineDetailGrids, injectBinsEditor, validateUniqueMachineNames, renderBinsReadOnly,
+});

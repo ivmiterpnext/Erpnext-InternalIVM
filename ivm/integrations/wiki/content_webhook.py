@@ -20,7 +20,7 @@ def on_wiki_document_update(doc: Any, method: str | None = None) -> None:
 
 	try:
 		frappe.enqueue(
-			"ivm.ivm_integrations.wiki.content_webhook.send_wiki_content_webhook",
+			"ivm.integrations.wiki.content_webhook.send_wiki_content_webhook",
 			queue="short",
 			payload=payload,
 		)

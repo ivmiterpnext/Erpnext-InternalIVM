@@ -1,5 +1,5 @@
 import frappe
-from ivm.ivm.utils.api_utils import icorp_api_get
+from ivm.integrations.icorp import icorp_api_get
 
 # def check_if_location_exists(location_name, client_id):
 #     # tbl_SV_Location has client id and and location name, most recent format is:

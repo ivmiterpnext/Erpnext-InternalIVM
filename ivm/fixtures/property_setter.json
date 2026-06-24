@@ -1045,22 +1045,6 @@
   "docstatus": 0,
   "doctype": "Property Setter",
   "doctype_or_field": "DocField",
-  "field_name": "customer_group",
-  "is_system_generated": 0,
-  "modified": "2026-06-02 05:55:36.620698",
-  "module": null,
-  "name": "Customer-customer_group-default",
-  "property": "default",
-  "property_type": "Text",
-  "row_name": null,
-  "value": "All Customer Groups"
- },
- {
-  "default_value": null,
-  "doc_type": "Customer",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocField",
   "field_name": "territory",
   "is_system_generated": 0,
   "modified": "2026-06-02 05:55:36.605182",
@@ -2783,22 +2767,7 @@
   "row_name": null,
   "value": "[\"organization_tab\", \"custom_hubspot_deal_name\", \"custom_client_id\", \"custom_master_client_id\", \"custom_expected_close_date\", \"column_break_ijan\", \"deal_owner\", \"status\", \"next_step\", \"closed_date\", \"custom_deployment_section\", \"custom_machine_ownership_status\", \"custom_column_break_deploy1\", \"custom_opportunity_term\", \"section_break_jgpm\", \"naming_series\", \"organization\", \"probability\", \"expected_deal_value\", \"deal_value\", \"column_break_kpxa\", \"custom_hubspot_deal_id\", \"expected_closure_date\", \"custom_locations_tab\", \"custom_locations_html\", \"contacts_tab\", \"contacts\", \"contact\", \"custom_notes_tab\", \"custom_notes_html\", \"lead_details_tab\", \"lead\", \"source\", \"column_break_wsde\", \"lead_name\", \"organization_details_section\", \"organization_name\", \"website\", \"no_of_employees\", \"job_title\", \"column_break_xbyf\", \"territory\", \"currency\", \"exchange_rate\", \"annual_revenue\", \"industry\", \"person_section\", \"salutation\", \"first_name\", \"last_name\", \"column_break_xjmy\", \"email\", \"mobile_no\", \"phone\", \"gender\", \"products_tab\", \"products\", \"section_break_ccbj\", \"total\", \"column_break_udbq\", \"net_total\", \"sla_tab\", \"sla\", \"sla_creation\", \"column_break_pfvq\", \"sla_status\", \"communication_status\", \"response_details_section\", \"response_by\", \"column_break_hpvj\", \"first_response_time\", \"first_responded_on\", \"section_break_mwvg\", \"rolling_responses\", \"section_break_jgdr\", \"last_response_time\", \"column_break_evzj\", \"last_responded_on\", \"log_tab\", \"status_change_log\", \"lost_details_tab\", \"lost_reason\", \"lost_notes\"]"
  },
- {
-  "default_value": null,
-  "doc_type": "Warehouse Request",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocType",
-  "field_name": null,
-  "is_system_generated": 0,
-  "modified": "2026-04-22 10:13:15.033543",
-  "module": null,
-  "name": "Warehouse Request-main-title_field",
-  "property": "title_field",
-  "property_type": "Data",
-  "row_name": null,
-  "value": ""
- },
+
  {
   "default_value": null,
   "doc_type": "Warehouse Request",
@@ -3022,22 +2991,6 @@
   "property_type": "Check",
   "row_name": null,
   "value": "1"
- },
- {
-  "default_value": null,
-  "doc_type": "Warehouse Request",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocType",
-  "field_name": null,
-  "is_system_generated": 0,
-  "modified": "2026-04-22 10:13:14.253867",
-  "module": null,
-  "name": "Warehouse Request-main-field_order",
-  "property": "field_order",
-  "property_type": "Data",
-  "row_name": null,
-  "value": "[\"warehouse_request_name\", \"naming_series\", \"created_date_2\", \"related_project\", \"related_case\", \"request_reason\", \"account\", \"time_spent\", \"use_existing_plan\", \"due_date\", \"time_due\", \"column_break_hj6v7\", \"owner_name\", \"bonus_timestamp\", \"explanation\", \"status\", \"priority\", \"number_of_devices\", \"request\", \"subject\", \"description\", \"internal_notes\", \"machine_names\", \"machine_key\", \"ethernet_port\", \"power_connections\", \"machine_ownership_status\", \"additional_information\", \"wrap_type\", \"offline_sales\", \"column_break_4jemu\", \"locker_names\", \"primary_locker\", \"secondary_locker\", \"enhanced_lockers\", \"attached_to\", \"locker_configuration_details\", \"locker_front\", \"interior_locker_lighting\", \"additional_locker_information\", \"vault_size\", \"vault_power_configuration_details\", \"device_request_info\", \"connectivity\", \"carrier\", \"card_readers\", \"column_break_65jdp\", \"card_reader_type\", \"rfid_1_settings\", \"rfid_2_settings\", \"shipping_info\", \"contact\", \"shipping_phone\", \"delivery_options\", \"invoice_client_for_parts\", \"parts_invoiced\", \"eori_information\", \"ior\", \"column_break_kieb6\", \"shipping_address\", \"shipping_company\", \"tracking_number\", \"return_tracking_number\", \"invoice\", \"ivm_parts_invoice_number\", \"vat\", \"kiosk_details\", \"kiosk_options\", \"kvm_switch_options\", \"monitor_options\", \"network_options\", \"column_break_naxn5\", \"electrical_outlet_in_bins\", \"network_port_in_bins\", \"interior_kiosk_lighting\", \"locker_bin_door_type\", \"column_break_rkvns\", \"countertop_color\", \"ada_side_table\", \"kiosk_side_for_table\", \"monitor_mount\", \"overhead_light\", \"section_break_csbpl\", \"computer_interface_modules\", \"equipment_numbers\", \"1_machine_number\", \"1_motherboard_number\", \"1_serial_number\", \"1_mac_address\", \"send_machine_1_numbers_to_ics\", \"2_machine_number\", \"2_motherboard_number\", \"2_serial_number\", \"2_mac_address\", \"send_machine_2_numbers_to_ics\", \"3_machine_number\", \"3_motherboard_number\", \"3_serial_number\", \"3_mac_address\", \"send_machine_3_numbers_to_ics\", \"4_machine_number\", \"4_motherboard_number\", \"4_serial_number\", \"4_mac_address\", \"send_machine_4_numbers_to_ics\", \"5_machine_number\", \"5_motherboard_number\", \"5_serial_number\", \"5_mac_address\", \"send_machine_5_numbers_to_ics\", \"send_numbers_to_ics\", \"created_by\", \"modified_by1\", \"modified_date\", \"column_break_sifxz\", \"6_machine_number\", \"6_motherboard_number\", \"6_serial_number\", \"6_mac_address\", \"send_machine_6_numbers_to_ics\", \"7_machine_number\", \"7_motherboard_number\", \"7_serial_number\", \"7_mac_address\", \"send_machine_7_numbers_to_ics\", \"8_machine_number\", \"8_motherboard_number\", \"8_serial_number\", \"8_mac_address\", \"send_machine_8_numbers_to_ics\", \"9_machine_number\", \"9_motherboard_number\", \"9_serial_number\", \"9_mac_address\", \"send_machine_9_numbers_to_ics\", \"10_machine_number\", \"10_motherboard_number\", \"10_serial_number\", \"10_mac_address\", \"send_machine_10_numbers_to_ics\", \"locale\", \"created_date\"]"
  },
  {
   "default_value": null,
@@ -4559,22 +4512,7 @@
   "row_name": null,
   "value": "[\"account_section\", \"email_id\", \"email_account_name\", null, \"column_break_3\", \"domain\", \"service\", \"authentication_column\", \"auth_method\", \"authorize_api_access\", \"password\", \"awaiting_password\", \"ascii_encode_password\", \"column_break_10\", \"connected_app\", \"connected_user\", \"login_id_is_different\", \"login_id\", \"mailbox_settings\", \"enable_incoming\", \"default_incoming\", \"use_imap\", \"use_ssl\", \"use_starttls\", \"email_server\", \"incoming_port\", \"column_break_18\", \"attachment_limit\", \"email_sync_option\", \"initial_sync_count\", \"section_break_25\", \"imap_folder\", \"section_break_12\", \"append_emails_to_sent_folder\", \"append_to\", \"create_contact\", \"enable_automatic_linking\", \"section_break_13\", \"notify_if_unreplied\", \"unreplied_for_mins\", \"send_notification_to\", \"outgoing_mail_settings\", \"enable_outgoing\", \"use_tls\", \"use_ssl_for_outgoing\", \"smtp_server\", \"smtp_port\", \"column_break_38\", \"default_outgoing\", \"always_use_account_email_id_as_sender\", \"always_use_account_name_as_sender_name\", \"send_unsubscribe_message\", \"track_email_status\", \"no_smtp_authentication\", \"signature_section\", \"add_signature\", \"signature\", \"auto_reply\", \"enable_auto_reply\", \"auto_reply_message\", \"set_footer\", \"footer\", \"brand_logo\", \"uidvalidity\", \"uidnext\", \"no_failed\"]"
  },
- {
-  "default_value": null,
-  "doc_type": "Warehouse Request",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocField",
-  "field_name": "account",
-  "is_system_generated": 1,
-  "modified": "2024-03-13 04:00:52.051670",
-  "module": null,
-  "name": "Warehouse Request-account-in_list_view",
-  "property": "in_list_view",
-  "property_type": "Check",
-  "row_name": null,
-  "value": "1"
- },
+
  {
   "default_value": null,
   "doc_type": "Issue",

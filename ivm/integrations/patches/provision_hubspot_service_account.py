@@ -6,7 +6,7 @@ used by the HubSpot webhook handlers, and creates the service account user.
 """
 
 import frappe
-from ivm.ivm_integrations.hubspot.constants import HUBSPOT_ROLE, HUBSPOT_USER
+from ivm.integrations.hubspot.constants import HUBSPOT_ROLE, HUBSPOT_USER
 
 _PERMITTED_DOCTYPES: list[str] = [
     "CRM Deal",
@@ -65,7 +65,7 @@ def _ensure_role_permissions() -> None:
 
 def _ensure_hubspot_user() -> None:
     """Create the HubSpot service account if it does not already exist."""
-    
+
     if frappe.db.exists("User", HUBSPOT_USER):
         return
 
