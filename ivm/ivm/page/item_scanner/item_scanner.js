@@ -1,19 +1,16 @@
 frappe.pages['item_scanner'].on_page_load = function(wrapper) {
-	const page = frappe.ui.make_app_page({
+	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Item Scanner',
 		single_column: true
 	});
-
-	page.item_scanner = new ItemScanner(page);
 };
 
 class ItemScanner {
-	constructor(page) {
+	constructor(page, warehouse_request) {
 		this.page = page;
 		this.wrapper = $(this.page.body);
-		this.warehouse_request = frappe.urllib.get_arg('warehouse_request')
-			|| (frappe.route_options && frappe.route_options.warehouse_request);
+		this.warehouse_request = warehouse_request;
 		this.pick_list = null;
 		this.scanned_items = []; // mirrors Pick List locations for rendering
 
@@ -509,5 +506,21 @@ class ItemScanner {
 
 frappe.pages['item_scanner'].on_page_show = function(wrapper) {
 	const page = wrapper.page;
-	cur_page.item_scanner = page.item_scanner || new ItemScanner(page);
+
+	// Capture the warehouse request from route_options (set by frappe.set_route)
+	// or from the URL query string. route_options is consumed after read, so grab
+	// it here before anything else clears it.
+	const new_wr = (frappe.route_options && frappe.route_options.warehouse_request)
+		|| frappe.urllib.get_arg('warehouse_request');
+
+	// Clear route_options so Frappe doesn't try to consume them elsewhere
+	if (frappe.route_options) {
+		delete frappe.route_options.warehouse_request;
+	}
+
+	// Reinitialize if the warehouse request changed or on first visit
+	if (!page.item_scanner || (new_wr && page.item_scanner.warehouse_request !== new_wr)) {
+		page.item_scanner = new ItemScanner(page, new_wr);
+	}
+	cur_page.item_scanner = page.item_scanner;
 };

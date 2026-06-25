@@ -12,6 +12,44 @@ class WarehouseRequest(Document):
                 f"You can only add up to {MAX_RFID_SETTINGS_ROWS} RFID Settings rows."
             )
 
+    def validate(self):
+        self._validate_crated_status()
+
+    def _validate_crated_status(self):
+        """Prevent Build WRs from being set to 'Crated - Ready to Ship'
+        unless their Stock Entry has been submitted."""
+        if self.status != "Crated - Ready to Ship":
+            return
+        if not self.request_reason or not self.request_reason.startswith("Build"):
+            return
+
+        if not self.pick_list:
+            frappe.throw(
+                "Cannot set status to 'Crated - Ready to Ship' without a Pick List. "
+                "Please complete the picking process first."
+            )
+
+        stock_entry = frappe.db.get_value(
+            "Stock Entry",
+            {"pick_list": self.pick_list, "docstatus": ["!=", 2]},
+            ["name", "docstatus"],
+            as_dict=True,
+        )
+
+        if not stock_entry:
+            frappe.throw(
+                "Cannot set status to 'Crated - Ready to Ship' — no Stock Entry "
+                "exists for this Build's Pick List."
+            )
+
+        if stock_entry.docstatus != 1:
+            frappe.throw(
+                "Cannot set status to 'Crated - Ready to Ship' — Stock Entry "
+                f'<a href="/app/stock-entry/{stock_entry.name}">{stock_entry.name}</a> '
+                "is still in draft. Please submit it first so "
+                "that items are transferred to the WIP warehouse."
+            )
+
     def on_update(self):
         old_doc = self.get_doc_before_save()
         if not old_doc:

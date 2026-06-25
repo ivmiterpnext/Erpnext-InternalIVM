@@ -234,15 +234,24 @@
    "label": "Related Deployment",
    "options": "Project"
   },
-  {
-   "fieldname": "pick_list",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Active Pick List",
-   "no_copy": 1,
-   "options": "Pick List",
-   "read_only": 1
-  },
+   {
+    "depends_on": "eval:doc.related_project",
+    "fieldname": "source_build_request",
+    "fieldtype": "Link",
+    "label": "Source Build Request",
+    "no_copy": 1,
+    "options": "Warehouse Request",
+    "read_only": 1
+   },
+   {
+    "fieldname": "pick_list",
+    "fieldtype": "Link",
+    "hidden": 1,
+    "label": "Active Pick List",
+    "no_copy": 1,
+    "options": "Pick List",
+    "read_only": 1
+   },
   {
    "fieldname": "related_case",
    "fieldtype": "Link",

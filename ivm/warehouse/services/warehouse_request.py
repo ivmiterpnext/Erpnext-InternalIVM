@@ -219,7 +219,16 @@ def get_or_create_warehouse_request_pick_list(warehouse_request: str) -> dict:
     pl_name = create_pick_list(company)
     frappe.db.set_value("Warehouse Request", warehouse_request, "pick_list", pl_name)
 
-    return {"pick_list": pl_name, "submitted": False, "items": []}
+    default_target_warehouse = _get_default_target_warehouse()
+    if default_target_warehouse:
+        frappe.db.set_value("Pick List", pl_name, "parent_warehouse", default_target_warehouse)
+
+    return {
+        "pick_list": pl_name,
+        "submitted": False,
+        "target_warehouse": default_target_warehouse,
+        "items": [],
+    }
 
 
 @frappe.whitelist()
@@ -260,7 +269,7 @@ def reset_warehouse_request_pick_list(warehouse_request):
     if not pl_name:
         return {"success": False, "message": "No pick list linked"}
 
-    delete_draft_pick_list(pl_name)
     frappe.db.set_value("Warehouse Request", warehouse_request, "pick_list", None)
+    delete_draft_pick_list(pl_name)
 
     return {"success": True}
