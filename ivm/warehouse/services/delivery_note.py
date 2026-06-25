@@ -46,10 +46,10 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
         or frappe.db.get_single_value("Global Defaults", "default_company")
     )
 
-    customer = wr.account
+    customer = wr.customer
     if not customer:
         frappe.throw(
-            f"Warehouse Request {warehouse_request_name} has no Account (Customer) set. "
+            f"Warehouse Request {warehouse_request_name} has no Customer set. "
             "Cannot create a Delivery Note without a customer.",
             title="Missing Customer",
         )

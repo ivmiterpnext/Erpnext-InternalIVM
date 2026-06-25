@@ -35,7 +35,7 @@ def execute():
     frappe.db.commit()
 
     print(f"\n{'='*50}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Total items: {len(items)}")
     print(f"  Updated: {updated_count}")
     print(f"  Skipped (already had barcode): {skipped_count}")

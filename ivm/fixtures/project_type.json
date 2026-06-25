@@ -1,0 +1,34 @@
+[
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2026-04-22 07:19:06.688027",
+  "name": "Internal",
+  "project_type": "Internal"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2026-04-22 07:19:06.691357",
+  "name": "Other",
+  "project_type": "Other"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-08-25 02:47:31.465982",
+  "name": "External",
+  "project_type": "External"
+ },
+ {
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Project Type",
+  "modified": "2023-08-25 02:49:29.790764",
+  "name": "Deployment",
+  "project_type": "Deployment"
+ }
+]

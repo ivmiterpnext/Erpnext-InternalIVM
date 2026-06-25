@@ -8,15 +8,18 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 fixtures = [
-    #"Workspace",
-	"Dashboard", "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "List View Settings", "Workflow Action Master", "Custom DocPerm",
-    "Workflow", "Property Setter", "Workflow State", "Industry Type", "Role", "Custom Field"
+    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", 
+    "List View Settings", "Workflow Action Master", "Custom DocPerm", "Workflow", "Property Setter", 
+    "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type", "CRM Pipeline", 
+    "CRM Deal Status",
+    {"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]}
 ]
 
 # include js, css files in header of desk.html
 app_include_css = [
     "/assets/ivm/css/chatbox_widget.css",
-    "/assets/ivm/css/embedded_form.css"
+    "/assets/ivm/css/embedded_form.css",
+    "/assets/ivm/css/project.css"
 ]
 
 app_include_js = [
@@ -25,7 +28,8 @@ app_include_js = [
     "/assets/ivm/js/utils.js",
     "/assets/ivm/js/embedded_form.js",
     "/assets/ivm/js/chatbox_widget.js",
-    "/assets/ivm/js/barcode_scanner_override.js"
+    "/assets/ivm/js/barcode_scanner_override.js",
+    "/assets/ivm/js/machine_detail_grids.js"
 ]
 
 add_to_apps_screen = [
@@ -56,13 +60,13 @@ add_to_apps_screen = [
 doctype_js = {
     # "Opportunity": "public/js/doctype/Opportunity.js",
     "Customer": "public/js/doctype/Customer.js",
-    "Deployment Location": "public/js/doctype/Deployment_location.js",
     "User": "public/js/doctype/user.js",
     "Task": "public/js/doctype/Task.js",
+    "CRM Deal": "public/js/doctype/CRM_Deal.js",
     "Project": "public/js/doctype/Project.js",
     "Issue": "public/js/doctype/Issue.js",
     "Delivery Note": "public/js/doctype/Delivery_Note.js",
-    "Stock Entry": "public/js/doctype/Stock_Entry.js"
+    "Stock Entry": "public/js/doctype/Stock_Entry.js",
 }
 
 doctype_list_js = {
@@ -71,7 +75,8 @@ doctype_list_js = {
     "Customer": "public/js/listview/Customer_listview.js",
     "User": "public/js/listview/user_listview.js",
     "Calendar Events": "public/js/calendar.js",
-    "Issue": "public/js/listview/issue_listview.js"
+    "Issue": "public/js/listview/issue_listview.js",
+    # "Project": "public/js/listview/project_listview.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -112,6 +117,8 @@ on_session_creation = [
 # before_install = "ivm.install.before_install"
 # after_install = "ivm.install.after_install"
 
+
+
 # Uninstallation
 # ------------
 
@@ -143,9 +150,6 @@ on_session_creation = [
 # override_doctype_class = {
 # "ToDo": "custom_app.overrides.CustomToDo"
 # }
-override_doctype_class = {
-    "Project": "ivm.controllers.project.CustomProjectController"
-}
 # Document Events
 # ---------------
 # Hook on document methods and events
@@ -160,31 +164,40 @@ doc_events = {
     "Item": {
         "before_save": "ivm.warehouse.event_handlers.item.before_save"
     },
-	"Wiki Document": {
-		"on_update": "ivm.ivm_integrations.wiki.content_webhook.on_wiki_document_update",
-	},
+    "Wiki Document": {
+        "on_update": "ivm.integrations.wiki.content_webhook.on_wiki_document_update",
+    },
+    "CRM Deal": {
+        "on_update": "ivm.deployments.event_handlers.deal.on_update",
+    },
+    # "Project": {
+    #     "before_validate": "ivm.deployments.event_handlers.project.before_validate",
+    #     "validate": "ivm.deployments.event_handlers.project.validate",
+    #     "after_insert": "ivm.deployments.event_handlers.project.after_insert",
+    # },
 }
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# "all": [
-# "ivm.tasks.all"
-# ],
-# "daily": [
-# "ivm.tasks.daily"
-# ],
-# "hourly": [
-# "ivm.tasks.hourly"
-# ],
-# "weekly": [
-# "ivm.tasks.weekly"
-# ],
-# "monthly": [
-# "ivm.tasks.monthly"
-# ],
-# }
+scheduler_events = {
+    # "all": [
+    # "ivm.tasks.all"
+    # ],
+    # "daily": [
+    # "ivm.tasks.daily"
+    # ],
+    "hourly": [
+        # Catch inbound reply emails that HubSpot does not surface via webhooks.
+        "ivm.integrations.hubspot.scheduled_tasks.sync_inbound_emails",
+    ],
+    # "weekly": [
+    # "ivm.tasks.weekly"
+    # ],
+    # "monthly": [
+    # "ivm.tasks.monthly"
+    # ],
+}
 
 # Testing
 # -------

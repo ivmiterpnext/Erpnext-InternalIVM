@@ -3,7 +3,7 @@
 
 from ivm.machine_hardware_management.doctype.machine_link.machine_link import get_machine_name_from_machine_id, get_machine_id_from_machine_name
 from ivm.machine_hardware_management.utils.base_virtual_doctype import BaseVirtualDoctype
-from ivm.machine_hardware_management.utils.case_utils import api_data_to_frappe_dict
+from ivm.integrations.icorp.utils import api_data_to_frappe_dict
 
 class MachineActivityLog(BaseVirtualDoctype):
 	API_TYPE = "icorp"

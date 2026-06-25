@@ -1,16 +1,16 @@
-# Copyright (c) 2023, korecent and contributors
-# For license information, please see license.txt
 
 import frappe
 from frappe.model.document import Document
 
+MAX_RFID_SETTINGS_ROWS = 5
+
 
 class WarehouseRequest(Document):
-    def get_title(self):
-        """Return formatted title for link fields"""
-        if self.subject:
-            return f"{self.name} - {self.subject}"
-        return self.name
+    def validate(self):
+        if len(self.rfid_settings or []) > MAX_RFID_SETTINGS_ROWS:
+            frappe.throw(
+                f"You can only add up to {MAX_RFID_SETTINGS_ROWS} RFID Settings rows."
+            )
 
     def validate(self):
         self._validate_crated_status()

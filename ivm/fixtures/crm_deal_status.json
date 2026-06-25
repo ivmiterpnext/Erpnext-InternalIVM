@@ -1,0 +1,181 @@
+[
+ {
+  "color": "red",
+  "custom_pipelines": [],
+  "deal_status": "Lost",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-04-22 21:43:20.673863",
+  "name": "Lost",
+  "position": 7,
+  "probability": 0.0,
+  "type": "Lost"
+ },
+ {
+  "color": "yellow",
+  "custom_pipelines": [
+   {
+    "pipeline": "Commercial Sales"
+   },
+   {
+    "pipeline": "Government Sales"
+   },
+   {
+    "pipeline": "Commercial Partner Deals"
+   }
+  ],
+  "deal_status": "On-Hold / Timing",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-06-02 05:43:35.685544",
+  "name": "On-Hold / Timing",
+  "position": 0,
+  "probability": 0.0,
+  "type": "On Hold"
+ },
+ {
+  "color": "blue",
+  "custom_pipelines": [
+   {
+    "pipeline": "Commercial Partner Deals"
+   },
+   {
+    "pipeline": "Commercial Sales"
+   },
+   {
+    "pipeline": "Government Sales"
+   }
+  ],
+  "deal_status": "Discovery",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-06-02 05:34:02.475682",
+  "name": "Discovery",
+  "position": 1,
+  "probability": 0.0,
+  "type": "Open"
+ },
+ {
+  "color": "cyan",
+  "custom_pipelines": [
+   {
+    "pipeline": "Commercial Sales"
+   },
+   {
+    "pipeline": "Government Sales"
+   }
+  ],
+  "deal_status": "Solution Design",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-06-02 05:34:02.478496",
+  "name": "Solution Design",
+  "position": 2,
+  "probability": 0.0,
+  "type": "Ongoing"
+ },
+ {
+  "color": "violet",
+  "custom_pipelines": [
+   {
+    "pipeline": "Commercial Sales"
+   },
+   {
+    "pipeline": "Government Sales"
+   }
+  ],
+  "deal_status": "Presentation",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-06-02 05:34:02.484803",
+  "name": "Presentation",
+  "position": 4,
+  "probability": 0.0,
+  "type": "Ongoing"
+ },
+ {
+  "color": "purple",
+  "custom_pipelines": [
+   {
+    "pipeline": "Commercial Partner Deals"
+   },
+   {
+    "pipeline": "Commercial Sales"
+   },
+   {
+    "pipeline": "Government Sales"
+   }
+  ],
+  "deal_status": "Contracting",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-06-02 05:34:02.487602",
+  "name": "Contracting",
+  "position": 5,
+  "probability": 0.0,
+  "type": "Ongoing"
+ },
+ {
+  "color": "teal",
+  "custom_pipelines": [
+   {
+    "pipeline": "Commercial Sales"
+   },
+   {
+    "pipeline": "Government Sales"
+   }
+  ],
+  "deal_status": "Due Diligence",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-06-02 05:39:15.985404",
+  "name": "Due Diligence",
+  "position": 3,
+  "probability": 0.0,
+  "type": "Ongoing"
+ },
+ {
+  "color": "cyan",
+  "custom_pipelines": [
+   {
+    "pipeline": "Commercial Partner Deals"
+   }
+  ],
+  "deal_status": "Proposal & Pricing",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-06-02 05:47:21.724119",
+  "name": "Proposal & Pricing",
+  "position": 2,
+  "probability": 0.0,
+  "type": "Ongoing"
+ },
+ {
+  "color": "teal",
+  "custom_pipelines": [
+   {
+    "pipeline": "Commercial Partner Deals"
+   }
+  ],
+  "deal_status": "RFP / Decision TBD",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-06-02 05:47:29.269268",
+  "name": "RFP / Decision TBD",
+  "position": 3,
+  "probability": 0.0,
+  "type": "Ongoing"
+ },
+ {
+  "color": "green",
+  "custom_pipelines": [],
+  "deal_status": "Won",
+  "docstatus": 0,
+  "doctype": "CRM Deal Status",
+  "modified": "2026-04-22 21:43:20.673195",
+  "name": "Won",
+  "position": 6,
+  "probability": 100.0,
+  "type": "Won"
+ }
+]

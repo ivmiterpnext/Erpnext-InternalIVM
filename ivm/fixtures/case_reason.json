@@ -1,0 +1,588 @@
+[
+ {
+  "case_reason": "Remove Vend",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:29:59.754732",
+  "name": "Remove Vend"
+ },
+ {
+  "case_reason": "Receivable",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:30:36.210101",
+  "name": "Receivable"
+ },
+ {
+  "case_reason": "Other",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Other"
+   },
+   {
+    "case_sub_reason": "Reconfiguration by Client"
+   },
+   {
+    "case_sub_reason": "Reconfiguration by Vendor"
+   },
+   {
+    "case_sub_reason": "Reconfiguration by IVM"
+   },
+   {
+    "case_sub_reason": "Locker Reconfiguration"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:36:04.177168",
+  "name": "Other"
+ },
+ {
+  "case_reason": "Related to Existing Case",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:38:23.087845",
+  "name": "Related to Existing Case"
+ },
+ {
+  "case_reason": "PO Request",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:48:43.354895",
+  "name": "PO Request"
+ },
+ {
+  "case_reason": "Technical",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:49:42.235598",
+  "name": "Technical"
+ },
+ {
+  "case_reason": "Change Request",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": " CSS"
+   },
+   {
+    "case_sub_reason": "SmartHub"
+   },
+   {
+    "case_sub_reason": "Firmware"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:51:52.386799",
+  "name": "Change Request"
+ },
+ {
+  "case_reason": "Product Innovation",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:52:13.276034",
+  "name": "Product Innovation"
+ },
+ {
+  "case_reason": "New Deployment",
+  "case_sub_reason": [],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:53:27.742262",
+  "name": "New Deployment"
+ },
+ {
+  "case_reason": "Redeployment",
+  "case_sub_reason": [],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:53:41.195757",
+  "name": "Redeployment"
+ },
+ {
+  "case_reason": "Client Call",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Other"
+   },
+   {
+    "case_sub_reason": "Connectivity"
+   },
+   {
+    "case_sub_reason": "Reader"
+   },
+   {
+    "case_sub_reason": "Self Install"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:55:12.271261",
+  "name": "Client Call"
+ },
+ {
+  "case_reason": "Virtual Install Call",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:58:34.416634",
+  "name": "Virtual Install Call"
+ },
+ {
+  "case_reason": "Travel Install",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:59:29.518298",
+  "name": "Travel Install"
+ },
+ {
+  "case_reason": "Information",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Security Request"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:01:02.197882",
+  "name": "Information"
+ },
+ {
+  "case_reason": "Tasks",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Inventory Request"
+   },
+   {
+    "case_sub_reason": "Custom Report"
+   },
+   {
+    "case_sub_reason": "API Call"
+   },
+   {
+    "case_sub_reason": "Security Request"
+   },
+   {
+    "case_sub_reason": "Security Call"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:05:09.267229",
+  "name": "Tasks"
+ },
+ {
+  "case_reason": "Issues",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Misc Control Board Issue"
+   },
+   {
+    "case_sub_reason": "Reports not Generated/Emailed"
+   },
+   {
+    "case_sub_reason": "Vends Not Recording"
+   },
+   {
+    "case_sub_reason": "RealTime"
+   },
+   {
+    "case_sub_reason": "CSS"
+   },
+   {
+    "case_sub_reason": "SmartHub"
+   },
+   {
+    "case_sub_reason": "Importer"
+   },
+   {
+    "case_sub_reason": "Salesforce"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:06:59.476481",
+  "name": "Issues"
+ },
+ {
+  "case_reason": "Salesforce",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:07:41.332061",
+  "name": "Salesforce"
+ },
+ {
+  "case_reason": "Sales Support",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "API Call"
+   },
+   {
+    "case_sub_reason": "Security Request"
+   },
+   {
+    "case_sub_reason": "Security Call"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:08:16.766851",
+  "name": "Sales Support"
+ },
+ {
+  "case_reason": "Product Testing",
+  "case_sub_reason": [],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:12:02.863066",
+  "name": "Product Testing"
+ },
+ {
+  "case_reason": "Build Machine",
+  "case_sub_reason": [],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:12:27.539863",
+  "name": "Build Machine"
+ },
+ {
+  "case_reason": "Wrap Ready",
+  "case_sub_reason": [],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:12:40.247368",
+  "name": "Wrap Ready"
+ },
+ {
+  "case_reason": "Print Labels",
+  "case_sub_reason": [],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:12:51.092460",
+  "name": "Print Labels"
+ },
+ {
+  "case_reason": "Shipping Request",
+  "case_sub_reason": [],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:13:00.623323",
+  "name": "Shipping Request"
+ },
+ {
+  "case_reason": "Batch",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Process Batch"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:24:42.372548",
+  "name": "Batch"
+ },
+ {
+  "case_reason": "Permissions",
+  "case_sub_reason": [],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:18:32.515261",
+  "name": "Permissions"
+ },
+ {
+  "case_reason": "Website",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Add/Modify Access"
+   },
+   {
+    "case_sub_reason": "Reset Password"
+   },
+   {
+    "case_sub_reason": "Website Training"
+   },
+   {
+    "case_sub_reason": "Create Reports"
+   },
+   {
+    "case_sub_reason": "Report Issue"
+   },
+   {
+    "case_sub_reason": "Enable Enhanced Locker Features"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:42:49.422867",
+  "name": "Website"
+ },
+ {
+  "case_reason": "Reconfiguration",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:37:27.258241",
+  "name": "Reconfiguration"
+ },
+ {
+  "case_reason": "Desktop Support",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Misc Card Reader Issue"
+   },
+   {
+    "case_sub_reason": "Misc Connectivity Issue"
+   },
+   {
+    "case_sub_reason": "Misc Control Board Issue"
+   },
+   {
+    "case_sub_reason": "Connectivity"
+   },
+   {
+    "case_sub_reason": "Reader"
+   },
+   {
+    "case_sub_reason": "Machine User Not Authenticating"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:57:04.298154",
+  "name": "Desktop Support"
+ },
+ {
+  "case_reason": "Data Update",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Add or Modify Product Infornamtion"
+   },
+   {
+    "case_sub_reason": "Add or Update Location/Information"
+   },
+   {
+    "case_sub_reason": "Add or Update Machine Users"
+   },
+   {
+    "case_sub_reason": "Other"
+   },
+   {
+    "case_sub_reason": "Add or Update Billing Information"
+   },
+   {
+    "case_sub_reason": "Add or Update Restrictions"
+   },
+   {
+    "case_sub_reason": "Inventory Alerts"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-15 18:49:03.079001",
+  "name": "Data Update"
+ },
+ {
+  "case_reason": "Miscellaneous Issues",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Other"
+   },
+   {
+    "case_sub_reason": "Inventory"
+   },
+   {
+    "case_sub_reason": "Change Machine/Locker Graphics"
+   },
+   {
+    "case_sub_reason": "Relocate Machine"
+   },
+   {
+    "case_sub_reason": "Order Inventory"
+   },
+   {
+    "case_sub_reason": "Enable Vend Reciepts"
+   },
+   {
+    "case_sub_reason": "Import Issue"
+   },
+   {
+    "case_sub_reason": "Create SFTP"
+   },
+   {
+    "case_sub_reason": "Billing Inquiry"
+   },
+   {
+    "case_sub_reason": "Vend Reciepts Issue"
+   },
+   {
+    "case_sub_reason": "Assignments"
+   },
+   {
+    "case_sub_reason": "Machine Status Change"
+   },
+   {
+    "case_sub_reason": "Parts Request"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:34:26.280682",
+  "name": "Miscellaneous Issues"
+ },
+ {
+  "case_reason": "Equipment Issue",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Machine/ Locker Damaged"
+   },
+   {
+    "case_sub_reason": "Product Not Vending"
+   },
+   {
+    "case_sub_reason": "Connectivity"
+   },
+   {
+    "case_sub_reason": "Display"
+   },
+   {
+    "case_sub_reason": "Keypad"
+   },
+   {
+    "case_sub_reason": "Reader"
+   },
+   {
+    "case_sub_reason": "Restrictions Not Enforced"
+   },
+   {
+    "case_sub_reason": "Machine User Not Authenticating"
+   },
+   {
+    "case_sub_reason": "Misc"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:47:52.389040",
+  "name": "Equipment Issue"
+ },
+ {
+  "case_reason": "VM Support",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   },
+   {
+    "case_sub_reason": "Fill Machine"
+   },
+   {
+    "case_sub_reason": "Send Vendor"
+   },
+   {
+    "case_sub_reason": "Service Required"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 11:25:14.425993",
+  "name": "VM Support"
+ },
+ {
+  "case_reason": "--None--",
+  "case_sub_reason": [
+   {
+    "case_sub_reason": "--None--"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Case Reason",
+  "modified": "2023-08-16 10:51:01.396538",
+  "name": "--None--"
+ }
+]

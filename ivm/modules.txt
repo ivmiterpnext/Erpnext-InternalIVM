@@ -1,4 +1,5 @@
+Deals
+Deployments
 IVM
-IVM Integrations
 Warehouse
 Machine Hardware Management

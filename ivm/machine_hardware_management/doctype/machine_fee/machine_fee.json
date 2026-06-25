@@ -38,7 +38,7 @@
    "fieldname": "client_id",
    "fieldtype": "Link",
    "label": "Client",
-   "options": "Client Link"
+   "options": "Customer"
   },
   {
    "fieldname": "machine_id",

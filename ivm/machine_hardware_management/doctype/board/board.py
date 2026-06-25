@@ -3,93 +3,93 @@
 
 import frappe
 from ivm.machine_hardware_management.utils.base_virtual_doctype import BaseVirtualDoctype
-from ivm.machine_hardware_management.utils.api_utils import icorp_api_get
-from ivm.machine_hardware_management.utils.case_utils import api_data_to_frappe_dict
+from ivm.integrations.icorp import icorp_api_get
+from ivm.integrations.icorp.utils import api_data_to_frappe_dict
 from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict, to_iso8601
 
 
 class Board(BaseVirtualDoctype):
-	API_TYPE = "icorp"
-	BOOL_FIELDS = [
-		"is_update_firmware", "is_update_connection", "is_update_rfid", "is_dhcp",
-		"offline_vend_storage", "is_update_machine_motor_info",
-		"is_pin_entry_enabled", "keypad_id_entry", "has_rfid_configuration",
-		"primary_has_bit_reverse_feature", "secondary_has_bit_reverse_feature",
-		"setting3_has_bit_reverse_feature", "setting4_has_bit_reverse_feature",
-		"setting5_has_bit_reverse_feature"
-	]
-	FIELD_MAP = { "name": "id" }
-	endpoint = "SV/Board"
+    API_TYPE = "icorp"
+    BOOL_FIELDS = [
+        "is_update_firmware", "is_update_connection", "is_update_rfid", "is_dhcp",
+        "offline_vend_storage", "is_update_machine_motor_info",
+        "is_pin_entry_enabled", "keypad_id_entry", "has_rfid_configuration",
+        "primary_has_bit_reverse_feature", "secondary_has_bit_reverse_feature",
+        "setting3_has_bit_reverse_feature", "setting4_has_bit_reverse_feature",
+        "setting5_has_bit_reverse_feature"
+    ]
+    FIELD_MAP = { "name": "id" }
+    endpoint = "SV/Board"
 
 # Get List Overrides
-	@classmethod
-	def preprocess_filters(cls, filters):
-		new_filters = []
-		for f in filters or []:
-			if f[1] == "board_firmware_id":
-				version = frappe.db.get_value("Board Firmware", f[3], "version")
-				if version:
-					new_filters.append([f[0], "firmware_version", f[2], version])
-				else:
-					continue
-			else:
-				new_filters.append(f)
-		return new_filters
+    @classmethod
+    def preprocess_filters(cls, filters):
+        new_filters = []
+        for f in filters or []:
+            if f[1] == "board_firmware_id":
+                version = frappe.db.get_value("Board Firmware", f[3], "version")
+                if version:
+                    new_filters.append([f[0], "firmware_version", f[2], version])
+                else:
+                    continue
+            else:
+                new_filters.append(f)
+        return new_filters
 
-	@classmethod
-	def process_list_response(cls, data, args):
-		for row in data:
-			if "board_manufacturer_name" in row:
-				row["board_manufacturer_id"] = row["board_manufacturer_name"]
-			if "hardware_availability_type_description" in row:
-				row["hardware_availability_type_code"] = row["hardware_availability_type_description"]
-			if "board_firmware_version" in row:
-				row["board_firmware_id"] = row["board_firmware_version"]
+    @classmethod
+    def process_list_response(cls, data, args):
+        for row in data:
+            if "board_manufacturer_name" in row:
+                row["board_manufacturer_id"] = row["board_manufacturer_name"]
+            if "hardware_availability_type_description" in row:
+                row["hardware_availability_type_code"] = row["hardware_availability_type_description"]
+            if "board_firmware_version" in row:
+                row["board_firmware_id"] = row["board_firmware_version"]
 
-		return api_data_to_frappe_dict(data, cls.FIELD_MAP.get("name"))
+        return api_data_to_frappe_dict(data, cls.FIELD_MAP.get("name"))
 
 # Load from DB Overrides
-	def process_load_response(self, data):
-		self._set_vendnovation_configurations()
-		set_attrs_from_dict(self, data)
+    def process_load_response(self, data):
+        self._set_vendnovation_configurations()
+        set_attrs_from_dict(self, data)
 
 # Insert Overrides
-	def prepare_insert_data(self, data):
-		data["effective_date"] = to_iso8601(data["effective_date"])
-		return data
+    def prepare_insert_data(self, data):
+        data["effective_date"] = to_iso8601(data["effective_date"])
+        return data
 
 # Helpers
-	def _set_vendnovation_configurations(self):
-		try:
-			endpoint = f"SV/BoardVendnovationConfiguration/GetEffectiveConfiguration?Id={self.name}"
-			response = icorp_api_get(endpoint)
-			data = response.get("data", {})
+    def _set_vendnovation_configurations(self):
+        try:
+            endpoint = f"SV/BoardVendnovationConfiguration/GetEffectiveConfiguration?Id={self.name}"
+            response = icorp_api_get(endpoint)
+            data = response.get("data", {})
 
-			set_attrs_from_dict(self, data)
-			self.has_rfid_configuration = 1 if getattr(self, "board_rfid_configuration_id", None) not in (None, '', 'null') else 0
+            set_attrs_from_dict(self, data)
+            self.has_rfid_configuration = 1 if getattr(self, "board_rfid_configuration_id", None) not in (None, '', 'null') else 0
 
-			endpoint = f"SV/BoardVendnovationConfiguration/GetByBoardSerialNumber?SerialNumber={self.serial_number}"
-			response = icorp_api_get(endpoint)
-			data = response.get("data", {})
+            endpoint = f"SV/BoardVendnovationConfiguration/GetByBoardSerialNumber?SerialNumber={self.serial_number}"
+            response = icorp_api_get(endpoint)
+            data = response.get("data", {})
 
-			configs = sorted(
-				data,
-				key=lambda c: c.get("effective_date") or "",
-				reverse=True
-			)
+            configs = sorted(
+                data,
+                key=lambda c: c.get("effective_date") or "",
+                reverse=True
+            )
 
-			for config in configs:
-				self.append("vendnovation_configurations", config)
-		except Exception as e:
-				frappe.log_error(f"{e}\n{frappe.get_traceback()}", "Board._set_vendnovation_configurations error")
+            for config in configs:
+                self.append("vendnovation_configurations", config)
+        except Exception as e:
+                frappe.log_error(f"{e}\n{frappe.get_traceback()}", "Board._set_vendnovation_configurations error")
 
-	def db_update(self, *args, **kwargs):
-		# Board insert and update are the same api endpoint
-		self.db_insert(*args, **kwargs)
+    def db_update(self, *args, **kwargs):
+        # Board insert and update are the same api endpoint
+        self.db_insert(*args, **kwargs)
 
-	def delete(self):
-		# Cannot currently delete Boards via API
-		raise NotImplementedError
+    def delete(self):
+        # Cannot currently delete Boards via API
+        raise NotImplementedError
 
 # Select logic
 @frappe.whitelist()

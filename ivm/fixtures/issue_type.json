@@ -1,0 +1,1381 @@
+[
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Escalation"
+   },
+   {
+    "case_origin": "Sales"
+   },
+   {
+    "case_origin": "IT"
+   },
+   {
+    "case_origin": "S&O"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "Change Request"
+   },
+   {
+    "case_reason": "Product Innovation"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2023-08-25 03:13:34.748574",
+  "name": "Change Request",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "Resolved"
+   },
+   {
+    "status": "Closed"
+   }
+  ],
+  "stage": [
+   {
+    "stage": "--None--"
+   },
+   {
+    "stage": "Waiting Review"
+   },
+   {
+    "stage": "Waiting Prioritization"
+   },
+   {
+    "stage": "Waiting Assignment"
+   },
+   {
+    "stage": "Assigned"
+   },
+   {
+    "stage": "Troubleshooting"
+   },
+   {
+    "stage": "Incomplete"
+   },
+   {
+    "stage": "In Progress"
+   },
+   {
+    "stage": "Code Committed"
+   },
+   {
+    "stage": "Merged - Building"
+   },
+   {
+    "stage": "SIT Ready"
+   },
+   {
+    "stage": "SIT Passed"
+   },
+   {
+    "stage": "SIT Failed"
+   },
+   {
+    "stage": "Request Completed"
+   },
+   {
+    "stage": "No Action Taken"
+   },
+   {
+    "stage": "Waiting AutoClose"
+   },
+   {
+    "stage": "Waiting Client Response"
+   },
+   {
+    "stage": "Waiting Internal Response"
+   },
+   {
+    "stage": "Waiting Vendor Response"
+   },
+   {
+    "stage": "Waiting Internal Response IT"
+   },
+   {
+    "stage": "Waiting Internal Response S&I"
+   },
+   {
+    "stage": "Waiting Internal Response Sales"
+   },
+   {
+    "stage": "Waiting Internal Response Mgmt"
+   },
+   {
+    "stage": "Release Ready"
+   },
+   {
+    "stage": "Released"
+   },
+   {
+    "stage": "DevOps"
+   },
+   {
+    "stage": "S&O Testing - SH"
+   },
+   {
+    "stage": "S&O Testing - iCorp"
+   },
+   {
+    "stage": "S&O Passed"
+   },
+   {
+    "stage": "Rejected"
+   },
+   {
+    "stage": "Duplicate"
+   },
+   {
+    "stage": "Complete"
+   },
+   {
+    "stage": "Completed"
+   },
+   {
+    "stage": "Client Action Required"
+   },
+   {
+    "stage": "Internal Action Required"
+   },
+   {
+    "stage": "Phase 1 In Progress"
+   },
+   {
+    "stage": "Phase 2 In Progress"
+   },
+   {
+    "stage": "Phase 3 In Progress"
+   },
+   {
+    "stage": "Shipped"
+   },
+   {
+    "stage": "Delivered"
+   }
+  ]
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Email"
+   },
+   {
+    "case_origin": "Phone"
+   },
+   {
+    "case_origin": "Web"
+   },
+   {
+    "case_origin": "Escalation"
+   },
+   {
+    "case_origin": "Sales"
+   },
+   {
+    "case_origin": "Internal"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "New Deployment"
+   },
+   {
+    "case_reason": "Data Update"
+   },
+   {
+    "case_reason": "Remove Vend"
+   },
+   {
+    "case_reason": "Receivable"
+   },
+   {
+    "case_reason": "Miscellaneous Issues"
+   },
+   {
+    "case_reason": "Other"
+   },
+   {
+    "case_reason": "Reconfiguration"
+   },
+   {
+    "case_reason": "VM Support"
+   },
+   {
+    "case_reason": "Change Request"
+   },
+   {
+    "case_reason": "Information"
+   },
+   {
+    "case_reason": "Tasks"
+   },
+   {
+    "case_reason": "Issues"
+   },
+   {
+    "case_reason": "Desktop Support"
+   },
+   {
+    "case_reason": "Website"
+   },
+   {
+    "case_reason": "Equipment Issue"
+   },
+   {
+    "case_reason": "Product Testing"
+   },
+   {
+    "case_reason": "Build Machine"
+   },
+   {
+    "case_reason": "Wrap Ready"
+   },
+   {
+    "case_reason": "Print Labels"
+   },
+   {
+    "case_reason": "Shipping Request"
+   },
+   {
+    "case_reason": "Product Innovation"
+   },
+   {
+    "case_reason": "Salesforce"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2023-08-25 03:13:34.796124",
+  "name": "Reconfiguration",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "On Hold"
+   },
+   {
+    "status": "Escalated"
+   },
+   {
+    "status": "Closed"
+   }
+  ],
+  "stage": [
+   {
+    "stage": "--None--"
+   },
+   {
+    "stage": "Waiting Review"
+   },
+   {
+    "stage": "Waiting Prioritization"
+   },
+   {
+    "stage": "Waiting Assignment"
+   },
+   {
+    "stage": "Assigned"
+   },
+   {
+    "stage": "Troubleshooting"
+   },
+   {
+    "stage": "Incomplete"
+   },
+   {
+    "stage": "In Progress"
+   },
+   {
+    "stage": "Code Committed"
+   },
+   {
+    "stage": "Merged - Building"
+   },
+   {
+    "stage": "SIT Ready"
+   },
+   {
+    "stage": "SIT Passed"
+   },
+   {
+    "stage": "SIT Failed"
+   },
+   {
+    "stage": "Request Completed"
+   },
+   {
+    "stage": "No Action Taken"
+   },
+   {
+    "stage": "Waiting AutoClose"
+   },
+   {
+    "stage": "Waiting Client Response"
+   },
+   {
+    "stage": "Waiting Internal Response"
+   },
+   {
+    "stage": "Waiting Vendor Response"
+   },
+   {
+    "stage": "Waiting Internal Response IT"
+   },
+   {
+    "stage": "Waiting Internal Response S&I"
+   },
+   {
+    "stage": "Waiting Internal Response Sales"
+   },
+   {
+    "stage": "Waiting Internal Response Mgmt"
+   },
+   {
+    "stage": "Release Ready"
+   },
+   {
+    "stage": "Released"
+   },
+   {
+    "stage": "S&O Testing - SH"
+   },
+   {
+    "stage": "S&O Passed"
+   },
+   {
+    "stage": "Rejected"
+   },
+   {
+    "stage": "Duplicate"
+   },
+   {
+    "stage": "Complete"
+   },
+   {
+    "stage": "Completed"
+   },
+   {
+    "stage": "Client Action Required"
+   },
+   {
+    "stage": "Internal Action Required"
+   },
+   {
+    "stage": "Phase 1 In Progress"
+   },
+   {
+    "stage": "Phase 2 In Progress"
+   },
+   {
+    "stage": "Phase 3 In Progress"
+   },
+   {
+    "stage": "Shipped"
+   },
+   {
+    "stage": "Delivered"
+   }
+  ]
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Email"
+   },
+   {
+    "case_origin": "Phone"
+   },
+   {
+    "case_origin": "Web"
+   },
+   {
+    "case_origin": "Escalation"
+   },
+   {
+    "case_origin": "Sales"
+   },
+   {
+    "case_origin": "Internal"
+   },
+   {
+    "case_origin": "IT"
+   },
+   {
+    "case_origin": "S&O"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "Client Call"
+   },
+   {
+    "case_reason": "New Deployment"
+   },
+   {
+    "case_reason": "Data Update"
+   },
+   {
+    "case_reason": "Remove Vend"
+   },
+   {
+    "case_reason": "Receivable"
+   },
+   {
+    "case_reason": "Miscellaneous Issues"
+   },
+   {
+    "case_reason": "Other"
+   },
+   {
+    "case_reason": "Reconfiguration"
+   },
+   {
+    "case_reason": "Related to Existing Case"
+   },
+   {
+    "case_reason": "VM Support"
+   },
+   {
+    "case_reason": "Change Request"
+   },
+   {
+    "case_reason": "Information"
+   },
+   {
+    "case_reason": "Tasks"
+   },
+   {
+    "case_reason": "Issues"
+   },
+   {
+    "case_reason": "Desktop Support"
+   },
+   {
+    "case_reason": "Website"
+   },
+   {
+    "case_reason": "Equipment Issue"
+   },
+   {
+    "case_reason": "Product Testing"
+   },
+   {
+    "case_reason": "Build Machine"
+   },
+   {
+    "case_reason": "Wrap Ready"
+   },
+   {
+    "case_reason": "Print Labels"
+   },
+   {
+    "case_reason": "Shipping Request"
+   },
+   {
+    "case_reason": "Product Innovation"
+   },
+   {
+    "case_reason": "Salesforce"
+   },
+   {
+    "case_reason": "Redeployment"
+   },
+   {
+    "case_reason": "Sales Support"
+   },
+   {
+    "case_reason": "Batch"
+   },
+   {
+    "case_reason": "PO Request"
+   },
+   {
+    "case_reason": "Technical"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2023-08-25 03:13:34.839681",
+  "name": "Offboarding",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "Resolved"
+   },
+   {
+    "status": "Closed"
+   }
+  ],
+  "stage": [
+   {
+    "stage": "--None--"
+   },
+   {
+    "stage": "Waiting Review"
+   },
+   {
+    "stage": "Waiting Prioritization"
+   },
+   {
+    "stage": "Waiting Assignment"
+   },
+   {
+    "stage": "Assigned"
+   },
+   {
+    "stage": "Troubleshooting"
+   },
+   {
+    "stage": "Incomplete"
+   },
+   {
+    "stage": "In Progress"
+   },
+   {
+    "stage": "Code Committed"
+   },
+   {
+    "stage": "Merged - Building"
+   },
+   {
+    "stage": "SIT Ready"
+   },
+   {
+    "stage": "SIT Passed"
+   },
+   {
+    "stage": "SIT Failed"
+   },
+   {
+    "stage": "Request Completed"
+   },
+   {
+    "stage": "No Action Tacken"
+   },
+   {
+    "stage": "Waiting AutoClose"
+   },
+   {
+    "stage": "Waiting Client Response"
+   },
+   {
+    "stage": "Waiting Internal Response"
+   },
+   {
+    "stage": "Waiting Vendor Response"
+   },
+   {
+    "stage": "Waiting Internal Response IT"
+   },
+   {
+    "stage": "Waiting Internal Response S&I"
+   },
+   {
+    "stage": "Waiting Internal Response Sales"
+   },
+   {
+    "stage": "Waiting Internal Response Mgmt"
+   },
+   {
+    "stage": "Release Ready"
+   },
+   {
+    "stage": "Released"
+   },
+   {
+    "stage": "DevOps"
+   },
+   {
+    "stage": "S&O Testing - SH"
+   },
+   {
+    "stage": "S&O Passed"
+   },
+   {
+    "stage": "Rejected"
+   },
+   {
+    "stage": "Duplicate"
+   },
+   {
+    "stage": "Complete"
+   },
+   {
+    "stage": "Completed"
+   },
+   {
+    "stage": "Client Action Required"
+   },
+   {
+    "stage": "Internal Action Required"
+   },
+   {
+    "stage": "Phase 1 In Progress"
+   },
+   {
+    "stage": "Phase 2 In Progress"
+   },
+   {
+    "stage": "Phase 3 In Progress"
+   },
+   {
+    "stage": "Shipped"
+   },
+   {
+    "stage": "Delivered"
+   }
+  ]
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Email"
+   },
+   {
+    "case_origin": "Escalation"
+   },
+   {
+    "case_origin": "Sales"
+   },
+   {
+    "case_origin": "Internal"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "Client Call"
+   },
+   {
+    "case_reason": "Remove Vend"
+   },
+   {
+    "case_reason": "Change Request"
+   },
+   {
+    "case_reason": "Information"
+   },
+   {
+    "case_reason": "Tasks"
+   },
+   {
+    "case_reason": "Issues"
+   },
+   {
+    "case_reason": "Product Innovation"
+   },
+   {
+    "case_reason": "Salesforce"
+   },
+   {
+    "case_reason": "Sales Support"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2023-08-25 03:13:34.919452",
+  "name": "Onboarding",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "Resolved"
+   },
+   {
+    "status": "Closed"
+   }
+  ],
+  "stage": []
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Email"
+   },
+   {
+    "case_origin": "Phone"
+   },
+   {
+    "case_origin": "Web"
+   },
+   {
+    "case_origin": "Escalation"
+   },
+   {
+    "case_origin": "Sales"
+   },
+   {
+    "case_origin": "Internal"
+   },
+   {
+    "case_origin": "IT"
+   },
+   {
+    "case_origin": "S&O"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "Permissions"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2023-08-25 03:13:34.937258",
+  "name": "Permission Change",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "Resolved"
+   },
+   {
+    "status": "Closed"
+   }
+  ],
+  "stage": []
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Email"
+   },
+   {
+    "case_origin": "Escalation"
+   },
+   {
+    "case_origin": "Sales"
+   },
+   {
+    "case_origin": "Internal"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "Client Call"
+   },
+   {
+    "case_reason": "Virtual Install Call"
+   },
+   {
+    "case_reason": "Travel Install"
+   },
+   {
+    "case_reason": "Remove Vend"
+   },
+   {
+    "case_reason": "Change Request"
+   },
+   {
+    "case_reason": "Information"
+   },
+   {
+    "case_reason": "Tasks"
+   },
+   {
+    "case_reason": "Issues"
+   },
+   {
+    "case_reason": "Product Innovation"
+   },
+   {
+    "case_reason": "Salesforce"
+   },
+   {
+    "case_reason": "Sales Support"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2024-02-12 10:58:31.443891",
+  "name": "IT",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "Resolved"
+   },
+   {
+    "status": "Closed"
+   },
+   {
+    "status": "Replied"
+   }
+  ],
+  "stage": [
+   {
+    "stage": "--None--"
+   },
+   {
+    "stage": "Waiting Review"
+   },
+   {
+    "stage": "Assigned"
+   },
+   {
+    "stage": "Troubleshooting"
+   },
+   {
+    "stage": "Incomplete"
+   },
+   {
+    "stage": "In Progress"
+   },
+   {
+    "stage": "Code Commited"
+   },
+   {
+    "stage": "Merged - Building"
+   },
+   {
+    "stage": "SIT Ready"
+   },
+   {
+    "stage": "SIT Passed"
+   },
+   {
+    "stage": "SIT Failed"
+   },
+   {
+    "stage": "Waiting Client Response"
+   },
+   {
+    "stage": "Waiting Internal Response"
+   },
+   {
+    "stage": "Waiting Vendor Response"
+   },
+   {
+    "stage": "Release Ready"
+   },
+   {
+    "stage": "Released"
+   },
+   {
+    "stage": "DevOps"
+   },
+   {
+    "stage": "S&O Testing - SH"
+   },
+   {
+    "stage": "S&O Testing - iCrop"
+   },
+   {
+    "stage": "S&O Passed"
+   },
+   {
+    "stage": "Rejected"
+   },
+   {
+    "stage": "Duplicate"
+   },
+   {
+    "stage": "Complete"
+   }
+  ]
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Escalation"
+   },
+   {
+    "case_origin": "Sales"
+   },
+   {
+    "case_origin": "Internal"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "Client Call"
+   },
+   {
+    "case_reason": "Desktop Support"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2023-08-16 23:59:34.523022",
+  "name": "Desktop Support",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "Resolved"
+   },
+   {
+    "status": "Closed"
+   }
+  ],
+  "stage": [
+   {
+    "stage": "--None--"
+   },
+   {
+    "stage": "Assigned"
+   },
+   {
+    "stage": "Troubleshooting"
+   },
+   {
+    "stage": "In Progress"
+   },
+   {
+    "stage": "Waiting Internal Response"
+   },
+   {
+    "stage": "Rejected"
+   },
+   {
+    "stage": "Duplicate"
+   },
+   {
+    "stage": "Complete"
+   }
+  ]
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Email"
+   },
+   {
+    "case_origin": "Phone"
+   },
+   {
+    "case_origin": "Internal"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "VM Support"
+   },
+   {
+    "case_reason": "Batch"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2023-08-25 03:13:34.780323",
+  "name": "Vending Management",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "Escalated"
+   },
+   {
+    "status": "Resolved"
+   },
+   {
+    "status": "Closed"
+   }
+  ],
+  "stage": []
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Email"
+   },
+   {
+    "case_origin": "Phone"
+   },
+   {
+    "case_origin": "Web"
+   },
+   {
+    "case_origin": "Escalation"
+   },
+   {
+    "case_origin": "Sales"
+   },
+   {
+    "case_origin": "Internal"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "New Deployment"
+   },
+   {
+    "case_reason": "Data Update"
+   },
+   {
+    "case_reason": "Remove Vend"
+   },
+   {
+    "case_reason": "Receivable"
+   },
+   {
+    "case_reason": "Miscellaneous Issues"
+   },
+   {
+    "case_reason": "Other"
+   },
+   {
+    "case_reason": "Reconfiguration"
+   },
+   {
+    "case_reason": "VM Support"
+   },
+   {
+    "case_reason": "Change Request"
+   },
+   {
+    "case_reason": "Information"
+   },
+   {
+    "case_reason": "Tasks"
+   },
+   {
+    "case_reason": "Issues"
+   },
+   {
+    "case_reason": "Desktop Support"
+   },
+   {
+    "case_reason": "Website"
+   },
+   {
+    "case_reason": "Equipment Issue"
+   },
+   {
+    "case_reason": "Product Testing"
+   },
+   {
+    "case_reason": "Build Machine"
+   },
+   {
+    "case_reason": "Wrap Ready"
+   },
+   {
+    "case_reason": "Print Labels"
+   },
+   {
+    "case_reason": "Shipping Request"
+   },
+   {
+    "case_reason": "Product Innovation"
+   },
+   {
+    "case_reason": "Salesforce"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2023-08-25 03:13:34.893030",
+  "name": "Receivable",
+  "project_status": [
+   {
+    "status": "--None--"
+   },
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "In Progress"
+   },
+   {
+    "status": "On Hold"
+   },
+   {
+    "status": "Closed"
+   },
+   {
+    "status": "Payment Scheduled"
+   },
+   {
+    "status": "Deactivation Notice Sent"
+   },
+   {
+    "status": "Equipment Deactivated"
+   }
+  ],
+  "stage": []
+ },
+ {
+  "case_origin": [
+   {
+    "case_origin": "--None--"
+   },
+   {
+    "case_origin": "Email"
+   },
+   {
+    "case_origin": "Phone"
+   },
+   {
+    "case_origin": "Web"
+   },
+   {
+    "case_origin": "Internal"
+   }
+  ],
+  "case_reason": [
+   {
+    "case_reason": "--None--"
+   },
+   {
+    "case_reason": "Data Update"
+   },
+   {
+    "case_reason": "Remove Vend"
+   },
+   {
+    "case_reason": "Receivable"
+   },
+   {
+    "case_reason": "Miscellaneous Issues"
+   },
+   {
+    "case_reason": "Other"
+   },
+   {
+    "case_reason": "Reconfiguration"
+   },
+   {
+    "case_reason": "Related to Existing Case"
+   },
+   {
+    "case_reason": "VM Support"
+   },
+   {
+    "case_reason": "Website"
+   },
+   {
+    "case_reason": "Equipment Issue"
+   },
+   {
+    "case_reason": "PO Request"
+   },
+   {
+    "case_reason": "Technical"
+   }
+  ],
+  "description": null,
+  "docstatus": 0,
+  "doctype": "Issue Type",
+  "modified": "2024-02-12 10:58:43.804330",
+  "name": "Support",
+  "project_status": [
+   {
+    "status": "New"
+   },
+   {
+    "status": "Open"
+   },
+   {
+    "status": "Pending"
+   },
+   {
+    "status": "Escalated"
+   },
+   {
+    "status": "Resolved"
+   },
+   {
+    "status": "Closed"
+   },
+   {
+    "status": "Replied"
+   }
+  ],
+  "stage": [
+   {
+    "stage": "--None--"
+   },
+   {
+    "stage": "In Progress"
+   },
+   {
+    "stage": "Request Completed"
+   },
+   {
+    "stage": "No Action Taken"
+   },
+   {
+    "stage": "Waiting Auto Close"
+   },
+   {
+    "stage": "Waiting Client Response"
+   },
+   {
+    "stage": "Waiting Internal Response"
+   },
+   {
+    "stage": "Waiting Vendor Response"
+   },
+   {
+    "stage": "Waiting Internal Response IT"
+   },
+   {
+    "stage": "Waiting Internal Response S&I"
+   },
+   {
+    "stage": "Waiting Internal Response Sales"
+   },
+   {
+    "stage": "Waiting Internal Response Mgmt"
+   },
+   {
+    "stage": "S&O Follow-up"
+   },
+   {
+    "stage": "Duplicate"
+   }
+  ]
+ }
+]

@@ -105,7 +105,7 @@ $(document).on("app_ready", function () {
 		showTyping();
 
 		frappe.call({
-			method: "ivm.ivm_integrations.howiebot.chat.send_message",
+			method: "ivm.integrations.howiebot.chat.send_message",
 			args: { message: message },
 			callback: function (r) {
 				removeTyping();

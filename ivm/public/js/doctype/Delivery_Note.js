@@ -7,13 +7,6 @@ frappe.ui.form.on('Delivery Note', {
 		}
 	},
 
-	setup: function(frm) {
-		frm.set_query('custom_related_warehouse_request', function() {
-			return {
-				query: 'ivm.warehouse.services.warehouse_request.warehouse_request_query'
-			};
-		});
-	},
 	
 	custom_related_warehouse_request: function(frm) {
 		if (frm.doc.custom_related_warehouse_request) {

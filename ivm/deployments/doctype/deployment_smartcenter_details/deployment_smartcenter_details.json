@@ -1,0 +1,203 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-26 08:04:03.153517",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "general_section",
+  "machine_name",
+  "smartscreen",
+  "workflow",
+  "serial_validation",
+  "home_screen_logo",
+  "column_break_qhcr",
+  "notes",
+  "section_break_38vj",
+  "kiosk_options",
+  "kvm_switch_options",
+  "monitor_options",
+  "power_connections_in_bins",
+  "column_break_hzug",
+  "network_port_in_bins",
+  "network_options",
+  "interior_kiosk_lighting",
+  "locker_bin_door_type",
+  "column_break_bmfq",
+  "countertop_color",
+  "ada_side_table",
+  "kiosk_side_for_table",
+  "monitor_mount",
+  "hidden_fields_section",
+  "machine_type_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "kiosk_options",
+   "fieldtype": "Select",
+   "label": "Kiosk Options",
+   "options": "\nNone\nKiosk w/ KVM & All-in-one\nKisok w/ All-in-one\nSide Table"
+  },
+  {
+   "fieldname": "machine_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_38vj",
+   "fieldtype": "Section Break",
+   "label": "Specifications"
+  },
+  {
+   "fieldname": "kvm_switch_options",
+   "fieldtype": "Select",
+   "label": "KVM Switch Options",
+   "options": "\nNone\nStandard KVM Switch Raritan DKX3-108 KVM\nClient to Provide"
+  },
+  {
+   "fieldname": "monitor_options",
+   "fieldtype": "Select",
+   "label": "Monitor Options",
+   "options": "\nNone\n27' All-in-One Optiplex 7780\n22' Display Dell P2217\n24' Display Dell E2420HS\n27' Display Dell E2720HS\nClient to Provide and Install"
+  },
+  {
+   "fieldname": "network_options",
+   "fieldtype": "Select",
+   "label": "Network Options",
+   "options": "\n16 Port Netgear Switch\nClient Provided"
+  },
+  {
+   "fieldname": "column_break_hzug",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "network_port_in_bins",
+   "fieldtype": "Select",
+   "label": "Network Port in Bins",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "interior_kiosk_lighting",
+   "fieldtype": "Select",
+   "label": "Interior Kiosk Lighting",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "locker_bin_door_type",
+   "fieldtype": "Select",
+   "label": "Locker Bin Door Type",
+   "options": "\nSolid\nGlass"
+  },
+  {
+   "fieldname": "countertop_color",
+   "fieldtype": "Select",
+   "label": "Countertop Color",
+   "options": "\nBlue\nBlack\nLight Gray\nDark Gray"
+  },
+  {
+   "fieldname": "ada_side_table",
+   "fieldtype": "Select",
+   "label": "ADA Side Table",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "kiosk_side_for_table",
+   "fieldtype": "Select",
+   "label": "Kiosk Side for Table",
+   "options": "\nRight\nLeft"
+  },
+  {
+   "fieldname": "monitor_mount",
+   "fieldtype": "Select",
+   "label": "Monitor Mount",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_bmfq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "smartscreen",
+   "fieldtype": "Check",
+   "label": "SmartScreen"
+  },
+  {
+   "fieldname": "column_break_qhcr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.smartscreen;",
+   "fieldname": "workflow",
+   "fieldtype": "Select",
+   "label": "Workflow",
+   "mandatory_depends_on": "eval:doc.smartscreen",
+   "options": "\nVend and Return"
+  },
+  {
+   "depends_on": "eval:doc.smartscreen;",
+   "fieldname": "serial_validation",
+   "fieldtype": "Select",
+   "label": "Serial Validation",
+   "mandatory_depends_on": "eval:doc.smartscreen",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.smartscreen;",
+   "fieldname": "home_screen_logo",
+   "fieldtype": "Select",
+   "label": "Home Screen Logo",
+   "mandatory_depends_on": "eval:doc.smartscreen",
+   "options": "\nIVM Logo\nClient Logo"
+  },
+  {
+   "fieldname": "hidden_fields_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden Fields"
+  },
+  {
+   "default": "5",
+   "fieldname": "machine_type_id",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Machine Type Id"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "power_connections_in_bins",
+   "fieldtype": "Select",
+   "label": "Power Connections in Bins",
+   "options": "\nNone\nUSB\n110 Outlets\n220 Outlets"
+  },
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "SmartCenter Details"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-10 10:26:23.696293",
+ "modified_by": "Administrator",
+ "module": "Deployments",
+ "name": "Deployment SmartCenter Details",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
