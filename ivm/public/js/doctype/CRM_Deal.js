@@ -10,8 +10,8 @@ const DEVICE_FIELDS = [
   { field: "number_of_machines",          label: "SmartStations" },
   { field: "number_of_primary_lockers",   label: "SmartLockers"  },
   { field: "number_of_secondary_lockers", label: "SmartSyncs"    },
-  { field: "number_of_kiosks",            label: "SmartCenters"  },
   { field: "number_of_vaults",            label: "SmartVaults"   },
+  { field: "number_of_kiosks",            label: "SmartCenters"  },
 ];
 
 function renderSitesTab(frm) {
@@ -78,8 +78,8 @@ function renderSitesTable($container, sites, frm) {
           <th class="text-center">SS</th>
           <th class="text-center">SL</th>
           <th class="text-center">SSy</th>
-          <th class="text-center">SC</th>
           <th class="text-center">SV</th>
+          <th class="text-center">SC</th>
           <th style="width:60px;"></th>
         </tr>
       </thead>
@@ -97,8 +97,8 @@ function renderSitesTable($container, sites, frm) {
         <td class="text-center">${site.number_of_machines || 0}</td>
         <td class="text-center">${site.number_of_primary_lockers || 0}</td>
         <td class="text-center">${site.number_of_secondary_lockers || 0}</td>
-        <td class="text-center">${site.number_of_kiosks || 0}</td>
         <td class="text-center">${site.number_of_vaults || 0}</td>
+        <td class="text-center">${site.number_of_kiosks || 0}</td>
         <td class="text-center">
           <button class="btn btn-xs btn-danger btn-delete-site"
                   title="Delete">&times;</button>

@@ -16,6 +16,7 @@ _LOG = "deployments"
 DEAL_TO_PROJECT_FIELDS: dict[str, str] = {
     "custom_machine_ownership_status": "machine_ownership_status",
     "custom_opportunity_term": "opportunity_term",
+    "deal_owner": "sales_rep",
 }
 
 LOCATION_TO_PROJECT_FIELDS: dict[str, str] = {
@@ -131,7 +132,7 @@ def _create_project_for_location(
     Returns the new Project name, or None if a Project already exists for this location."""
     location = frappe.get_doc("Deployment Location", location_name)
 
-    if frappe.db.exists("Project", {"custom_hubspot_deployment_site_id": location.hubspot_site_id or ""}):
+    if location.hubspot_site_id and frappe.db.exists("Project", {"custom_hubspot_deployment_site_id": location.hubspot_site_id}):
         frappe.logger(_LOG).info(
             f"Deployment already exists for Deployment Location {location_name}, skipping"
         )
@@ -145,7 +146,7 @@ def _create_project_for_location(
 
     project = frappe.new_doc("Project")
     project.update({
-        "project_name": f"{site_name} - {deal.name}",
+        "project_name": f"{site_name} - {deal.get('custom_hubspot_deal_name') or deal.name}",
         "project_type": "Deployment",
         "stage": "Waiting Assignment",
         "expected_start_date": start_date,

@@ -164,15 +164,19 @@ def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
     synced here — they have their own generic webhook subscriptions and
     are handled independently by ``deployment_site_handler`` and
     ``activity_handler``.
+
+    Organization is synced before deal fields so that when _sync_deal_fields
+    saves the deal (triggering on_update), the organization link is already
+    in place — ensuring customer provisioning can find it if the deal is Won.
     """
     hubspot_data = api.get_deal(
         hubspot_deal_id, properties=list(DEAL_FIELD_MAP.keys())
     )
     properties: dict[str, Any] = hubspot_data.get("properties", {})
 
-    _sync_deal_fields(crm_deal_name, properties)
     _sync_organization(hubspot_deal_id, crm_deal_name)
     _sync_contacts(hubspot_deal_id, crm_deal_name)
+    _sync_deal_fields(crm_deal_name, properties)
 
 
 def _sync_deal_fields(crm_deal_name: str, properties: dict[str, Any]) -> None:

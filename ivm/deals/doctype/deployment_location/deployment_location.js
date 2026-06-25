@@ -43,7 +43,7 @@ for (const [dt, table_field] of Object.entries(DL_CHILD_DOCTYPE_TO_TABLE)) {
     handlers[table_field + "_add"] = (frm) => updateDLQuantities(frm);
     handlers[table_field + "_remove"] = (frm) => updateDLQuantities(frm);
 
-    if (dt === "Deployment SmartLocker Details" || dt === "Deployment SmartSync Details") {
+    if (dt === "Deployment SmartLocker Details" || dt === "Deployment SmartSync Details" || dt === "Deployment SmartVault Details") {
         handlers.form_render = (frm, cdt, cdn) => injectBinsEditor(frm, cdt, cdn);
     }
 

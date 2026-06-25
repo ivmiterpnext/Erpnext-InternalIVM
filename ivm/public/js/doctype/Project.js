@@ -13,6 +13,10 @@ frappe.ui.form.on('Deployment SmartSync Details', {
   form_render: (frm, cdt, cdn) => injectBinsEditor(frm, cdt, cdn)
 });
 
+frappe.ui.form.on('Deployment SmartVault Details', {
+  form_render: (frm, cdt, cdn) => injectBinsEditor(frm, cdt, cdn)
+});
+
 frappe.ui.form.on("Project", {
   refresh: function (frm) {
     frm._prev_status = frm.doc.status;
