@@ -24,7 +24,7 @@ def execute(filters=None):
 			p.opportunity_term,
 			GROUP_CONCAT(u.full_name SEPARATOR ', ') AS assigned_to
 		FROM `tabProject` p
-		LEFT JOIN `tabUser` u ON JSON_CONTAINS(p._assign, JSON_QUOTE(u.name))
+		LEFT JOIN `tabUser` u ON JSON_CONTAINS(COALESCE(p._assign, '[]'), JSON_QUOTE(u.name))
 		WHERE p.status NOT IN ('Cancelled', 'Completed', 'Installed')
 		GROUP BY p.name
 		ORDER BY p.modified DESC

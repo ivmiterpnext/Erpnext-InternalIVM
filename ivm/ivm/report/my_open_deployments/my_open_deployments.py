@@ -4,7 +4,7 @@ import frappe
 def execute(filters=None):
 	columns = [
 		{"label": "ID", "fieldname": "name", "fieldtype": "Link", "options": "Project", "width": 120},
-		{"label": "Subject", "fieldname": "subject", "fieldtype": "Data", "width": 200},
+		{"label": "Project Name", "fieldname": "project_name", "fieldtype": "Data", "width": 200},
 		{"label": "Status", "fieldname": "status", "fieldtype": "Data", "width": 120},
 		{"label": "Stage", "fieldname": "stage", "fieldtype": "Data", "width": 120},
 		{"label": "Client ID", "fieldname": "client_id", "fieldtype": "Data", "width": 120},
@@ -16,7 +16,7 @@ def execute(filters=None):
 	data = frappe.db.sql("""
 		SELECT
 			p.name,
-			p.subject,
+			p.project_name,
 			p.status,
 			p.stage,
 			p.client_id,
@@ -24,7 +24,7 @@ def execute(filters=None):
 			p.opportunity_term,
 			u.full_name AS assigned_to
 		FROM `tabProject` p
-		JOIN `tabUser` u ON JSON_CONTAINS(p._assign, JSON_QUOTE(u.name))
+		JOIN `tabUser` u ON JSON_CONTAINS(COALESCE(p._assign, '[]'), JSON_QUOTE(u.name))
 		WHERE u.name = %(user)s
 		  AND p.status NOT IN ('Cancelled', 'Completed', 'Installed')
 		ORDER BY p.modified DESC
