@@ -1,0 +1,2974 @@
+[
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Issue\",\"creation\",\"Between\",[\"2023-07-01\",\"2023-09-30\"],false],[\"Issue\",\"issue_type\",\"not in\",[\"Receivable\",\"Vending management\",\"Change Request\"],false]],\"fields\":[[\"name\",\"Issue\"],[\"case_owner\",\"Issue\"],[\"_assign\",\"Issue\"],[\"status\",\"Issue\"],[\"case_number\",\"Issue\"],[\"issue_type\",\"Issue\"],[\"date_and_time_closed\",\"Issue\"],[\"created_date\",\"Issue\"],[\"creation\",\"Issue\"],[\"opening_date\",\"Issue\"],[\"est_completion_date\",\"Issue\"],[\"custom_modified_date\",\"Issue\"]],\"order_by\":\"`tabIssue`.`creation` asc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"name\":120,\"case_owner\":120,\"_assign\":120,\"status\":120,\"case_number\":120,\"issue_type\":120,\"date_and_time_closed\":120,\"created_date\":120,\"creation\":120,\"opening_date\":120,\"est_completion_date\":120,\"custom_modified_date\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-10-09 20:11:47.322316",
+  "module": "Support",
+  "name": "Q3 2022",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Q3 2022",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project User\",\"full_name\",\"=\",\"Becca Carreno\",false],[\"Project\",\"stage\",\"!=\",\"Phase 1 In Progress\",false],[\"Project\",\"stage\",\"!=\",\"Phase 2 In Progress\",false],[\"Project\",\"stage\",\"!=\",\"Waiting Client Response\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"status\",\"Project\"],[\"stage\",\"Project\"],[\"client_id\",\"Project\"],[\"case_number\",\"Project\"],[\"machine_numbers\",\"Project\"],[\"opportunity_term\",\"Project\"],[\"full_name\",\"Project User\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"subject\":120,\"status\":120,\"stage\":120,\"client_id\":120,\"case_number\":120,\"machine_numbers\":120,\"opportunity_term\":120,\"Project User:full_name\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-10-18 03:40:14.512886",
+  "module": "Projects",
+  "name": "Becca's \"Build / Shipping / Install\" Queue",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Becca's \"Build / Shipping / Install\" Queue",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project User\",\"full_name\",\"=\",\"Becca Carreno\",false],[\"Project\",\"stage\",\"!=\",\"Phase 3 In Progress\",false],[\"Project\",\"stage\",\"!=\",\"Ready to Ship\",false],[\"Project\",\"stage\",\"!=\",\"Shipped\",false],[\"Project\",\"stage\",\"!=\",\"Delivered\",false],[\"Project\",\"stage\",\"!=\",\"Created - on Hold\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"status\",\"Project\"],[\"stage\",\"Project\"],[\"client_id\",\"Project\"],[\"case_number\",\"Project\"],[\"machine_numbers\",\"Project\"],[\"opportunity_term\",\"Project\"],[\"full_name\",\"Project User\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"subject\":120,\"status\":120,\"stage\":120,\"client_id\":120,\"case_number\":120,\"machine_numbers\":120,\"opportunity_term\":120,\"Project User:full_name\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-10-18 03:41:04.652465",
+  "module": "Projects",
+  "name": "Becca's \"Pre-Build\" Queue",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Becca's \"Pre-Build\" Queue",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Project\"],[\"customer\",\"Project\"],[\"subject\",\"Project\"],[\"number_of_lockers\",\"Project\"],[\"number_of_machines\",\"Project\"],[\"number_of_kiosks\",\"Project\"],[\"number_of_vaults\",\"Project\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":100,\"column_widths\":{\"name\":120,\"customer\":120,\"subject\":120,\"number_of_lockers\":120,\"number_of_machines\":120,\"number_of_kiosks\":120,\"number_of_vaults\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-10-19 09:44:43.475199",
+  "module": "Projects",
+  "name": "Weekly Equipment Count",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Weekly Equipment Count",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"not in\",[\"Delivered\",\"Installed\",\"Cancelled\",\"Completed\",null],false],[\"Project\",\"stage\",\"not in\",[\"Shipped\",\"Delivered\",null],false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"customer\",\"Project\"],[\"subject\",\"Project\"],[\"number_of_machines\",\"Project\"],[\"number_of_primary_lockers\",\"Project\"],[\"number_of_secondary_lockers\",\"Project\"],[\"number_of_kiosks\",\"Project\"],[\"number_of_vaults\",\"Project\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":true,\"page_length\":500,\"column_widths\":{\"name\":120,\"customer\":120,\"subject\":120,\"number_of_machines\":120,\"number_of_primary_lockers\":120,\"number_of_secondary_lockers\":120,\"number_of_kiosks\":120,\"number_of_vaults\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2024-05-17 04:52:06.265723",
+  "module": "Projects",
+  "name": "Nathan's New Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Nathan's New Report",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project User\",\"full_name\",\"=\",\"Becca Carreno\",false],[\"Project\",\"status\",\"!=\",\"Installed\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"status\",\"Project\"],[\"stage\",\"Project\"],[\"client_id\",\"Project\"],[\"machine_numbers\",\"Project\"],[\"opportunity_term\",\"Project\"],[\"full_name\",\"Project User\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":100,\"column_widths\":{\"name\":120,\"subject\":120,\"status\":120,\"stage\":120,\"client_id\":120,\"machine_numbers\":120,\"opportunity_term\":120,\"Project User:full_name\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-10-30 09:37:44.989643",
+  "module": "Projects",
+  "name": "My Open Deployments",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "My Open Deployments",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-11-02 04:46:14.023613",
+  "module": "IVM",
+  "name": "S&I Management Open Cases",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "S&I Management Open Cases",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false],[\"Warehouse Request\",\"_assign\",\"like\",\"%tgiles%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2024-05-28 04:39:39.475093",
+  "module": "IVM",
+  "name": "S&I Management New Requests",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "S&I Management New Requests",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%Mmccarroll%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-11-01 09:55:29.821145",
+  "module": "IVM",
+  "name": "S&I Monte",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "S&I Monte",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%wott%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-11-01 09:56:12.314742",
+  "module": "IVM",
+  "name": "S&I Will Ott",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "S&I Will Ott",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%Swhitaker%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-11-01 09:56:47.635225",
+  "module": "IVM",
+  "name": "S&I Sean Whitaker",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "S&I Sean Whitaker",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-11-01 09:54:38.489457",
+  "module": "IVM",
+  "name": "S&I Management All Warehouse Requests",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "S&I Management All Warehouse Requests",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project\",\"status\",\"!=\",\"Installed\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"project_name\",\"Project\"],[\"status\",\"Project\"],[\"stage\",\"Project\"],[\"client_id\",\"Project\"],[\"machine_numbers\",\"Project\"],[\"opportunity_term\",\"Project\"],[\"full_name\",\"Project User\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":500,\"column_widths\":{\"name\":120,\"project_name\":120,\"status\":120,\"stage\":120,\"client_id\":120,\"machine_numbers\":120,\"opportunity_term\":120,\"Project User:full_name\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2026-02-23 03:30:34.196551",
+  "module": "Projects",
+  "name": "All open deployments dashboard",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "All open deployments dashboard",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"request_reason\":120,\"related_project\":120,\"account\":120,\"subject\":232,\"related_case\":120,\"status\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-11-07 07:26:33.632689",
+  "module": "IVM",
+  "name": "My Warehouse Requests",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "My Warehouse Requests",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"owner\",\"!=\",\"jvoiles@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"dlanteigne@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"mharrison@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"htoon@ivminc.com\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"request_reason\":120,\"account\":152,\"subject\":120,\"related_case\":120,\"status\":120,\"modified\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-11-09 06:26:19.489891",
+  "module": "IVM",
+  "name": "All WR by Becca and Daniel",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "All WR by Becca and Daniel",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project\",\"status\",\"!=\",\"Installed\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"number_of_machines\",\"Project\"],[\"number_of_primary_lockers\",\"Project\"],[\"number_of_secondary_lockers\",\"Project\"],[\"number_of_vaults\",\"Project\"],[\"number_of_kiosks\",\"Project\"],[\"machine_ownership_status\",\"Project\"],[\"is_refurbished\",\"Project\"],[\"status\",\"Project\"],[\"stage\",\"Project\"],[\"sales_rep\",\"Project\"],[\"_assign\",\"Project\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":500,\"column_widths\":{\"name\":120,\"subject\":120,\"number_of_machines\":120,\"number_of_primary_lockers\":120,\"number_of_secondary_lockers\":120,\"number_of_vaults\":120,\"number_of_kiosks\":120,\"machine_ownership_status\":120,\"is_refurbished\":120,\"status\":120,\"stage\":120,\"sales_rep\":120,\"_assign\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2024-06-06 05:23:17.149100",
+  "module": "Projects",
+  "name": "All Open Active Deployments",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "All Open Active Deployments",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Issue\",\"creation\",\"Timespan\",\"this quarter\",false],[\"Issue\",\"issue_type\",\"not in\",[\"Receivable\",\"Vending management\",\"Change Request\"],false]],\"fields\":[[\"_assign\",\"Issue\"],[\"docstatus\",\"Issue\"],[\"issue_type\",\"Issue\"],[\"name\",\"Issue\"],[\"status\",\"Issue\"],[\"opening_date\",\"Issue\"],[\"date_and_time_closed\",\"Issue\"],[\"case_number\",\"Issue\"],[\"creation\",\"Issue\"],[\"custom_modified_date\",\"Issue\"]],\"order_by\":\"`tabIssue`.`creation` asc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"_assign\":120,\"issue_type\":120,\"name\":120,\"status\":120,\"opening_date\":120,\"date_and_time_closed\":120,\"case_number\":120,\"creation\":120,\"custom_modified_date\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-12-26 05:36:19.625722",
+  "module": "Support",
+  "name": "Current Quarter Metrics",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Current Quarter Metrics",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Issue\",\"status\",\"!=\",\"Closed\",false],[\"Issue\",\"customer\",\"=\",\"Pfizer\",false],[\"Issue\",\"issue_type\",\"=\",\"Support\"]],\"fields\":[[\"name\",\"Issue\"],[\"docstatus\",\"Issue\"],[\"subject\",\"Issue\"],[\"customer\",\"Issue\"],[\"contact_name\",\"Issue\"],[\"stage\",\"Issue\"],[\"status\",\"Issue\"],[\"issue_type\",\"Issue\"],[\"opening_date\",\"Issue\"],[\"_assign\",\"Issue\"]],\"order_by\":\"`tabIssue`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"subject\":266,\"customer\":120,\"contact_name\":120,\"stage\":120,\"status\":120,\"issue_type\":120,\"opening_date\":120,\"_assign\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-11-13 03:55:16.136213",
+  "module": "Support",
+  "name": "Open Support Tickets - Pfizer",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Open Support Tickets - Pfizer",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"target_ship_date\",\"Timespan\",\"this quarter\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"_assign\",\"Project\"],[\"status\",\"Project\"],[\"creation\",\"Project\"],[\"target_ship_date\",\"Project\"],[\"equipment_ship_date\",\"Project\"],[\"project_name\",\"Project\"],[\"expected_end_date\",\"Project\"],[\"planogram_approved_date\",\"Project\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":true,\"page_length\":500,\"column_widths\":{\"name\":120,\"subject\":120,\"_assign\":120,\"status\":120,\"creation\":120,\"target_ship_date\":120,\"equipment_ship_date\":120,\"project_name\":120,\"expected_end_date\":120,\"planogram_approved_date\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2024-06-27 08:27:46.315414",
+  "module": "Projects",
+  "name": "QuarterlyMetricsDeployments",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "QuarterlyMetricsDeployments",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [
+   {
+    "fieldname": "_assign",
+    "fieldtype": "Date",
+    "label": "Assigned To",
+    "options": null,
+    "width": 0
+   }
+  ],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Issue\",\"creation\",\"Timespan\",\"this quarter\",false],[\"Issue\",\"issue_type\",\"not in\",[\"Change Request\"],false]],\"fields\":[[\"name\",\"Issue\"],[\"docstatus\",\"Issue\"],[\"_assign\",\"Issue\"],[\"status\",\"Issue\"],[\"case_number\",\"Issue\"],[\"issue_type\",\"Issue\"],[\"date_and_time_closed\",\"Issue\"],[\"creation\",\"Issue\"],[\"opening_date\",\"Issue\"],[\"custom_modified_date\",\"Issue\"]],\"order_by\":\"`tabIssue`.`creation` asc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"name\":120,\"_assign\":120,\"status\":120,\"case_number\":120,\"issue_type\":120,\"date_and_time_closed\":120,\"creation\":120,\"opening_date\":120,\"custom_modified_date\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-12-14 19:42:50.019252",
+  "module": "IVM",
+  "name": "Weekly Tickets",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Weekly Tickets",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2023-11-27 09:48:31.929086",
+  "module": "IVM",
+  "name": "Test 2",
+  "prepared_report": 0,
+  "query": "SELECT\n    i.issue_type,\n    i.case_record_type AS \"Case Record Type\",\n    COUNT(i.case_reason) AS 'Case Reason Count',\n    i.created_date AS 'Opened Date',\n    u.full_name AS \"Case Owner\",\n    i.case_owner as \"email\", \n    COUNT(*) AS \"Closed Issue\",\n    i.case_origin AS \"Case Origin\",\n    i.case_number AS \"Case Number\"\nFROM\n    `tabIssue` i\nJOIN\n    `tabUser` u ON i.case_owner = u.email\nWHERE\n    i.status = 'Open'\nGROUP BY\n    i.issue_type;\n",
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Test 2",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 1,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2023-11-27 11:55:52.501626",
+  "module": "Support",
+  "name": "Test 3",
+  "prepared_report": 0,
+  "query": "SELECT\n    i._assign as \"Test\",\n    SUM(CASE WHEN i.status= 'Open' THEN 1 ELSE 0 END) AS \"Open\",\n    SUM(CASE WHEN i.status= 'Closed' THEN 1 ELSE 0 END) AS \"Closed\",\n    SUM(CASE WHEN i.status= 'New' THEN 1 ELSE 0 END) AS \"New\",\n    SUM(CASE WHEN i.status= 'Pending' THEN 1 ELSE 0 END) AS \"Pending\",\n    SUM(CASE WHEN i.status= 'Resolved' THEN 1 ELSE 0 END) AS \"Resolved\",\n    SUM(CASE WHEN i.status= 'In Progress' THEN 1 ELSE 0 END) AS \"In Progress\",\n    SUM(CASE WHEN i.status= 'On Hold' THEN 1 ELSE 0 END) AS \"On Hold\"\nFROM\n    `tabIssue` i\nJOIN\n    `tabUser` u ON i.case_owner = u.email\nWHERE \n    i.created_date BETWEEN DATE_SUB(NOW(), INTERVAL 90 DAY) AND NOW()\n    AND u.enabled = 1\nGroup By\n    i._assign;",
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Test 3",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [
+   {
+    "fieldname": "_assign",
+    "fieldtype": "Data",
+    "label": "Owner",
+    "options": null,
+    "width": 0
+   },
+   {
+    "fieldname": "status",
+    "fieldtype": "Data",
+    "label": "Status",
+    "options": null,
+    "width": 0
+   }
+  ],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{}",
+  "letter_head": null,
+  "modified": "2023-11-27 11:37:01.297226",
+  "module": "Support",
+  "name": "Test4",
+  "prepared_report": 0,
+  "query": "",
+  "ref_doctype": "Issue",
+  "reference_report": "",
+  "report_name": "Test4",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project\",\"status\",\"!=\",\"Installed\",false]],\"fields\":[[\"machine_numbers\",\"Project\"],[\"docstatus\",\"Project\"],[\"client_id\",\"Project\"],[\"customer\",\"Project\"],[\"project_name\",\"Project\"],[\"stage\",\"Project\"],[\"machine_ownership_status\",\"Project\"],[\"name\",\"Project\"],[\"_assign\",\"Project\"],[\"sales_rep\",\"Project\"]],\"order_by\":\"`tabProject`.`creation` desc\",\"add_totals_row\":0,\"page_length\":500,\"column_widths\":{\"machine_numbers\":120,\"client_id\":120,\"customer\":120,\"project_name\":120,\"stage\":120,\"machine_ownership_status\":120,\"name\":120,\"_assign\":120,\"sales_rep\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2025-04-21 09:27:48.882059",
+  "module": "Projects",
+  "name": "Monthly Machine Management Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Monthly Machine Management Report",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"creation\",\"Timespan\",\"this quarter\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"bonus_timestamp\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":500,\"column_widths\":{\"name\":120,\"_assign\":120,\"bonus_timestamp\":120,\"request_reason\":120,\"status\":120,\"creation\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-12-13 09:57:20.640734",
+  "module": "IVM",
+  "name": "Quarterly Metrics",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "Quarterly Metrics",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"creation\",\"Timespan\",\"this quarter\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-12-14 19:27:59.795745",
+  "module": "IVM",
+  "name": "Weekly Number Warehouse",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "Weekly Number Warehouse",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"case_number\",\"=\",0,false],[\"Project\",\"creation\",\"Timespan\",\"this quarter\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"_assign\",\"Project\"],[\"status\",\"Project\"],[\"creation\",\"Project\"],[\"target_ship_date\",\"Project\"],[\"equipment_shipped_date\",\"Project\"],[\"equipment_ship_date\",\"Project\"],[\"project_name\",\"Project\"],[\"expected_end_date\",\"Project\"],[\"case_number\",\"Project\"],[\"equipment_installed_date\",\"Project\"],[\"planogram_approved_date\",\"Project\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":true,\"page_length\":500,\"column_widths\":{\"name\":120,\"subject\":120,\"_assign\":120,\"status\":120,\"creation\":120,\"target_ship_date\":120,\"equipment_shipped_date\":120,\"equipment_ship_date\":120,\"project_name\":120,\"expected_end_date\":120,\"case_number\":120,\"equipment_installed_date\":120,\"planogram_approved_date\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-12-14 19:37:29.934516",
+  "module": "Projects",
+  "name": "Weekly Numbers Deployments",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Weekly Numbers Deployments",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"status\",\"Project\"],[\"stage\",\"Project\"],[\"client_id\",\"Project\"],[\"machine_numbers\",\"Project\"],[\"equipment_ship_date\",\"Project\"],[\"creation\",\"Project\"],[\"_assign\",\"Project\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":500,\"column_widths\":{\"name\":120,\"subject\":120,\"status\":120,\"stage\":120,\"client_id\":120,\"machine_numbers\":120,\"equipment_ship_date\":120,\"creation\":120,\"_assign\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-12-22 09:25:06.791263",
+  "module": "Projects",
+  "name": "Deployments with Ship Date",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Deployments with Ship Date",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Task\",\"custom_assigned_to\",\"=\",\"rcarreno@ivminc.com\",false],[\"Task\",\"status\",\"=\",\"Open\"]],\"fields\":[[\"name\",\"Task\"],[\"docstatus\",\"Task\"],[\"subject\",\"Task\"],[\"project\",\"Task\"],[\"is_group\",\"Task\"],[\"status\",\"Task\"],[\"priority\",\"Task\"],[\"is_milestone\",\"Task\"],[\"exp_start_date\",\"Task\"],[\"exp_end_date\",\"Task\"],[\"progress\",\"Task\"],[\"depends_on_tasks\",\"Task\"]],\"order_by\":\"`tabTask`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"subject\":120,\"project\":120,\"is_group\":120,\"status\":120,\"priority\":120,\"is_milestone\":120,\"exp_start_date\":120,\"exp_end_date\":120,\"progress\":120,\"depends_on_tasks\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2023-12-27 04:57:31.053930",
+  "module": "Projects",
+  "name": "Beccas Open Tasks",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Task",
+  "reference_report": null,
+  "report_name": "Beccas Open Tasks",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project\",\"status\",\"!=\",\"Installed\",false],[\"Project\",\"stage\",\"!=\",\"Shipped\",false],[\"Project\",\"stage\",\"!=\",\"Delivered\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"stage\",\"Project\"],[\"machine_numbers\",\"Project\"],[\"address\",\"Project\"],[\"delivery_contact\",\"Project\"],[\"delivery_contact_email\",\"Project\"],[\"delivery_contact_phone\",\"Project\"],[\"full_name\",\"Project User\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":500,\"column_widths\":{\"name\":120,\"subject\":120,\"stage\":120,\"machine_numbers\":120,\"address\":120,\"delivery_contact\":120,\"delivery_contact_email\":120,\"delivery_contact_phone\":120,\"Project User:full_name\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2024-04-24 10:22:47.421970",
+  "module": "Projects",
+  "name": "Tim's Address Report for Deployments",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Tim's Address Report for Deployments",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-05-07 12:23:41.182540",
+  "module": "Support",
+  "name": "Test",
+  "prepared_report": 0,
+  "query": "SELECT (\n        SELECT count(*)\n          FROM `tabIssue`\n         WHERE `tabIssue`.STATUS NOT IN ('Resolved', 'Closed')\n           AND `tabIssue`.issue_type NOT IN ('Change Request')\n       ) + (\n        SELECT count(*)\n          FROM `tabWarehouse Request`\n         WHERE `tabWarehouse Request`.STATUS NOT IN ('Closed')\n       ) + (\n        SELECT count(*)\n          FROM `tabProject`\n         WHERE `tabProject`.status NOT IN ('Cancled', 'Completed')\n       )AS \"All Open Tickets\",\n       (\n        SELECT count(*)\n          FROM `tabIssue`\n         WHERE `tabIssue`.STATUS NOT IN ('Resolved', 'Closed')\n           AND `tabIssue`.issue_type NOT IN ('Receivable','Change Request', 'Vending Management', 'Support', 'Reconfiguration')\n       ) AS \"Total IT Tickets\",\n       (\n        SELECT count(*)\n          FROM `tabIssue`\n         WHERE `tabIssue`.STATUS NOT IN ('Resolved', 'Closed')\n           AND `tabIssue`.issue_type IN ('Support','Reconfiguration')\n       ) AS \"Total Support Tickets\",\n       (\n        SELECT count(*)\n          FROM `tabIssue`\n         WHERE `tabIssue`.STATUS NOT IN ('Resolved', 'Closed')\n           AND `tabIssue`.issue_type IN ('Vending Management')\n       ) AS \"Vending Management Tickets\",\n       (\n        SELECT count(*)\n          FROM `tabIssue`\n         WHERE `tabIssue`.STATUS NOT IN ('Resolved', 'Closed')\n           AND `tabIssue`.issue_type IN ('Receivable')\n       ) AS \"Receivable Tickets\",\n       (\n        SELECT count(*)\n          FROM `tabWarehouse Request`\n         WHERE `tabWarehouse Request`.STATUS NOT IN ('Closed')\n       )AS \"Warehouse Requests\",\n       (\n        SELECT count(*)\n          FROM `tabProject`\n         WHERE `tabProject`.status NOT IN ('Cancled', 'Completed')\n       ) AS \"Open Deployments\"",
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Test",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2024-09-30 14:51:39.116772",
+  "module": "Projects",
+  "name": "Deployment test",
+  "prepared_report": 0,
+  "query": "SELECT `tabProject`.name AS `Name`,\n     `tabProject`.subject AS `Subject`,\n     `tabProject`._assign AS ` Assign`,\n     `tabProject`.status AS `Status`,\n     date_format(`tabProject`.creation, '%%Y-%%m-%%d 00:00') AS `Creation`,\n     date_format(`tabProject`.target_ship_date, '%%Y-%%m-%%d 00:00') AS `Target Ship Date`,\n     date_format(`tabProject`.equipment_ship_date, '%%Y-%%m-%%d 00:00') AS `Equipment Ship Date`,\n     `tabProject`.project_name AS `Project Name`,\n     date_format(`tabProject`.expected_end_date, '%%Y-%%m-%%d 00:00') AS `Expected End Date`,\n     date_format(`tabProject`.planogram_approved_date, '%%Y-%%m-%%d 00:00') AS `Planogram Approved Date`,\n     CASE WHEN (`tabProject`.equipment_ship_date > 0) THEN timestampdiff(DAY, `tabProject`.creation, `tabProject`.equipment_ship_date) - `tabProject`.added_days\n        ELSE timestampdiff(DAY, `tabProject`.creation, date(now())) - `tabProject`.added_days\n         END AS `Days Open`\nFROM `tabProject` AS `tabProject`\nWHERE (`tabProject`.target_ship_date BETWEEN '2024-07-01 00:00' AND '2024-09-30 23:59' OR `tabProject`.equipment_ship_date BETWEEN '2024-07-01 00:00' AND '2024-09-30 23:59')\nAND `tabProject`.status != 'On Hold'\nGROUP BY `tabProject`.name,\n     `tabProject`.subject,\n     `tabProject`._assign,\n     `tabProject`.status,\n     date_format(`tabProject`.creation, '%%Y-%%m-%%d 00:00'),\n     date_format(`tabProject`.target_ship_date, '%%Y-%%m-%%d 00:00'),\n     date_format(`tabProject`.equipment_ship_date, '%%Y-%%m-%%d 00:00'),\n     `tabProject`.project_name,\n     date_format(`tabProject`.expected_end_date, '%%Y-%%m-%%d 00:00'),\n     date_format(`tabProject`.equipment_installed_date, '%%Y-%%m-%%d 00:00'),\n     date_format(`tabProject`.planogram_approved_date, '%%Y-%%m-%%d 00:00')\nLIMIT 10000\n\n\n",
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Deployment test",
+  "report_script": "",
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Opportunity\",\"sales_stage\",\"=\",\"Pending Contract\",false]],\"fields\":[[\"name\",\"Opportunity\"],[\"docstatus\",\"Opportunity\"],[\"sales_stage\",\"Opportunity\"],[\"title\",\"Opportunity\"],[\"equipment_total\",\"Opportunity\"],[\"number_of_total_locations\",\"Opportunity\"],[\"opportunity_owner\",\"Opportunity\"],[\"creation\",\"Opportunity\"],[\"close_date\",\"Opportunity\"],[\"modified\",\"Opportunity\"],[\"modified_by\",\"Opportunity\"]],\"order_by\":\"`tabOpportunity`.`modified` desc\",\"add_totals_row\":0,\"page_length\":500,\"column_widths\":{\"name\":120,\"sales_stage\":120,\"title\":120,\"equipment_total\":120,\"number_of_total_locations\":120,\"opportunity_owner\":120,\"creation\":120,\"close_date\":120,\"modified\":120,\"modified_by\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2024-10-10 10:20:02.397993",
+  "module": "CRM",
+  "name": "Pending Contracts Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Opportunity",
+  "reference_report": null,
+  "report_name": "Pending Contracts Report",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Opportunity\",\"sales_stage\",\"=\",\"Closed Won\",false]],\"fields\":[[\"name\",\"Opportunity\"],[\"docstatus\",\"Opportunity\"],[\"sales_stage\",\"Opportunity\"],[\"title\",\"Opportunity\"],[\"equipment_total\",\"Opportunity\"],[\"number_of_total_locations\",\"Opportunity\"],[\"opportunity_owner\",\"Opportunity\"],[\"creation\",\"Opportunity\"],[\"close_date\",\"Opportunity\"],[\"modified\",\"Opportunity\"],[\"modified_by\",\"Opportunity\"]],\"order_by\":\"`tabOpportunity`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"sales_stage\":120,\"title\":120,\"equipment_total\":120,\"number_of_total_locations\":120,\"opportunity_owner\":120,\"creation\":120,\"close_date\":120,\"modified\":120,\"modified_by\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2024-10-21 05:50:32.213484",
+  "module": "CRM",
+  "name": "Closed Won Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Opportunity",
+  "reference_report": null,
+  "report_name": "Closed Won Report",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2025-01-05 17:01:20.417882",
+  "module": "IVM",
+  "name": "Warehouse 24 metrics",
+  "prepared_report": 0,
+  "query": "SELECT `tabWarehouse Request`._assign AS ` Assign`,\n       `tabWarehouse Request`.name AS `Name`,\n       date_format(`tabWarehouse Request`.bonus_timestamp, '%%Y-%%m-01') AS `Bonus Timestamp`,\n       `tabWarehouse Request`.request_reason AS `Request Reason`,\n       `tabWarehouse Request`.status AS `Status`,\n       date_format(`tabWarehouse Request`.creation, '%%Y-%%m-01') AS `Creation`,\n       `tabWarehouse Request`.related_case AS `Related Case`,\n       `tabWarehouse Request`.related_project AS `Related Project`,\n       `tabWarehouse Request`.machine_names AS `Machine Names`\n  FROM `tabWarehouse Request` AS `tabWarehouse Request`\n WHERE `tabWarehouse Request`.creation BETWEEN '2024-10-01 00:00:00' AND '2024-12-31 23:59:59'\n    OR `tabWarehouse Request`.date_and_time_closed BETWEEN '2024-10-01 00:00:00' AND '2024-12-31 23:59:59'\n GROUP BY `tabWarehouse Request`._assign,\n          `tabWarehouse Request`.name,\n          date_format(`tabWarehouse Request`.bonus_timestamp, '%%Y-%%m-01'),\n          `tabWarehouse Request`.request_reason,\n          `tabWarehouse Request`.status,\n          date_format(`tabWarehouse Request`.creation, '%%Y-%%m-01'),\n          `tabWarehouse Request`.related_case,\n          `tabWarehouse Request`.related_project,\n          `tabWarehouse Request`.machine_names\n LIMIT 10000",
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "Warehouse 24 metrics",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2025-01-05 17:05:53.813687",
+  "module": "Projects",
+  "name": "Deployments 24",
+  "prepared_report": 0,
+  "query": "SELECT `tabProject`.name AS `Name`,\n       `tabProject`.subject AS `Subject`,\n       `tabProject`._assign AS ` Assign`,\n       `tabProject`.status AS `Status`,\n       date_format(`tabProject`.creation, '%%Y-%%m-%%d 00:00') AS `Creation`,\n       date_format(`tabProject`.target_ship_date, '%%Y-%%m-%%d 00:00') AS `Target Ship Date`,\n       date_format(`tabProject`.equipment_ship_date, '%%Y-%%m-%%d 00:00') AS `Equipment Ship Date`,\n       `tabProject`.project_name AS `Project Name`,\n       date_format(`tabProject`.expected_end_date, '%%Y-%%m-%%d 00:00') AS `Expected End Date`,\n       date_format(`tabProject`.equipment_installed_date, '%%Y-%%m-%%d 00:00') AS `Equipment Installed Date`,\n       date_format(`tabProject`.planogram_approved_date, '%%Y-%%m-%%d 00:00') AS `Planogram Approved Date`,\n       CASE WHEN (`tabProject`.equipment_ship_date > 0) THEN timestampdiff(DAY, `tabProject`.creation, `tabProject`.equipment_ship_date) - `tabProject`.added_days\n            ELSE timestampdiff(DAY, `tabProject`.creation, date(now())) - `tabProject`.added_days\n             END AS `Days Open`\n  FROM `tabProject` AS `tabProject`\n WHERE (`tabProject`.target_ship_date BETWEEN '2024-10-01 00:00:00' AND '2024-12-31 23:59:59' OR `tabProject`.equipment_ship_date BETWEEN '2024-10-01 00:00:00' AND '2024-12-31 23:59:59')\n   AND `tabProject`.status != 'On Hold'\n GROUP BY `tabProject`.name,\n          `tabProject`.subject,\n          `tabProject`._assign,\n          `tabProject`.status,\n          date_format(`tabProject`.creation, '%%Y-%%m-%%d 00:00'),\n          date_format(`tabProject`.target_ship_date, '%%Y-%%m-%%d 00:00'),\n          date_format(`tabProject`.equipment_ship_date, '%%Y-%%m-%%d 00:00'),\n          `tabProject`.project_name,\n          date_format(`tabProject`.expected_end_date, '%%Y-%%m-%%d 00:00'),\n          date_format(`tabProject`.equipment_installed_date, '%%Y-%%m-%%d 00:00'),\n          date_format(`tabProject`.planogram_approved_date, '%%Y-%%m-%%d 00:00')\n LIMIT 10000",
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Deployments 24",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"status\":120,\"account\":120,\"request_reason\":120,\"subject\":120,\"_assign\":120,\"modified\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2025-06-30 06:14:23.898942",
+  "module": "IVM",
+  "name": "All Warehouse Requests",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "All Warehouse Requests",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false],[\"Warehouse Request\",\"request_reason\",\"=\",\"Product Testing\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"status\":120,\"account\":120,\"request_reason\":120,\"subject\":120,\"_assign\":120,\"modified\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2025-06-30 06:12:23.905162",
+  "module": "IVM",
+  "name": "WR - Product Testing",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Warehouse Request",
+  "reference_report": null,
+  "report_name": "WR - Product Testing",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Issue\"],[\"status\",\"Issue\"],[\"_assign\",\"Issue\"],[\"subject\",\"Issue\"]],\"order_by\":\"`tabIssue`.`modified` desc\",\"page_length\":20,\"column_widths\":{\"name\":120,\"status\":120,\"_assign\":120,\"subject\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2025-10-01 05:37:43.291859",
+  "module": "Support",
+  "name": "Quinten AI Project",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Quinten AI Project",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{}",
+  "letter_head": null,
+  "modified": "2025-10-01 05:18:07.086910",
+  "module": "Support",
+  "name": "Danielle AI Project",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Danielle AI Project",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Issue\"],[\"docstatus\",\"Issue\"],[\"status\",\"Issue\"],[\"_assign\",\"Issue\"],[\"subject\",\"Issue\"]],\"order_by\":\"`tabIssue`.`modified` desc\",\"page_length\":20,\"column_widths\":{\"name\":120,\"status\":120,\"_assign\":120,\"subject\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2025-10-01 05:38:45.392366",
+  "module": "Support",
+  "name": "Quinten AI Project Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "Quinten AI Project Report",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2025-10-01 05:53:18.655354",
+  "module": "Support",
+  "name": "AI Support Quinten",
+  "prepared_report": 0,
+  "query": "SELECT `tabIssue`._assign AS ` Assign`,\n       `tabIssue`.name AS `Name`,\n       `tabIssue`.issue_type AS `Issue Type`,\n       `tabIssue`.status AS `Status`,\n       date_format(`tabIssue`.creation, '%%Y-%%m-01') AS `Creation`\n  FROM `tabIssue` AS `tabIssue`\n WHERE (`tabIssue`.issue_type NOT IN ('Receivable', 'Change Request', 'Vending Management', 'Desktop Support', 'Onboarding', 'Offboarding', 'Permission Change'))\n   AND `tabIssue`.creation BETWEEN '2025-06-30 00:00:00' AND '2025-10-01 23:59:59'\n   AND `tabIssue`._assign LIKE '%%%%qh%%%%'\n GROUP BY `tabIssue`._assign,\n          `tabIssue`.name,\n          `tabIssue`.issue_type,\n          `tabIssue`.status,\n          date_format(`tabIssue`.creation, '%%Y-%%m-01')",
+  "ref_doctype": "Issue",
+  "reference_report": null,
+  "report_name": "AI Support Quinten",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project\",\"status\",\"!=\",\"Installed\",false],[\"Project\",\"stage\",\"!=\",\"Shipped\",false],[\"Project\",\"stage\",\"!=\",\"Delivered\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"stage\",\"Project\"],[\"machine_numbers\",\"Project\"],[\"number_of_machines\",\"Project\"],[\"number_of_primary_lockers\",\"Project\"],[\"number_of_secondary_lockers\",\"Project\"],[\"number_of_vaults\",\"Project\"],[\"number_of_kiosks\",\"Project\"],[\"address\",\"Project\"],[\"delivery_contact\",\"Project\"],[\"delivery_contact_email\",\"Project\"],[\"delivery_contact_phone\",\"Project\"],[\"dock\",\"Project\"],[\"freight_elevator\",\"Project\"],[\"delivery_hours_start\",\"Project\"],[\"delivery_hours_end\",\"Project\"],[\"full_name\",\"Project User\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":500,\"column_widths\":{\"name\":120,\"subject\":120,\"stage\":120,\"machine_numbers\":120,\"number_of_machines\":120,\"number_of_primary_lockers\":120,\"number_of_secondary_lockers\":120,\"number_of_vaults\":120,\"number_of_kiosks\":120,\"address\":120,\"delivery_contact\":120,\"delivery_contact_email\":120,\"delivery_contact_phone\":120,\"dock\":120,\"freight_elevator\":120,\"delivery_hours_start\":120,\"delivery_hours_end\":120,\"Project User:full_name\":120},\"group_by\":null}",
+  "letter_head": null,
+  "modified": "2026-02-17 03:16:55.980524",
+  "module": "Projects",
+  "name": "Shipping Information Report for Logistics",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Project",
+  "reference_report": null,
+  "report_name": "Shipping Information Report for Logistics",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "role": "Projects Manager"
+   },
+   {
+    "role": "Projects User"
+   },
+   {
+    "role": "Graphic Designer"
+   },
+   {
+    "role": "Support"
+   },
+   {
+    "role": "Sales Representatives"
+   },
+   {
+    "role": "President"
+   },
+   {
+    "role": "Warehouse"
+   },
+   {
+    "role": "Operations"
+   },
+   {
+    "role": "S&I Manager"
+   },
+   {
+    "role": "Management"
+   },
+   {
+    "role": "CTO"
+   },
+   {
+    "role": "COO"
+   },
+   {
+    "role": "CEO"
+   },
+   {
+    "role": "ITAdmin"
+   },
+   {
+    "role": "Regional Sales Director"
+   },
+   {
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ }
+]

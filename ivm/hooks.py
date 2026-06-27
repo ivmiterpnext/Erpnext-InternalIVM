@@ -8,11 +8,13 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 fixtures = [
-    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", 
-    "List View Settings", "Workflow Action Master", "Custom DocPerm", "Workflow", "Property Setter", 
-    "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type", "CRM Pipeline", 
-    "CRM Deal Status",
-    {"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]}
+    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type",
+    "List View Settings", "Workflow Action Master", "Custom DocPerm", "Workflow", "Property Setter",
+    "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type", "CRM Pipeline",
+    "CRM Deal Status", "Server Script", "Client Script",
+    {"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]},
+    {"dt": "Print Format", "filters": [["standard", "=", "No"]]},
+    {"dt": "Report", "filters": [["is_standard", "=", "No"]]},
 ]
 
 # include js, css files in header of desk.html
