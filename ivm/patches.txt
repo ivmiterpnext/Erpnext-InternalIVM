@@ -12,3 +12,4 @@ ivm.deployments.patches.remove_default_deal_statuses
 ivm.integrations.patches.provision_hubspot_service_account
 ivm.warehouse.patches.cleanup_equipment_number_fields
 ivm.deployments.patches.fix_broken_workspace_links
+ivm.deployments.patches.convert_deployment_reports_to_script_report
