@@ -273,3 +273,27 @@ def reset_warehouse_request_pick_list(warehouse_request):
     delete_draft_pick_list(pl_name)
 
     return {"success": True}
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def warehouse_request_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""
+        SELECT
+            name,
+            CASE
+                WHEN subject IS NOT NULL AND subject != ''
+                THEN CONCAT(name, ' - ', subject)
+                ELSE name
+            END as description
+        FROM `tabWarehouse Request`
+        WHERE
+            (name LIKE %(txt)s OR subject LIKE %(txt)s)
+            AND docstatus < 2
+        ORDER BY modified DESC
+        LIMIT %(start)s, %(page_len)s
+    """, {
+        'txt': f'%{txt}%',
+        'start': start,
+        'page_len': page_len
+    })

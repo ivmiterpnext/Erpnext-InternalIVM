@@ -173,11 +173,11 @@ doc_events = {
     "CRM Deal": {
         "on_update": "ivm.deployments.event_handlers.deal.on_update",
     },
-    # "Project": {
-    #     "before_validate": "ivm.deployments.event_handlers.project.before_validate",
-    #     "validate": "ivm.deployments.event_handlers.project.validate",
-    #     "after_insert": "ivm.deployments.event_handlers.project.after_insert",
-    # },
+    "Project": {
+        "before_validate": "ivm.deployments.event_handlers.project.before_validate",
+        "validate": "ivm.deployments.event_handlers.project.validate",
+        "after_insert": "ivm.deployments.event_handlers.project.after_insert",
+    },
 }
 
 # Scheduled Tasks
