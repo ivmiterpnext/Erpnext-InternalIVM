@@ -89,6 +89,18 @@ def handle_engagement_webhook(
 
     try:
         deal_ids = api.get_engagement_deal_ids(engagement_type, engagement_id_str)
+    except api.HubSpotRateLimitExhausted:
+        frappe.logger(_LOG).warning(
+            f"HubSpot: rate limit exhausted fetching deal associations for {engagement_type} {engagement_id_str} — re-enqueueing"
+        )
+        frappe.enqueue(
+            "ivm.integrations.hubspot.activity_handler.handle_engagement_webhook",
+            queue="long",
+            engagement_type=engagement_type,
+            engagement_id=engagement_id,
+            hubspot_user_id=hubspot_user_id,
+        )
+        return
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to fetch deal associations for {engagement_type} {engagement_id_str}",
@@ -105,6 +117,18 @@ def handle_engagement_webhook(
     properties = ENGAGEMENT_PROPERTIES.get(engagement_type, [])
     try:
         data = api.get_engagement(engagement_type, engagement_id_str, properties)
+    except api.HubSpotRateLimitExhausted:
+        frappe.logger(_LOG).warning(
+            f"HubSpot: rate limit exhausted fetching {engagement_type} {engagement_id_str} — re-enqueueing"
+        )
+        frappe.enqueue(
+            "ivm.integrations.hubspot.activity_handler.handle_engagement_webhook",
+            queue="long",
+            engagement_type=engagement_type,
+            engagement_id=engagement_id,
+            hubspot_user_id=hubspot_user_id,
+        )
+        return
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to fetch {engagement_type} {engagement_id_str}",

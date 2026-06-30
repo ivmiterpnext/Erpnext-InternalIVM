@@ -71,6 +71,21 @@ def _handle_contact_event(
             hubspot_contact_id=str(hubspot_contact_id),
             address_props=address_props,
         )
+    except api.HubSpotRateLimitExhausted:
+        handler_method = (
+            "ivm.integrations.hubspot.contact_handler.handle_contact_created"
+            if action == "create"
+            else "ivm.integrations.hubspot.contact_handler.handle_contact_updated"
+        )
+        frappe.logger("hubspot").warning(
+            f"HubSpot: rate limit exhausted on contact {hubspot_contact_id} — re-enqueueing"
+        )
+        frappe.enqueue(
+            handler_method,
+            queue="long",
+            hubspot_contact_id=hubspot_contact_id,
+            hubspot_user_id=hubspot_user_id,
+        )
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to {action} Contact for HubSpot contact {hubspot_contact_id}",

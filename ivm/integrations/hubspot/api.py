@@ -26,10 +26,13 @@ from ivm.integrations.hubspot.constants import (
 HUBSPOT_API_BASE = "https://api.hubapi.com"
 DEFAULT_TIMEOUT_SECONDS = 30
 
-# Retry settings for transient failures (429, 500, 502, 503, 504).
 _MAX_RETRIES = 3
 _RETRY_BACKOFF_SECONDS = 1.0
-_RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+_SERVER_ERROR_CODES = frozenset({500, 502, 503, 504})
+
+_MAX_RATE_LIMIT_RETRIES = 8
+_RATE_LIMIT_BACKOFF_FLOOR_SECONDS = 10.0
+_RATE_LIMIT_BACKOFF_CEILING_SECONDS = 60.0
 
 
 def _get_conf(key: str, label: str) -> str:
@@ -61,48 +64,68 @@ def _build_association_key(suffix: str) -> str:
     """Build the full association key: p{portal_id}_{suffix}."""
     return f"p{_get_portal_id()}_{suffix}"
 
-def _backoff(attempt: int, response: requests.Response | None = None) -> None:
-    """Sleep before the next retry, respecting Retry-After when available."""
+def _server_error_backoff(attempt: int) -> None:
+    time.sleep(_RETRY_BACKOFF_SECONDS * (2 ** attempt))
 
-    delay = _RETRY_BACKOFF_SECONDS * (2 ** attempt)
-    if response is not None:
-        retry_after = response.headers.get("Retry-After")
-        if retry_after:
-            try:
-                delay = float(retry_after)
-            except (ValueError, TypeError):
-                pass
+
+def _rate_limit_backoff(response: requests.Response) -> float:
+    delay = _RATE_LIMIT_BACKOFF_FLOOR_SECONDS
+    retry_after = response.headers.get("Retry-After")
+    if retry_after:
+        try:
+            delay = float(retry_after)
+        except (ValueError, TypeError):
+            pass
+    delay = max(_RATE_LIMIT_BACKOFF_FLOOR_SECONDS, min(delay, _RATE_LIMIT_BACKOFF_CEILING_SECONDS))
     time.sleep(delay)
+    return delay
+
+
+class HubSpotRateLimitExhausted(Exception):
+    def __init__(self, retry_after_seconds: float) -> None:
+        self.retry_after_seconds = retry_after_seconds
+        super().__init__(
+            f"HubSpot rate limit exhausted after {_MAX_RATE_LIMIT_RETRIES} attempts. "
+            f"Suggested re-enqueue delay: {retry_after_seconds}s"
+        )
 
 
 def _retry_loop(
     send: Callable[[int], requests.Response],
 ) -> requests.Response:
-    """Execute *send(attempt)* with retry on transient HTTP errors.
+    rate_limit_attempts = 0
+    server_error_attempts = 0
+    last_rate_limit_delay = _RATE_LIMIT_BACKOFF_FLOOR_SECONDS
 
-    *send* receives the attempt index (0-based) and must return a
-    ``requests.Response``.  On retryable status codes or connection errors
-    the call is retried up to ``_MAX_RETRIES`` times with exponential
-    backoff.
-    """
-    last_exc: Exception | None = None
-    for attempt in range(_MAX_RETRIES):
+    while True:
         try:
-            response = send(attempt)
-            if response.status_code in _RETRYABLE_STATUS_CODES and attempt < _MAX_RETRIES - 1:
-                _backoff(attempt, response)
+            response = send(rate_limit_attempts + server_error_attempts)
+
+            if response.status_code == 429:
+                rate_limit_attempts += 1
+                last_rate_limit_delay = _rate_limit_backoff(response)
+                if rate_limit_attempts >= _MAX_RATE_LIMIT_RETRIES:
+                    raise HubSpotRateLimitExhausted(last_rate_limit_delay)
                 continue
+
+            if response.status_code in _SERVER_ERROR_CODES:
+                server_error_attempts += 1
+                if server_error_attempts < _MAX_RETRIES:
+                    _server_error_backoff(server_error_attempts - 1)
+                    continue
+                response.raise_for_status()
+
             response.raise_for_status()
             return response
-        except requests.exceptions.RequestException as exc:
-            last_exc = exc
-            if attempt < _MAX_RETRIES - 1:
-                _backoff(attempt)
+
+        except HubSpotRateLimitExhausted:
+            raise
+        except requests.exceptions.RequestException:
+            server_error_attempts += 1
+            if server_error_attempts < _MAX_RETRIES:
+                _server_error_backoff(server_error_attempts - 1)
             else:
                 raise
-
-    # Should not be reachable, but keeps type-checkers happy.
-    raise last_exc  # type: ignore[misc]
 
 
 def _request(

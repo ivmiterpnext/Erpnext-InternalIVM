@@ -127,6 +127,16 @@ def handle_deal_created(
             )
             return
         _sync_deal(hubspot_deal_id, doc.name)
+    except api.HubSpotRateLimitExhausted:
+        frappe.logger("hubspot").warning(
+            f"HubSpot: rate limit exhausted creating CRM Deal for deal {hubspot_deal_id} — re-enqueueing"
+        )
+        frappe.enqueue(
+            "ivm.integrations.hubspot.deal_handler.handle_deal_created",
+            queue="long",
+            hubspot_deal_id=hubspot_deal_id,
+            hubspot_user_id=hubspot_user_id,
+        )
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to create CRM Deal for deal {hubspot_deal_id}",
@@ -150,6 +160,16 @@ def handle_deal_updated(
             )
             return
         _sync_deal(hubspot_deal_id, crm_deal_name)
+    except api.HubSpotRateLimitExhausted:
+        frappe.logger("hubspot").warning(
+            f"HubSpot: rate limit exhausted syncing CRM Deal for deal {hubspot_deal_id} — re-enqueueing"
+        )
+        frappe.enqueue(
+            "ivm.integrations.hubspot.deal_handler.handle_deal_updated",
+            queue="long",
+            hubspot_deal_id=hubspot_deal_id,
+            hubspot_user_id=hubspot_user_id,
+        )
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to sync deal {hubspot_deal_id}",
