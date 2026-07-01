@@ -18,6 +18,7 @@ fixtures = [
     {"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]},
     {"dt": "Print Format", "filters": [["standard", "=", "No"]]},
     {"dt": "Report", "filters": [["is_standard", "=", "No"]]},
+    {"dt": "CRM Fields Layout", "filters": [["dt", "=", "CRM Deal"]]},
 ]
 
 # include js, css files in header of desk.html
