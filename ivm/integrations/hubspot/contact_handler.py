@@ -156,11 +156,24 @@ def upsert_contact(
         if phone:
             contact_doc.append("phone_nos", {"phone": phone, "is_primary_phone": 1})
 
-        contact_doc.insert(ignore_permissions=True)
-        frappe.db.commit()
-        frappe.logger("hubspot").info(
-            f"Created Contact {contact_doc.name} ({first_name} {last_name})"
-        )
+        frappe.db.savepoint("before_contact_insert")
+        try:
+            contact_doc.insert(ignore_permissions=True)
+            frappe.db.commit()
+            frappe.logger("hubspot").info(
+                f"Created Contact {contact_doc.name} ({first_name} {last_name})"
+            )
+        except frappe.DuplicateEntryError:
+            frappe.db.rollback(save_point="before_contact_insert")
+            frappe.logger("hubspot").warning(
+                f"HubSpot: duplicate on insert for '{contact_doc.name}' — concurrent write, falling back to update"
+            )
+            contact_doc = frappe.get_doc("Contact", contact_doc.name)
+            _update_contact_fields(contact_doc, first_name, last_name, properties)
+            _sync_email(contact_doc, email)
+            _sync_phone_numbers(contact_doc, properties)
+            _set_hubspot_id(contact_doc, hubspot_contact_id)
+            save_doc(contact_doc, "contact")
 
     if address_props:
         _sync_contact_address(contact_doc.name, address_props)

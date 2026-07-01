@@ -93,7 +93,11 @@ def apply_field_map(
 
 def save_doc(doc: Any, label: str = "hubspot") -> None:
     """Save a Frappe doc with ignore_permissions and log the result."""
-    doc.save(ignore_permissions=True)
+    try:
+        doc.save(ignore_permissions=True)
+    except frappe.exceptions.TimestampMismatchError:
+        doc.reload()
+        doc.save(ignore_permissions=True)
     frappe.logger(_LOG).info(
         f"Synced {label} fields on {doc.doctype} {doc.name}"
     )
@@ -119,12 +123,25 @@ def lookup_or_create(
     doc.set(hubspot_id_field, hubspot_id)
     for key, val in (defaults or {}).items():
         doc.set(key, val)
-    doc.insert(ignore_permissions=True)
 
-    frappe.logger(_LOG).info(
-        f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})"
-    )
-    return doc, True
+    frappe.db.savepoint("before_lookup_or_create_insert")
+    try:
+        doc.insert(ignore_permissions=True)
+        frappe.logger(_LOG).info(
+            f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})"
+        )
+        return doc, True
+    except frappe.DuplicateEntryError:
+        frappe.db.rollback(save_point="before_lookup_or_create_insert")
+        frappe.logger(_LOG).warning(
+            f"HubSpot: duplicate on insert for {doctype} '{doc.name}' — concurrent write, fetching existing"
+        )
+        existing_name = frappe.db.get_value(
+            doctype, {hubspot_id_field: hubspot_id}, "name",
+        )
+        if existing_name:
+            return frappe.get_doc(doctype, existing_name), False
+        raise
 
 
 def upsert_address(

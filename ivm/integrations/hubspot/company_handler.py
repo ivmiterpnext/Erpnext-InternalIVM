@@ -171,22 +171,26 @@ def _maybe_rename_org(org_name: str, properties: dict[str, Any]) -> str:
     if not new_name:
         return org_name
 
-    # Only rename if the current name is a placeholder
     if not org_name.startswith("HS-"):
         return org_name
 
-    # Check that the target name doesn't already exist
     if frappe.db.exists("CRM Organization", new_name):
         frappe.logger("hubspot").warning(
             f"CRM Organization '{new_name}' already exists — keeping placeholder name '{org_name}'"
         )
         return org_name
 
-    frappe.rename_doc("CRM Organization", org_name, new_name, force=True)
-    frappe.logger("hubspot").info(
-        f"Renamed CRM Organization '{org_name}' → '{new_name}'"
-    )
-    return new_name
+    try:
+        frappe.rename_doc("CRM Organization", org_name, new_name, force=True)
+        frappe.logger("hubspot").info(
+            f"Renamed CRM Organization '{org_name}' → '{new_name}'"
+        )
+        return new_name
+    except Exception:
+        frappe.logger("hubspot").warning(
+            f"HubSpot: failed to rename CRM Organization '{org_name}' → '{new_name}' — keeping placeholder"
+        )
+        return org_name
 
 
 def _sync_org_address(org_name: str, properties: dict[str, Any]) -> None:

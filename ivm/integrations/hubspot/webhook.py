@@ -162,7 +162,12 @@ def _route_event(event: dict[str, Any]) -> None:
     kwargs["hubspot_user_id"] = user_id
 
     try:
-        frappe.enqueue(method, queue="long", **kwargs)
+        frappe.enqueue(
+            method,
+            queue="long",
+            job_id=f"hubspot_{object_type_id}_{object_id_str}_{subscription_type}",
+            **kwargs,
+        )
     except Exception:
         frappe.log_error(
             title=f"HubSpot webhook: failed to enqueue {subscription_type} "

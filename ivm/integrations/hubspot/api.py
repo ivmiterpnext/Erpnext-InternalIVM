@@ -30,10 +30,6 @@ _MAX_RETRIES = 3
 _RETRY_BACKOFF_SECONDS = 1.0
 _SERVER_ERROR_CODES = frozenset({500, 502, 503, 504})
 
-_MAX_RATE_LIMIT_RETRIES = 8
-_RATE_LIMIT_BACKOFF_FLOOR_SECONDS = 10.0
-_RATE_LIMIT_BACKOFF_CEILING_SECONDS = 60.0
-
 
 def _get_conf(key: str, label: str) -> str:
     """Return a site_config value or throw if missing."""
@@ -68,45 +64,33 @@ def _server_error_backoff(attempt: int) -> None:
     time.sleep(_RETRY_BACKOFF_SECONDS * (2 ** attempt))
 
 
-def _rate_limit_backoff(response: requests.Response) -> float:
-    delay = _RATE_LIMIT_BACKOFF_FLOOR_SECONDS
-    retry_after = response.headers.get("Retry-After")
-    if retry_after:
-        try:
-            delay = float(retry_after)
-        except (ValueError, TypeError):
-            pass
-    delay = max(_RATE_LIMIT_BACKOFF_FLOOR_SECONDS, min(delay, _RATE_LIMIT_BACKOFF_CEILING_SECONDS))
-    time.sleep(delay)
-    return delay
-
-
 class HubSpotRateLimitExhausted(Exception):
     def __init__(self, retry_after_seconds: float) -> None:
         self.retry_after_seconds = retry_after_seconds
         super().__init__(
-            f"HubSpot rate limit exhausted after {_MAX_RATE_LIMIT_RETRIES} attempts. "
-            f"Suggested re-enqueue delay: {retry_after_seconds}s"
+            f"HubSpot rate limit hit. Suggested re-enqueue delay: {retry_after_seconds}s"
         )
 
 
 def _retry_loop(
     send: Callable[[int], requests.Response],
 ) -> requests.Response:
-    rate_limit_attempts = 0
     server_error_attempts = 0
-    last_rate_limit_delay = _RATE_LIMIT_BACKOFF_FLOOR_SECONDS
 
     while True:
         try:
-            response = send(rate_limit_attempts + server_error_attempts)
+            response = send(server_error_attempts)
 
             if response.status_code == 429:
-                rate_limit_attempts += 1
-                last_rate_limit_delay = _rate_limit_backoff(response)
-                if rate_limit_attempts >= _MAX_RATE_LIMIT_RETRIES:
-                    raise HubSpotRateLimitExhausted(last_rate_limit_delay)
-                continue
+                retry_after = response.headers.get("Retry-After")
+                delay = 10.0
+                if retry_after:
+                    try:
+                        delay = float(retry_after)
+                    except (ValueError, TypeError):
+                        pass
+                delay = max(10.0, min(delay, 60.0))
+                raise HubSpotRateLimitExhausted(delay)
 
             if response.status_code in _SERVER_ERROR_CODES:
                 server_error_attempts += 1
