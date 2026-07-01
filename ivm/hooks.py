@@ -12,10 +12,12 @@ fixtures = [
     "List View Settings", "Workflow Action Master", "Custom DocPerm", "Workflow", "Property Setter",
     "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type", "CRM Pipeline",
     "CRM Deal Status", "Server Script", "Client Script",
+    "Workspace",
+    "Workspace Shortcut",
+    {"dt": "Desktop Icon", "filters": [["standard", "=", 0]]},
     {"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]},
     {"dt": "Print Format", "filters": [["standard", "=", "No"]]},
     {"dt": "Report", "filters": [["is_standard", "=", "No"]]},
-    {"dt": "Report", "filters": [["name", "in", ["My Open Deployments", "All open deployments dashboard"]]]},
 ]
 
 # include js, css files in header of desk.html
@@ -33,15 +35,6 @@ app_include_js = [
     "/assets/ivm/js/chatbox_widget.js",
     "/assets/ivm/js/barcode_scanner_override.js",
     "/assets/ivm/js/machine_detail_grids.js"
-]
-
-add_to_apps_screen = [
-	{
-		"name": "ivm",
-		"logo": "/assets/ivm/logo.png",
-		"title": "IVM",
-		"route": "/desk-web-route"
-}
 ]
 
 # include js, css files in header of web template
@@ -95,10 +88,6 @@ doctype_list_js = {
 # "Role": "home_page"
 # }
 
-# Session Creation
-on_session_creation = [
-    "ivm.api.on_session_creation"
-]
 # Generators
 # ----------
 
