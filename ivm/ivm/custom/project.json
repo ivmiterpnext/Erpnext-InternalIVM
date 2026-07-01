@@ -15488,12 +15488,12 @@
    "modified": "2026-06-24 08:50:38.163264",
    "modified_by": "Administrator",
    "module": null,
-   "name": "Project-connections_tab-hidden",
-   "owner": "Administrator",
-   "property": "hidden",
-   "property_type": "Check",
-   "row_name": null,
-   "value": "1"
+    "name": "Project-connections_tab-hidden",
+    "owner": "Administrator",
+    "property": "hidden",
+    "property_type": "Check",
+    "row_name": null,
+    "value": "0"
   },
   {
    "_assign": null,
