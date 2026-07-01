@@ -122,43 +122,6 @@ def make_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def on_session_creation():
-    modules = ['IVM', 'CRM', 'Projects', 'Warehouse Requests',
-               'Tickets', 'Receivables', 'Vending Management']
-    # This part of code is for the user who is not having admin role----------------------------
-    if 'Admin' not in frappe.get_roles(frappe.session.user):
-        workspaces = frappe.get_list(
-            "Workspace", fields=["name"], ignore_permissions=True)
-        for workspace in workspaces:
-          try:
-            workspace_name = workspace.get("name")
-
-            if workspace_name in modules:
-                data = frappe.get_doc("Workspace", workspace_name)
-                data.is_hidden = 0  # Set is_hidden to 0 for matching modules
-
-            else:
-                data = frappe.get_doc("Workspace", workspace_name)
-                data.is_hidden = 1  # Set is_hidden to 1 for non-matching modules
-            data.save(ignore_permissions=True)
-            frappe.db.commit()
-          except Exception:
-            frappe.db.rollback()
-    # This part of code is for the user who is having admin role-------------------------
-    else:
-        workspaces = frappe.get_list("Workspace", fields=["name"])
-        for workspace in workspaces:
-          try:
-            workspace_name = workspace.get("name")
-            data = frappe.get_doc("Workspace", workspace_name)
-            data.is_hidden = 0  # Set is_hidden to 1 for non-matching modules
-            data.save()
-            frappe.db.commit()
-          except Exception:
-            frappe.db.rollback()
-
-
-@frappe.whitelist()
 def creating_issue(doc, method):
     try:
         attachments = doc.get_attachments()
