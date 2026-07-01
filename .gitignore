@@ -9,3 +9,4 @@ node_modules/
 ivm/www/
 .opencode/
 .env
+CLAUDE.md
