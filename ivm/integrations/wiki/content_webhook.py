@@ -12,11 +12,13 @@ def on_wiki_document_update(doc: Any, method: str | None = None) -> None:
 	if not _content_changed(doc):
 		return
 
-	# Skip if content is empty
 	if not (doc.content or "").strip():
 		return
 
 	payload = _build_payload(doc)
+
+	if not payload.get("url"):
+		return
 
 	try:
 		frappe.enqueue(
@@ -49,6 +51,7 @@ def send_wiki_content_webhook(payload: dict[str, Any]) -> None:
 		response = requests.post(
 			str(webhook_url),
 			files={"file": ("content.md", file_obj, "text/markdown")},
+			data={"url": payload.get("url") or ""},
 			headers=headers,
 			timeout=timeout_seconds,
 		)
@@ -84,7 +87,16 @@ def _content_changed(doc: Any) -> bool:
 def _build_payload(doc: Any) -> dict[str, Any]:
 	return {
 		"content": doc.content or "",
+		"url": _build_doc_url(doc),
 	}
+
+
+def _build_doc_url(doc: Any) -> str:
+	route = getattr(doc, "route", None) or ""
+	if not route:
+		return ""
+	base = frappe.utils.get_url()
+	return f"{base}/{route.lstrip('/')}"
 
 
 def cint_or_default(value: Any, default: int) -> int:
