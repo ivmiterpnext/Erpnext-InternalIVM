@@ -56,6 +56,12 @@ _RE_PLAIN_QUOTE = re.compile(
 )
 
 
+def _normalize_email_list(value: str) -> str:
+    if not value:
+        return ""
+    return ", ".join(addr.strip() for addr in value.replace(";", ",").split(",") if addr.strip())
+
+
 def sync_deal_activities(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
     """Fetch and sync all engagement types for a HubSpot deal."""
 
@@ -433,13 +439,13 @@ def _sync_email(engagement_id: str, props: dict[str, Any], crm_deal_name: str) -
     # Inbound: from_email = contact, sender_email = CRM owner (not the real sender).
     if is_inbound:
         sender = props.get("hs_email_from_email") or props.get("hs_email_sender_email") or ""
-        recipients = props.get("hs_email_to_email") or ""
+        recipients = _normalize_email_list(props.get("hs_email_to_email") or "")
     else:
         sender = props.get("hs_email_sender_email") or ""
-        recipients = props.get("hs_email_to_email") or ""
+        recipients = _normalize_email_list(props.get("hs_email_to_email") or "")
 
-    cc = props.get("hs_email_cc_email") or ""
-    bcc = props.get("hs_email_bcc_email") or ""
+    cc = _normalize_email_list(props.get("hs_email_cc_email") or "")
+    bcc = _normalize_email_list(props.get("hs_email_bcc_email") or "")
 
     html_body = props.get("hs_email_html") or ""
     text_body = props.get("hs_email_text") or ""

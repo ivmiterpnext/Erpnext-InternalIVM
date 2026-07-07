@@ -166,9 +166,15 @@ def upsert_contact(
         except frappe.DuplicateEntryError:
             frappe.db.rollback(save_point="before_contact_insert")
             frappe.logger("hubspot").warning(
-                f"HubSpot: duplicate on insert for '{contact_doc.name}' — concurrent write, falling back to update"
+                f"HubSpot: duplicate on insert for '{contact_doc.name}' — falling back to update"
             )
-            contact_doc = frappe.get_doc("Contact", contact_doc.name)
+            contact_doc = _find_existing_contact(email, hubspot_contact_id)
+            if not contact_doc:
+                frappe.logger("hubspot").error(
+                    f"HubSpot: could not locate existing Contact after duplicate insert "
+                    f"(email={email}, hubspot_id={hubspot_contact_id}) — skipping"
+                )
+                return None
             _update_contact_fields(contact_doc, first_name, last_name, properties)
             _sync_email(contact_doc, email)
             _sync_phone_numbers(contact_doc, properties)

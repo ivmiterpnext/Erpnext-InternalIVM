@@ -2,6 +2,7 @@
 Event handlers for Project documents.
 """
 
+import frappe
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
 
@@ -32,6 +33,7 @@ def validate(doc: Document, method: str | None = None) -> None:
     if getattr(doc, "_original_status", None) not in ("Open", "Completed", "Cancelled", None):
         doc.status = doc._original_status
 
+    _link_crm_deal(doc)
     _update_milestone_due_dates(doc)
     _update_delivery_and_install_contact_due(doc)
     _update_install_checklist_due(doc)
@@ -40,6 +42,16 @@ def after_insert(doc: Document, method: str | None = None) -> None:
     """Provision machine records from the newly created project."""
     from ivm.deployments.services.create_machines_from_project import create_machines_from_project
     create_machines_from_project(doc)
+
+def _link_crm_deal(doc: Document) -> None:
+    if not doc.custom_hubspot_deal_id or doc.custom_crm_deal:
+        return
+    deal = frappe.db.get_value(
+        "CRM Deal", {"custom_hubspot_deal_id": doc.custom_hubspot_deal_id}, "name"
+    )
+    if deal:
+        doc.custom_crm_deal = deal
+
 
 def _get_added_days(doc: Document) -> int:
     """Return the added_days field as an integer, defaulting to 0."""
