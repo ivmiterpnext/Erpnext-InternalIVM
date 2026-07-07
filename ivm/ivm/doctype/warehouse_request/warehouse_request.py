@@ -7,17 +7,16 @@ MAX_RFID_SETTINGS_ROWS = 5
 
 class WarehouseRequest(Document):
     def validate(self):
+        self._validate_rfid_settings()
+        self._validate_crated_status()
+
+    def _validate_rfid_settings(self):
         if len(self.rfid_settings or []) > MAX_RFID_SETTINGS_ROWS:
             frappe.throw(
                 f"You can only add up to {MAX_RFID_SETTINGS_ROWS} RFID Settings rows."
             )
 
-    def validate(self):
-        self._validate_crated_status()
-
     def _validate_crated_status(self):
-        """Prevent Build WRs from being set to 'Crated - Ready to Ship'
-        unless their Stock Entry has been submitted."""
         if self.status != "Crated - Ready to Ship":
             return
         if not self.request_reason or not self.request_reason.startswith("Build"):
