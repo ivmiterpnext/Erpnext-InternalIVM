@@ -169,8 +169,8 @@ def _count_existing_engagements(
 
 def _count_existing(crm_deal_name: str) -> int:
     return sum([
-        frappe.db.count("FCRM Note", {"reference_name": crm_deal_name}),
-        frappe.db.count("CRM Call Log", {"reference_doctype": "CRM Deal", "reference_name": crm_deal_name}),
-        frappe.db.count("CRM Task", {"reference_doctype": "CRM Deal", "reference_name": crm_deal_name}),
+        frappe.db.count("FCRM Note", {"reference_docname": crm_deal_name}),
+        frappe.db.count("CRM Call Log", {"reference_doctype": "CRM Deal", "reference_docname": crm_deal_name}),
+        frappe.db.count("CRM Task", {"reference_doctype": "CRM Deal", "reference_docname": crm_deal_name}),
         frappe.db.count("Communication", {"reference_doctype": "CRM Deal", "reference_name": crm_deal_name}),
     ])

@@ -276,16 +276,24 @@ def _sync_attachments(
 
 
 def _sync_note(engagement_id: str, props: dict[str, Any], crm_deal_name: str) -> None:
-    """Create an FCRM Note from a HubSpot note engagement.
+    """Create or update an FCRM Note from a HubSpot note engagement.
 
     Attachment-only notes (no body) are skipped; files still sync to the deal.
     """
-    if _engagement_exists("FCRM Note", engagement_id):
-        _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
-        return
-
     body = props.get("hs_note_body") or ""
     attachment_ids = props.get("hs_attachment_ids") or ""
+
+    existing_name = _get_existing("FCRM Note", engagement_id)
+    if existing_name:
+        if body:
+            doc = frappe.get_doc("FCRM Note", existing_name)
+            doc.content = body
+            doc.save(ignore_permissions=True)
+            frappe.logger(_LOG).info(
+                f"Updated FCRM Note {existing_name} from HubSpot note {engagement_id}"
+            )
+        _sync_attachments(attachment_ids, crm_deal_name)
+        return
 
     # Attachment-only: sync files but skip empty FCRM Note.
     if not body:
@@ -314,9 +322,23 @@ def _sync_note(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
 
 
 def _sync_call(engagement_id: str, props: dict[str, Any], crm_deal_name: str) -> None:
-    """Create a CRM Call Log from a HubSpot call engagement."""
+    """Create or update a CRM Call Log from a HubSpot call engagement."""
 
-    if _engagement_exists("CRM Call Log", engagement_id):
+    existing_name = _get_existing("CRM Call Log", engagement_id)
+    if existing_name:
+        status_raw = (props.get("hs_call_status") or "").upper()
+        status = CALL_STATUS_MAP.get(status_raw)
+        recording_url = props.get("hs_call_recording_url")
+        if status or recording_url:
+            doc = frappe.get_doc("CRM Call Log", existing_name)
+            if status:
+                doc.status = status
+            if recording_url:
+                doc.recording_url = recording_url
+            doc.save(ignore_permissions=True)
+            frappe.logger(_LOG).info(
+                f"Updated CRM Call Log {existing_name} from HubSpot call {engagement_id}"
+            )
         _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
         return
 
@@ -372,7 +394,7 @@ def _create_calendar_note(
     engagement_id: str, props: dict[str, Any], crm_deal_name: str,
 ) -> None:
     """Create an FCRM Note for a calendar accept/decline/tentative/cancel response."""
-    if _engagement_exists("FCRM Note", engagement_id):
+    if _get_existing("FCRM Note", engagement_id):
         return
 
     raw_subject = (props.get("hs_email_subject") or "").strip()
@@ -483,11 +505,7 @@ def _sync_email(engagement_id: str, props: dict[str, Any], crm_deal_name: str) -
 
 
 def _sync_task(engagement_id: str, props: dict[str, Any], crm_deal_name: str) -> None:
-    """Create a CRM Task from a HubSpot task engagement."""
-
-    if _engagement_exists("CRM Task", engagement_id):
-        _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
-        return
+    """Create or update a CRM Task from a HubSpot task engagement."""
 
     title = props.get("hs_task_subject") or "HubSpot Task"
     description = props.get("hs_task_body") or ""
@@ -497,6 +515,20 @@ def _sync_task(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
 
     priority_raw = (props.get("hs_task_priority") or "").upper()
     priority = TASK_PRIORITY_MAP.get(priority_raw, "Medium")
+
+    existing_name = _get_existing("CRM Task", engagement_id)
+    if existing_name:
+        doc = frappe.get_doc("CRM Task", existing_name)
+        doc.title = title
+        doc.description = description
+        doc.status = status
+        doc.priority = priority
+        doc.save(ignore_permissions=True)
+        _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
+        frappe.logger(_LOG).info(
+            f"Updated CRM Task {existing_name} from HubSpot task {engagement_id}"
+        )
+        return
 
     with _as_owner(props.get("hubspot_owner_id")) as owner_email:
         doc = frappe.new_doc("CRM Task")
@@ -523,11 +555,7 @@ def _sync_task(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
 def _sync_meeting(
     engagement_id: str, props: dict[str, Any], crm_deal_name: str,
 ) -> None:
-    """Create an FCRM Note from a HubSpot meeting engagement."""
-
-    if _engagement_exists("FCRM Note", engagement_id):
-        _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
-        return
+    """Create or update an FCRM Note from a HubSpot meeting engagement."""
 
     title = props.get("hs_meeting_title") or "Meeting"
     body = props.get("hs_meeting_body") or ""
@@ -544,6 +572,18 @@ def _sync_meeting(
     if body:
         content_parts.append(body)
     content = "<br>".join(content_parts) if content_parts else ""
+
+    existing_name = _get_existing("FCRM Note", engagement_id)
+    if existing_name:
+        doc = frappe.get_doc("FCRM Note", existing_name)
+        doc.title = f"[Meeting] {title}"
+        doc.content = content
+        doc.save(ignore_permissions=True)
+        _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
+        frappe.logger(_LOG).info(
+            f"Updated FCRM Note {existing_name} from HubSpot meeting {engagement_id}"
+        )
+        return
 
     with _as_owner(props.get("hubspot_owner_id")):
         doc = frappe.new_doc("FCRM Note")
@@ -570,11 +610,9 @@ _TYPE_HANDLERS: dict[str, Any] = {
 }
 
 
-def _engagement_exists(doctype: str, engagement_id: str) -> bool:
-    """Check whether a Frappe record already exists for this HubSpot engagement."""
-    return bool(
-        frappe.db.exists(doctype, {HUBSPOT_ENGAGEMENT_ID_FIELD: engagement_id})
-    )
+def _get_existing(doctype: str, engagement_id: str) -> str | None:
+    """Return the Frappe document name for this HubSpot engagement, or None."""
+    return frappe.db.get_value(doctype, {HUBSPOT_ENGAGEMENT_ID_FIELD: engagement_id}, "name")
 
 
 def _parse_timestamp(value: str | None) -> str | None:
