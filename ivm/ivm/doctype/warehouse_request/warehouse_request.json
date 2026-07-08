@@ -702,6 +702,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "icorp_machine_id",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "iCorp Machine ID",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "computer_interface_modules",
    "fieldtype": "Table MultiSelect",
    "label": "Computer Interface Modules",

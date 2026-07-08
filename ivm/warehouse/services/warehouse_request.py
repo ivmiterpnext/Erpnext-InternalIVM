@@ -2,9 +2,9 @@ from typing import Any, NamedTuple
 
 import frappe
 
-from ivm.warehouse.services.hardware_configuration import (
-    apply_machine_hardware,
-    fetch_machine_hardware,
+from ivm.warehouse.services.machine import (
+    apply_machine_data,
+    fetch_machine,
 )
 from ivm.warehouse.services.pick_list import create_pick_list, delete_draft_pick_list
 
@@ -115,7 +115,7 @@ def create_build_requests_from_detail_rows(project_name: str, detail_table: str)
             skipped += 1
             continue
 
-        icorp_data = fetch_machine_hardware(machine_name, client_id)
+        icorp_data = fetch_machine(machine_name, client_id)
         if icorp_data is None:
             failed.append(machine_name)
             continue
@@ -155,7 +155,7 @@ def create_build_requests_from_detail_rows(project_name: str, detail_table: str)
             if value is not None and value != "":
                 setattr(wr, field, value)
 
-        apply_machine_hardware(wr, icorp_data)
+        apply_machine_data(wr, icorp_data)
         wr.insert(ignore_permissions=True)
         created.append(wr.name)
 
