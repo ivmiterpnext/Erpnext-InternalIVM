@@ -11,37 +11,29 @@ from ivm.integrations.icorp import icorp_api_get
 _LOG = "ivm.warehouse.machine"
 
 
-def _fetch_machine_by_name(machine_name: str) -> dict[str, Any] | None:
-    response = icorp_api_get(f"SV/Machine/GetByName?name={machine_name}")
+def _fetch_machine(machine_name: str, client_id: str) -> dict[str, Any] | None:
+    response = icorp_api_get(f"SV/Machine?Name={machine_name}&ClientId={client_id}")
     if not isinstance(response, dict):
         return None
     data = response.get("data")
-    if isinstance(data, dict):
-        return data
     if isinstance(data, list):
         return data[0] if data else None
     return None
 
 
 def fetch_machine(machine_name: str, client_id: str) -> dict[str, Any] | None:
-    """Look up a machine by name in iCorp and validate it belongs to the expected client.
+    """Look up a machine by name and client ID in iCorp.
 
     Returns a dict with icorp_machine_id, serial_number, and prose_number,
-    or None if the machine is not found or the client does not match.
+    or None if the machine is not found.
     """
     try:
-        machine = _fetch_machine_by_name(machine_name)
+        machine = _fetch_machine(machine_name, client_id)
 
         if not machine:
             frappe.logger(_LOG).warning(
-                f"No machine found in iCorp for name {machine_name!r}"
-            )
-            return None
-
-        if machine.get("client_id") != int(client_id):
-            frappe.logger(_LOG).warning(
-                f"Machine {machine_name!r} found in iCorp but belongs to client "
-                f"{machine.get('client_id')}, expected {client_id}"
+                f"No machine found in iCorp for name {machine_name!r} "
+                f"and client {client_id!r}"
             )
             return None
 
