@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_rename": 1,
  "creation": "2025-11-26 08:04:03.153517",
  "doctype": "DocType",
@@ -13,8 +14,14 @@
   "serial_validation",
   "home_screen_logo",
   "column_break_qhcr",
+  "selection_sheet",
+  "planogram",
+  "wrap",
+  "logo",
+  "column_break_etjv",
+  "printer",
   "notes",
-  "section_break_38vj",
+  "specifications_section",
   "kiosk_options",
   "kvm_switch_options",
   "monitor_options",
@@ -45,11 +52,6 @@
    "in_list_view": 1,
    "label": "Machine Name",
    "reqd": 1
-  },
-  {
-   "fieldname": "section_break_38vj",
-   "fieldtype": "Section Break",
-   "label": "Specifications"
   },
   {
    "fieldname": "kvm_switch_options",
@@ -130,15 +132,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.smartscreen;",
    "fieldname": "workflow",
    "fieldtype": "Select",
    "label": "Workflow",
    "mandatory_depends_on": "eval:doc.smartscreen",
-   "options": "\nVend and Return"
+   "options": "\nFree Vend\nAuto Vend\nHybrid Vend (Free Vend with Assignments)\nEnhanced Assignments\nVend and Return"
   },
   {
-   "depends_on": "eval:doc.smartscreen;",
    "fieldname": "serial_validation",
    "fieldtype": "Select",
    "label": "Serial Validation",
@@ -146,7 +146,6 @@
    "options": "\nYes\nNo"
   },
   {
-   "depends_on": "eval:doc.smartscreen;",
    "fieldname": "home_screen_logo",
    "fieldtype": "Select",
    "label": "Home Screen Logo",
@@ -182,13 +181,48 @@
    "fieldtype": "Section Break",
    "hide_border": 1,
    "label": "SmartCenter Details"
+  },
+  {
+   "fieldname": "selection_sheet",
+   "fieldtype": "Attach",
+   "label": "Selection Sheet"
+  },
+  {
+   "fieldname": "planogram",
+   "fieldtype": "Attach",
+   "label": "Planogram"
+  },
+  {
+   "fieldname": "wrap",
+   "fieldtype": "Attach",
+   "label": "Wrap"
+  },
+  {
+   "fieldname": "logo",
+   "fieldtype": "Attach",
+   "label": "Logo"
+  },
+  {
+   "fieldname": "column_break_etjv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "printer",
+   "fieldtype": "Select",
+   "label": "Printer",
+   "options": "\nPrinter 1\nPrinter 2\nPrinter 3"
+  },
+  {
+   "fieldname": "specifications_section",
+   "fieldtype": "Section Break",
+   "label": "Specifications"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-10 10:26:23.696293",
+ "modified": "2026-07-07 08:57:29.057742",
  "modified_by": "Administrator",
  "module": "Deployments",
  "name": "Deployment SmartCenter Details",
