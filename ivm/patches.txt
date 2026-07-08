@@ -15,5 +15,5 @@ ivm.warehouse.patches.cleanup_equipment_number_fields
 ivm.deployments.patches.fix_broken_workspace_links
 ivm.deployments.patches.convert_deployment_reports_to_script_report
 ivm.patches.clear_desktop_layouts
-ivm.integrations.hubspot.patches.backfill_deals_from_hubspot
+# ivm.integrations.hubspot.patches.backfill_deals_from_hubspot
 ivm.patches.delete_link_project_to_deal_script

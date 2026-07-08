@@ -1,0 +1,29 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "CRM Fields Layout",
+  "dt": "CRM Deal",
+  "layout": "[{\"name\": \"organization_section\", \"hidden\": true, \"editable\": false, \"columns\": [{\"name\": \"column_GpMP\", \"fields\": [\"organization\"]}, {\"name\": \"column_FPTn\", \"fields\": []}]}, {\"name\": \"organization_details_section\", \"editable\": false, \"columns\": [{\"name\": \"column_S3tQ\", \"fields\": [\"organization_name\", \"territory\"]}, {\"name\": \"column_KqV1\", \"fields\": [\"website\", \"annual_revenue\"]}, {\"name\": \"column_1r67\", \"fields\": [\"no_of_employees\", \"industry\"]}]}, {\"name\": \"contact_section\", \"hidden\": true, \"editable\": false, \"columns\": [{\"name\": \"column_CeXr\", \"fields\": [\"contact\"]}, {\"name\": \"column_yHbk\", \"fields\": []}]}, {\"name\": \"contact_details_section\", \"editable\": false, \"columns\": [{\"name\": \"column_ZTWr\", \"fields\": [\"salutation\", \"email\"]}, {\"name\": \"column_tabr\", \"fields\": [\"first_name\", \"mobile_no\"]}, {\"name\": \"column_Qjdx\", \"fields\": [\"last_name\", \"gender\"]}]}, {\"name\": \"deal_section\", \"columns\": [{\"name\": \"column_mdps\", \"fields\": [\"status\"]}, {\"name\": \"column_H40H\", \"fields\": [\"deal_owner\"]}]}]",
+  "modified": "2026-04-16 08:21:28.301245",
+  "name": "CRM Deal-Quick Entry",
+  "type": "Quick Entry"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "CRM Fields Layout",
+  "dt": "CRM Deal",
+  "layout": "[{\"label\":\"Contacts\",\"name\":\"contacts_section\",\"opened\":true,\"editable\":false,\"contacts\":[]},{\"label\":\"Organization Details\",\"name\":\"organization_section\",\"opened\":true,\"columns\":[{\"name\":\"column_na2Q\",\"fields\":[\"organization\",\"website\",\"territory\",\"annual_revenue\",\"close_date\",\"probability\",\"next_step\",\"deal_owner\"]}]},{\"label\":\"Deployment Locations\",\"name\":\"equipment_section\",\"opened\":true,\"editable\":false}]",
+  "modified": "2026-04-16 08:21:28.315490",
+  "name": "CRM Deal-Side Panel",
+  "type": "Side Panel"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "CRM Fields Layout",
+  "dt": "CRM Deal",
+  "layout": "[{\"name\":\"first_tab\",\"sections\":[{\"label\":\"General\",\"name\":\"details_section\",\"opened\":true,\"columns\":[{\"name\":\"column_z9XL\",\"fields\":[\"custom_hubspot_deal_name\",\"custom_deal_type\"]},{\"name\":\"column_gM4w\",\"fields\":[\"deal_owner\",\"organization\"]},{\"name\":\"column_gWmE\",\"fields\":[\"custom_expected_close_date\",\"closed_date\"]}],\"editingLabel\":false},{\"label\":\"Details\",\"name\":\"section_RvRS\",\"opened\":true,\"columns\":[{\"name\":\"column_dKNu\",\"fields\":[\"custom_pipeline\",\"custom_machine_ownership_status\",\"custom_opportunity_term\"]},{\"label\":\"\",\"name\":\"column_IQXH\",\"fields\":[\"status\",\"probability\"]}],\"editingLabel\":false}]}]",
+  "modified": "2026-07-07 05:12:41.113394",
+  "name": "CRM Deal-Data Fields",
+  "type": "Data Fields"
+ }
+]

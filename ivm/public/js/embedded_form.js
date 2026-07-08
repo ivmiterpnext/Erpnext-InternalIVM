@@ -289,7 +289,17 @@ ivm.EmbeddedForm = class {
             self._render_field(df, state.current_column);
         });
 
-        // Remove any sections that ended up with no rendered fields.
+        // Remove empty columns, then empty section-body rows, then empty sections.
+        form_container.find('.form-column').each(function() {
+            if ($(this).find('.frappe-control').length === 0) {
+                $(this).remove();
+            }
+        });
+        form_container.find('.section-body').each(function() {
+            if ($(this).children().length === 0) {
+                $(this).remove();
+            }
+        });
         form_container.find('.form-section').each(function() {
             if ($(this).find('.frappe-control').length === 0) {
                 $(this).remove();
@@ -305,11 +315,11 @@ ivm.EmbeddedForm = class {
      * @private
      */
     _render_field(df, container) {
-        const field_wrapper = $('<div class="frappe-control"></div>').appendTo(container);
         const self = this;
 
         // Use a custom renderer if one is registered for this field
         if (this.custom_renderers[df.fieldname]) {
+            const field_wrapper = $('<div class="frappe-control"></div>').appendTo(container);
             this.custom_renderers[df.fieldname](
                 field_wrapper,
                 this.embedded_doc[df.fieldname],
@@ -317,6 +327,27 @@ ivm.EmbeddedForm = class {
             );
             return;
         }
+
+        // In read-only mode, render Attach/Attach Image as a labelled hyperlink.
+        // Skip entirely if there is no value.
+        if (this.readOnly && (df.fieldtype === 'Attach' || df.fieldtype === 'Attach Image')) {
+            const value = this.embedded_doc[df.fieldname];
+            if (!value) return;
+            const field_wrapper = $('<div class="frappe-control"></div>').appendTo(container);
+            field_wrapper.append(`
+                <div class="form-group">
+                    <label class="control-label">${df.label || df.fieldname}</label>
+                    <div class="control-value">
+                        <a href="${frappe.utils.escape_html(value)}" target="_blank" rel="noopener noreferrer">
+                            ${frappe.utils.escape_html(value.split('/').pop())}
+                        </a>
+                    </div>
+                </div>
+            `);
+            return;
+        }
+
+        const field_wrapper = $('<div class="frappe-control"></div>').appendTo(container);
 
         // In read-only mode force all fields read-only
         const field_df = this.readOnly
