@@ -12,7 +12,7 @@ _LOG = "ivm.warehouse.machine"
 
 
 def _fetch_machine(machine_name: str, client_id: str) -> dict[str, Any] | None:
-    response = icorp_api_get(f"SV/Machine?Name={machine_name}&ClientId={client_id}")
+    response = icorp_api_get(f"SV/Machine?ActiveStatus=All&Name={machine_name}&ClientId={client_id}")
     if not isinstance(response, dict):
         return None
     data = response.get("data")
