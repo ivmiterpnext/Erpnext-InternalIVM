@@ -21,6 +21,8 @@ frappe.ui.form.on("Project", {
   refresh: function (frm) {
     frm._prev_status = frm.doc.status;
     setupMachineDetailGrids(frm, PROJECT_MACHINE_DETAIL_TABLES);
+    const smartstation_grid = frm.fields_dict.custom_deployment_smartstation_details.grid;
+    smartstation_grid.get_field('card_reader_type').get_query = () => ({ filters: { enabled: 1 } });
   },
 
   onload: function (frm) {

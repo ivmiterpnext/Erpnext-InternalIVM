@@ -1,6 +1,7 @@
 frappe.ui.form.on("Issue", {
     refresh: function (frm) {
         $(".badge-link:contains('Ticket')").closest(".document-link").find(".icon-btn").hide();
+        frm.set_query('card_reader_type', () => ({ filters: { enabled: 1 } }));
     },
     issue_type: function (frm) {
         if (frm.doc.issue_type) {

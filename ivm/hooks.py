@@ -8,7 +8,7 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 fixtures = [
-    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type",
+    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "Card Reader Type",
     "List View Settings", "Workflow Action Master", "Custom DocPerm", "Workflow", "Property Setter",
     "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type", "CRM Pipeline",
     "CRM Deal Status", "Server Script", "Client Script",

@@ -2,8 +2,9 @@
 Backfill HubSpot engagement activities (notes, calls, emails, tasks, meetings)
 for all CRM Deals that have a custom_hubspot_deal_id.
 
-This is a manual one-off script, NOT registered in patches.txt.
-Trigger via the whitelisted API endpoint in backfill_api.py, or via bench execute:
+Registered in patches.txt (post_model_sync, end of file) — runs automatically
+on migrate with dry_run=False. Can also be triggered manually via the
+whitelisted API endpoint in backfill_api.py (supports dry_run), or via bench execute:
 
     bench --site <site> execute \
         "ivm.integrations.hubspot.patches.backfill_activities_from_hubspot.execute" \
@@ -36,60 +37,63 @@ _ENGAGEMENT_DOCTYPE_MAP = {
 
 
 def execute(dry_run: bool = False) -> None:
+    previous_user = frappe.session.user
     frappe.set_user("hubspot@ivm.local")
-
-    deals = frappe.get_all(
-        "CRM Deal",
-        filters=[[HUBSPOT_DEAL_ID_FIELD, "is", "set"]],
-        fields=["name", HUBSPOT_DEAL_ID_FIELD],
-        order_by="creation asc",
-    )
-
-    if not deals:
-        _log_result(dry_run, ["No CRM Deals with a HubSpot ID found — nothing to do."], 0, 0, 0)
-        return
-
-    mode = "DRY RUN" if dry_run else "LIVE"
-    lines: list[str] = [f"[{mode}] Backfilling activities for {len(deals)} deal(s).\n"]
-
-    total_new = total_existing = total_errors = 0
-
-    for idx, deal in enumerate(deals, start=1):
-        crm_deal_name = deal["name"]
-        hubspot_deal_id = deal[HUBSPOT_DEAL_ID_FIELD]
-
-        try:
-            new, existing = _process_deal(hubspot_deal_id, crm_deal_name, dry_run)
-        except api.HubSpotRateLimitExhausted as exc:
-            lines.append(
-                f"[{idx}/{len(deals)}] {crm_deal_name} — rate limit hit "
-                f"(retry after {exc.retry_after_seconds}s). Stopping early."
-            )
-            lines.append("Re-run to resume. Already-synced records will be skipped.")
-            _log_result(dry_run, lines, total_new, total_existing, total_errors)
-            return
-        except Exception:
-            total_errors += 1
-            frappe.log_error(
-                title=f"Activity backfill: failed on {crm_deal_name}",
-                message=frappe.get_traceback(with_context=True),
-            )
-            lines.append(f"[{idx}/{len(deals)}] {crm_deal_name} — ERROR (see Error Log)")
-            continue
-
-        total_new += new
-        total_existing += existing
-
-        label = "would create" if dry_run else "created"
-        lines.append(
-            f"[{idx}/{len(deals)}] {crm_deal_name} — "
-            f"{new} {label}, {existing} already existed"
+    try:
+        deals = frappe.get_all(
+            "CRM Deal",
+            filters=[[HUBSPOT_DEAL_ID_FIELD, "is", "set"]],
+            fields=["name", HUBSPOT_DEAL_ID_FIELD],
+            order_by="creation asc",
         )
 
-        if not dry_run:
-            frappe.db.commit()
+        if not deals:
+            _log_result(dry_run, ["No CRM Deals with a HubSpot ID found — nothing to do."], 0, 0, 0)
+            return
 
-    _log_result(dry_run, lines, total_new, total_existing, total_errors)
+        mode = "DRY RUN" if dry_run else "LIVE"
+        lines: list[str] = [f"[{mode}] Backfilling activities for {len(deals)} deal(s).\n"]
+
+        total_new = total_existing = total_errors = 0
+
+        for idx, deal in enumerate(deals, start=1):
+            crm_deal_name = deal["name"]
+            hubspot_deal_id = deal[HUBSPOT_DEAL_ID_FIELD]
+
+            try:
+                new, existing = _process_deal(hubspot_deal_id, crm_deal_name, dry_run)
+            except api.HubSpotRateLimitExhausted as exc:
+                lines.append(
+                    f"[{idx}/{len(deals)}] {crm_deal_name} — rate limit hit "
+                    f"(retry after {exc.retry_after_seconds}s). Stopping early."
+                )
+                lines.append("Re-run to resume. Already-synced records will be skipped.")
+                _log_result(dry_run, lines, total_new, total_existing, total_errors)
+                return
+            except Exception:
+                total_errors += 1
+                frappe.log_error(
+                    title=f"Activity backfill: failed on {crm_deal_name}",
+                    message=frappe.get_traceback(with_context=True),
+                )
+                lines.append(f"[{idx}/{len(deals)}] {crm_deal_name} — ERROR (see Error Log)")
+                continue
+
+            total_new += new
+            total_existing += existing
+
+            label = "would create" if dry_run else "created"
+            lines.append(
+                f"[{idx}/{len(deals)}] {crm_deal_name} — "
+                f"{new} {label}, {existing} already existed"
+            )
+
+            if not dry_run:
+                frappe.db.commit()
+
+        _log_result(dry_run, lines, total_new, total_existing, total_errors)
+    finally:
+        frappe.set_user(previous_user)
 
 
 def _log_result(

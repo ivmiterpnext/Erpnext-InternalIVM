@@ -10,9 +10,14 @@ into Frappe CRM. For deals already Won in HubSpot:
   - If the matched Customer is missing icorp_client_id, looks it up from
     iCorp's Client endpoint (read-only, no POST) and backfills it.
 
-Usage:
-    bench --site dev.local execute \
+Registered in patches.txt (post_model_sync, end of file) — runs automatically
+on migrate. Can also be run manually via:
+    bench --site <site> execute \
         "ivm.integrations.hubspot.patches.backfill_deals_from_hubspot.execute"
+
+If a HubSpot rate limit is hit mid-run, the run stops early and returns
+normally (does not raise) — check Error Log and re-run manually to resume.
+Already-synced deals are skipped on re-run.
 """
 
 from __future__ import annotations
@@ -37,34 +42,51 @@ _PROPERTIES = list(DEAL_FIELD_MAP.keys())
 
 
 def execute() -> None:
+    previous_user = frappe.session.user
     frappe.set_user("hubspot@ivm.local")
+    try:
+        print(f"Fetching HubSpot deals created since {_SINCE_DATE}...")
+        hs_deals = _fetch_hubspot_deals(_SINCE_DATE)
+        print(f"Found {len(hs_deals)} deal(s) to process.")
 
-    print(f"Fetching HubSpot deals created since {_SINCE_DATE}...")
-    hs_deals = _fetch_hubspot_deals(_SINCE_DATE)
-    print(f"Found {len(hs_deals)} deal(s) to process.")
+        icorp_client_map = _build_icorp_client_map()
 
-    icorp_client_map = _build_icorp_client_map()
+        created = skipped = errors = 0
 
-    created = skipped = errors = 0
+        for idx, hs_deal in enumerate(hs_deals, start=1):
+            hs_id = str(hs_deal["id"])
+            try:
+                was_created = _sync_one_deal(hs_id, hs_deal["properties"], icorp_client_map)
+                if was_created:
+                    created += 1
+                else:
+                    skipped += 1
+            except api.HubSpotRateLimitExhausted as exc:
+                print(
+                    f"  Rate limit hit at deal {idx}/{len(hs_deals)} "
+                    f"(retry after {exc.retry_after_seconds}s). Stopping early — re-run to resume."
+                )
+                frappe.log_error(
+                    title="Backfill: HubSpot rate limit exhausted — stopped early",
+                    message=(
+                        f"Processed {idx - 1}/{len(hs_deals)} deals before rate limit. "
+                        f"Created: {created}, Skipped: {skipped}, Errors: {errors}. "
+                        f"Re-run the patch to resume — already-synced deals will be skipped."
+                    ),
+                )
+                break
+            except Exception:
+                errors += 1
+                frappe.log_error(
+                    title=f"Backfill: failed to sync HubSpot deal {hs_id}",
+                    message=frappe.get_traceback(with_context=True),
+                )
+                print(f"  ERROR: deal {hs_id} — see Error Log")
 
-    for hs_deal in hs_deals:
-        hs_id = str(hs_deal["id"])
-        try:
-            was_created = _sync_one_deal(hs_id, hs_deal["properties"], icorp_client_map)
-            if was_created:
-                created += 1
-            else:
-                skipped += 1
-        except Exception:
-            errors += 1
-            frappe.log_error(
-                title=f"Backfill: failed to sync HubSpot deal {hs_id}",
-                message=frappe.get_traceback(with_context=True),
-            )
-            print(f"  ERROR: deal {hs_id} — see Error Log")
-
-    frappe.db.commit()
-    print(f"\nDone. Created: {created}, Skipped (already existed): {skipped}, Errors: {errors}")
+        frappe.db.commit()
+        print(f"\nDone. Created: {created}, Skipped (already existed): {skipped}, Errors: {errors}")
+    finally:
+        frappe.set_user(previous_user)
 
 
 def _fetch_hubspot_deals(since_date: str) -> list[dict]:
@@ -81,9 +103,21 @@ def _fetch_hubspot_deals(since_date: str) -> list[dict]:
     after = None
 
     while True:
-        response = api.search_deals(filters=filters, properties=_PROPERTIES, after=after)
-        results.extend(response.get("results", []))
+        try:
+            response = api.search_deals(filters=filters, properties=_PROPERTIES, after=after)
+        except api.HubSpotRateLimitExhausted as exc:
+            print(
+                f"  Rate limit hit while fetching deal list "
+                f"(retry after {exc.retry_after_seconds}s). "
+                f"Returning {len(results)} deal(s) fetched so far — re-run to resume."
+            )
+            frappe.log_error(
+                title="Backfill: HubSpot rate limit exhausted during deal fetch",
+                message=f"Fetched {len(results)} deal(s) before rate limit. Re-run the patch to resume.",
+            )
+            break
 
+        results.extend(response.get("results", []))
         next_page = response.get("paging", {}).get("next", {})
         after = next_page.get("after")
         if not after:

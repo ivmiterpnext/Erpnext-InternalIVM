@@ -355,3 +355,80 @@ def create_shipping_request_from_build(build_warehouse_request):
     shipping_wr.insert(ignore_permissions=True)
 
     return shipping_wr.name
+
+# Following will be replaced and push directly to iCorp
+def _build_equipment_info_description(wr) -> str:
+    lines = [
+        f"Equipment Information Has Been Added to {wr.name}",
+        "",
+        f"Project: {wr.subject or ''} {wr.machine_name or ''}",
+        "",
+        f"Machine Name: {wr.machine_name or ''}",
+        f"PROSE Number: {wr.prose_number or ''}",
+        f"Serial Number: {wr.serial_number or ''}",
+        f"LAN MAC Address: {wr.lan_mac_address or ''}",
+        f"WiFi MAC Address: {wr.wifi_mac_address or ''}",
+    ]
+
+    rfid_rows = wr.get("rfid_settings") or []
+    if rfid_rows:
+        lines.append("")
+        for idx, row in enumerate(rfid_rows, start=1):
+            lines.append(
+                f"RFID Setting {idx}: "
+                f"Facility Code Start {row.facility_code_start_position}, "
+                f"Facility Code Length {row.facility_code_length}, "
+                f"Employee ID Start {row.employee_id_start_position}, "
+                f"Employee ID Length {row.employee_id_length}, "
+                f"Target Number Base {row.target_number_base}, "
+                f"Bit Size {row.bit_size}, "
+                f"Bit Reverse {'Yes' if row.bit_reverse_feature else 'No'}"
+            )
+
+    return "<br>".join(lines)
+
+
+@frappe.whitelist()
+def get_equipment_info_task(warehouse_request):
+    """Return the existing 'add machine info' Task linked to this Warehouse Request, if any."""
+    return frappe.db.get_value(
+        "Task",
+        {"custom_warehouse_request": warehouse_request, "type": "add machine info"},
+        "name",
+    )
+
+
+@frappe.whitelist()
+def send_equipment_info_to_ics(warehouse_request):
+    """Create the 'Add Equipment Information' Task for a schema v2 Warehouse Request,
+    pulling data from the single-machine schema fields instead of the legacy
+    numbered/ordinal fields used by schema_version == 1.
+    """
+    wr = frappe.get_doc("Warehouse Request", warehouse_request)
+
+    if (wr.schema_version or 0) < 2:
+        frappe.throw("This action is only available for the new (schema v2) Warehouse Request layout.")
+
+    if not (wr.request_reason or "").startswith("Build"):
+        frappe.throw("This action is only available for Build requests.")
+
+    existing = get_equipment_info_task(warehouse_request)
+    if existing:
+        return existing
+
+    task = frappe.get_doc({
+        "doctype": "Task",
+        "subject": f"Add Equipment Information into CSS for {wr.machine_name} and {wr.customer}",
+        "status": "Open",
+        "type": "add machine info",
+        "custom_customer": wr.customer,
+        "project": wr.related_project,
+        "custom_warehouse_request": wr.name,
+        "custom_assigned_to": wr.created_by,
+        "custom_created_by": frappe.session.user,
+        "description": _build_equipment_info_description(wr),
+    })
+    task.insert(ignore_permissions=True)
+    frappe.db.commit()
+
+    return task.name

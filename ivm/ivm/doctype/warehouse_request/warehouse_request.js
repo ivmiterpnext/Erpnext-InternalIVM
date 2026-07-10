@@ -39,6 +39,34 @@ frappe.ui.form.on('Warehouse Request', {
 			}
 			frm._machine_details.render();
 		}
+
+		if (!frm.is_new() && frm.doc.schema_version >= 2 && (frm.doc.request_reason || '').includes('Build')) {
+			frappe.call({
+				method: 'ivm.warehouse.services.warehouse_request.get_equipment_info_task',
+				args: { warehouse_request: frm.doc.name },
+				callback: function(r) {
+					if (r.message) {
+						frm.add_custom_button(__('View ICS Task'), function() {
+							frappe.set_route('Form', 'Task', r.message);
+						}, __('View'));
+					} else {
+						frm.add_custom_button(__('Send Equipment Info to ICS'), function() {
+							frappe.call({
+								method: 'ivm.warehouse.services.warehouse_request.send_equipment_info_to_ics',
+								args: { warehouse_request: frm.doc.name },
+								callback: function(res) {
+									if (res.message) {
+										frappe.show_alert({ message: __('Equipment info sent to ICS'), indicator: 'green' });
+										frm.reload_doc();
+									}
+								}
+							});
+						});
+					}
+				}
+			});
+		}
+
 		if (frm.is_new() || !frm.doc.request_reason) return;
 
 		// Update the cached server status on every refresh (which fires after save too)

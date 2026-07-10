@@ -28,10 +28,10 @@
   "column_break_upml",
   "offline_sales",
   "label_color",
-  "card_reader_type",
-  "column_break_whgz",
   "connectivity_type",
-  "connectivity_device_quantity",
+  "column_break_whgz",
+  "card_reader_type",
+  "barcode_reader",
   "hidden_fields_section",
   "machine_type_id"
  ],
@@ -43,9 +43,9 @@
   },
   {
    "fieldname": "card_reader_type",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Card Reader Type",
-   "options": "\nNot Needed\nQR Code Reader\nP300-H-A\nHID Omnikey\nHID Signo\nHID MultiCLASS SE\nKeypad\nDelta3\nWave\nOther"
+   "options": "Card Reader Type"
   },
   {
    "fieldname": "machine_name",
@@ -115,11 +115,6 @@
    "options": "Connectivity Type"
   },
   {
-   "fieldname": "connectivity_device_quantity",
-   "fieldtype": "Int",
-   "label": "Connectivity Device Quantity"
-  },
-  {
    "fieldname": "power_connection",
    "fieldtype": "Select",
    "label": "Power Connection",
@@ -180,13 +175,19 @@
    "fieldtype": "Select",
    "label": "Printer",
    "options": "\nPrinter 1\nPrinter 2\nPrinter 3"
+  },
+  {
+   "fieldname": "barcode_reader",
+   "fieldtype": "Select",
+   "label": "Barcode Reader",
+   "options": "\nYes\nNo"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-07 09:17:14.529968",
+ "modified": "2026-07-10 09:25:07.983223",
  "modified_by": "Administrator",
  "module": "Deployments",
  "name": "Deployment SmartStation Details",

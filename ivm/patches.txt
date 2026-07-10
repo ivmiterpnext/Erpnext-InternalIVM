@@ -1,9 +1,11 @@
 [pre_model_sync]
 ivm.warehouse.patches.rename_wr_account_to_customer
+ivm.warehouse.patches.rename_wr_mac_address_to_lan_mac_address
 ivm.warehouse.patches.backfill_item_barcodes
 ivm.deployments.patches.remap_selection_field_options
 ivm.deployments.patches.rebuild_deployment_location
 ivm.patches.fix_workspace_shortcut_parenttype
+ivm.patches.prepare_card_reader_type_migration
 
 [post_model_sync]
 ivm.deployments.patches.drop_crm_deal_custom_client_id_column
@@ -15,5 +17,6 @@ ivm.warehouse.patches.cleanup_equipment_number_fields
 ivm.deployments.patches.fix_broken_workspace_links
 ivm.deployments.patches.convert_deployment_reports_to_script_report
 ivm.patches.clear_desktop_layouts
-# ivm.integrations.hubspot.patches.backfill_deals_from_hubspot
 ivm.patches.delete_link_project_to_deal_script
+ivm.integrations.hubspot.patches.backfill_deals_from_hubspot
+ivm.integrations.hubspot.patches.backfill_activities_from_hubspot
