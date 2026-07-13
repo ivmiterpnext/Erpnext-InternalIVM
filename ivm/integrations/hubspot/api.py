@@ -424,6 +424,30 @@ def search_deals(
     return _post("/crm/v3/objects/deals/search", payload)
 
 
+def search_contacts(
+    filters: list[dict],
+    properties: list[str],
+    after: str | None = None,
+) -> dict[str, Any]:
+    """POST to /crm/v3/objects/contacts/search with cursor-based pagination.
+
+    Args:
+        filters: HubSpot filter dicts (combined into a single filterGroup).
+        properties: HubSpot property names to include in each result.
+        after: Pagination cursor from paging.next.after of the previous response.
+
+    Returns the raw HubSpot search response dict.
+    """
+    payload: dict[str, Any] = {
+        "filterGroups": [{"filters": filters}],
+        "properties": properties,
+        "limit": 100,
+    }
+    if after:
+        payload["after"] = after
+    return _post("/crm/v3/objects/contacts/search", payload)
+
+
 @frappe.whitelist()
 def get_hubspot_deal_url(deal_id: int | str) -> str:
     """Build the full HubSpot deal URL from deal ID and configured portal ID."""

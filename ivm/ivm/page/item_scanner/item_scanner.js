@@ -73,7 +73,7 @@ class ItemScanner {
 				label: __('Scan Barcode'),
 				fieldname: 'barcode',
 				placeholder: __('Scan or enter barcode...'),
-				description: __('Source warehouse will be auto-detected')
+				description: __('You will be asked to choose bay quantities after each scan')
 			},
 			render_input: true
 		});
@@ -307,26 +307,101 @@ class ItemScanner {
 			frappe.show_alert({ message: 'Pick List not loaded yet, please wait', indicator: 'orange' }, 3);
 			return;
 		}
+		this.show_bay_breakdown_dialog(item_data);
+	}
 
-		for (const wh of item_data.warehouses) {
-			const existing = this.scanned_items.find(i =>
-				i.item_code === item_data.item_code && i.warehouse === wh.warehouse
-			);
-			if (!existing) {
-				this._add_new_row(item_data, wh.warehouse, wh.available_qty, 1);
-				return;
+	show_bay_breakdown_dialog(item_data) {
+		const me = this;
+		const existing_for_item = this.scanned_items.filter(i => i.item_code === item_data.item_code);
+		const bay_map = new Map(item_data.warehouses.map(w => [w.warehouse, w.available_qty]));
+		existing_for_item.forEach(r => { if (!bay_map.has(r.warehouse)) bay_map.set(r.warehouse, r.available_qty); });
+
+		const rows = [...bay_map.entries()].map(([warehouse, available_qty]) => {
+			const existing = existing_for_item.find(r => r.warehouse === warehouse);
+			return {
+				warehouse,
+				available_qty,
+				row_name: existing ? existing.row_name : null,
+				qty: existing ? existing.qty : 0
+			};
+		});
+		rows.sort((a, b) => a.warehouse.localeCompare(b.warehouse, undefined, { numeric: true, sensitivity: 'base' }));
+
+		const dialog = new frappe.ui.Dialog({
+			title: __('Bay Breakdown — {0} ({1})', [item_data.item_name, item_data.item_code]),
+			size: 'large',
+			fields: [{ fieldtype: 'HTML', fieldname: 'breakdown_html' }],
+			primary_action_label: __('Save'),
+			primary_action: async () => {
+				await me._save_bay_breakdown(item_data, rows);
+				dialog.hide();
 			}
-			if (existing.qty < wh.available_qty) {
-				this._update_item_qty(existing, existing.qty + 1);
-				return;
+		});
+		dialog.on_hide = () => me.focus_barcode_input();
+
+		const render_breakdown = () => {
+			const total = rows.reduce((s, r) => s + r.qty, 0);
+			dialog.fields_dict.breakdown_html.$wrapper.html(`
+				<table class="table table-bordered">
+					<thead>
+						<tr>
+							<th>${__('Bay')}</th>
+							<th>${__('Available')}</th>
+							<th>${__('Qty to Pick')}</th>
+						</tr>
+					</thead>
+					<tbody>
+					${rows.map((r, idx) => `
+						<tr>
+							<td>${r.warehouse}</td>
+							<td class="text-center">${r.available_qty}</td>
+							<td>
+								<input type="number"
+									class="form-control input-sm bay-qty-input"
+									data-idx="${idx}"
+									min="0"
+									max="${r.available_qty}"
+									value="${r.qty}">
+							</td>
+						</tr>
+					`).join('')}
+					</tbody>
+				</table>
+				<div class="text-muted">${__('Total')}: <span id="bay-breakdown-total">${total}</span></div>
+			`);
+			dialog.$wrapper.find('.bay-qty-input').on('change input', function() {
+				const idx = $(this).data('idx');
+				let val = parseInt($(this).val()) || 0;
+				if (val > rows[idx].available_qty) {
+					frappe.show_alert({
+						message: __('Only {0} available in {1}', [rows[idx].available_qty, rows[idx].warehouse]),
+						indicator: 'red'
+					}, 4);
+					val = rows[idx].qty;
+					$(this).val(val);
+				}
+				rows[idx].qty = val;
+				$('#bay-breakdown-total').text(rows.reduce((s, r) => s + r.qty, 0));
+			});
+		};
+
+		render_breakdown();
+		dialog.show();
+	}
+
+	async _save_bay_breakdown(item_data, rows) {
+		for (const r of rows) {
+			if (r.qty > 0 && !r.row_name) {
+				await this._add_new_row_async(item_data, r.warehouse, r.available_qty, r.qty);
+			} else if (r.qty > 0 && r.row_name) {
+				await this._update_item_qty_async(r, r.qty);
+			} else if (r.qty === 0 && r.row_name) {
+				await this._remove_item_by_row_name_async(r.row_name);
 			}
 		}
-
-		frappe.show_alert({
-			message: `No more stock available for ${item_data.item_name}`,
-			indicator: 'orange'
-		}, 5);
-		this.play_error_sound();
+		this.render_items();
+		this.update_submit_button();
+		this.play_success_sound();
 	}
 
 	_add_new_row(item_data, warehouse, available_qty, qty) {
@@ -371,6 +446,71 @@ class ItemScanner {
 					this.update_submit_button();
 				}
 			}
+		});
+	}
+
+	_add_new_row_async(item_data, warehouse, available_qty, qty) {
+		const me = this;
+		return new Promise((resolve) => {
+			frappe.call({
+				method: 'ivm.warehouse.services.pick_list.add_item_to_pick_list',
+				args: {
+					pick_list: me.pick_list,
+					item_code: item_data.item_code,
+					warehouse: warehouse,
+					qty: qty,
+					item_name: item_data.item_name,
+					uom: item_data.stock_uom
+				},
+				callback: (r) => {
+					if (r.message) {
+						me.scanned_items.push({
+							row_name: r.message.row_name,
+							item_code: item_data.item_code,
+							item_name: item_data.item_name,
+							warehouse: warehouse,
+							available_qty: available_qty,
+							qty: r.message.qty,
+							uom: item_data.stock_uom
+						});
+					}
+					resolve();
+				}
+			});
+		});
+	}
+
+	_update_item_qty_async(item, new_qty) {
+		const me = this;
+		return new Promise((resolve) => {
+			frappe.call({
+				method: 'ivm.warehouse.services.pick_list.update_pick_list_item_qty',
+				args: { pick_list: me.pick_list, row_name: item.row_name, qty: new_qty },
+				callback: (r) => {
+					if (r.message && r.message.success) {
+						const cached = me.scanned_items.find(i => i.row_name === item.row_name);
+						if (cached) cached.qty = new_qty;
+					}
+					resolve();
+				}
+			});
+		});
+	}
+
+	_remove_item_by_row_name_async(row_name) {
+		const me = this;
+		return new Promise((resolve) => {
+			frappe.call({
+				method: 'ivm.warehouse.services.pick_list.remove_pick_list_item',
+				args: { pick_list: me.pick_list, row_name: row_name },
+				callback: (r) => {
+					if (r.message && r.message.success) {
+						const idx = me.scanned_items.findIndex(i => i.row_name === row_name);
+						if (idx !== -1) me.scanned_items.splice(idx, 1);
+					}
+					resolve();
+				}
+			});
 		});
 	}
 

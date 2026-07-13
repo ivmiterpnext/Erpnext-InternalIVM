@@ -19,4 +19,5 @@ ivm.deployments.patches.convert_deployment_reports_to_script_report
 ivm.patches.clear_desktop_layouts
 ivm.patches.delete_link_project_to_deal_script
 ivm.integrations.hubspot.patches.backfill_deals_from_hubspot
+ivm.integrations.hubspot.patches.backfill_contacts_from_hubspot
 ivm.integrations.hubspot.patches.backfill_activities_from_hubspot
