@@ -5,6 +5,10 @@ Fills in HubSpot contacts that are NOT already covered by the deal backfill
 (ivm.integrations.hubspot.patches.backfill_deals_from_hubspot), e.g. contacts
 associated with a company/org that has no deal in HubSpot.
 
+The fetch is explicitly filtered to contacts with an associated company via
+the `associatedcompanyid` HAS_PROPERTY filter. This constraint was added to
+stay under HubSpot's 10,000-result search API cap.
+
 Unlike the deal backfill, this patch is CREATE-ONLY: existing Contacts
 (matched by custom_hubspot_contact_id, falling back to email) are skipped
 and never updated on re-run.
@@ -41,7 +45,16 @@ def execute() -> None:
     frappe.set_user("hubspot@ivm.local")
     try:
         print(f"Fetching HubSpot contacts created since {_SINCE_DATE}...")
-        hs_contacts = _fetch_hubspot_contacts(_SINCE_DATE)
+        try:
+            hs_contacts = _fetch_hubspot_contacts(_SINCE_DATE)
+        except Exception:
+            frappe.log_error(
+                title="Backfill: failed to fetch HubSpot contacts",
+                message=frappe.get_traceback(with_context=True),
+            )
+            print("ERROR: failed to fetch HubSpot contacts — see Error Log")
+            return
+
         print(f"Found {len(hs_contacts)} contact(s) to process.")
 
         created = skipped = errors = 0
@@ -89,7 +102,11 @@ def _fetch_hubspot_contacts(since_date: str) -> list[dict]:
             "propertyName": "createdate",
             "operator": "GTE",
             "value": f"{since_date}T00:00:00.000Z",
-        }
+        },
+        {
+            "propertyName": "associatedcompanyid",
+            "operator": "HAS_PROPERTY",
+        },
     ]
 
     results = []

@@ -97,9 +97,21 @@ def _retry_loop(
                 if server_error_attempts < _MAX_RETRIES:
                     _server_error_backoff(server_error_attempts - 1)
                     continue
-                response.raise_for_status()
+                try:
+                    response.raise_for_status()
+                except requests.exceptions.HTTPError as e:
+                    body_text = response.text[:2000]
+                    raise requests.exceptions.HTTPError(
+                        f"{str(e)}\n\nResponse body:\n{body_text}", response=response
+                    ) from e
 
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                body_text = response.text[:2000]
+                raise requests.exceptions.HTTPError(
+                    f"{str(e)}\n\nResponse body:\n{body_text}", response=response
+                ) from e
             return response
 
         except HubSpotRateLimitExhausted:
