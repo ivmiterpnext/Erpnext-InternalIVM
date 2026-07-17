@@ -9,6 +9,7 @@ class WarehouseRequest(Document):
     def validate(self):
         self._validate_rfid_settings()
         self._validate_crated_status()
+        self._validate_closed_status()
 
     def _validate_rfid_settings(self):
         if len(self.rfid_settings or []) > MAX_RFID_SETTINGS_ROWS:
@@ -47,6 +48,38 @@ class WarehouseRequest(Document):
                 f'<a href="/app/stock-entry/{stock_entry.name}">{stock_entry.name}</a> '
                 "is still in draft. Please submit it first so "
                 "that items are transferred to the WIP warehouse."
+            )
+
+    def _validate_closed_status(self):
+        if self.status != "Closed":
+            return
+        if self.request_reason != "Shipping Request":
+            return
+
+        if not self.pick_list:
+            frappe.throw(
+                "Cannot close this Shipping Request without a Pick List. "
+                "Please complete the picking process first."
+            )
+
+        stock_entry = frappe.db.get_value(
+            "Stock Entry",
+            {"custom_warehouse_request": self.name, "docstatus": ["!=", 2]},
+            ["name", "docstatus"],
+            as_dict=True,
+        )
+
+        if not stock_entry:
+            frappe.throw(
+                "Cannot close this Shipping Request — no Stock Entry (Material Transfer) "
+                "is linked to it. Please submit the material transfer first."
+            )
+
+        if stock_entry.docstatus != 1:
+            frappe.throw(
+                "Cannot close this Shipping Request — Stock Entry "
+                f'<a href="/app/stock-entry/{stock_entry.name}">{stock_entry.name}</a> '
+                "is still in draft. Please submit it first."
             )
 
     def on_update(self):
