@@ -166,6 +166,7 @@ def _route_event(event: dict[str, Any]) -> None:
             method,
             queue="long",
             job_id=f"hubspot_{object_type_id}_{object_id_str}",
+            deduplicate=True,
             **kwargs,
         )
     except Exception:

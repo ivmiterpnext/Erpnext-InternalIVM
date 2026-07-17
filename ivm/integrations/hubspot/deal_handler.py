@@ -34,6 +34,36 @@ def _apply_status(doc: Any, value: Any) -> None:
         doc.status = mapped
 
 
+def _apply_lost_reason(doc: Any, value: Any) -> None:
+    """Map a HubSpot closed_lost_reason to a CRM Lost Reason record.
+
+    Attempts case-insensitive matching against existing CRM Lost Reason
+    records.  Falls back to "Other" with the raw value in ``lost_notes``
+    if no match is found.  Only applies when the deal status is "Lost".
+    """
+    if not value:
+        return
+
+    value_str = str(value).strip()
+    if not value_str:
+        return
+
+    # Build a case-insensitive lookup of existing lost reasons
+    existing = frappe.get_all("CRM Lost Reason", pluck="name")
+    lookup = {name.lower(): name for name in existing}
+
+    matched = lookup.get(value_str.lower())
+    if matched:
+        doc.lost_reason = matched
+    else:
+        doc.lost_reason = "Other"
+        doc.lost_notes = value_str
+        frappe.logger("hubspot").info(
+            f"HubSpot closed_lost_reason '{value_str}' did not match any "
+            f"CRM Lost Reason — set to 'Other' with lost_notes"
+        )
+
+
 def _apply_pipeline(doc: Any, value: Any) -> None:
     mapped = PIPELINE_MAP.get(value or "")
     if mapped:
@@ -100,6 +130,7 @@ def _apply_client_id(doc: Any, value: Any) -> None:
 DEAL_TRANSFORMS = {
     "deal_value": _apply_deal_value,
     "status": _apply_status,
+    "lost_reason": _apply_lost_reason,
     "custom_pipeline": _apply_pipeline,
     "custom_deal_type": _apply_deal_type,
     "deal_owner": _apply_deal_owner,

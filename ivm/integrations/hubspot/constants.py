@@ -204,6 +204,7 @@ DEAL_FIELD_MAP: dict[str, str] = {
     "dealname": "custom_hubspot_deal_name",
     "amount": "deal_value",
     "dealstage": "status",
+    "closed_lost_reason": "lost_reason",
     "pipeline": "custom_pipeline",
     "closedate": "custom_expected_close_date",
     "dealtype": "custom_deal_type",

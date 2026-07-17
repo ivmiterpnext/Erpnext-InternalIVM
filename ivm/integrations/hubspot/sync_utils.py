@@ -91,13 +91,38 @@ def apply_field_map(
         doc.set(frappe_field, value)
 
 
-def save_doc(doc: Any, label: str = "hubspot") -> None:
-    """Save a Frappe doc with ignore_permissions and log the result."""
-    try:
-        doc.save(ignore_permissions=True)
-    except frappe.exceptions.TimestampMismatchError:
-        doc.reload()
-        doc.save(ignore_permissions=True)
+def save_doc(
+    doc: Any,
+    label: str = "hubspot",
+    mutate: Callable[[Any], None] | None = None,
+    max_retries: int = 3,
+) -> None:
+    """Save a Frappe doc with ignore_permissions, skip link validation, and log the result.
+
+    On ``TimestampMismatchError`` (concurrent modification), reloads the
+    doc and retries up to *max_retries* times. If *mutate* is provided,
+    it is called with the freshly-reloaded doc after each reload to
+    re-apply any field changes that were made before the failed save
+    (since ``reload()`` discards in-memory mutations).
+    """
+    doc.flags.ignore_links = True
+    attempt = 0
+    while True:
+        try:
+            doc.save(ignore_permissions=True)
+            break
+        except frappe.exceptions.TimestampMismatchError:
+            attempt += 1
+            if attempt > max_retries:
+                raise
+            frappe.logger(_LOG).warning(
+                f"{doc.doctype} {doc.name} modified concurrently — "
+                f"reloading and retrying save (attempt {attempt}/{max_retries})"
+            )
+            doc.reload()
+            if mutate:
+                mutate(doc)
+
     frappe.logger(_LOG).info(
         f"Synced {label} fields on {doc.doctype} {doc.name}"
     )
@@ -131,7 +156,7 @@ def lookup_or_create(
             f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})"
         )
         return doc, True
-    except frappe.DuplicateEntryError:
+    except (frappe.DuplicateEntryError, frappe.UniqueValidationError):
         frappe.db.rollback(save_point="before_lookup_or_create_insert")
         frappe.logger(_LOG).warning(
             f"HubSpot: duplicate on insert for {doctype} '{doc.name}' — concurrent write, fetching existing"

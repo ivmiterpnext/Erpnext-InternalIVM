@@ -14,6 +14,7 @@ constants maps HubSpot properties to intermediate dict keys; the actual
 doc manipulation happens in ``upsert_contact()``.
 """
 
+import re
 from typing import Any
 
 import frappe
@@ -31,6 +32,39 @@ from ivm.integrations.hubspot.sync_utils import (
 )
 
 HUBSPOT_ID_FIELD = HUBSPOT_CONTACT_ID_FIELD
+
+_EXT_PATTERN = re.compile(r"\s*(?:ext\.?|x)\s*(\d+)\s*$", re.IGNORECASE)
+_PHONE_CHARS = re.compile(r"[^0-9 +_\-,.*#()]")
+
+
+def _sanitize_phone(raw: str) -> tuple[str, str]:
+    """Strip extension suffixes from a phone number.
+
+    Returns ``(phone, extension)`` where *extension* is the bare digit
+    string (e.g. ``"1254"``) or ``""`` if none was found.
+    """
+    raw = (raw or "").strip()
+    if not raw:
+        return ("", "")
+
+    extension = ""
+    m = _EXT_PATTERN.search(raw)
+    if m:
+        extension = m.group(1)
+        raw = raw[:m.start()].strip()
+
+    # Strip any remaining non-phone characters (letters, etc.)
+    raw = _PHONE_CHARS.sub("", raw).strip()
+
+    # Frappe's phone regex allows max 20 characters
+    if len(raw) > 20:
+        raw = raw[:20].strip()
+
+    if not raw:
+        return ("", "")
+
+    return (raw, extension)
+
 
 # Fields from the field map that are handled specially (child tables, etc.)
 # rather than being set directly as flat fields on the Contact doc.
@@ -131,11 +165,14 @@ def upsert_contact(
     contact_doc = _find_existing_contact(email, hubspot_contact_id)
 
     if contact_doc:
-        _update_contact_fields(contact_doc, first_name, last_name, properties)
-        _sync_email(contact_doc, email)
-        _sync_phone_numbers(contact_doc, properties)
-        _set_hubspot_id(contact_doc, hubspot_contact_id)
-        save_doc(contact_doc, "contact")
+        def _apply_mutations(doc: Any) -> None:
+            _update_contact_fields(doc, first_name, last_name, properties)
+            _sync_email(doc, email)
+            _sync_phone_numbers(doc, properties)
+            _set_hubspot_id(doc, hubspot_contact_id)
+
+        _apply_mutations(contact_doc)
+        save_doc(contact_doc, "contact", mutate=_apply_mutations)
     else:
         contact_doc = frappe.new_doc("Contact")
         contact_doc.first_name = first_name or email
@@ -148,13 +185,23 @@ def upsert_contact(
         if email:
             contact_doc.append("email_ids", {"email_id": email, "is_primary": 1})
 
-        mobile_no = (properties.get("mobile_no") or "").strip()
-        if mobile_no:
-            contact_doc.append("phone_nos", {"phone": mobile_no, "is_primary_mobile_no": 1})
+        mobile_raw = (properties.get("mobile_no") or "").strip()
+        if mobile_raw:
+            mobile_no, mobile_ext = _sanitize_phone(mobile_raw)
+            if mobile_no:
+                row = {"phone": mobile_no, "is_primary_mobile_no": 1}
+                if mobile_ext:
+                    row["custom_phone_extension"] = mobile_ext
+                contact_doc.append("phone_nos", row)
 
-        phone = (properties.get("phone") or "").strip()
-        if phone:
-            contact_doc.append("phone_nos", {"phone": phone, "is_primary_phone": 1})
+        phone_raw = (properties.get("phone") or "").strip()
+        if phone_raw:
+            phone, phone_ext = _sanitize_phone(phone_raw)
+            if phone:
+                row = {"phone": phone, "is_primary_phone": 1}
+                if phone_ext:
+                    row["custom_phone_extension"] = phone_ext
+                contact_doc.append("phone_nos", row)
 
         frappe.db.savepoint("before_contact_insert")
         try:
@@ -175,11 +222,14 @@ def upsert_contact(
                     f"(email={email}, hubspot_id={hubspot_contact_id}) — skipping"
                 )
                 return None
-            _update_contact_fields(contact_doc, first_name, last_name, properties)
-            _sync_email(contact_doc, email)
-            _sync_phone_numbers(contact_doc, properties)
-            _set_hubspot_id(contact_doc, hubspot_contact_id)
-            save_doc(contact_doc, "contact")
+            def _apply_mutations(doc: Any) -> None:
+                _update_contact_fields(doc, first_name, last_name, properties)
+                _sync_email(doc, email)
+                _sync_phone_numbers(doc, properties)
+                _set_hubspot_id(doc, hubspot_contact_id)
+
+            _apply_mutations(contact_doc)
+            save_doc(contact_doc, "contact", mutate=_apply_mutations)
 
     if address_props:
         _sync_contact_address(contact_doc.name, address_props)
@@ -305,13 +355,23 @@ def _sync_phone_numbers(doc: Any, properties: dict[str, Any]) -> None:
     """Ensure mobile and phone numbers are present in the phone_nos child table."""
     existing_phones = {row.phone for row in (doc.get("phone_nos") or [])}
 
-    mobile_no = (properties.get("mobile_no") or "").strip()
-    if mobile_no and mobile_no not in existing_phones:
-        doc.append("phone_nos", {"phone": mobile_no, "is_primary_mobile_no": 1})
+    mobile_raw = (properties.get("mobile_no") or "").strip()
+    if mobile_raw:
+        mobile_no, mobile_ext = _sanitize_phone(mobile_raw)
+        if mobile_no and mobile_no not in existing_phones:
+            row = {"phone": mobile_no, "is_primary_mobile_no": 1}
+            if mobile_ext:
+                row["custom_phone_extension"] = mobile_ext
+            doc.append("phone_nos", row)
 
-    phone = (properties.get("phone") or "").strip()
-    if phone and phone not in existing_phones:
-        doc.append("phone_nos", {"phone": phone, "is_primary_phone": 1})
+    phone_raw = (properties.get("phone") or "").strip()
+    if phone_raw:
+        phone, phone_ext = _sanitize_phone(phone_raw)
+        if phone and phone not in existing_phones:
+            row = {"phone": phone, "is_primary_phone": 1}
+            if phone_ext:
+                row["custom_phone_extension"] = phone_ext
+            doc.append("phone_nos", row)
 
 
 def _set_hubspot_id(doc: Any, hubspot_contact_id: str | None) -> None:
