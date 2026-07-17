@@ -168,6 +168,10 @@ doc_events = {
         "validate": "ivm.deployments.event_handlers.project.validate",
         #"after_insert": "ivm.deployments.event_handlers.project.after_insert",
     },
+    "Stock Entry": {
+        "after_insert": "ivm.warehouse.event_handlers.stock_entry.after_insert",
+        "on_submit": "ivm.warehouse.event_handlers.stock_entry.on_submit",
+    },
 }
 
 # Scheduled Tasks
