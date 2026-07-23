@@ -204,8 +204,14 @@ def _sync_engagement_type(
 
 @contextmanager
 def _as_owner(hubspot_owner_id: str | None):
-    """Context manager that temporarily switches the Frappe session user for
-    correct ``owner`` attribution.  Yields the resolved email (or None).
+    """Resolve a HubSpot owner ID to a Frappe user email for doc attribution.
+
+    Yields the resolved email (or None). Does NOT switch
+    ``frappe.session.user`` — the session stays on the HubSpot integration
+    service account so downstream hooks (e.g. assignment, sharing) that run
+    their own permission checks succeed regardless of the resolved owner's
+    Frappe role permissions. Callers must set attribution fields (e.g.
+    ``doc.owner``, ``doc.assigned_to``) explicitly using the yielded email.
     """
     if not hubspot_owner_id:
         yield None
@@ -213,12 +219,7 @@ def _as_owner(hubspot_owner_id: str | None):
 
     email = api.get_owner_email(hubspot_owner_id)
     if email and frappe.db.exists("User", email):
-        prev = frappe.session.user
-        frappe.set_user(email)
-        try:
-            yield email
-        finally:
-            frappe.set_user(prev)
+        yield email
     else:
         yield None
 
@@ -305,7 +306,7 @@ def _sync_note(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
             )
         return
 
-    with _as_owner(props.get("hubspot_owner_id")):
+    with _as_owner(props.get("hubspot_owner_id")) as owner_email:
         doc = frappe.new_doc("FCRM Note")
         doc.title = "HubSpot Note"
         doc.content = body
@@ -313,6 +314,8 @@ def _sync_note(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
         doc.reference_docname = crm_deal_name
         doc.set(HUBSPOT_ENGAGEMENT_ID_FIELD, engagement_id)
         doc.insert(ignore_permissions=True)
+        if owner_email:
+            frappe.db.set_value(doc.doctype, doc.name, "owner", owner_email, update_modified=False)
 
         _sync_attachments(attachment_ids, crm_deal_name)
 
@@ -382,6 +385,8 @@ def _sync_call(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
                 doc.receiver = owner_email
 
         doc.insert(ignore_permissions=True)
+        if owner_email:
+            frappe.db.set_value(doc.doctype, doc.name, "owner", owner_email, update_modified=False)
 
         _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
 
@@ -422,7 +427,7 @@ def _create_calendar_note(
 
     content = f"{contact_display} {action} the meeting invite: **{meeting_title}**."
 
-    with _as_owner(props.get("hubspot_owner_id")):
+    with _as_owner(props.get("hubspot_owner_id")) as owner_email:
         doc = frappe.new_doc("FCRM Note")
         doc.title = _truncate(title, 140)
         doc.content = content
@@ -430,6 +435,8 @@ def _create_calendar_note(
         doc.reference_docname = crm_deal_name
         doc.set(HUBSPOT_ENGAGEMENT_ID_FIELD, engagement_id)
         doc.insert(ignore_permissions=True)
+        if owner_email:
+            frappe.db.set_value(doc.doctype, doc.name, "owner", owner_email, update_modified=False)
         frappe.logger(_LOG).info(
             f"Created calendar note for HubSpot email {engagement_id} → FCRM Note {doc.name}"
         )
@@ -479,7 +486,7 @@ def _sync_email(engagement_id: str, props: dict[str, Any], crm_deal_name: str) -
         or _parse_timestamp(props.get("_createdAt"))
     )
 
-    with _as_owner(props.get("hubspot_owner_id")):
+    with _as_owner(props.get("hubspot_owner_id")) as owner_email:
         doc = frappe.new_doc("Communication")
         doc.subject = subject
         doc.content = content
@@ -496,6 +503,8 @@ def _sync_email(engagement_id: str, props: dict[str, Any], crm_deal_name: str) -
         doc.message_id = message_id
         doc.has_attachment = 1 if props.get("hs_attachment_ids") else 0
         doc.insert(ignore_permissions=True)
+        if owner_email:
+            frappe.db.set_value(doc.doctype, doc.name, "owner", owner_email, update_modified=False)
 
         _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
 
@@ -544,6 +553,8 @@ def _sync_task(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
             doc.assigned_to = owner_email
 
         doc.insert(ignore_permissions=True)
+        if owner_email:
+            frappe.db.set_value(doc.doctype, doc.name, "owner", owner_email, update_modified=False)
 
         _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
 
@@ -585,7 +596,7 @@ def _sync_meeting(
         )
         return
 
-    with _as_owner(props.get("hubspot_owner_id")):
+    with _as_owner(props.get("hubspot_owner_id")) as owner_email:
         doc = frappe.new_doc("FCRM Note")
         doc.title = f"[Meeting] {title}"
         doc.content = content
@@ -593,6 +604,8 @@ def _sync_meeting(
         doc.reference_docname = crm_deal_name
         doc.set(HUBSPOT_ENGAGEMENT_ID_FIELD, engagement_id)
         doc.insert(ignore_permissions=True)
+        if owner_email:
+            frappe.db.set_value(doc.doctype, doc.name, "owner", owner_email, update_modified=False)
 
         _sync_attachments(props.get("hs_attachment_ids"), crm_deal_name)
 

@@ -2,9 +2,6 @@
  {
   "cell_carrier": [
    {
-    "cell_carrier": "--None--"
-   },
-   {
     "cell_carrier": "AT&T"
    },
    {
@@ -30,11 +27,7 @@
   "name": "Cellular"
  },
  {
-  "cell_carrier": [
-   {
-    "cell_carrier": "--None--"
-   }
-  ],
+  "cell_carrier": [],
   "connectivity_type": "Not Needed",
   "docstatus": 0,
   "doctype": "Connectivity Type",
@@ -42,11 +35,7 @@
   "name": "Not Needed"
  },
  {
-  "cell_carrier": [
-   {
-    "cell_carrier": "--None--"
-   }
-  ],
+  "cell_carrier": [],
   "connectivity_type": "Other",
   "docstatus": 0,
   "doctype": "Connectivity Type",
@@ -54,11 +43,7 @@
   "name": "Other"
  },
  {
-  "cell_carrier": [
-   {
-    "cell_carrier": "--None--"
-   }
-  ],
+  "cell_carrier": [],
   "connectivity_type": "LAN",
   "docstatus": 0,
   "doctype": "Connectivity Type",
@@ -67,9 +52,6 @@
  },
  {
   "cell_carrier": [
-   {
-    "cell_carrier": "--None--"
-   },
    {
     "cell_carrier": "AT&T"
    },
@@ -94,17 +76,5 @@
   "doctype": "Connectivity Type",
   "modified": "2023-08-11 02:51:32.349999",
   "name": "WiFi"
- },
- {
-  "cell_carrier": [
-   {
-    "cell_carrier": "--None--"
-   }
-  ],
-  "connectivity_type": "--None--",
-  "docstatus": 0,
-  "doctype": "Connectivity Type",
-  "modified": "2023-08-11 02:47:04.631002",
-  "name": "--None--"
  }
 ]

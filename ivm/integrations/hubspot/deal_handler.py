@@ -225,8 +225,22 @@ def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
     )
     properties: dict[str, Any] = hubspot_data.get("properties", {})
 
-    _sync_organization(hubspot_deal_id, crm_deal_name)
-    _sync_contacts(hubspot_deal_id, crm_deal_name)
+    try:
+        _sync_organization(hubspot_deal_id, crm_deal_name)
+    except Exception:
+        frappe.log_error(
+            title=f"HubSpot: failed to sync organization for deal {crm_deal_name}",
+            message=frappe.get_traceback(with_context=True),
+        )
+
+    try:
+        _sync_contacts(hubspot_deal_id, crm_deal_name)
+    except Exception:
+        frappe.log_error(
+            title=f"HubSpot: failed to sync contacts for deal {crm_deal_name}",
+            message=frappe.get_traceback(with_context=True),
+        )
+
     _sync_deal_fields(crm_deal_name, properties)
 
 
@@ -328,7 +342,15 @@ def _ensure_contacts(crm_deal_name: str, contacts: list[dict[str, Any]]) -> None
     deal = frappe.get_doc("CRM Deal", crm_deal_name)
 
     for idx, entry in enumerate(contacts):
-        contact_name = upsert_contact(entry)
+        try:
+            contact_name = upsert_contact(entry)
+        except Exception:
+            frappe.log_error(
+                title=f"HubSpot: failed to upsert contact for deal {crm_deal_name}",
+                message=frappe.get_traceback(with_context=True),
+            )
+            continue
+
         if not contact_name:
             continue
 

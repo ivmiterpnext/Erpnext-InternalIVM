@@ -15909,15 +15909,15 @@
    "owner": "Administrator",
    "property": "depends_on",
    "property_type": "Data",
-   "row_name": null,
-   "value": "eval:doc.project_type=='Deployment'\n&& doc.custom_schema_version==1;"
-  },
-  {
-   "_assign": null,
-   "_comments": null,
-   "_liked_by": null,
-   "_user_tags": null,
-   "creation": "2026-04-27 09:26:55.816927",
+    "row_name": null,
+    "value": "eval:doc.project_type=='Deployment';"
+   },
+   {
+    "_assign": null,
+    "_comments": null,
+    "_liked_by": null,
+    "_user_tags": null,
+    "creation": "2026-04-27 09:26:55.816927",
    "default_value": null,
    "doc_type": "Project",
    "docstatus": 0,

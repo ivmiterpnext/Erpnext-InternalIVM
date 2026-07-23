@@ -2589,7 +2589,7 @@
   "property": "depends_on",
   "property_type": "Data",
   "row_name": null,
-  "value": "eval:doc.project_type=='Deployment'\n&& doc.custom_schema_version==1;"
+  "value": "eval:doc.project_type=='Deployment';"
  },
  {
   "default_value": null,

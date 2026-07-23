@@ -267,26 +267,13 @@ def bucket_employee_count(count_str: str | None) -> str:
 
 
 def set_acting_user(hubspot_user_id: int | str | None = None) -> None:
-    """Set the Frappe session user based on the HubSpot user who triggered the event.
+    """Set the Frappe session user to the HubSpot integration service account.
 
-    Resolves the HubSpot user/owner ID to an email via the Owners API,
-    then checks if that email corresponds to a Frappe User. Falls back
-    to the HubSpot service account when resolution fails or no matching
-    Frappe user exists.
-
-    Owner email resolution is cached in ``api.get_owner_email``
-    so repeated calls for the same owner ID within a single worker process
-    don't hit the HubSpot API again.
+    All HubSpot sync operations run as the dedicated ``HUBSPOT_USER`` service
+    account so they have consistent, sufficient permissions regardless of
+    which HubSpot user triggered the webhook. ``hubspot_user_id`` is accepted
+    for backwards compatibility but is no longer used to switch the acting
+    user — attribution (e.g. ``doc.owner``, ``doc.assigned_to``) should be
+    set explicitly by callers instead of relying on the session user.
     """
-    if not hubspot_user_id:
-        frappe.set_user(HUBSPOT_USER)
-        return
-
-    from ivm.integrations.hubspot import api
-
-    email = api.get_owner_email(hubspot_user_id)
-
-    if email and frappe.db.exists("User", email):
-        frappe.set_user(email)
-    else:
-        frappe.set_user(HUBSPOT_USER)
+    frappe.set_user(HUBSPOT_USER)
