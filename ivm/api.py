@@ -3,7 +3,6 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.data import getdate, add_days
 import math
-from frappe.utils.jinja import render_template
 
 
 @frappe.whitelist()
@@ -122,60 +121,6 @@ def make_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def creating_issue(doc, method):
-    try:
-        attachments = doc.get_attachments()
-        reference_name = frappe.get_all('Communication', filters={'reference_name': doc.reference_name}, fields=['reference_name'])
-        # getting record matching to email received
-        email = None
-        if (doc.email_account):
-            email = frappe.db.get_value(
-                'Email Account', {'name': doc.email_account}, "name")
-
-        if email:
-            email_Account = frappe.get_doc("Email Account", email)
-            # getting issue type from email account doctype
-            issue_type = email_Account.imap_folder[0].custom_issue_type
-            issue = frappe.db.get_value('Issue', {'name': doc.reference_name})
-            issue_name = frappe.get_doc("Issue", issue)
-            if (issue_type in ['IT', 'Support', 'Receivable', 'Reconfiguration', 'Vending Management']):
-                customer = fetch_customer_name_and_contact(doc.sender)
-                issue_name.customer = customer.get('customer_name')
-                issue_name.contact_name = customer.get('contact_name')
-            issue_name.issue_type = issue_type
-            if (len(reference_name) <= 1):
-                issue_name.description = doc.content
-            issue_name.save()
-            if (attachments):
-                frappe.log_error("attachments", attachments)
-                file_urls = [url['file_url'] for url in attachments]
-                for links in file_urls:
-                    file = frappe.get_doc({
-                        'doctype': 'File',
-                        'is_private': 1,
-                        'file_url': links,
-                        'attached_to_doctype': 'Issue',
-                        'attached_to_name': doc.reference_name
-                    })
-                    file.save()
-            frappe.db.commit()
-    except Exception as e:
-        pass
-
-
-def fetch_customer_name_and_contact(sender_name):
-    try:
-        contact_name = frappe.db.sql("""SELECT DISTINCT c.name AS contact_name, dl.link_name AS customer_name
-                                   FROM `tabContact` c
-                                   INNER JOIN `tabContact Email` ce ON c.name = ce.parent
-                                   LEFT JOIN `tabDynamic Link` dl ON c.name = dl.parent AND dl.link_doctype = 'Customer'
-                                   WHERE ce.email_id = '{0}' """.format(sender_name), as_dict=True)
-        return contact_name[0]
-    except Exception as e:
-        pass
-
-
-@frappe.whitelist()
 def calculate_closed_opportunity_total(customer_name):
     # Initialize the total value
     total_value = 0
@@ -249,15 +194,6 @@ def override_project_dashboard(data):
 
 
 @frappe.whitelist()
-def fetching_dates(doc, method):
-    doc.db_set('created_date', doc.creation)
-    doc.db_set('custom_modified_date', doc.modified)
-    doc.db_set('custom_created_by', doc.owner)
-    doc.db_set('custom_modified_by', doc.modified_by)
-    doc.reload()
-
-
-@frappe.whitelist()
 def search_machine_numbers(machine_no):
     issue_doc = frappe.db.sql(
         """SELECT name FROM `tabIssue` WHERE machine_number LIKE %s""",
@@ -292,34 +228,3 @@ def search_machine_numbers(machine_no):
     )
 
     return {"issue": issue_doc, "project": project_doc, "warehouse-request": warehouse_request_doc}
-
-
-def send_auto_reply(self, communication, email):
-    frappe.log_error('email.from_email',email.from_email)
-    """Send auto reply if set."""
-    from frappe.core.doctype.communication.email import set_incoming_outgoing_accounts
-
-    if self.enable_auto_reply:
-
-        set_incoming_outgoing_accounts(communication)
-
-        unsubscribe_message = (self.send_unsubscribe_message and _(
-            "Leave this conversation")) or ""
-        issue_name = frappe.get_all('Communication', filters={
-                                    'reference_name': communication.reference_name}, fields=['reference_name'])
-        if (len(issue_name) <= 1):
-            frappe.sendmail(
-                recipients=[email.from_email],
-                sender=self.email_id,
-                reply_to=communication.incoming_email_account,
-                subject=" ".join([_("Re:"), communication.subject]),
-                content=render_template(
-                    self.auto_reply_message or "", communication.as_dict())
-                or frappe.get_template("templates/emails/auto_reply.html").render(communication.as_dict()),
-                reference_doctype=communication.reference_doctype,
-                reference_name=communication.reference_name,
-                # send back the Message-Id as In-Reply-To
-                in_reply_to=email.mail.get(
-                    "Message-Id"),
-                unsubscribe_message=unsubscribe_message,
-            )

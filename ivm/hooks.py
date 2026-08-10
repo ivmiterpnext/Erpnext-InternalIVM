@@ -140,19 +140,19 @@ doctype_list_js = {
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# "ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+    "Email Account": "ivm.support.overrides.CustomEmailAccount",
+}
 # Document Events
 # ---------------
 # Hook on document methods and events
 
 doc_events = {
     "Communication": {
-        "on_update": "ivm.api.creating_issue",
+        "on_update": "ivm.support.event_handlers.communication.on_update",
     },
     "Issue": {
-        "on_update": "ivm.api.fetching_dates"
+        "on_update": "ivm.support.event_handlers.issue.on_update"
     },
     "Item": {
         "before_save": "ivm.warehouse.event_handlers.item.before_save"
