@@ -16,6 +16,22 @@ _FALSY = frozenset({"false", "0", "no"})
 _BOOLEAN_ISH = _TRUTHY | _FALSY
 
 
+class ConcurrentCreateConflict(Exception):
+    """Raised when lookup_or_create hits a unique-constraint violation on insert
+    but the concurrently-committed row is not yet visible in this transaction's
+    snapshot (MariaDB REPEATABLE READ). Callers should re-enqueue their job so
+    the retry runs in a fresh transaction that can see the committed row.
+    """
+
+    def __init__(self, doctype: str, hubspot_id_field: str, hubspot_id: str) -> None:
+        self.doctype = doctype
+        self.hubspot_id_field = hubspot_id_field
+        self.hubspot_id = hubspot_id
+        super().__init__(
+            f"Concurrent create conflict on {doctype} ({hubspot_id_field}={hubspot_id})"
+        )
+
+
 def coerce_value(value: Any, df: Any = None) -> Any:
     """Coerce a single HubSpot value based on the target Frappe field type."""
     if df is None:
@@ -156,7 +172,7 @@ def lookup_or_create(
             f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})"
         )
         return doc, True
-    except (frappe.DuplicateEntryError, frappe.UniqueValidationError):
+    except (frappe.DuplicateEntryError, frappe.UniqueValidationError) as e:
         frappe.db.rollback(save_point="before_lookup_or_create_insert")
         frappe.logger(_LOG).warning(
             f"HubSpot: duplicate on insert for {doctype} '{doc.name}' — concurrent write, fetching existing"
@@ -166,7 +182,18 @@ def lookup_or_create(
         )
         if existing_name:
             return frappe.get_doc(doctype, existing_name), False
-        raise
+
+        # Concurrent committer's row may not be visible yet under this
+        # transaction's REPEATABLE READ snapshot. Force a fresh snapshot
+        # and check once more before giving up.
+        frappe.db.commit()
+        existing_name = frappe.db.get_value(
+            doctype, {hubspot_id_field: hubspot_id}, "name",
+        )
+        if existing_name:
+            return frappe.get_doc(doctype, existing_name), False
+
+        raise ConcurrentCreateConflict(doctype, hubspot_id_field, hubspot_id) from e
 
 
 def upsert_address(

@@ -165,7 +165,7 @@ def _route_event(event: dict[str, Any]) -> None:
         frappe.enqueue(
             method,
             queue="long",
-            job_id=f"hubspot_{object_type_id}_{object_id_str}",
+            job_id=f"hubspot_{object_type_id}_{object_id_str}_{subscription_type}",
             deduplicate=True,
             **kwargs,
         )

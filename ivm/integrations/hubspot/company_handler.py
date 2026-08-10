@@ -19,6 +19,7 @@ from ivm.integrations.hubspot.constants import (
     HUBSPOT_INDUSTRY_LABELS,
 )
 from ivm.integrations.hubspot.sync_utils import (
+    ConcurrentCreateConflict,
     apply_field_map,
     bucket_employee_count,
     lookup_or_create,
@@ -88,6 +89,16 @@ def handle_company_created(
             )
             return
         _sync_company(hubspot_company_id, doc.name)
+    except ConcurrentCreateConflict:
+        frappe.logger("hubspot").warning(
+            f"HubSpot: concurrent create conflict for company {hubspot_company_id} — re-enqueueing"
+        )
+        frappe.enqueue(
+            "ivm.integrations.hubspot.company_handler.handle_company_created",
+            queue="long",
+            hubspot_company_id=hubspot_company_id,
+            hubspot_user_id=hubspot_user_id,
+        )
     except api.HubSpotRateLimitExhausted:
         frappe.logger("hubspot").warning(
             f"HubSpot: rate limit exhausted creating CRM Organization for company {hubspot_company_id} — re-enqueueing"
@@ -118,10 +129,11 @@ def handle_company_updated(
             "name",
         )
         if not org_name:
-            frappe.logger("hubspot").warning(
-                f"No CRM Organization found for HubSpot company {hubspot_company_id}, "
-                f"skipping update"
+            frappe.logger("hubspot").info(
+                f"No CRM Organization found for HubSpot company {hubspot_company_id} "
+                f"— provisioning before applying update"
             )
+            handle_company_created(hubspot_company_id, hubspot_user_id)
             return
         _sync_company(hubspot_company_id, org_name)
     except api.HubSpotRateLimitExhausted:

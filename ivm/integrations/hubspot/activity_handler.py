@@ -153,16 +153,48 @@ def handle_engagement_webhook(
         )
         return
 
+    from ivm.integrations.hubspot.deal_handler import ConcurrentCreateConflict, ensure_deal_exists
+
     for deal_id in deal_ids:
         crm_deal_name = frappe.db.get_value(
             "CRM Deal", {HUBSPOT_DEAL_ID_FIELD: str(deal_id)}, "name",
         )
         if not crm_deal_name:
-            frappe.logger(_LOG).warning(
-                f"No CRM Deal for HubSpot deal {deal_id} — "
-                f"skipping {engagement_type} {engagement_id_str}"
-            )
-            continue
+            try:
+                crm_deal_name, _ = ensure_deal_exists(deal_id, hubspot_user_id)
+            except ConcurrentCreateConflict:
+                frappe.logger(_LOG).warning(
+                    f"HubSpot: concurrent create conflict for deal {deal_id} — "
+                    f"re-enqueueing {engagement_type} {engagement_id_str}"
+                )
+                frappe.enqueue(
+                    "ivm.integrations.hubspot.activity_handler.handle_engagement_webhook",
+                    queue="long",
+                    engagement_type=engagement_type,
+                    engagement_id=engagement_id,
+                    hubspot_user_id=hubspot_user_id,
+                )
+                return
+            except api.HubSpotRateLimitExhausted:
+                frappe.logger(_LOG).warning(
+                    f"HubSpot: rate limit exhausted creating CRM Deal {deal_id} — "
+                    f"re-enqueueing {engagement_type} {engagement_id_str}"
+                )
+                frappe.enqueue(
+                    "ivm.integrations.hubspot.activity_handler.handle_engagement_webhook",
+                    queue="long",
+                    engagement_type=engagement_type,
+                    engagement_id=engagement_id,
+                    hubspot_user_id=hubspot_user_id,
+                )
+                return
+            except Exception:
+                frappe.log_error(
+                    title=f"HubSpot: failed to create CRM Deal {deal_id} for "
+                          f"{engagement_type} {engagement_id_str}",
+                    message=frappe.get_traceback(with_context=True),
+                )
+                continue
 
         try:
             handler(engagement_id_str, props, crm_deal_name)

@@ -359,6 +359,8 @@ def _sync_phone_numbers(doc: Any, properties: dict[str, Any]) -> None:
     if mobile_raw:
         mobile_no, mobile_ext = _sanitize_phone(mobile_raw)
         if mobile_no and mobile_no not in existing_phones:
+            for row in doc.get("phone_nos") or []:
+                row.is_primary_mobile_no = 0
             row = {"phone": mobile_no, "is_primary_mobile_no": 1}
             if mobile_ext:
                 row["custom_phone_extension"] = mobile_ext
@@ -368,6 +370,8 @@ def _sync_phone_numbers(doc: Any, properties: dict[str, Any]) -> None:
     if phone_raw:
         phone, phone_ext = _sanitize_phone(phone_raw)
         if phone and phone not in existing_phones:
+            for row in doc.get("phone_nos") or []:
+                row.is_primary_phone = 0
             row = {"phone": phone, "is_primary_phone": 1}
             if phone_ext:
                 row["custom_phone_extension"] = phone_ext

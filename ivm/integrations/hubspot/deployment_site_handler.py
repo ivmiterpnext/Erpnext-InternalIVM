@@ -21,7 +21,7 @@ from ivm.integrations.hubspot.constants import (
     MACHINE_TYPES_WITH_BINS,
     SITE_FIELD_MAP,
 )
-from ivm.integrations.hubspot.sync_utils import coerce_value, set_acting_user
+from ivm.integrations.hubspot.sync_utils import ConcurrentCreateConflict, coerce_value, set_acting_user
 
 _LOG = "hubspot"
 
@@ -71,11 +71,11 @@ def handle_site_webhook(
     set_acting_user(hubspot_user_id)
     site_id_str = str(hubspot_site_id)
 
-    crm_deal_name = _resolve_deal_for_site(site_id_str)
-    if not crm_deal_name:
-        return
-
     try:
+        crm_deal_name = _resolve_deal_for_site(site_id_str, hubspot_user_id)
+        if not crm_deal_name:
+            return
+
         with _log_error(f"failed to sync deployment site {site_id_str}"):
             site_data = api.get_custom_object(
                 DEPLOYMENT_SITE_TYPE_ID, site_id_str,
@@ -90,6 +90,16 @@ def handle_site_webhook(
             frappe.logger(_LOG).info(
                 f"Synced deployment site {site_id_str} to CRM Deal {crm_deal_name}"
             )
+    except ConcurrentCreateConflict:
+        frappe.logger(_LOG).warning(
+            f"HubSpot: concurrent create conflict resolving deal for site {site_id_str} — re-enqueueing"
+        )
+        frappe.enqueue(
+            "ivm.integrations.hubspot.deployment_site_handler.handle_site_webhook",
+            queue="long",
+            hubspot_site_id=hubspot_site_id,
+            hubspot_user_id=hubspot_user_id,
+        )
     except api.HubSpotRateLimitExhausted:
         frappe.logger(_LOG).warning(
             f"HubSpot: rate limit exhausted syncing site {site_id_str} — re-enqueueing"
@@ -188,8 +198,18 @@ def handle_bin_webhook(
         )
 
 
-def _resolve_deal_for_site(site_id: str) -> str | None:
-    """Find the CRM Deal for a site via HubSpot associations, falling back to local lookup."""
+def _resolve_deal_for_site(site_id: str, hubspot_user_id: int | str | None = None) -> str | None:
+    """Find the CRM Deal for a site via HubSpot associations, falling back to local lookup.
+
+    Self-heals by creating the CRM Deal if HubSpot has at least one deal
+    association for this site but no local CRM Deal record matches yet
+    (e.g. the deal's own object.creation event hasn't been processed yet).
+
+    May raise ConcurrentCreateConflict or api.HubSpotRateLimitExhausted —
+    the caller (handle_site_webhook) handles re-enqueueing.
+    """
+    from ivm.integrations.hubspot.deal_handler import ensure_deal_exists
+
     deal_ids: list = []
     with _log_error(f"failed to fetch deal associations for site {site_id}"):
         deal_ids = api.get_site_deal_ids(site_id)
@@ -206,6 +226,10 @@ def _resolve_deal_for_site(site_id: str) -> str | None:
     )
     if crm_deal:
         return crm_deal
+
+    if deal_ids:
+        crm_deal_name, _ = ensure_deal_exists(deal_ids[0], hubspot_user_id)
+        return crm_deal_name
 
     frappe.logger(_LOG).warning(
         f"No CRM Deal found for deployment site {site_id} — skipping"

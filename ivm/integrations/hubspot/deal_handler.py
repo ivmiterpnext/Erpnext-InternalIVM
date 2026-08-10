@@ -17,6 +17,7 @@ from ivm.integrations.hubspot.constants import (
     PIPELINE_MAP,
 )
 from ivm.integrations.hubspot.sync_utils import (
+    ConcurrentCreateConflict,
     apply_field_map,
     lookup_or_create,
     save_doc,
@@ -152,9 +153,9 @@ def handle_deal_created(
             defaults={"status": "Discovery"},
         )
         if not is_new:
-            frappe.log_error(
-                title=f"HubSpot: CRM Deal already exists for deal {hubspot_deal_id}",
-                message="Skipping duplicate deal creation.",
+            frappe.logger("hubspot").info(
+                f"CRM Deal already exists for HubSpot deal {hubspot_deal_id} "
+                f"(created by a concurrent event or self-heal) — skipping duplicate creation"
             )
             return
         _sync_deal(hubspot_deal_id, doc.name)
@@ -179,18 +180,28 @@ def handle_deal_updated(
     hubspot_deal_id: int | str,
     hubspot_user_id: int | str | None = None,
 ) -> None:
-    """Sync a HubSpot deal's current state to the matching CRM Deal."""
+    """Sync a HubSpot deal's current state to the matching CRM Deal.
+
+    Creates the CRM Deal first (via ensure_deal_exists) if it doesn't exist
+    yet — a propertyChange or associationChange event can arrive for a deal
+    whose object.creation event was missed, deduplicated away, or not yet
+    processed.
+    """
     set_acting_user(hubspot_user_id)
     try:
-        crm_deal_name = frappe.db.get_value(
-            "CRM Deal", {HUBSPOT_DEAL_ID_FIELD: str(hubspot_deal_id)}, "name",
+        crm_deal_name, was_created = ensure_deal_exists(hubspot_deal_id, hubspot_user_id)
+        if not was_created:
+            _sync_deal(hubspot_deal_id, crm_deal_name)
+    except ConcurrentCreateConflict:
+        frappe.logger("hubspot").warning(
+            f"HubSpot: concurrent create conflict for deal {hubspot_deal_id} — re-enqueueing"
         )
-        if not crm_deal_name:
-            frappe.logger("hubspot").warning(
-                f"No CRM Deal found for HubSpot deal {hubspot_deal_id}, skipping update"
-            )
-            return
-        _sync_deal(hubspot_deal_id, crm_deal_name)
+        frappe.enqueue(
+            "ivm.integrations.hubspot.deal_handler.handle_deal_updated",
+            queue="long",
+            hubspot_deal_id=hubspot_deal_id,
+            hubspot_user_id=hubspot_user_id,
+        )
     except api.HubSpotRateLimitExhausted:
         frappe.logger("hubspot").warning(
             f"HubSpot: rate limit exhausted syncing CRM Deal for deal {hubspot_deal_id} — re-enqueueing"
@@ -206,6 +217,40 @@ def handle_deal_updated(
             title=f"HubSpot: failed to sync deal {hubspot_deal_id}",
             message=frappe.get_traceback(with_context=True),
         )
+
+
+def ensure_deal_exists(
+    hubspot_deal_id: int | str,
+    hubspot_user_id: int | str | None = None,
+) -> tuple[str, bool]:
+    """Return (crm_deal_name, was_created) for hubspot_deal_id.
+
+    Creates the CRM Deal (and fully syncs it via _sync_deal) if it doesn't
+    exist yet. Used by callers that reference a deal — engagements,
+    deployment sites, or the deal's own propertyChange/associationChange
+    events — which may arrive before the deal's own object.creation event
+    has been processed (missed, deduplicated, or simply not yet run).
+
+    May raise ConcurrentCreateConflict or api.HubSpotRateLimitExhausted —
+    callers are responsible for catching and re-enqueueing their own job.
+    """
+    crm_deal_name = frappe.db.get_value(
+        "CRM Deal", {HUBSPOT_DEAL_ID_FIELD: str(hubspot_deal_id)}, "name",
+    )
+    if crm_deal_name:
+        return crm_deal_name, False
+
+    frappe.logger("hubspot").info(
+        f"No CRM Deal found for HubSpot deal {hubspot_deal_id} — creating"
+    )
+    doc, _ = lookup_or_create(
+        doctype="CRM Deal",
+        hubspot_id_field=HUBSPOT_DEAL_ID_FIELD,
+        hubspot_id=str(hubspot_deal_id),
+        defaults={"status": "Discovery"},
+    )
+    _sync_deal(hubspot_deal_id, doc.name)
+    return doc.name, True
 
 
 def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
