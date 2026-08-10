@@ -23,3 +23,4 @@ ivm.integrations.hubspot.patches.backfill_contacts_from_hubspot
 ivm.integrations.hubspot.patches.backfill_activities_from_hubspot
 ivm.warehouse.patches.delete_stale_wr_field_order_property_setter
 ivm.patches.remove_none_connectivity_type
+ivm.warehouse.patches.fix_warehouse_request_row_size

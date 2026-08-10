@@ -837,23 +837,23 @@
   },
   {
    "fieldname": "5_machine_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "5 Machine Number"
   },
   {
    "fieldname": "5_motherboard_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "5 Motherboard Number"
   },
   {
    "fieldname": "5_serial_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "5 Serial Number"
   },
   {
    "fieldname": "5_mac_address",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "5 MAC Address",
    "translatable": 1
   },
@@ -895,23 +895,23 @@
   },
   {
    "fieldname": "6_machine_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "6 Machine Number"
   },
   {
    "fieldname": "6_motherboard_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "6 Motherboard Number"
   },
   {
    "fieldname": "6_serial_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "6 Serial Number"
   },
   {
    "fieldname": "6_mac_address",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "6 MAC Address",
    "translatable": 1
   },
@@ -923,23 +923,23 @@
   },
   {
    "fieldname": "7_machine_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "7 Machine Number"
   },
   {
    "fieldname": "7_motherboard_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "7 Motherboard Number"
   },
   {
    "fieldname": "7_serial_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "7 Serial Number"
   },
   {
    "fieldname": "7_mac_address",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "7 MAC Address",
    "translatable": 1
   },
@@ -951,23 +951,23 @@
   },
   {
    "fieldname": "8_machine_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "8 Machine Number"
   },
   {
    "fieldname": "8_motherboard_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "8 Motherboard Number"
   },
   {
    "fieldname": "8_serial_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "8 Serial Number"
   },
   {
    "fieldname": "8_mac_address",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "8 MAC Address",
    "translatable": 1
   },
@@ -979,23 +979,23 @@
   },
   {
    "fieldname": "9_machine_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "9 Machine Number"
   },
   {
    "fieldname": "9_motherboard_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "9 Motherboard Number"
   },
   {
    "fieldname": "9_serial_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "9 Serial Number"
   },
   {
    "fieldname": "9_mac_address",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "9 MAC Address",
    "translatable": 1
   },
@@ -1007,23 +1007,23 @@
   },
   {
    "fieldname": "10_machine_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "10 Machine Number"
   },
   {
    "fieldname": "10_motherboard_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "10 Motherboard Number"
   },
   {
    "fieldname": "10_serial_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "10 Serial Number"
   },
   {
    "fieldname": "10_mac_address",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "10 MAC Address",
    "translatable": 1
   },
@@ -1045,33 +1045,33 @@
    "fieldtype": "Date",
    "label": "Created Date"
   },
-   {
-    "fieldname": "column_break_ausuf",
-    "fieldtype": "Column Break"
-   },
-   {
-    "fieldname": "lan_mac_address",
-    "fieldtype": "Data",
-    "in_global_search": 1,
-    "label": "LAN Mac Address"
-   },
-   {
-    "default": "  ",
-    "fieldname": "serial_number",
-    "fieldtype": "Data",
-    "in_global_search": 1,
-    "label": "Serial Number",
-    "translatable": 1
-   },
+  {
+   "fieldname": "column_break_ausuf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lan_mac_address",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "LAN Mac Address"
+  },
+  {
+   "default": "  ",
+   "fieldname": "serial_number",
+   "fieldtype": "Small Text",
+   "in_global_search": 1,
+   "label": "Serial Number",
+   "translatable": 1
+  },
   {
    "fieldname": "prose_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "PROSE Number"
   },
   {
    "fieldname": "machine_name",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Machine Name"
   },
   {
