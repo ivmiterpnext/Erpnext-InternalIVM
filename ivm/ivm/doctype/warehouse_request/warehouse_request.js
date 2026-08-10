@@ -24,21 +24,21 @@ frappe.ui.form.on('Warehouse Request', {
 
 	refresh: function(frm) {
 		toggle_rfid_add_row(frm);
-		if (frm.doc.schema_version >= 2 && frm.doc.source_detail_doctype && frm.doc.source_detail_row) {
-			if (!frm._machine_details) {
+		if (!frm._machine_details) {
 			frm._machine_details = new ivm.EmbeddedForm({
 				parent_form: frm,
 				html_field_name: 'machine_details_html',
 				embedded_doctype_field: 'source_detail_doctype',
 				dynamic_link_field: 'source_detail_row',
 				readOnly: true,
+				extra_condition: () => frm.doc.schema_version >= 2,
 				custom_renderers: {
 					bins_data: renderBinsReadOnly,
 				},
 			});
-			}
-			frm._machine_details.render();
 		}
+		// Rendering/clearing on every refresh is now handled automatically by
+		// EmbeddedForm's internal frm.refresh hook.
 
 		if (!frm.is_new() && frm.doc.schema_version >= 2 && (frm.doc.request_reason || '').includes('Build')) {
 			frappe.call({

@@ -40,6 +40,12 @@ ivm.EmbeddedForm = class {
         this.readOnly = config.readOnly || false;
         this.hideEmptyFields = config.hideEmptyFields || false;
 
+        // Optional extra gating condition, evaluated in addition to
+        // "doctype + docname both resolved". Lets host doctypes add
+        // supplementary rules (e.g. schema_version checks) without needing
+        // to gate the render()/clear() call themselves.
+        this.extra_condition = config.extra_condition || (() => true);
+
         // Editable-only config
         this.save_method = config.save_method || null;
         this.on_change_callback = config.on_change_callback || null;
@@ -57,6 +63,9 @@ ivm.EmbeddedForm = class {
         this.field_controls = {};
         this.is_dirty = false;
         this.embedded_doc = null;
+
+        this._register_auto_sync();
+        this.render();
     }
 
     /**
@@ -84,7 +93,32 @@ ivm.EmbeddedForm = class {
      * Check if form should be rendered.
      */
     should_render() {
-        return this.get_doctype() && this.get_docname();
+        return this.get_doctype() && this.get_docname() && this.extra_condition();
+    }
+
+    /**
+     * Ensure render() is invoked on every refresh of the parent form,
+     * regardless of whether/how the host doctype's own refresh handler
+     * calls it. This prevents stale embedded content from a previously
+     * rendered document lingering when the current document no longer
+     * qualifies (different request_reason, missing source fields, etc.)
+     * but the host's own gating logic skips calling render()/clear().
+     * @private
+     */
+    _register_auto_sync() {
+        const frm = this.parent_form;
+
+        if (!frm.__embedded_forms) {
+            frm.__embedded_forms = [];
+            const original_refresh = frm.refresh.bind(frm);
+            frm.refresh = function(...args) {
+                const result = original_refresh(...args);
+                frm.__embedded_forms.forEach(function(ef) { ef.render(); });
+                return result;
+            };
+        }
+
+        frm.__embedded_forms.push(this);
     }
 
     /**
