@@ -5,7 +5,7 @@ import hashlib
 import frappe
 import requests
 
-from ivm.integrations.keyvault import get_config_value, get_secret_client
+from ivm.integrations.keyvault import get_config_value, get_secrets
 from ivm.integrations.icorp.utils import dict_keys_to_camel_case, dict_keys_to_snake_case
 
 _LOG = "ivm.integrations.headwind"
@@ -18,9 +18,9 @@ def _get_base_url():
     return url
 
 def _fetch_headwind_token():
-    client = get_secret_client()
-    login = client.get_secret("Headwind-Privileged-Api-User").value
-    password = client.get_secret("Headwind-Privileged-Api-User-Password").value
+    secrets = get_secrets(["Headwind-Privileged-Api-User", "Headwind-Privileged-Api-User-Password"])
+    login = secrets["Headwind-Privileged-Api-User"]
+    password = secrets["Headwind-Privileged-Api-User-Password"]
     password_md5 = hashlib.md5(password.encode("utf-8")).hexdigest().upper()
 
     response = requests.post(

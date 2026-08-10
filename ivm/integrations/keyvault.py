@@ -16,3 +16,14 @@ def get_secret_client():
         frappe.throw("azure_keyvault_url is not set in site config or environment variables.")
 
     return SecretClient(vault_url=vault_url, credential=DefaultAzureCredential())
+
+
+def get_secret(name):
+    """Retrieve a single secret value from Azure Key Vault by name."""
+    return get_secret_client().get_secret(name).value
+
+
+def get_secrets(names):
+    """Retrieve multiple secret values from Azure Key Vault in one client session."""
+    client = get_secret_client()
+    return {name: client.get_secret(name).value for name in names}

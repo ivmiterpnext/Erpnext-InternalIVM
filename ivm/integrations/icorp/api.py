@@ -5,7 +5,7 @@ from typing import Any
 import frappe
 import requests
 
-from ivm.integrations.keyvault import get_config_value, get_secret_client
+from ivm.integrations.keyvault import get_config_value, get_secrets
 from ivm.integrations.icorp.utils import (
 	dict_keys_to_camel_case,
 	dict_keys_to_snake_case,
@@ -41,11 +41,16 @@ def _get_api_scope() -> str:
 
 def get_icorp_auth() -> tuple[str, dict[str, str]]:
     """Authenticate via Azure AD ROPC flow and return ``(base_url, headers)``."""
-    kv = get_secret_client()
-    client_id     = kv.get_secret("ICorpAPI-AzureAd-ClientId").value
-    client_secret = kv.get_secret("ICorpAPI-AzureAd-ClientSecret").value
-    username      = kv.get_secret("FrappeServiceAccount-Username").value
-    password      = kv.get_secret("FrappeServiceAccount-Password").value
+    secrets = get_secrets([
+        "ICorpAPI-AzureAd-ClientId",
+        "ICorpAPI-AzureAd-ClientSecret",
+        "FrappeServiceAccount-Username",
+        "FrappeServiceAccount-Password",
+    ])
+    client_id = secrets["ICorpAPI-AzureAd-ClientId"]
+    client_secret = secrets["ICorpAPI-AzureAd-ClientSecret"]
+    username = secrets["FrappeServiceAccount-Username"]
+    password = secrets["FrappeServiceAccount-Password"]
 
     tenant_id = _get_tenant_id()
     token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
