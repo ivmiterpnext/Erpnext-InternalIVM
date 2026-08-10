@@ -21,7 +21,11 @@ Prod (from inside the bench container):
 Set DRY_RUN = True (default) to preview every action without writing
 anything. Set DRY_RUN = False to actually execute. Re-running this script
 after a partial or full run is safe — every phase checks for existing
-records before creating anything.
+records before creating anything. Phase 6 disables (rather than deletes)
+any item in ITEMS_TO_DELETE that has Stock Ledger Entry history, since
+force-deleting an Item with ledger history leaves historical transactions
+referencing a nonexistent item_code and breaks any report that iterates
+raw Stock Ledger Entries.
 """
 
 import frappe
@@ -30,7 +34,7 @@ import frappe
 # CONFIG
 # ---------------------------------------------------------------------------
 
-DRY_RUN = False
+DRY_RUN = True
 COMPANY = "IVM"
 
 STOCK_ADJUSTMENT_ACCOUNT = "5119 - Stock Adjustment - I"
@@ -683,9 +687,23 @@ def delete_orphaned_items():
                 f"Run Phase 5 (Stock Reconciliation) first.")
             continue
 
-        log(f"DELETE Item: {code}")
-        if not DRY_RUN:
-            frappe.delete_doc("Item", code, force=True, ignore_permissions=True)
+        # frappe.delete_doc(force=True) bypasses the link-existence check that would
+        # otherwise block deleting an Item with Stock Ledger Entry history. Doing so
+        # anyway leaves every historical Stock Entry / Stock Reconciliation row
+        # referencing an item_code with no Item record — any report that iterates raw
+        # Stock Ledger Entries (Stock Ledger, Stock Balance, etc.) then crashes with
+        # KeyError the moment it hits that item_code. If the item has ledger history,
+        # disable it instead of deleting the master record; the historical
+        # transactions stay valid and the item just stops being usable going forward.
+        has_sle = frappe.db.exists("Stock Ledger Entry", {"item_code": code})
+        if has_sle:
+            log(f"DISABLE Item (has Stock Ledger Entry history, cannot safely delete): {code}")
+            if not DRY_RUN:
+                frappe.db.set_value("Item", code, "disabled", 1)
+        else:
+            log(f"DELETE Item (no Stock Ledger Entry history): {code}")
+            if not DRY_RUN:
+                frappe.delete_doc("Item", code, force=True, ignore_permissions=True)
     if not DRY_RUN:
         frappe.db.commit()
     log("Phase 6 done.")
