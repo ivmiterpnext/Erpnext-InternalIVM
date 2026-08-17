@@ -75,6 +75,22 @@ frappe.ui.form.on('Warehouse Request', {
 		var is_pick_request = frm.doc.request_reason.includes('Build') || frm.doc.request_reason == 'Shipping Request';
 		if (!is_pick_request) return;
 
+		// Non-inventory shipments skip the Item Scanner — just show a Delivery Note button if one exists
+		if (frm.doc.request_reason == 'Shipping Request' && frm.doc.non_inventory_shipment) {
+			frappe.db.get_value('Delivery Note',
+				{custom_related_warehouse_request: frm.doc.name, docstatus: ['!=', 2]},
+				'name',
+				function(r) {
+					if (r && r.name) {
+						frm.add_custom_button(__('Delivery Note'), function() {
+							frappe.set_route('Form', 'Delivery Note', r.name);
+						}, __('View'));
+					}
+				}
+			);
+			return;
+		}
+
 		// Shipping Requests linked to a Build skip the Item Scanner —
 		// just show a Delivery Note button if one exists
 		if (frm.doc.request_reason == 'Shipping Request' && frm.doc.source_build_request) {
@@ -146,6 +162,19 @@ frappe.ui.form.on('Warehouse Request', {
 						frappe.set_route('Form', 'Delivery Note', docs.delivery_note);
 					}, __('View'));
 				}
+			}
+		});
+	},
+
+	non_inventory_shipment: function(frm) {
+		if (!frm.doc.non_inventory_shipment || !frm.doc.pick_list) return;
+
+		frappe.db.get_value('Pick List', frm.doc.pick_list, 'docstatus').then(r => {
+			frm.set_value('non_inventory_shipment', 0);
+			if (r.message.docstatus === 1) {
+				frappe.msgprint(__('This Warehouse Request already has a submitted Pick List and cannot be marked as a Non-Inventory Shipment.'));
+			} else {
+				frappe.msgprint(__('A Pick List already exists for this Warehouse Request. Use "Reset Pick List" to delete it before marking this as a Non-Inventory Shipment.'));
 			}
 		});
 	},

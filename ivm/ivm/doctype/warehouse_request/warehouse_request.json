@@ -74,13 +74,14 @@
   "rfid_3_settings",
   "rfid_4_settings",
   "rfid_5_settings",
-  "shipping_info",
-  "contact",
-  "shipping_phone",
-  "delivery_options",
-  "invoice_client_for_parts",
-  "invoice_notes",
-  "parts_invoiced",
+   "shipping_info",
+   "contact",
+   "shipping_phone",
+   "delivery_options",
+   "invoice_client_for_parts",
+   "invoice_notes",
+   "non_inventory_shipment",
+   "parts_invoiced",
   "eori_information",
   "ior",
   "column_break_kieb6",
@@ -1373,13 +1374,21 @@
    "hidden": 1,
    "label": "Number 3 Task sent"
   },
-  {
-   "fieldname": "invoice_notes",
-   "fieldtype": "Small Text",
-   "label": "Invoice Notes",
-   "mandatory_depends_on": "eval:doc.request_reason==='Shipping Request'",
-   "translatable": 1
-  },
+   {
+    "fieldname": "invoice_notes",
+    "fieldtype": "Small Text",
+    "label": "Invoice Notes",
+    "mandatory_depends_on": "eval:doc.request_reason==='Shipping Request'",
+    "translatable": 1
+   },
+   {
+    "default": 0,
+    "depends_on": "eval:doc.request_reason=='Shipping Request'",
+    "description": "Check if this shipment contains only non-stock items (e.g. printed labels) and requires no warehouse picking.",
+    "fieldname": "non_inventory_shipment",
+    "fieldtype": "Check",
+    "label": "Non-Inventory Shipment"
+   },
   {
    "fetch_from": "related_project.rfid_3_settings",
    "fieldname": "rfid_3_settings",

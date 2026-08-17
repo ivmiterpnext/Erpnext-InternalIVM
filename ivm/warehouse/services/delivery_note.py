@@ -34,12 +34,26 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
         items = get_stock_entry_items_from_warehouse_request(warehouse_request_name)
 
     if not items:
-        frappe.log_error(
-            title="Delivery Note Auto-Creation Skipped",
-            message=f"No stock entry items found for Warehouse Request {warehouse_request_name}. "
-                    "Delivery Note was not created.",
-        )
-        return None
+        if wr.non_inventory_shipment:
+            # For non-inventory shipments, create a placeholder item row
+            items = [{
+                "item_code": "Non-Inventory Shipment",
+                "item_name": "Non-Inventory Shipment",
+                "description": wr.notes or "Non-inventory shipment — see Warehouse Request for details.",
+                "qty": 1,
+                "uom": "Nos",
+                "stock_uom": "Nos",
+                "conversion_factor": 1,
+                "warehouse": None,
+                "rate": 0,
+            }]
+        else:
+            frappe.log_error(
+                title="Delivery Note Auto-Creation Skipped",
+                message=f"No stock entry items found for Warehouse Request {warehouse_request_name}. "
+                        "Delivery Note was not created.",
+            )
+            return None
 
     company = (
         frappe.defaults.get_user_default("Company")

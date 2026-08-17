@@ -35,3 +35,4 @@ ivm.deployments.patches.drop_deployment_location_orphaned_property_setters
 ivm.patches.add_warehouse_request_link_indexes
 ivm.patches.remove_broken_workspaces
 ivm.patches.consolidate_tickets_into_it
+ivm.warehouse.patches.create_non_inventory_shipment_item

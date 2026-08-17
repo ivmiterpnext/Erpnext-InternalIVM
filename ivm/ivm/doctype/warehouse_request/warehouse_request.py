@@ -8,6 +8,7 @@ MAX_RFID_SETTINGS_ROWS = 5
 class WarehouseRequest(Document):
     def validate(self):
         self._validate_rfid_settings()
+        self._validate_non_inventory_shipment()
         self._validate_crated_status()
         self._validate_closed_status()
 
@@ -15,6 +16,12 @@ class WarehouseRequest(Document):
         if len(self.rfid_settings or []) > MAX_RFID_SETTINGS_ROWS:
             frappe.throw(
                 f"You can only add up to {MAX_RFID_SETTINGS_ROWS} RFID Settings rows."
+            )
+
+    def _validate_non_inventory_shipment(self):
+        if self.non_inventory_shipment and self.pick_list:
+            frappe.throw(
+                "Cannot mark this Warehouse Request as a Non-Inventory Shipment because a Pick List already exists. Reset the Pick List first."
             )
 
     def _validate_crated_status(self):
@@ -54,6 +61,9 @@ class WarehouseRequest(Document):
         if self.status != "Closed":
             return
         if self.request_reason != "Shipping Request":
+            return
+
+        if self.non_inventory_shipment:
             return
 
         if not self.pick_list:
