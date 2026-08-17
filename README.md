@@ -42,15 +42,22 @@ This skips the API fetch and restores from the local file instead.
 
 ### HubSpot Webhook Testing in Dev
 
-Both production and dev receive live HubSpot webhooks via a [Hookdeck](https://hookdeck.com) relay that fans out from a single HubSpot app webhook target to two destinations.
+Production receives live HubSpot webhooks directly (no relay service in between). Production then forwards a best-effort copy of each raw webhook payload to a dev tunnel URL, configured via the `hubspot_dev_relay_url` site config key on prod. If dev is offline, the forward silently fails — this is expected.
 
-To receive webhooks on dev.local, use the [Hookdeck CLI](https://hookdeck.com/docs/cli) to forward events straight to your local server — no separate tunneling tool required:
+To receive webhooks on dev.local, use [ngrok](https://ngrok.com) to expose `localhost:8000` at a persistent, free static domain (one is included per ngrok account, and does not change between sessions):
 
+**One-time setup:**
 ```bash
-hookdeck listen 8000 hubspot --path /api/method/ivm.integrations.hubspot.webhook.handle_webhook
+ngrok config add-authtoken <your-token>
+```
+Then claim your account's one free static domain via the [ngrok dashboard](https://dashboard.ngrok.com) (Domains page).
+
+**Each dev session:**
+```bash
+ngrok http --url=https://<your-domain>.ngrok-free.app 8000
 ```
 
-(Replace `hubspot` with your actual Hookdeck source name if it differs.) This attaches your local session directly to the "dev" destination and forwards matching events to `localhost:8000` for the duration of the session — no public URL to generate or destination URL to update between dev sessions.
+No changes are needed on prod between sessions since the domain is stable — `hubspot_dev_relay_url` is set once via `bench --site ivmportal.frappe.cloud set-config hubspot_dev_relay_url "https://<your-domain>.ngrok-free.app/api/method/ivm.integrations.hubspot.webhook.handle_webhook"`.
 
 #### License
 

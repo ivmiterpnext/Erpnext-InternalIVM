@@ -12,24 +12,33 @@
 		<h3>Item Scanner</h3>
 	</div>
 
-	<div class="scanner-controls" style="display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+	<div class="scanner-info-row" style="display: flex; align-items: flex-start; gap: 30px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
 		<div style="flex: 0 0 auto;">
 			<label class="control-label" style="display: block; margin-bottom: 6px;">Warehouse Request</label>
 			<div style="height: 30px; display: flex; align-items: center;">
 				<a id="wr-name" href="#"></a>&nbsp;<span id="wr-subject" style="color: var(--text-muted);"></span>
 			</div>
 		</div>
-		<div style="flex: 0 0 auto;">
+		<div style="flex: 0 0 auto; margin-left: auto;">
 			<label class="control-label" style="display: block; margin-bottom: 6px;">Pick List</label>
 			<div style="height: 30px; display: flex; align-items: center;">
 				<a id="pick-list-name" href="#">Loading...</a>
 			</div>
 		</div>
+	</div>
+
+	<div class="scanner-controls" style="display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; margin-bottom: 25px;">
 		<div style="flex: 1 1 200px;">
 			<div id="target-warehouse-field"></div>
 		</div>
 		<div style="flex: 1 1 200px;">
 			<div id="barcode-field"></div>
+		</div>
+		<div style="flex: 1 1 200px;">
+			<label class="control-label" style="display: block; margin-bottom: 6px;">Search by Name</label>
+			<button class="btn btn-default" id="search-item-btn" style="height: 30px; width: 100%;">
+				<i class="fa fa-search"></i> Search
+			</button>
 		</div>
 	</div>
 

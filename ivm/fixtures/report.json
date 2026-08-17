@@ -10,72 +10,6 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Issue\",\"creation\",\"Between\",[\"2023-07-01\",\"2023-09-30\"],false],[\"Issue\",\"issue_type\",\"not in\",[\"Receivable\",\"Vending management\",\"Change Request\"],false]],\"fields\":[[\"name\",\"Issue\"],[\"case_owner\",\"Issue\"],[\"_assign\",\"Issue\"],[\"status\",\"Issue\"],[\"case_number\",\"Issue\"],[\"issue_type\",\"Issue\"],[\"date_and_time_closed\",\"Issue\"],[\"created_date\",\"Issue\"],[\"creation\",\"Issue\"],[\"opening_date\",\"Issue\"],[\"est_completion_date\",\"Issue\"],[\"custom_modified_date\",\"Issue\"]],\"order_by\":\"`tabIssue`.`creation` asc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"name\":120,\"case_owner\":120,\"_assign\":120,\"status\":120,\"case_number\":120,\"issue_type\":120,\"date_and_time_closed\":120,\"created_date\":120,\"creation\":120,\"opening_date\":120,\"est_completion_date\":120,\"custom_modified_date\":120},\"group_by\":null}",
-  "letter_head": null,
-  "modified": "2023-10-09 20:11:47.322316",
-  "module": "Support",
-  "name": "Q3 2022",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Issue",
-  "reference_report": null,
-  "report_name": "Q3 2022",
-  "report_script": null,
-  "report_type": "Report Builder",
-  "roles": [
-   {
-    "role": "Graphic Designer"
-   },
-   {
-    "role": "Support"
-   },
-   {
-    "role": "Sales Representatives"
-   },
-   {
-    "role": "President"
-   },
-   {
-    "role": "Warehouse"
-   },
-   {
-    "role": "Operations"
-   },
-   {
-    "role": "S&I Manager"
-   },
-   {
-    "role": "Management"
-   },
-   {
-    "role": "CTO"
-   },
-   {
-    "role": "COO"
-   },
-   {
-    "role": "CEO"
-   },
-   {
-    "role": "ITAdmin"
-   },
-   {
-    "role": "Regional Sales Director"
-   }
-  ],
-  "timeout": 0
- },
- {
-  "add_total_row": 0,
-  "add_translate_data": 0,
-  "columns": [],
-  "disable_prepared_report_automation": 0,
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "No",
-  "javascript": null,
   "json": "{\"filters\":[[\"Project\",\"status\",\"!=\",\"Cancelled\",false],[\"Project\",\"status\",\"!=\",\"Completed\",false],[\"Project User\",\"full_name\",\"=\",\"Becca Carreno\",false],[\"Project\",\"stage\",\"!=\",\"Phase 1 In Progress\",false],[\"Project\",\"stage\",\"!=\",\"Phase 2 In Progress\",false],[\"Project\",\"stage\",\"!=\",\"Waiting Client Response\",false]],\"fields\":[[\"name\",\"Project\"],[\"docstatus\",\"Project\"],[\"subject\",\"Project\"],[\"status\",\"Project\"],[\"stage\",\"Project\"],[\"client_id\",\"Project\"],[\"case_number\",\"Project\"],[\"machine_numbers\",\"Project\"],[\"opportunity_term\",\"Project\"],[\"full_name\",\"Project User\"]],\"order_by\":\"`tabProject`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"subject\":120,\"status\":120,\"stage\":120,\"client_id\":120,\"case_number\":120,\"machine_numbers\":120,\"opportunity_term\":120,\"Project User:full_name\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-10-18 03:40:14.512886",
@@ -376,7 +310,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"customer\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-11-02 04:46:14.023613",
   "module": "IVM",
@@ -442,7 +376,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false],[\"Warehouse Request\",\"_assign\",\"like\",\"%tgiles%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false],[\"Warehouse Request\",\"_assign\",\"like\",\"%tgiles%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"customer\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2024-05-28 04:39:39.475093",
   "module": "IVM",
@@ -508,7 +442,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%Mmccarroll%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%Mmccarroll%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"customer\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-11-01 09:55:29.821145",
   "module": "IVM",
@@ -574,7 +508,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%wott%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%wott%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"customer\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-11-01 09:56:12.314742",
   "module": "IVM",
@@ -640,7 +574,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%Swhitaker%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"not in\",[\"Closed\",null],false],[\"Warehouse Request\",\"_assign\",\"like\",\"%Swhitaker%\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"customer\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-11-01 09:56:47.635225",
   "module": "IVM",
@@ -706,7 +640,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"customer\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-11-01 09:54:38.489457",
   "module": "IVM",
@@ -772,7 +706,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"request_reason\":120,\"related_project\":120,\"account\":120,\"subject\":232,\"related_case\":120,\"status\":120},\"group_by\":null}",
+  "json": "{\"filters\":[],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"request_reason\":120,\"related_project\":120,\"customer\":120,\"subject\":232,\"related_case\":120,\"status\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-11-07 07:26:33.632689",
   "module": "IVM",
@@ -838,7 +772,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"owner\",\"!=\",\"jvoiles@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"dlanteigne@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"mharrison@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"htoon@ivminc.com\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"request_reason\":120,\"account\":152,\"subject\":120,\"related_case\":120,\"status\":120,\"modified\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"owner\",\"!=\",\"jvoiles@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"dlanteigne@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"mharrison@ivminc.com\",false],[\"Warehouse Request\",\"owner\",\"!=\",\"htoon@ivminc.com\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"request_reason\":120,\"customer\":152,\"subject\":120,\"related_case\":120,\"status\":120,\"modified\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-11-09 06:26:19.489891",
   "module": "IVM",
@@ -964,72 +898,6 @@
    },
    {
     "role": "Employee Self Service"
-   }
-  ],
-  "timeout": 0
- },
- {
-  "add_total_row": 0,
-  "add_translate_data": 0,
-  "columns": [],
-  "disable_prepared_report_automation": 0,
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "No",
-  "javascript": null,
-  "json": "{\"filters\":[[\"Issue\",\"creation\",\"Timespan\",\"this quarter\",false],[\"Issue\",\"issue_type\",\"not in\",[\"Receivable\",\"Vending management\",\"Change Request\"],false]],\"fields\":[[\"_assign\",\"Issue\"],[\"docstatus\",\"Issue\"],[\"issue_type\",\"Issue\"],[\"name\",\"Issue\"],[\"status\",\"Issue\"],[\"opening_date\",\"Issue\"],[\"date_and_time_closed\",\"Issue\"],[\"case_number\",\"Issue\"],[\"creation\",\"Issue\"],[\"custom_modified_date\",\"Issue\"]],\"order_by\":\"`tabIssue`.`creation` asc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"_assign\":120,\"issue_type\":120,\"name\":120,\"status\":120,\"opening_date\":120,\"date_and_time_closed\":120,\"case_number\":120,\"creation\":120,\"custom_modified_date\":120},\"group_by\":null}",
-  "letter_head": null,
-  "modified": "2023-12-26 05:36:19.625722",
-  "module": "Support",
-  "name": "Current Quarter Metrics",
-  "prepared_report": 0,
-  "query": null,
-  "ref_doctype": "Issue",
-  "reference_report": null,
-  "report_name": "Current Quarter Metrics",
-  "report_script": null,
-  "report_type": "Report Builder",
-  "roles": [
-   {
-    "role": "Graphic Designer"
-   },
-   {
-    "role": "Support"
-   },
-   {
-    "role": "Sales Representatives"
-   },
-   {
-    "role": "President"
-   },
-   {
-    "role": "Warehouse"
-   },
-   {
-    "role": "Operations"
-   },
-   {
-    "role": "S&I Manager"
-   },
-   {
-    "role": "Management"
-   },
-   {
-    "role": "CTO"
-   },
-   {
-    "role": "COO"
-   },
-   {
-    "role": "CEO"
-   },
-   {
-    "role": "ITAdmin"
-   },
-   {
-    "role": "Regional Sales Director"
    }
   ],
   "timeout": 0
@@ -1194,7 +1062,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Issue\",\"creation\",\"Timespan\",\"this quarter\",false],[\"Issue\",\"issue_type\",\"not in\",[\"Change Request\"],false]],\"fields\":[[\"name\",\"Issue\"],[\"docstatus\",\"Issue\"],[\"_assign\",\"Issue\"],[\"status\",\"Issue\"],[\"case_number\",\"Issue\"],[\"issue_type\",\"Issue\"],[\"date_and_time_closed\",\"Issue\"],[\"creation\",\"Issue\"],[\"opening_date\",\"Issue\"],[\"custom_modified_date\",\"Issue\"]],\"order_by\":\"`tabIssue`.`creation` asc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"name\":120,\"_assign\":120,\"status\":120,\"case_number\":120,\"issue_type\":120,\"date_and_time_closed\":120,\"creation\":120,\"opening_date\":120,\"custom_modified_date\":120},\"group_by\":null}",
+  "json": "{\"filters\": [[\"Issue\", \"creation\", \"Timespan\", \"this quarter\", false], [\"Issue\", \"issue_type\", \"not in\", [\"Change Request\"], false]], \"fields\": [[\"name\", \"Issue\"], [\"docstatus\", \"Issue\"], [\"_assign\", \"Issue\"], [\"status\", \"Issue\"], [\"case_number\", \"Issue\"], [\"issue_type\", \"Issue\"], [\"date_and_time_closed\", \"Issue\"], [\"creation\", \"Issue\"], [\"opening_date\", \"Issue\"], [\"modified\", \"Issue\"]], \"order_by\": \"`tabIssue`.`creation` asc\", \"add_totals_row\": 0, \"page_length\": 40, \"column_widths\": {\"name\": 120, \"_assign\": 120, \"status\": 120, \"case_number\": 120, \"issue_type\": 120, \"date_and_time_closed\": 120, \"creation\": 120, \"opening_date\": 120, \"modified\": 120}, \"group_by\": null}",
   "letter_head": null,
   "modified": "2023-12-14 19:42:50.019252",
   "module": "IVM",
@@ -1245,156 +1113,6 @@
    },
    {
     "role": "Regional Sales Director"
-   }
-  ],
-  "timeout": 0
- },
- {
-  "add_total_row": 0,
-  "add_translate_data": 0,
-  "columns": [],
-  "disable_prepared_report_automation": 0,
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "No",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2023-11-27 09:48:31.929086",
-  "module": "IVM",
-  "name": "Test 2",
-  "prepared_report": 0,
-  "query": "SELECT\n    i.issue_type,\n    i.case_record_type AS \"Case Record Type\",\n    COUNT(i.case_reason) AS 'Case Reason Count',\n    i.created_date AS 'Opened Date',\n    u.full_name AS \"Case Owner\",\n    i.case_owner as \"email\", \n    COUNT(*) AS \"Closed Issue\",\n    i.case_origin AS \"Case Origin\",\n    i.case_number AS \"Case Number\"\nFROM\n    `tabIssue` i\nJOIN\n    `tabUser` u ON i.case_owner = u.email\nWHERE\n    i.status = 'Open'\nGROUP BY\n    i.issue_type;\n",
-  "ref_doctype": "Issue",
-  "reference_report": null,
-  "report_name": "Test 2",
-  "report_script": null,
-  "report_type": "Query Report",
-  "roles": [
-   {
-    "role": "Projects Manager"
-   },
-   {
-    "role": "Projects User"
-   },
-   {
-    "role": "Graphic Designer"
-   },
-   {
-    "role": "Support"
-   },
-   {
-    "role": "Sales Representatives"
-   },
-   {
-    "role": "President"
-   },
-   {
-    "role": "Warehouse"
-   },
-   {
-    "role": "Operations"
-   },
-   {
-    "role": "S&I Manager"
-   },
-   {
-    "role": "Management"
-   },
-   {
-    "role": "CTO"
-   },
-   {
-    "role": "COO"
-   },
-   {
-    "role": "CEO"
-   },
-   {
-    "role": "ITAdmin"
-   },
-   {
-    "role": "Regional Sales Director"
-   },
-   {
-    "role": "Employee Self Service"
-   }
-  ],
-  "timeout": 0
- },
- {
-  "add_total_row": 1,
-  "add_translate_data": 0,
-  "columns": [],
-  "disable_prepared_report_automation": 0,
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "No",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2023-11-27 11:55:52.501626",
-  "module": "Support",
-  "name": "Test 3",
-  "prepared_report": 0,
-  "query": "SELECT\n    i._assign as \"Test\",\n    SUM(CASE WHEN i.status= 'Open' THEN 1 ELSE 0 END) AS \"Open\",\n    SUM(CASE WHEN i.status= 'Closed' THEN 1 ELSE 0 END) AS \"Closed\",\n    SUM(CASE WHEN i.status= 'New' THEN 1 ELSE 0 END) AS \"New\",\n    SUM(CASE WHEN i.status= 'Pending' THEN 1 ELSE 0 END) AS \"Pending\",\n    SUM(CASE WHEN i.status= 'Resolved' THEN 1 ELSE 0 END) AS \"Resolved\",\n    SUM(CASE WHEN i.status= 'In Progress' THEN 1 ELSE 0 END) AS \"In Progress\",\n    SUM(CASE WHEN i.status= 'On Hold' THEN 1 ELSE 0 END) AS \"On Hold\"\nFROM\n    `tabIssue` i\nJOIN\n    `tabUser` u ON i.case_owner = u.email\nWHERE \n    i.created_date BETWEEN DATE_SUB(NOW(), INTERVAL 90 DAY) AND NOW()\n    AND u.enabled = 1\nGroup By\n    i._assign;",
-  "ref_doctype": "Issue",
-  "reference_report": null,
-  "report_name": "Test 3",
-  "report_script": null,
-  "report_type": "Query Report",
-  "roles": [
-   {
-    "role": "Projects Manager"
-   },
-   {
-    "role": "Projects User"
-   },
-   {
-    "role": "Graphic Designer"
-   },
-   {
-    "role": "Support"
-   },
-   {
-    "role": "Sales Representatives"
-   },
-   {
-    "role": "President"
-   },
-   {
-    "role": "Warehouse"
-   },
-   {
-    "role": "Operations"
-   },
-   {
-    "role": "S&I Manager"
-   },
-   {
-    "role": "Management"
-   },
-   {
-    "role": "CTO"
-   },
-   {
-    "role": "COO"
-   },
-   {
-    "role": "CEO"
-   },
-   {
-    "role": "ITAdmin"
-   },
-   {
-    "role": "Regional Sales Director"
-   },
-   {
-    "role": "Employee Self Service"
    }
   ],
   "timeout": 0
@@ -1632,7 +1350,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"creation\",\"Timespan\",\"this quarter\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"account\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"creation\",\"Timespan\",\"this quarter\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"due_date\",\"Warehouse Request\"],[\"related_case\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"machine_names\",\"Warehouse Request\"],[\"creation\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`creation` desc\",\"add_totals_row\":0,\"page_length\":40,\"column_widths\":{\"name\":120,\"_assign\":120,\"request_reason\":120,\"customer\":120,\"due_date\":120,\"related_case\":120,\"related_project\":120,\"machine_names\":120,\"creation\":120,\"status\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2023-12-14 19:27:59.795745",
   "module": "IVM",
@@ -2361,7 +2079,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"status\":120,\"account\":120,\"request_reason\":120,\"subject\":120,\"_assign\":120,\"modified\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"status\":120,\"customer\":120,\"request_reason\":120,\"subject\":120,\"_assign\":120,\"modified\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2025-06-30 06:14:23.898942",
   "module": "IVM",
@@ -2427,7 +2145,7 @@
   "filters": [],
   "is_standard": "No",
   "javascript": null,
-  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false],[\"Warehouse Request\",\"request_reason\",\"=\",\"Product Testing\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"account\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"status\":120,\"account\":120,\"request_reason\":120,\"subject\":120,\"_assign\":120,\"modified\":120},\"group_by\":null}",
+  "json": "{\"filters\":[[\"Warehouse Request\",\"status\",\"!=\",\"Closed\",false],[\"Warehouse Request\",\"request_reason\",\"=\",\"Product Testing\",false]],\"fields\":[[\"name\",\"Warehouse Request\"],[\"docstatus\",\"Warehouse Request\"],[\"related_project\",\"Warehouse Request\"],[\"status\",\"Warehouse Request\"],[\"customer\",\"Warehouse Request\"],[\"request_reason\",\"Warehouse Request\"],[\"subject\",\"Warehouse Request\"],[\"_assign\",\"Warehouse Request\"],[\"modified\",\"Warehouse Request\"]],\"order_by\":\"`tabWarehouse Request`.`modified` desc\",\"add_totals_row\":0,\"page_length\":20,\"column_widths\":{\"name\":120,\"related_project\":120,\"status\":120,\"customer\":120,\"request_reason\":120,\"subject\":120,\"_assign\":120,\"modified\":120},\"group_by\":null}",
   "letter_head": null,
   "modified": "2025-06-30 06:12:23.905162",
   "module": "IVM",

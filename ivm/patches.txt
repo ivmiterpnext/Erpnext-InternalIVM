@@ -1,6 +1,7 @@
 [pre_model_sync]
 ivm.warehouse.patches.rename_wr_account_to_customer
 ivm.warehouse.patches.rename_wr_mac_address_to_lan_mac_address
+ivm.warehouse.patches.rename_wr_internal_notes_to_notes
 ivm.warehouse.patches.backfill_item_barcodes
 ivm.deployments.patches.remap_selection_field_options
 ivm.deployments.patches.rebuild_deployment_location
@@ -24,3 +25,13 @@ ivm.integrations.hubspot.patches.backfill_activities_from_hubspot
 ivm.warehouse.patches.delete_stale_wr_field_order_property_setter
 ivm.patches.remove_none_connectivity_type
 ivm.warehouse.patches.fix_warehouse_request_row_size
+ivm.patches.drop_legacy_audit_field_columns
+ivm.warehouse.patches.drop_wr_legacy_modified_fields
+ivm.warehouse.patches.delete_wr_text_field_resize_script
+ivm.warehouse.patches.drop_wr_dead_custom_fields
+ivm.deployments.patches.drop_deployment_location_legacy_fields
+ivm.deployments.patches.fix_deployment_location_naming_and_dead_script
+ivm.deployments.patches.drop_deployment_location_orphaned_property_setters
+ivm.patches.add_warehouse_request_link_indexes
+ivm.patches.remove_broken_workspaces
+ivm.patches.consolidate_tickets_into_it

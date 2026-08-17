@@ -1,27 +1,5 @@
 [
  {
-  "app": null,
-  "bg_color": "gray",
-  "docstatus": 0,
-  "doctype": "Desktop Icon",
-  "hidden": 0,
-  "icon": null,
-  "icon_image": null,
-  "icon_type": "Link",
-  "label": "Accounts Receivable",
-  "link": null,
-  "link_to": "Accounts Receivable",
-  "link_type": "Workspace Sidebar",
-  "logo_url": null,
-  "modified": "2026-04-08 04:55:36.752819",
-  "name": "Accounts Receivable",
-  "parent_icon": null,
-  "restrict_removal": 0,
-  "roles": [],
-  "sidebar": null,
-  "standard": 0
- },
- {
   "app": "crm",
   "bg_color": "gray",
   "docstatus": 0,

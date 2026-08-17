@@ -151,9 +151,6 @@ doc_events = {
     "Communication": {
         "on_update": "ivm.support.event_handlers.communication.on_update",
     },
-    "Issue": {
-        "on_update": "ivm.support.event_handlers.issue.on_update"
-    },
     "Item": {
         "before_save": "ivm.warehouse.event_handlers.item.before_save"
     },

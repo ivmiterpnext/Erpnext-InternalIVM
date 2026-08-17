@@ -24,39 +24,6 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
-  "dt": "Warehouse Request",
-  "enabled": 0,
-  "modified": "2023-11-01 09:18:54.325553",
-  "module": null,
-  "name": "Warehouse Request Created Date",
-  "script": "frappe.ui.form.on('Warehouse Request', {\n    setup(frm) {\n\t  if(frm.doc.created_date_2 === undefined){\n\t\t  // cur_frm.set_value(\"created_date_2\", frappe.datetime.now_datetime());\n\t\t  //  frm.refresh_field('created_date_2')\n\t  }\n\t}\n})",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Warehouse Request",
-  "enabled": 0,
-  "modified": "2023-11-01 09:18:11.014832",
-  "module": null,
-  "name": "Warehouse Request Modified By",
-  "script": "frappe.ui.form.on('Warehouse Request', {\n\tafter_save(frm) {\n// \t\tfrm.doc.modified_by1 = frappe.session.user\n// \t\tfrm.refresh_field('modified_by1')\n\t}\n})",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Warehouse Request",
-  "enabled": 1,
-  "modified": "2023-12-20 10:18:39.796295",
-  "module": null,
-  "name": "Warehouse Request Modified Date",
-  "script": "frappe.ui.form.on('Warehouse Request', {\n\tbefore_save(frm) {\n\t   \t   frm.doc.modified_by1 =frappe.session.user;\n\t\t   frm.doc.modified_date =frappe.datetime.now_datetime();\n\t\t   frm.refresh_field('modified_by1');\n\t\t   frm.refresh_field('modified_date');\n\t   \t}\n});",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
   "dt": "Issue",
   "enabled": 1,
   "modified": "2023-12-20 10:24:13.078013",
@@ -64,8 +31,8 @@
   "name": "Closed Date Tickets",
   "script": "frappe.ui.form.on('Issue', {\n\tbefore_save(frm) {\n\t    if(frm.doc.status === \"Closed\"){\n\t    frm.doc.date_and_time_closed = frappe.datetime.now_datetime();\n\t\t frm.refresh_field('date_and_time_closed');\n\t    }\n\t}\n});",
   "view": "Form"
-  },
-  {
+ },
+ {
   "docstatus": 0,
   "doctype": "Client Script",
   "dt": "Opportunity",
@@ -101,17 +68,6 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
-  "dt": "Warehouse Request",
-  "enabled": 1,
-  "modified": "2023-12-20 13:02:32.149728",
-  "module": "IVM",
-  "name": "Text Feild Resize",
-  "script": "frappe.ui.form.on('Warehouse Request', {\n\trefresh(frm) {\n\t\t\t$(\"textarea[data-fieldname='machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='lan_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='second_machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='second_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='second_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='second_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='third_machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='third_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='third_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='third_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='fourth_machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='fourth_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='fourth_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='fourth_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='fifth_machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='fifth_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='fifth_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='fifth_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='sixth_machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='sixth_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='sixth_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='sixth_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='seventh_machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='seventh_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='seventh_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='seventh_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='eighth_machine_name_']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='eighth_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='eighth_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='eighth_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='ninth_machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='ninth_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='ninth_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='ninth_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='tenth_machine_name']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='tenth_prose_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='tenth_serial_number']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='tenth_mac_address']\").css({'height':'30'});\n\t\t$(\"textarea[data-fieldname='rfid_1_settings']\").css({'height':'50'});\n\t\t$(\"textarea[data-fieldname='rfid_2_settings']\").css({'height':'50'});\n\t\t$(\"textarea[data-fieldname='rfid_3_settings']\").css({'height':'50'});\n\t\t$(\"textarea[data-fieldname='rfid_4_settings']\").css({'height':'50'});\n\t\t$(\"textarea[data-fieldname='rfid_5_settings']\").css({'height':'50'});\n\t\t$(\"textarea[data-fieldname='card_readers']\").css({'height':'30'});\n\t}\n});\n\n",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
   "dt": "Project",
   "enabled": 0,
   "modified": "2026-05-29 08:12:17.963941",
@@ -128,18 +84,7 @@
   "modified": "2023-12-02 11:41:57.856684",
   "module": null,
   "name": "Test Button 2",
-  "script": "frappe.ui.form.on('Warehouse Request', {\n\trefresh(frm) {\n\t\tfrm.add_custom_button('Send to IT', function(){\n\t\t\tfrm.trigger(\"send_to_it\");\n\t    });\n    },\n    send_to_it: function(frm){\n        console.log( frm.get_docinfo().assignments);\n        frappe.db.insert({\n            doctype: 'Issue',\n            subject: 'Connectivity for '+ frm.doc.subject,\n            related_warehouse_request: frm.doc.name,\n            related_deployment: frm.doc.related_project,\n            issue_type: 'Desktop Support',\n            case_reason: 'Desktop Support',\n            case_sub_reason: 'Connectivity',\n            connectivity_type: frm.doc.connectivity,\n            connectivity_devices_quantity: frm.doc.connectivity_device_quantity,\n            machine_name: frm.doc.machine_names,\n            customer: frm.doc.account,\n            deployment_owner: frm.doc.created_by\n            \n        }).then(doc => {\n            console.log(doc);\n        });\n        \n    }\n});\n\n\n",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Issue",
-  "enabled": 1,
-  "modified": "2023-12-02 10:52:05.950435",
-  "module": null,
-  "name": "Ticket Owner switch to Deployment Owner",
-  "script": "frappe.ui.form.on('Issue', {\n\tafter_save(frm) {\n\t    if(frm.doc.deployment_owner){\n\t\t   cur_frm.set_value(\"custom_created_by\", frm.doc.deployment_owner);\n\t   }\n\t}\n});",
+  "script": "frappe.ui.form.on('Warehouse Request', {\n\trefresh(frm) {\n\t\tfrm.add_custom_button('Send to IT', function(){\n\t\t\tfrm.trigger(\"send_to_it\");\n\t    });\n    },\n    send_to_it: function(frm){\n        console.log( frm.get_docinfo().assignments);\n        frappe.db.insert({\n            doctype: 'Issue',\n            subject: 'Connectivity for '+ frm.doc.subject,\n            related_warehouse_request: frm.doc.name,\n            related_deployment: frm.doc.related_project,\n            issue_type: 'Desktop Support',\n            case_reason: 'Desktop Support',\n            case_sub_reason: 'Connectivity',\n            connectivity_type: frm.doc.connectivity,\n            connectivity_devices_quantity: frm.doc.connectivity_device_quantity,\n            machine_name: frm.doc.machine_names,\n            customer: frm.doc.customer,\n            deployment_owner: frm.doc.created_by\n            \n        }).then(doc => {\n            console.log(doc);\n        });\n        \n    }\n});\n\n\n",
   "view": "Form"
  },
  {
@@ -156,89 +101,12 @@
  {
   "docstatus": 0,
   "doctype": "Client Script",
-  "dt": "Deployment Location",
-  "enabled": 1,
-  "modified": "2023-12-11 10:10:13.326697",
-  "module": "IVM",
-  "name": "Address Filter Deployment Location",
-  "script": "frappe.ui.form.on('Deployment Location', {\n\tonload: function (frm) {\n\t    frm.set_query(\"location_shipping_address\", function () {\n             return {\n                \"filters\": [\n                 [\"Address\", \"link_name\", \"=\", frm.doc.party_name],\n                  [\"Address\", \"address_type\", \"=\", \"Shipping\"],\n                ]\n         }\n\t    \n\t    });\n    }\n});",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Deployment Location",
-  "enabled": 1,
-  "modified": "2023-12-10 15:53:24.521889",
-  "module": "IVM",
-  "name": "Created Info Deployment Location",
-  "script": "frappe.ui.form.on('Deployment Location', {\n\tbefore_save(frm) {\n\t    if(frm.doc.created_by === null ||frm.doc.created_by === undefined){\n\t\t   cur_frm.set_value(\"created_by\", frappe.session.user);\n\t\t   cur_frm.set_value(\"created_on\", frappe.datetime.now_datetime());\n\t\t   //frm.refresh_field('created_by');\n\t   }\n\t}\n})",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Deployment Location",
-  "enabled": 1,
-  "modified": "2023-12-10 15:53:38.764773",
-  "module": "IVM",
-  "name": "Modified Info Deployment Location",
-  "script": "frappe.ui.form.on('Deployment Location', {\n\tbefore_save(frm) {\n\t   \t   cur_frm.set_value(\"modified_by1\", frappe.session.user);\n\t\t   cur_frm.set_value(\"last_modified_by\", frappe.datetime.now_datetime());\n\t\t   //frm.refresh_field('created_by');\n\t   \t}\n});",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Deployment Location",
-  "enabled": 1,
-  "modified": "2023-12-10 16:25:54.234203",
-  "module": "IVM",
-  "name": "Filter Opportunities",
-  "script": "frappe.ui.form.on('Deployment Location', {\n\tonload: function (frm) {\n\t    frm.set_query(\"opportunity\", function () {\n             return {\n                \"filters\": [\n                 [\"Opportunity\", \"opportunity_owner\", \"=\", frappe.session.user]\n                ]\n         }\n\t    \n\t    });\n    }\n});",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
   "dt": "Opportunity",
   "enabled": 0,
   "modified": "2023-12-11 10:06:38.647994",
   "module": "IVM",
   "name": "Create Deployment Location From Opportunity",
   "script": "frappe.ui.form.on('Opportunity', {\r\n    refresh(frm) {\r\n        var df = frappe.meta.get_docfield(\"Deployment Location\",\"opprotunity\", frm.doc.name);\r\n        df.get_route_options_for_new_doc = function (field) {\r\n            return {\r\n                \"opprotunity\": field.doc.name\r\n            }\r\n        }\r\n    }\r\n})",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Deployment Location",
-  "enabled": 1,
-  "modified": "2023-12-11 10:05:05.250252",
-  "module": "IVM",
-  "name": "Fetch Full Shipping Address",
-  "script": "frappe.ui.form.on(\"Deployment Location\", \"location_shipping_address\", function(frm, cdt, cdn) {\r\n    if(frm.doc.location_shipping_address){\r\n      return frm.call({\r\n      method: \"frappe.contacts.doctype.address.address.get_address_display\",\r\n      args: {\r\n         \"address_dict\": frm.doc.location_shipping_address\r\n      },\r\n      callback: function(r) {\r\n        if(r.message)\r\n            frm.set_value(\"full_shipping_address\", r.message);\r\n        \r\n      }\r\n     });\r\n    }\r\n    else{\r\n        frm.set_value(\"full_shipping_address\", \"\");\r\n    }\r\n});",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Deployment Location",
-  "enabled": 1,
-  "modified": "2023-12-11 10:06:22.164653",
-  "module": "IVM",
-  "name": "Full Billing Address",
-  "script": "frappe.ui.form.on(\"Deployment Location\", \"billing_address\", function(frm, cdt, cdn) {\r\n    if(frm.doc.billing_address){\r\n      return frm.call({\r\n      method: \"frappe.contacts.doctype.address.address.get_address_display\",\r\n      args: {\r\n         \"address_dict\": frm.doc.billing_address\r\n      },\r\n      callback: function(r) {\r\n        if(r.message)\r\n            frm.set_value(\"full_billing_address\", r.message);\r\n        \r\n      }\r\n     });\r\n    }\r\n    else{\r\n        frm.set_value(\"full_billing_address\", \"\");\r\n    }\r\n});",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Deployment Location",
-  "enabled": 1,
-  "modified": "2023-12-11 10:10:57.198705",
-  "module": "IVM",
-  "name": "Billing Adress Filter DL",
-  "script": "frappe.ui.form.on('Deployment Location', {\n\tonload: function (frm) {\n\t    frm.set_query(\"billing_address\", function () {\n             return {\n                \"filters\": [\n                 [\"Address\", \"link_name\", \"=\", frm.doc.party_name],\n                 [\"Address\", \"address_type\", \"=\", \"Billing\"],\n                ]\n         }\n\t    \n\t    });\n    }\n});",
   "view": "Form"
  },
  {
@@ -317,17 +185,6 @@
   "name": "Close Button",
   "script": "frappe.listview_settings[\"Issue\"] = {\n    onload(listview) {\n        var method = \"erpnext.support.doctype.issue.issue.set_multiple_status\";\n        listview.page.add_action_item(__(\"Close Ticket\"), function() {\n\t\t\tlistview.call_for_selected_items(method, {\"status\": \"Closed\"});\n\t\t});\n        // triggers once before the list is loaded\n        //listview.page.add_action_item('Close Ticket', () => close_ticket_btn());\n    }\n};\n\n/*function close_ticket_btn(event){\n    console.log(frappe.doc.name);\n}\n*/\n",
   "view": "List"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Lead",
-  "enabled": 1,
-  "modified": "2025-09-02 12:15:08.899792",
-  "module": null,
-  "name": "Created By Lead",
-  "script": "frappe.ui.form.on('Lead', {\n    refresh: function(frm) {\n        if (frm.is_new()) {\n        frm.set_value('created_by', frappe.session.user);\n        }\n\t}\n});",
-  "view": "Form"
  },
  {
   "docstatus": 0,

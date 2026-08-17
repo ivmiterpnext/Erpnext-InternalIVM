@@ -17,6 +17,7 @@ from ivm.integrations.hubspot.constants import (
 )
 
 MAX_TIMESTAMP_AGE_SECONDS = 300
+DEV_RELAY_TIMEOUT_SECONDS = 5
 
 _logger = frappe.logger("hubspot_webhook")
 _HANDLER_PREFIX = "ivm.integrations.hubspot"
@@ -103,6 +104,28 @@ def _verify_request(body: str, signature: str, timestamp: str) -> None:
         frappe.throw("Invalid webhook signature", frappe.AuthenticationError)
 
 
+def _forward_to_dev(body: str, signature: str, timestamp: str, content_type: str) -> None:
+    """Best-effort forward of the raw HubSpot payload to a dev tunnel. No-op if unconfigured. Never raises."""
+    relay_url = frappe.conf.get("hubspot_dev_relay_url")
+    if not relay_url:
+        return
+    try:
+        import requests
+        requests.post(
+            relay_url,
+            data=body.encode("utf-8"),
+            headers={
+                "Content-Type": content_type,
+                "X-HubSpot-Signature": signature,
+                "X-HubSpot-Request-Timestamp": timestamp,
+                "ngrok-skip-browser-warning": "true",
+            },
+            timeout=DEV_RELAY_TIMEOUT_SECONDS,
+        )
+    except Exception:
+        _logger.warning(f"hubspot dev relay forward failed: {frappe.get_traceback()}")
+
+
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def handle_webhook() -> dict[str, str]:
     """Verify signature and enqueue a handler for each incoming HubSpot event."""
@@ -113,6 +136,15 @@ def handle_webhook() -> dict[str, str]:
         body=request_body,
         signature=request.headers.get("X-HubSpot-Signature", ""),
         timestamp=request.headers.get("X-HubSpot-Request-Timestamp", ""),
+    )
+
+    frappe.enqueue(
+        _forward_to_dev,
+        queue="short",
+        body=request_body,
+        signature=request.headers.get("X-HubSpot-Signature", ""),
+        timestamp=request.headers.get("X-HubSpot-Request-Timestamp", ""),
+        content_type=request.headers.get("Content-Type", "application/json"),
     )
 
     try:

@@ -13,6 +13,7 @@ class ItemScanner {
 		this.warehouse_request = warehouse_request;
 		this.pick_list = null;
 		this.scanned_items = []; // mirrors Pick List locations for rendering
+		this.last_search_scope = 'All Warehouses - I';
 
 		if (!this.warehouse_request) {
 			frappe.msgprint('No Warehouse Request specified');
@@ -52,11 +53,15 @@ class ItemScanner {
 				fieldname: 'target_warehouse',
 				options: 'Warehouse',
 				placeholder: __('Select target warehouse...'),
+				description: __('Items will be moved to this warehouse once the Pick List is submitted'),
 				onchange: function() {
 					const val = me.target_warehouse_field.get_value();
 					if (val && me.pick_list) {
 						frappe.db.set_value('Pick List', me.pick_list, 'parent_warehouse', val);
 					}
+				},
+				get_query: () => {
+					return { filters: { disabled: 0 } };
 				}
 			},
 			render_input: true
@@ -189,6 +194,8 @@ class ItemScanner {
 			});
 		});
 
+		$('#search-item-btn').click(() => this.show_item_search_dialog());
+
 		$(document).on('click', function(e) {
 			if (!$(e.target).is('input, button, a, select')) {
 				me.focus_barcode_input();
@@ -310,49 +317,46 @@ class ItemScanner {
 		this.show_bay_breakdown_dialog(item_data);
 	}
 
-	show_bay_breakdown_dialog(item_data) {
-		const me = this;
+	_build_bay_rows(item_data) {
 		const existing_for_item = this.scanned_items.filter(i => i.item_code === item_data.item_code);
-		const bay_map = new Map(item_data.warehouses.map(w => [w.warehouse, w.available_qty]));
-		existing_for_item.forEach(r => { if (!bay_map.has(r.warehouse)) bay_map.set(r.warehouse, r.available_qty); });
+		const bay_map = new Map(item_data.warehouses.map(w => [w.warehouse, { available_qty: w.available_qty, top_level_warehouse: w.top_level_warehouse }]));
+		existing_for_item.forEach(r => {
+			if (!bay_map.has(r.warehouse)) {
+				bay_map.set(r.warehouse, { available_qty: r.available_qty, top_level_warehouse: r.top_level_warehouse || r.warehouse });
+			}
+		});
 
-		const rows = [...bay_map.entries()].map(([warehouse, available_qty]) => {
+		const rows = [...bay_map.entries()].map(([warehouse, info]) => {
 			const existing = existing_for_item.find(r => r.warehouse === warehouse);
 			return {
 				warehouse,
-				available_qty,
+				available_qty: info.available_qty,
+				top_level_warehouse: info.top_level_warehouse,
 				row_name: existing ? existing.row_name : null,
 				qty: existing ? existing.qty : 0
 			};
 		});
 		rows.sort((a, b) => a.warehouse.localeCompare(b.warehouse, undefined, { numeric: true, sensitivity: 'base' }));
+		return rows;
+	}
 
-		const dialog = new frappe.ui.Dialog({
-			title: __('Bay Breakdown — {0} ({1})', [item_data.item_name, item_data.item_code]),
-			size: 'large',
-			fields: [{ fieldtype: 'HTML', fieldname: 'breakdown_html' }],
-			primary_action_label: __('Save'),
-			primary_action: async () => {
-				await me._save_bay_breakdown(item_data, rows);
-				dialog.hide();
-			}
-		});
-		dialog.on_hide = () => me.focus_barcode_input();
-
-		const render_breakdown = () => {
+	_render_bay_table($wrapper, rows) {
+		const render = () => {
 			const total = rows.reduce((s, r) => s + r.qty, 0);
-			dialog.fields_dict.breakdown_html.$wrapper.html(`
+			$wrapper.html(`
 				<table class="table table-bordered">
 					<thead>
 						<tr>
-							<th>${__('Bay')}</th>
-							<th>${__('Available')}</th>
-							<th>${__('Qty to Pick')}</th>
+							<th style="width:35%">${__('Warehouse')}</th>
+							<th style="width:35%">${__('Bay')}</th>
+							<th style="width:15%">${__('Available')}</th>
+							<th style="width:15%">${__('Qty to Pick')}</th>
 						</tr>
 					</thead>
 					<tbody>
 					${rows.map((r, idx) => `
 						<tr>
+							<td>${r.top_level_warehouse}</td>
 							<td>${r.warehouse}</td>
 							<td class="text-center">${r.available_qty}</td>
 							<td>
@@ -367,9 +371,9 @@ class ItemScanner {
 					`).join('')}
 					</tbody>
 				</table>
-				<div class="text-muted">${__('Total')}: <span id="bay-breakdown-total">${total}</span></div>
+				<div class="text-muted">${__('Total')}: <span class="bay-breakdown-total">${total}</span></div>
 			`);
-			dialog.$wrapper.find('.bay-qty-input').on('change input', function() {
+			$wrapper.find('.bay-qty-input').on('change input', function() {
 				const idx = $(this).data('idx');
 				let val = parseInt($(this).val()) || 0;
 				if (val > rows[idx].available_qty) {
@@ -381,18 +385,36 @@ class ItemScanner {
 					$(this).val(val);
 				}
 				rows[idx].qty = val;
-				$('#bay-breakdown-total').text(rows.reduce((s, r) => s + r.qty, 0));
+				$wrapper.find('.bay-breakdown-total').text(rows.reduce((s, r) => s + r.qty, 0));
 			});
 		};
+		render();
+	}
 
-		render_breakdown();
+	show_bay_breakdown_dialog(item_data) {
+		const me = this;
+		const rows = this._build_bay_rows(item_data);
+
+		const dialog = new frappe.ui.Dialog({
+			title: __('Bay Breakdown — {0} ({1})', [item_data.item_name, item_data.item_code]),
+			size: 'large',
+			fields: [{ fieldtype: 'HTML', fieldname: 'breakdown_html' }],
+			primary_action_label: __('Save'),
+			primary_action: async () => {
+				await me._save_bay_breakdown(item_data, rows);
+				dialog.hide();
+			}
+		});
+		dialog.on_hide = () => me.focus_barcode_input();
+
+		this._render_bay_table(dialog.fields_dict.breakdown_html.$wrapper, rows);
 		dialog.show();
 	}
 
 	async _save_bay_breakdown(item_data, rows) {
 		for (const r of rows) {
 			if (r.qty > 0 && !r.row_name) {
-				await this._add_new_row_async(item_data, r.warehouse, r.available_qty, r.qty);
+				await this._add_new_row_async(item_data, r.warehouse, r.available_qty, r.qty, r.top_level_warehouse);
 			} else if (r.qty > 0 && r.row_name) {
 				await this._update_item_qty_async(r, r.qty);
 			} else if (r.qty === 0 && r.row_name) {
@@ -449,7 +471,7 @@ class ItemScanner {
 		});
 	}
 
-	_add_new_row_async(item_data, warehouse, available_qty, qty) {
+	_add_new_row_async(item_data, warehouse, available_qty, qty, top_level_warehouse) {
 		const me = this;
 		return new Promise((resolve) => {
 			frappe.call({
@@ -470,6 +492,7 @@ class ItemScanner {
 							item_name: item_data.item_name,
 							warehouse: warehouse,
 							available_qty: available_qty,
+							top_level_warehouse: top_level_warehouse,
 							qty: r.message.qty,
 							uom: item_data.stock_uom
 						});
@@ -535,7 +558,7 @@ class ItemScanner {
 					<td>${item.item_code}</td>
 					<td>${item.item_name}</td>
 					<td><span class="text-muted">${item.warehouse || 'Not found'}</span></td>
-					<td class="text-center"><span class="badge badge-info">${item.available_qty || 0}</span></td>
+					<td class="text-center">${item.available_qty || 0}</td>
 					<td>
 						<input type="number"
 							class="form-control input-sm ${qty_class}"
@@ -638,6 +661,192 @@ class ItemScanner {
 				});
 			}
 		);
+	}
+
+	show_item_search_dialog() {
+		const me = this;
+
+		const dialog = new frappe.ui.Dialog({
+			title: __('Search Item'),
+			size: 'large',
+			fields: [{ fieldtype: 'HTML', fieldname: 'content_html' }]
+		});
+
+		const $content = dialog.fields_dict.content_html.$wrapper;
+		$content.html(`
+			<div class="search-filter-row" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+				<div style="flex: 1 1 200px;" id="search-item-name-field"></div>
+				<div style="flex: 1 1 200px;" id="search-scope-field"></div>
+			</div>
+			<div class="search-results-panel"></div>
+			<div class="breakdown-panel" style="display: none;"></div>
+		`);
+
+		const item_name_field = frappe.ui.form.make_control({
+			parent: $content.find('#search-item-name-field'),
+			df: {
+				fieldtype: 'Data',
+				label: __('Item Name'),
+				fieldname: 'item_name_search',
+				placeholder: __('Type at least 2 characters...')
+			},
+			render_input: true
+		});
+
+		const search_scope_field = frappe.ui.form.make_control({
+			parent: $content.find('#search-scope-field'),
+			df: {
+				fieldtype: 'Link',
+				label: __('Search Under'),
+				fieldname: 'search_scope',
+				options: 'Warehouse',
+				onchange: () => {
+					const scope = search_scope_field.get_value();
+					if (scope) me.last_search_scope = scope;
+					me.run_item_search(dialog);
+				},
+				get_query: () => {
+					return { filters: { disabled: 0 } };
+				}
+			},
+			render_input: true
+		});
+		search_scope_field.set_value(this.last_search_scope);
+
+		dialog.custom_fields = {
+			item_name_search: item_name_field,
+			search_scope: search_scope_field
+		};
+
+		const debounced_search = frappe.utils.debounce(() => me.run_item_search(dialog), 300);
+		item_name_field.$input.on('input', debounced_search);
+
+		dialog.on_hide = () => me.focus_barcode_input();
+
+		dialog.show();
+
+		setTimeout(() => {
+			item_name_field.$input.focus();
+		}, 200);
+	}
+
+	run_item_search(dialog) {
+		const me = this;
+		const txt = (dialog.custom_fields.item_name_search.get_value() || '').trim();
+		const scope = dialog.custom_fields.search_scope.get_value() || this.last_search_scope;
+		const $results = dialog.fields_dict.content_html.$wrapper.find('.search-results-panel');
+
+		if (txt.length < 2) {
+			$results.empty();
+			return;
+		}
+
+		frappe.call({
+			method: 'ivm.warehouse.services.inventory.search_items_by_name',
+			args: { txt: txt, parent_warehouse: scope },
+			callback: (r) => {
+				me.render_search_results(dialog, r.message || []);
+			}
+		});
+	}
+
+	render_search_results(dialog, results) {
+		const me = this;
+		const $results = dialog.fields_dict.content_html.$wrapper.find('.search-results-panel');
+
+		if (!results.length) {
+			$results.html(`<div class="text-muted">${__('No items found with available stock in this scope')}</div>`);
+			return;
+		}
+
+		$results.html(`
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>${__('Item Code')}</th>
+						<th>${__('Item Name')}</th>
+						<th style="width:15%">${__('Total Qty')}</th>
+						<th style="width:15%">${__('UOM')}</th>
+						<th style="width:10%"></th>
+					</tr>
+				</thead>
+				<tbody>
+				${results.map((row, idx) => `
+					<tr>
+						<td>${row.item_code}</td>
+						<td>${row.item_name}</td>
+						<td class="text-center">${row.total_qty}</td>
+						<td>${row.stock_uom}</td>
+						<td class="text-center">
+							<button class="btn btn-xs btn-primary search-result-select" data-idx="${idx}">${__('Select')}</button>
+						</td>
+					</tr>
+				`).join('')}
+				</tbody>
+			</table>
+		`);
+
+		$results.find('.search-result-select').on('click', function() {
+			const idx = $(this).data('idx');
+			const row = results[idx];
+			const scope = dialog.custom_fields.search_scope.get_value() || me.last_search_scope;
+			me.select_search_result(dialog, row.item_code, scope);
+		});
+	}
+
+	select_search_result(dialog, item_code, scope) {
+		const me = this;
+		frappe.call({
+			method: 'ivm.warehouse.services.inventory.get_item_with_warehouse',
+			args: { item_code: item_code, parent_warehouse: scope },
+			callback: (r) => {
+				if (!r.message || !r.message.warehouses || r.message.warehouses.length === 0) {
+					frappe.show_alert({ message: __('No stock found for this item in the selected scope'), indicator: 'orange' }, 5);
+					return;
+				}
+				me.show_breakdown_panel(dialog, r.message);
+			}
+		});
+	}
+
+	show_breakdown_panel(dialog, item_data) {
+		const me = this;
+		const rows = this._build_bay_rows(item_data);
+
+		dialog.fields_dict.content_html.$wrapper.find('.search-filter-row').hide();
+
+		const $content = dialog.fields_dict.content_html.$wrapper;
+		const $searchPanel = $content.find('.search-results-panel');
+		const $panel = $content.find('.breakdown-panel');
+
+		$searchPanel.hide();
+		$panel.show().html(`
+			<div style="margin-bottom: 10px;">
+				<a href="#" class="search-back-link">&larr; ${__('Back to search')}</a>
+			</div>
+			<h5>${item_data.item_name} (${item_data.item_code})</h5>
+			<div class="breakdown-table-container"></div>
+			<button class="btn btn-primary search-add-btn" style="margin-top: 15px;">${__('Add to Pick List')}</button>
+		`);
+
+		this._render_bay_table($panel.find('.breakdown-table-container'), rows);
+
+		$panel.find('.search-back-link').on('click', (e) => {
+			e.preventDefault();
+			me.show_search_panel(dialog);
+		});
+
+		$panel.find('.search-add-btn').on('click', async () => {
+			await me._save_bay_breakdown(item_data, rows);
+			me.show_search_panel(dialog);
+		});
+	}
+
+	show_search_panel(dialog) {
+		const $content = dialog.fields_dict.content_html.$wrapper;
+		$content.find('.breakdown-panel').hide();
+		$content.find('.search-results-panel').show();
+		$content.find('.search-filter-row').show();
 	}
 
 	play_success_sound() {}

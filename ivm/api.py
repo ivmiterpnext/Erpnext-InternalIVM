@@ -87,7 +87,7 @@ def get_contact_name(doctype, txt, searchfield, start, page_len, filters):
     list_of_records = frappe.db.sql("""SELECT DISTINCT c.name
         FROM `tabContact` c
         INNER JOIN `tabDynamic Link` dl ON c.name = dl.parent
-        WHERE dl.link_doctype = 'Customer' AND dl.link_title = '{0}' """.format(names))
+        WHERE dl.link_doctype = 'Customer' AND dl.link_title = %s """, (names,))
 
     return list_of_records
 

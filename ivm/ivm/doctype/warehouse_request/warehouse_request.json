@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "request_reason",
+  "subject",
   "related_project",
   "source_build_request",
   "related_case",
@@ -16,6 +17,7 @@
   "status",
   "priority",
   "due_date",
+  "notes",
   "machine_details_section",
   "machine_details_html",
   "device_numbers_section",
@@ -29,7 +31,6 @@
   "hidden_fields_section",
   "schema_version",
   "icorp_machine_id",
-  "subject",
   "source_detail_doctype",
   "source_detail_row",
   "naming_series",
@@ -59,7 +60,6 @@
   "interior_locker_lighting",
   "additional_locker_information",
   "vault_size",
-  "internal_notes",
   "vault_power_configuration_details",
   "device_request_info",
   "connectivity",
@@ -136,8 +136,6 @@
   "send_machine_5_numbers_to_ics",
   "send_numbers_to_ics",
   "created_by",
-  "modified_by1",
-  "modified_date",
   "column_break_sifxz",
   "6_machine_number",
   "6_motherboard_number",
@@ -319,9 +317,9 @@
    "label": "Description"
   },
   {
-   "fieldname": "internal_notes",
-   "fieldtype": "Text Editor",
-   "label": "Internal Notes"
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
   },
   {
    "fieldname": "machine_names",
@@ -876,20 +874,6 @@
    "options": "User"
   },
   {
-   "bold": 1,
-   "fieldname": "modified_by1",
-   "fieldtype": "Data",
-   "label": "Modified By",
-   "options": "Email",
-   "read_only": 1
-  },
-  {
-   "fieldname": "modified_date",
-   "fieldtype": "Datetime",
-   "label": "Modified Date",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_sifxz",
    "fieldtype": "Column Break"
   },
@@ -1056,16 +1040,14 @@
    "label": "LAN Mac Address"
   },
   {
-   "default": "  ",
    "fieldname": "serial_number",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Serial Number",
-   "translatable": 1
+   "label": "Serial Number"
   },
   {
    "fieldname": "prose_number",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "PROSE Number"
   },
@@ -1497,7 +1479,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-10 09:30:04.396105",
+ "modified": "2026-08-12 05:57:56.137925",
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Warehouse Request",

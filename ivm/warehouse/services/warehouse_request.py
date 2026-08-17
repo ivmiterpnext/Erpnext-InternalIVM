@@ -349,7 +349,7 @@ def create_shipping_request_from_build(build_warehouse_request):
     shipping_wr.request_reason = "Shipping Request"
     shipping_wr.source_build_request = build_warehouse_request
     shipping_wr.related_project = build_wr.related_project
-    shipping_wr.account = build_wr.account
+    shipping_wr.customer = build_wr.customer
     shipping_wr.status = "New"
     shipping_wr.subject = f"Ship {build_wr.request_reason} - {build_wr.name}"
     shipping_wr.insert(ignore_permissions=True)
@@ -425,7 +425,6 @@ def send_equipment_info_to_ics(warehouse_request):
         "project": wr.related_project,
         "custom_warehouse_request": wr.name,
         "custom_assigned_to": wr.created_by,
-        "custom_created_by": frappe.session.user,
         "description": _build_equipment_info_description(wr),
     })
     task.insert(ignore_permissions=True)

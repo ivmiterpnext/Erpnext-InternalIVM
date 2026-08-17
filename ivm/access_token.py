@@ -31,8 +31,8 @@ def generate_access_token():
     return access_token
 
 
-@frappe.whitelist(allow_guest=True)
-def get_events():
+@frappe.whitelist()
+def get_events(_retried=False):
     doc = frappe.get_doc("Office 365 Settings")
     access_token = doc.access_token
     user_id = doc.user_id
@@ -169,11 +169,16 @@ def get_events():
 
             return
         else:
+            if _retried:
+                frappe.log_error(
+                    title="Office 365 get_events: retry failed",
+                    message=f"Graph API call failed again after token refresh. Status: {response.status_code}, Body: {response.text[:500]}",
+                )
+                return response.json(), access_token
             access = generate_access_token()
             doc = frappe.get_doc("Office 365 Settings")
             doc.access_token = access
             doc.save()
-            get_events()
-            return response.json(), access_token
+            return get_events(_retried=True)
     else:
         return "Functionality not enabled in the Office 365 Settings", frappe.msgprint("Functionality not enabled in the Office 365 Settings")

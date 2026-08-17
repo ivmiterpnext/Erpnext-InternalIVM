@@ -39,7 +39,7 @@
   "disable_sidebar_stats": 0,
   "docstatus": 0,
   "doctype": "List View Settings",
-  "fields": "[{\"fieldname\":\"name\",\"label\":\"ID\"},{\"fieldname\":\"related_project\",\"label\":\"Related Deployment\"},{\"fieldname\":\"request_reason\",\"label\":\"Request Reason\"},{\"fieldname\":\"account\",\"label\":\"Account\"},{\"fieldname\":\"status\",\"label\":\"Status\"},{\"fieldname\":\"subject\",\"label\":\"Subject\"},{\"fieldname\":\"due_date\",\"label\":\"Due Date\"},{\"fieldname\":\"related_case\",\"label\":\"Related Case\"}]",
+  "fields": "[{\"fieldname\":\"name\",\"label\":\"ID\"},{\"fieldname\":\"related_project\",\"label\":\"Related Deployment\"},{\"fieldname\":\"request_reason\",\"label\":\"Request Reason\"},{\"fieldname\":\"customer\",\"label\":\"Customer\"},{\"fieldname\":\"status\",\"label\":\"Status\"},{\"fieldname\":\"subject\",\"label\":\"Subject\"},{\"fieldname\":\"due_date\",\"label\":\"Due Date\"},{\"fieldname\":\"related_case\",\"label\":\"Related Case\"}]",
   "modified": "2024-03-13 04:00:51.993541",
   "name": "Warehouse Request",
   "show_tags": 0
