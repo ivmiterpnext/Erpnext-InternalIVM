@@ -72,7 +72,8 @@
   {
    "fieldname": "casters",
    "fieldtype": "Select",
-   "label": "Casters"
+   "label": "Casters",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "plug_type",

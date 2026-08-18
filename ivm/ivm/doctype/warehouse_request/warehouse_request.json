@@ -1042,13 +1042,13 @@
   },
   {
    "fieldname": "serial_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "Serial Number"
   },
   {
    "fieldname": "prose_number",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "PROSE Number"
   },
