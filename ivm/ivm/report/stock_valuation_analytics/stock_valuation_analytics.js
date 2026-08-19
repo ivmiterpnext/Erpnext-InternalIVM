@@ -12,25 +12,11 @@ frappe.query_reports["Stock Valuation Analytics"] = {
 			get_query: () => ({ filters: { is_stock_item: 1 } }),
 		},
 		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1,
-		},
-		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
 			fieldtype: "Link",
 			options: "Warehouse",
 			default: "",
-			get_query: function () {
-				const company = frappe.query_report.get_filter_value("company");
-				return {
-					filters: { company: company },
-				};
-			},
 		},
 		{
 			fieldname: "from_date",
@@ -59,5 +45,37 @@ frappe.query_reports["Stock Valuation Analytics"] = {
 			default: "Monthly",
 			reqd: 1,
 		},
+		{
+			fieldname: "hide_zero_qty_items",
+			label: __("Hide Zero Qty Items"),
+			fieldtype: "Check",
+			default: 0,
+		},
 	],
+
+	after_datatable_render(datatable) {
+		if (
+			datatable.bodyRenderer &&
+			typeof datatable.bodyRenderer.renderFooter === "function" &&
+			!datatable.bodyRenderer.__ivm_disable_total_patched
+		) {
+			const original_render_footer = datatable.bodyRenderer.renderFooter.bind(datatable.bodyRenderer);
+			datatable.bodyRenderer.renderFooter = function () {
+				original_render_footer();
+				datatable.datamanager
+					.getColumns()
+					.filter((column) => column.disable_total)
+					.forEach((column) => {
+						const content_el = datatable.footer.querySelector(
+							`.dt-cell--col-${column.colIndex} .dt-cell__content`
+						);
+						if (content_el) {
+							content_el.textContent = "";
+						}
+					});
+			};
+			datatable.bodyRenderer.__ivm_disable_total_patched = true;
+		}
+		datatable.bodyRenderer.renderFooter();
+	},
 };

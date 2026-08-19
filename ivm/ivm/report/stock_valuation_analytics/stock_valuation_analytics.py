@@ -7,6 +7,7 @@ from frappe import _, scrub
 from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start, getdate
 from frappe.utils import get_first_day as get_first_day_of_month
 
+import erpnext
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
@@ -15,6 +16,7 @@ from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	filters = frappe._dict(filters or {})
+	filters.company = filters.get("company") or erpnext.get_default_company()
 	period_columns = get_period_columns(filters)
 	columns = get_columns(period_columns)
 	data = get_data(filters)
@@ -36,6 +38,7 @@ def get_period_columns(filters):
 				"fieldname": f"{period_key}_qty",
 				"fieldtype": "Float",
 				"width": 90,
+				"disable_total": 1,
 			}
 		)
 		period_columns.append(
@@ -44,6 +47,7 @@ def get_period_columns(filters):
 				"fieldname": f"{period_key}_price",
 				"fieldtype": "Currency",
 				"width": 100,
+				"disable_total": 1,
 			}
 		)
 		period_columns.append(
@@ -61,6 +65,7 @@ def get_period_columns(filters):
 def get_columns(period_columns):
 	columns = [
 		{"label": _("Item"), "options": "Item", "fieldname": "name", "fieldtype": "Link", "width": 280},
+		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 200},
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Data", "width": 120},
 	]
 
@@ -232,14 +237,17 @@ def get_data(filters):
 	ranges = get_period_date_ranges(filters)
 
 	today = getdate()
+	hide_zero_qty_items = filters.get("hide_zero_qty_items")
 
 	for _dummy, item_data in item_details.items():
 		row = {
 			"name": item_data.name,
+			"item_name": item_data.item_name,
 			"uom": item_data.stock_uom,
 		}
 		previous_qty = 0.0
 		previous_value = 0.0
+		qty_columns = []
 		for start_date, end_date in ranges:
 			period = get_period(end_date, filters)
 			period_key = scrub(period)
@@ -260,6 +268,10 @@ def get_data(filters):
 			row[f"{period_key}_qty"] = total_qty
 			row[f"{period_key}_total"] = total_value
 			row[f"{period_key}_price"] = (total_value / total_qty) if total_qty else None
+			qty_columns.append(total_qty)
+
+		if hide_zero_qty_items and not any(qty_columns):
+			continue
 
 		data.append(row)
 
@@ -349,6 +361,7 @@ def get_item_details(items, sle):
 		frappe.qb.from_(item_table)
 		.select(
 			item_table.name,
+			item_table.item_name,
 			item_table.stock_uom,
 		)
 		.where(item_table.name.isin(items))
