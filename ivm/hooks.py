@@ -202,7 +202,8 @@ scheduler_events = {
 # ------------------------------
 #
 override_whitelisted_methods = {
-    "frappe.desk.search.get_value": "ivm.machine_hardware_management.overrides.virtual_get_value.virtual_get_value"
+    "frappe.desk.search.get_value": "ivm.machine_hardware_management.overrides.virtual_get_value.virtual_get_value",
+    "frappe.realtime.has_permission": "ivm.overrides.realtime_permission.has_permission",
 }
 #
 # each overriding function accepts a `data` argument;

@@ -159,6 +159,16 @@ def handle_deal_created(
             )
             return
         _sync_deal(hubspot_deal_id, doc.name)
+    except ConcurrentCreateConflict:
+        frappe.logger("hubspot").warning(
+            f"HubSpot: concurrent create conflict for deal {hubspot_deal_id} — re-enqueueing"
+        )
+        frappe.enqueue(
+            "ivm.integrations.hubspot.deal_handler.handle_deal_created",
+            queue="long",
+            hubspot_deal_id=hubspot_deal_id,
+            hubspot_user_id=hubspot_user_id,
+        )
     except api.HubSpotRateLimitExhausted:
         frappe.logger("hubspot").warning(
             f"HubSpot: rate limit exhausted creating CRM Deal for deal {hubspot_deal_id} — re-enqueueing"
@@ -384,8 +394,7 @@ def _ensure_contacts(crm_deal_name: str, contacts: list[dict[str, Any]]) -> None
     """Create Contact records (if needed) and link them to the CRM Deal."""
     from ivm.integrations.hubspot.contact_handler import upsert_contact
 
-    deal = frappe.get_doc("CRM Deal", crm_deal_name)
-
+    resolved: list[tuple[str, int]] = []
     for idx, entry in enumerate(contacts):
         try:
             contact_name = upsert_contact(entry)
@@ -399,9 +408,19 @@ def _ensure_contacts(crm_deal_name: str, contacts: list[dict[str, Any]]) -> None
         if not contact_name:
             continue
 
-        if any(row.contact == contact_name for row in (deal.get("contacts") or [])):
-            continue
+        resolved.append((contact_name, 1 if idx == 0 else 0))
 
-        deal.append("contacts", {"contact": contact_name, "is_primary": 1 if idx == 0 else 0})
+    if not resolved:
+        return
 
-    deal.save(ignore_permissions=True)
+    def _apply_contacts(d: Any) -> None:
+        existing = {row.contact for row in (d.get("contacts") or [])}
+        for contact_name, is_primary in resolved:
+            if contact_name in existing:
+                continue
+            d.append("contacts", {"contact": contact_name, "is_primary": is_primary})
+            existing.add(contact_name)
+
+    deal = frappe.get_doc("CRM Deal", crm_deal_name)
+    _apply_contacts(deal)
+    save_doc(deal, "deal", mutate=_apply_contacts)

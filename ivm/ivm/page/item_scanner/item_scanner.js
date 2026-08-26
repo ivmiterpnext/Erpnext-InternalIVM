@@ -54,12 +54,21 @@ class ItemScanner {
 				options: 'Warehouse',
 				placeholder: __('Select target warehouse...'),
 				description: __('Items will be moved to this warehouse once the Pick List is submitted'),
-				onchange: function() {
-					const val = me.target_warehouse_field.get_value();
-					if (val && me.pick_list) {
-						frappe.db.set_value('Pick List', me.pick_list, 'parent_warehouse', val);
-					}
-				},
+			onchange: function() {
+				const val = me.target_warehouse_field.get_value();
+				if (val && me.pick_list) {
+					frappe.call({
+						method: 'frappe.client.set_value',
+						args: {
+							doctype: 'Pick List',
+							name: me.pick_list,
+							fieldname: 'parent_warehouse',
+							value: val
+						},
+						error_handlers: me._pick_list_error_handlers()
+					});
+				}
+			},
 				get_query: () => {
 					return { filters: { disabled: 0 } };
 				}
@@ -176,23 +185,24 @@ class ItemScanner {
 			frappe.set_route('Form', 'Warehouse Request', this.warehouse_request);
 		});
 
-		$('#clear-btn').click(() => {
-			if (!me.scanned_items.length) return;
-			frappe.confirm(__('Remove all scanned items from the pick list?'), () => {
-				frappe.call({
-					method: 'ivm.warehouse.services.pick_list.clear_pick_list_items',
-					args: { pick_list: me.pick_list },
-					callback: (r) => {
-						if (r.message && r.message.success) {
-							me.scanned_items = [];
-							me.render_items();
-							me.update_submit_button();
-							me.focus_barcode_input();
-						}
+	$('#clear-btn').click(() => {
+		if (!me.scanned_items.length) return;
+		frappe.confirm(__('Remove all scanned items from the pick list?'), () => {
+			frappe.call({
+				method: 'ivm.warehouse.services.pick_list.clear_pick_list_items',
+				args: { pick_list: me.pick_list },
+				error_handlers: me._pick_list_error_handlers(),
+				callback: (r) => {
+					if (r.message && r.message.success) {
+						me.scanned_items = [];
+						me.render_items();
+						me.update_submit_button();
+						me.focus_barcode_input();
 					}
-				});
+				}
 			});
 		});
+	});
 
 		$('#search-item-btn').click(() => this.show_item_search_dialog());
 
@@ -266,6 +276,21 @@ class ItemScanner {
 			? `<a href="/app/stock-entry/${this.stock_entry}">View Stock Entry</a>`
 			: `<a href="/app/pick-list/${this.pick_list}">View Pick List</a>`;
 		frappe.show_alert({ message: `Pick List already submitted. ${link}`, indicator: 'blue' }, 10);
+	}
+
+	_pick_list_error_handlers() {
+		return { DoesNotExistError: () => this._recover_stale_pick_list() };
+	}
+
+	_recover_stale_pick_list() {
+		if (this._recovering) return;
+		this._recovering = true;
+		frappe.show_alert({
+			message: __('This pick list is no longer available (it may have been reset). Reloading...'),
+			indicator: 'orange'
+		}, 5);
+		this.load_pick_list();
+		this._recovering = false;
 	}
 
 	lookup_item(barcode) {
@@ -413,53 +438,28 @@ class ItemScanner {
 
 	async _save_bay_breakdown(item_data, rows) {
 		for (const r of rows) {
+			let result;
 			if (r.qty > 0 && !r.row_name) {
-				await this._add_new_row_async(item_data, r.warehouse, r.available_qty, r.qty, r.top_level_warehouse);
+				result = await this._add_new_row_async(item_data, r.warehouse, r.available_qty, r.qty, r.top_level_warehouse);
 			} else if (r.qty > 0 && r.row_name) {
-				await this._update_item_qty_async(r, r.qty);
+				result = await this._update_item_qty_async(r, r.qty);
 			} else if (r.qty === 0 && r.row_name) {
-				await this._remove_item_by_row_name_async(r.row_name);
+				result = await this._remove_item_by_row_name_async(r.row_name);
+			} else {
+				continue;
 			}
+			if (result && result.ok === false) return;
 		}
 		this.render_items();
 		this.update_submit_button();
 		this.play_success_sound();
 	}
 
-	_add_new_row(item_data, warehouse, available_qty, qty) {
-		frappe.call({
-			method: 'ivm.warehouse.services.pick_list.add_item_to_pick_list',
-			args: {
-				pick_list: this.pick_list,
-				item_code: item_data.item_code,
-				warehouse: warehouse,
-				qty: qty,
-				item_name: item_data.item_name,
-				uom: item_data.stock_uom
-			},
-			callback: (r) => {
-				if (r.message) {
-					this.scanned_items.push({
-						row_name: r.message.row_name,
-						item_code: item_data.item_code,
-						item_name: item_data.item_name,
-						warehouse: warehouse,
-						available_qty: available_qty,
-						qty: r.message.qty,
-						uom: item_data.stock_uom
-					});
-					this.play_success_sound();
-					this.render_items();
-					this.update_submit_button();
-				}
-			}
-		});
-	}
-
 	_update_item_qty(item, new_qty) {
 		frappe.call({
 			method: 'ivm.warehouse.services.pick_list.update_pick_list_item_qty',
 			args: { pick_list: this.pick_list, row_name: item.row_name, qty: new_qty },
+			error_handlers: this._pick_list_error_handlers(),
 			callback: (r) => {
 				if (r.message && r.message.success) {
 					item.qty = new_qty;
@@ -484,6 +484,9 @@ class ItemScanner {
 					item_name: item_data.item_name,
 					uom: item_data.stock_uom
 				},
+				error_handlers: {
+					DoesNotExistError: () => { me._recover_stale_pick_list(); resolve({ ok: false }); }
+				},
 				callback: (r) => {
 					if (r.message) {
 						me.scanned_items.push({
@@ -497,7 +500,7 @@ class ItemScanner {
 							uom: item_data.stock_uom
 						});
 					}
-					resolve();
+					resolve({ ok: true });
 				}
 			});
 		});
@@ -509,12 +512,15 @@ class ItemScanner {
 			frappe.call({
 				method: 'ivm.warehouse.services.pick_list.update_pick_list_item_qty',
 				args: { pick_list: me.pick_list, row_name: item.row_name, qty: new_qty },
+				error_handlers: {
+					DoesNotExistError: () => { me._recover_stale_pick_list(); resolve({ ok: false }); }
+				},
 				callback: (r) => {
 					if (r.message && r.message.success) {
 						const cached = me.scanned_items.find(i => i.row_name === item.row_name);
 						if (cached) cached.qty = new_qty;
 					}
-					resolve();
+					resolve({ ok: true });
 				}
 			});
 		});
@@ -526,12 +532,15 @@ class ItemScanner {
 			frappe.call({
 				method: 'ivm.warehouse.services.pick_list.remove_pick_list_item',
 				args: { pick_list: me.pick_list, row_name: row_name },
+				error_handlers: {
+					DoesNotExistError: () => { me._recover_stale_pick_list(); resolve({ ok: false }); }
+				},
 				callback: (r) => {
 					if (r.message && r.message.success) {
 						const idx = me.scanned_items.findIndex(i => i.row_name === row_name);
 						if (idx !== -1) me.scanned_items.splice(idx, 1);
 					}
-					resolve();
+					resolve({ ok: true });
 				}
 			});
 		});
@@ -606,6 +615,7 @@ class ItemScanner {
 		frappe.call({
 			method: 'ivm.warehouse.services.pick_list.remove_pick_list_item',
 			args: { pick_list: this.pick_list, row_name: item.row_name },
+			error_handlers: this._pick_list_error_handlers(),
 			callback: (r) => {
 				if (r.message && r.message.success) {
 					this.scanned_items.splice(index, 1);
@@ -653,6 +663,7 @@ class ItemScanner {
 				frappe.call({
 					method: 'ivm.warehouse.services.pick_list.submit_pick_list',
 					args: { pick_list: this.pick_list, target_warehouse: target_warehouse },
+					error_handlers: this._pick_list_error_handlers(),
 					callback: (r) => {
 						if (r.message) {
 							frappe.set_route('Form', 'Stock Entry', r.message.stock_entry);
@@ -870,6 +881,8 @@ frappe.pages['item_scanner'].on_page_show = function(wrapper) {
 	// Reinitialize if the warehouse request changed or on first visit
 	if (!page.item_scanner || (new_wr && page.item_scanner.warehouse_request !== new_wr)) {
 		page.item_scanner = new ItemScanner(page, new_wr);
+	} else if (!page.item_scanner.pick_list_submitted) {
+		page.item_scanner.load_pick_list();
 	}
 	cur_page.item_scanner = page.item_scanner;
 };

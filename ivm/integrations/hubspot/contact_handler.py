@@ -26,6 +26,7 @@ from ivm.integrations.hubspot.constants import (
     HUBSPOT_CONTACT_ID_FIELD,
 )
 from ivm.integrations.hubspot.sync_utils import (
+    insert_with_retry,
     save_doc,
     set_acting_user,
     upsert_address,
@@ -120,6 +121,21 @@ def _handle_contact_event(
             hubspot_contact_id=hubspot_contact_id,
             hubspot_user_id=hubspot_user_id,
         )
+    except frappe.QueryDeadlockError:
+        handler_method = (
+            "ivm.integrations.hubspot.contact_handler.handle_contact_created"
+            if action == "create"
+            else "ivm.integrations.hubspot.contact_handler.handle_contact_updated"
+        )
+        frappe.logger("hubspot").warning(
+            f"HubSpot: deadlock syncing contact {hubspot_contact_id} — re-enqueueing"
+        )
+        frappe.enqueue(
+            handler_method,
+            queue="long",
+            hubspot_contact_id=hubspot_contact_id,
+            hubspot_user_id=hubspot_user_id,
+        )
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to {action} Contact for HubSpot contact {hubspot_contact_id}",
@@ -205,7 +221,7 @@ def upsert_contact(
 
         frappe.db.savepoint("before_contact_insert")
         try:
-            contact_doc.insert(ignore_permissions=True)
+            insert_with_retry(contact_doc)
             frappe.db.commit()
             frappe.logger("hubspot").info(
                 f"Created Contact {contact_doc.name} ({first_name} {last_name})"
@@ -230,6 +246,12 @@ def upsert_contact(
 
             _apply_mutations(contact_doc)
             save_doc(contact_doc, "contact", mutate=_apply_mutations)
+        except frappe.QueryDeadlockError:
+            frappe.db.rollback()
+            frappe.logger("hubspot").warning(
+                f"HubSpot: deadlock on Contact insert (hubspot_id={hubspot_contact_id}) — re-raising for re-enqueue"
+            )
+            raise
 
     if address_props:
         _sync_contact_address(contact_doc.name, address_props)
@@ -339,43 +361,73 @@ def _apply_flat_fields(doc: Any, properties: dict[str, Any]) -> None:
         doc.set(key, value)
 
 
-def _sync_email(doc: Any, email: str) -> None:
-    """Ensure the primary email is present in the email_ids child table."""
-    if not email:
+def _normalize_primary(rows: list, value_field: str, primary_field: str, preferred_value: str) -> None:
+    """Collapse `rows` to exactly one primary, preferring the row whose
+    `value_field` equals `preferred_value` if present; otherwise keeping
+    whichever row is already flagged primary (first match), or the first
+    row if none are. Self-heals pre-existing duplicate-primary state, not
+    just newly-introduced duplicates.
+    """
+    if not rows:
         return
+    preferred_row = None
+    if preferred_value:
+        preferred_row = next((r for r in rows if r.get(value_field) == preferred_value), None)
+    winner = preferred_row or next((r for r in rows if r.get(primary_field)), None) or rows[0]
+    for r in rows:
+        r.set(primary_field, 1 if r is winner else 0)
 
-    existing_emails = {row.email_id for row in (doc.get("email_ids") or [])}
-    if email not in existing_emails:
-        for row in doc.get("email_ids") or []:
-            row.is_primary = 0
-        doc.append("email_ids", {"email_id": email, "is_primary": 1})
+
+def _sync_email(doc: Any, email: str) -> None:
+    """Ensure the primary email is present and correctly flagged in the email_ids child table.
+
+    Runs the primary-flag normalization unconditionally (not just when
+    appending a new email) so any pre-existing duplicate-primary state on
+    the doc self-heals, preferring the incoming HubSpot email as primary
+    when present.
+    """
+    if email:
+        existing_emails = {row.email_id for row in (doc.get("email_ids") or [])}
+        if email not in existing_emails:
+            doc.append("email_ids", {"email_id": email, "is_primary": 0})
+
+    _normalize_primary(doc.get("email_ids") or [], "email_id", "is_primary", email)
 
 
 def _sync_phone_numbers(doc: Any, properties: dict[str, Any]) -> None:
-    """Ensure mobile and phone numbers are present in the phone_nos child table."""
+    """Ensure mobile and phone numbers are present and correctly flagged in phone_nos.
+
+    Runs the primary-flag normalization unconditionally (not just when
+    appending a new value) so any pre-existing duplicate-primary state on
+    the doc self-heals, preferring the incoming HubSpot value as primary
+    when present. Mobile and phone are normalized independently since they
+    are separate primary flags over the same shared child table.
+    """
     existing_phones = {row.phone for row in (doc.get("phone_nos") or [])}
 
+    mobile_no = ""
     mobile_raw = (properties.get("mobile_no") or "").strip()
     if mobile_raw:
         mobile_no, mobile_ext = _sanitize_phone(mobile_raw)
         if mobile_no and mobile_no not in existing_phones:
-            for row in doc.get("phone_nos") or []:
-                row.is_primary_mobile_no = 0
-            row = {"phone": mobile_no, "is_primary_mobile_no": 1}
+            row = {"phone": mobile_no, "is_primary_mobile_no": 0}
             if mobile_ext:
                 row["custom_phone_extension"] = mobile_ext
             doc.append("phone_nos", row)
 
+    phone = ""
     phone_raw = (properties.get("phone") or "").strip()
     if phone_raw:
         phone, phone_ext = _sanitize_phone(phone_raw)
         if phone and phone not in existing_phones:
-            for row in doc.get("phone_nos") or []:
-                row.is_primary_phone = 0
-            row = {"phone": phone, "is_primary_phone": 1}
+            row = {"phone": phone, "is_primary_phone": 0}
             if phone_ext:
                 row["custom_phone_extension"] = phone_ext
             doc.append("phone_nos", row)
+
+    phone_rows = doc.get("phone_nos") or []
+    _normalize_primary(phone_rows, "phone", "is_primary_mobile_no", mobile_no)
+    _normalize_primary(phone_rows, "phone", "is_primary_phone", phone)
 
 
 def _set_hubspot_id(doc: Any, hubspot_contact_id: str | None) -> None:

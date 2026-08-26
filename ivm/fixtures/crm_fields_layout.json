@@ -12,8 +12,8 @@
   "docstatus": 0,
   "doctype": "CRM Fields Layout",
   "dt": "CRM Deal",
-  "layout": "[{\"label\":\"Contacts\",\"name\":\"contacts_section\",\"opened\":true,\"editable\":false,\"contacts\":[]},{\"label\":\"Organization Details\",\"name\":\"organization_section\",\"opened\":true,\"columns\":[{\"name\":\"column_na2Q\",\"fields\":[\"organization\",\"website\",\"territory\",\"annual_revenue\",\"close_date\",\"probability\",\"next_step\",\"deal_owner\"]}]},{\"label\":\"Deployment Locations\",\"name\":\"equipment_section\",\"opened\":true,\"editable\":false}]",
-  "modified": "2026-04-16 08:21:28.315490",
+   "layout": "[{\"label\":\"Contacts\",\"name\":\"contacts_section\",\"opened\":true,\"editable\":false,\"contacts\":[]},{\"label\":\"Organization Details\",\"name\":\"organization_section\",\"opened\":true,\"columns\":[{\"name\":\"column_na2Q\",\"fields\":[\"organization\",\"website\",\"territory\",\"annual_revenue\",\"close_date\",\"probability\",\"next_step\",\"deal_owner\"]}]},{\"label\":\"Deployment Locations\",\"name\":\"deployment_locations_section\",\"opened\":true,\"editable\":false,\"columns\":[{\"name\":\"column_dl1\",\"fields\":[\"custom_locations_html\"]}]}]",
+   "modified": "2026-08-26 00:00:00.000000",
   "name": "CRM Deal-Side Panel",
   "type": "Side Panel"
  },

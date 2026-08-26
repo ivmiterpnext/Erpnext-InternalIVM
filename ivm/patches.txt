@@ -14,6 +14,7 @@ ivm.deployments.patches.set_legacy_schema_version
 ivm.warehouse.patches.set_legacy_wr_schema_version
 ivm.deployments.patches.remove_default_deal_statuses
 ivm.integrations.patches.provision_hubspot_service_account
+ivm.integrations.patches.grant_hubspot_crm_task_share_permission
 ivm.warehouse.patches.cleanup_equipment_number_fields
 ivm.deployments.patches.fix_broken_workspace_links
 ivm.deployments.patches.convert_deployment_reports_to_script_report
@@ -36,3 +37,4 @@ ivm.patches.add_warehouse_request_link_indexes
 ivm.patches.remove_broken_workspaces
 ivm.patches.consolidate_tickets_into_it
 ivm.warehouse.patches.create_non_inventory_shipment_item
+ivm.patches.grant_warehouse_role_read_on_warehouse_doctype

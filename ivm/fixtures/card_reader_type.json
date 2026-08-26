@@ -4,7 +4,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Not Needed"
  },
  {
@@ -12,7 +12,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "QR Code Reader"
  },
  {
@@ -20,7 +20,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "P300-H-A"
  },
  {
@@ -28,7 +28,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "HID Omnikey"
  },
  {
@@ -36,7 +36,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "HID Signo"
  },
  {
@@ -44,7 +44,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "HID MultiCLASS SE"
  },
  {
@@ -52,7 +52,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Keypad"
  },
  {
@@ -60,7 +60,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Delta3"
  },
  {
@@ -68,7 +68,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Wave"
  },
  {
@@ -76,7 +76,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 1,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Other"
  },
  {
@@ -84,7 +84,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "P300 HA"
  },
  {
@@ -92,7 +92,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Pin Pad"
  },
  {
@@ -100,7 +100,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "P300 AH"
  },
  {
@@ -108,7 +108,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "HID I Class SE"
  },
  {
@@ -116,7 +116,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "HID MultiClass 40 - SmartStation"
  },
  {
@@ -124,7 +124,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "SmartScreen"
  },
  {
@@ -132,7 +132,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "HID iCLASS SE"
  },
  {
@@ -140,7 +140,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Barcode"
  },
  {
@@ -148,7 +148,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "HID MultiClass 20 - SmartLocker"
  },
  {
@@ -156,7 +156,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Standard Barcode Reader"
  },
  {
@@ -164,7 +164,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "QR Code"
  },
  {
@@ -172,7 +172,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Credit Card Reader"
  },
  {
@@ -180,7 +180,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Delta 3"
  },
  {
@@ -188,7 +188,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "HID Multiclass"
  },
  {
@@ -196,7 +196,7 @@
   "docstatus": 0,
   "doctype": "Card Reader Type",
   "enabled": 0,
-  "modified": "2026-07-10 00:00:00.000000",
+  "modified": "2026-07-10 00:00:00",
   "name": "Credit Card"
  }
 ]

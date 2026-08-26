@@ -1,19 +1,25 @@
 """One-time script: rename HS-{id} placeholder CRM Organizations to their real HubSpot company name.
 
-Usage (production — inside Docker container):
-    bench --site ivmportal.frappe.cloud execute \
-        "exec(open('/home/frappe/frappe-bench/apps/ivm/ivm/integrations/hubspot/patches/rename_placeholder_orgs.py').read(), globals())"
+NOT registered in patches.txt — manual, one-time data-fix operation.
 
-Usage (dev):
-    bench --site dev.local execute \
-        "exec(open('/home/lhammond/frappe-bench/apps/ivm/ivm/integrations/hubspot/patches/rename_placeholder_orgs.py').read(), globals())"
+Run manually, dry-run first (default):
+    bench --site <site> execute \
+        "ivm.integrations.hubspot.patches.rename_placeholder_orgs.execute" \
+        --kwargs '{"dry_run": true}'
+
+Review the output, then apply:
+    bench --site <site> execute \
+        "ivm.integrations.hubspot.patches.rename_placeholder_orgs.execute" \
+        --kwargs '{"dry_run": false}'
+
+Idempotent — re-running after a clean pass finds zero remaining HS-* orgs.
 """
 
 import time
 import frappe
 
 
-def main():
+def execute(dry_run: bool = True) -> None:
     from ivm.integrations.hubspot import api
     from ivm.integrations.hubspot.api import HubSpotRateLimitExhausted
 
@@ -30,7 +36,8 @@ def main():
     skipped_no_hs_id = 0
     errored = 0
 
-    print(f"Found {total} placeholder CRM Organizations (HS-*)")
+    mode = "DRY RUN" if dry_run else "LIVE"
+    print(f"[{mode}] Found {total} placeholder CRM Organizations (HS-*)")
 
     for i, org in enumerate(placeholder_orgs, 1):
         old_name = org["name"]
@@ -42,7 +49,7 @@ def main():
             continue
 
         try:
-            result = _fetch_and_rename(old_name, hs_id, api, HubSpotRateLimitExhausted)
+            result = _fetch_and_rename(old_name, hs_id, api, HubSpotRateLimitExhausted, dry_run)
             if result is None:
                 skipped_no_name += 1
                 print(f"  [{i}/{total}] {old_name}: HubSpot name is empty — skipping")
@@ -50,19 +57,22 @@ def main():
                 skipped_conflict += 1
             else:
                 renamed += 1
-                print(f"  [{i}/{total}] {old_name} → {result}")
+                verb = "would rename" if dry_run else "renamed"
+                print(f"  [{i}/{total}] {old_name} → {result} ({verb})")
         except Exception as e:
             errored += 1
             print(f"  [{i}/{total}] {old_name}: ERROR — {e}")
 
     print(
-        f"\nDone. Renamed: {renamed}, Conflict: {skipped_conflict}, "
+        f"\n[{mode}] Done. Renamed: {renamed}, Conflict: {skipped_conflict}, "
         f"No name: {skipped_no_name}, No HS ID: {skipped_no_hs_id}, Errors: {errored}"
     )
+    if dry_run:
+        print("  DRY RUN — no documents were renamed. Re-run with dry_run=false to execute.")
 
 
-def _fetch_and_rename(old_name, hs_id, api, RateLimitExc, retried=False):
-    """Fetch HubSpot name and rename. Returns new_name, None (no name), or 'CONFLICT'."""
+def _fetch_and_rename(old_name, hs_id, api, RateLimitExc, dry_run, retried=False):
+    """Fetch HubSpot name and rename (or preview). Returns new_name, None (no name), or 'CONFLICT'."""
     try:
         data = api.get_company(hs_id, properties=["name"])
     except RateLimitExc:
@@ -70,7 +80,7 @@ def _fetch_and_rename(old_name, hs_id, api, RateLimitExc, retried=False):
             raise
         print(f"    Rate limited on {old_name}, sleeping 10s...")
         time.sleep(10)
-        return _fetch_and_rename(old_name, hs_id, api, RateLimitExc, retried=True)
+        return _fetch_and_rename(old_name, hs_id, api, RateLimitExc, dry_run, retried=True)
 
     props = data.get("properties", {})
     new_name = (props.get("name") or "").strip()
@@ -82,9 +92,9 @@ def _fetch_and_rename(old_name, hs_id, api, RateLimitExc, retried=False):
         print(f"    {old_name}: '{new_name}' already exists — skipping")
         return "CONFLICT"
 
+    if dry_run:
+        return new_name
+
     frappe.rename_doc("CRM Organization", old_name, new_name, force=True)
     frappe.db.commit()
     return new_name
-
-
-main()

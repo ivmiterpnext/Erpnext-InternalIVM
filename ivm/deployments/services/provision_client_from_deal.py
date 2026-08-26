@@ -78,7 +78,7 @@ def provision_customer_and_icorp_client(crm_deal_name: str) -> str | None:
     if not customer_name:
         return None
 
-    primary_contact_doc = _get_primary_contact(deal)
+    primary_contact_doc = get_primary_contact(deal)
 
     if primary_contact_doc:
         _link_contact_to_customer(primary_contact_doc, customer_name)
@@ -241,7 +241,7 @@ def _link_contact_to_customer(contact_doc: Any, customer_name: str) -> None:
     )
 
 
-def _get_primary_contact(deal: Any) -> Any | None:
+def get_primary_contact(deal: Any) -> Any | None:
     """Return the Frappe Contact doc for the deal's primary contact."""
     contacts = deal.get("contacts") or []
 

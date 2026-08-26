@@ -44,20 +44,23 @@ This skips the API fetch and restores from the local file instead.
 
 Production receives live HubSpot webhooks directly (no relay service in between). Production then forwards a best-effort copy of each raw webhook payload to a dev tunnel URL, configured via the `hubspot_dev_relay_url` site config key on prod. If dev is offline, the forward silently fails — this is expected.
 
-To receive webhooks on dev.local, use [ngrok](https://ngrok.com) to expose `localhost:8000` at a persistent, free static domain (one is included per ngrok account, and does not change between sessions):
+To receive webhooks on dev.local, use [ngrok](https://ngrok.com) to expose `localhost:8000`. Every ngrok account (including free) gets one automatically-assigned Dev Domain that's stable across sessions — you don't pick the name, and custom/reserved static domains now require a paid plan (passing a custom subdomain via `--url` fails with `ERR_NGROK_313` on the free plan).
 
 **One-time setup:**
 ```bash
 ngrok config add-authtoken <your-token>
 ```
-Then claim your account's one free static domain via the [ngrok dashboard](https://dashboard.ngrok.com) (Domains page).
 
 **Each dev session:**
 ```bash
-ngrok http --url=https://<your-domain>.ngrok-free.app 8000
+ngrok http 8000
 ```
+The terminal's `Forwarding` line shows your assigned domain, e.g. `https://<random-name>.ngrok-free.dev -> http://localhost:8000`. It's also visible anytime on the [ngrok dashboard](https://dashboard.ngrok.com) → Domains page without starting a tunnel. Note the domain isn't necessarily `.ngrok-free.app` — ngrok may assign `.ngrok-free.dev` or other TLDs depending on the account.
 
-No changes are needed on prod between sessions since the domain is stable — `hubspot_dev_relay_url` is set once via `bench --site ivmportal.frappe.cloud set-config hubspot_dev_relay_url "https://<your-domain>.ngrok-free.app/api/method/ivm.integrations.hubspot.webhook.handle_webhook"`.
+No changes are needed on prod between sessions since the domain is stable once assigned — `hubspot_dev_relay_url` is set once via:
+```bash
+bench --site ivmportal.frappe.cloud set-config hubspot_dev_relay_url "https://<your-assigned-domain>/api/method/ivm.integrations.hubspot.webhook.handle_webhook"
+```
 
 #### License
 

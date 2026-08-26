@@ -1,5 +1,27 @@
 [
  {
+  "app": null,
+  "bg_color": "gray",
+  "docstatus": 0,
+  "doctype": "Desktop Icon",
+  "hidden": 0,
+  "icon": "education",
+  "icon_image": null,
+  "icon_type": "Link",
+  "label": "Learning",
+  "link": null,
+  "link_to": "Learning",
+  "link_type": "Workspace Sidebar",
+  "logo_url": null,
+  "modified": "2026-04-16 04:50:08.089653",
+  "name": "Learning",
+  "parent_icon": null,
+  "restrict_removal": 0,
+  "roles": [],
+  "sidebar": null,
+  "standard": 0
+ },
+ {
   "app": "crm",
   "bg_color": "gray",
   "docstatus": 0,

@@ -144,6 +144,29 @@ def save_doc(
     )
 
 
+def insert_with_retry(doc: Any, max_retries: int = 3) -> None:
+    """Insert doc, retrying on TimestampMismatchError caused by an unrelated
+    shared document (e.g. crm's lost-reason sidepanel layout singleton) being
+    saved concurrently inside validate(). Since db_insert() only runs after
+    validate() succeeds, a TimestampMismatchError here means nothing was
+    persisted yet — safe to retry the same doc object as-is.
+    """
+    attempt = 0
+    while True:
+        try:
+            doc.insert(ignore_permissions=True)
+            return
+        except frappe.exceptions.TimestampMismatchError:
+            attempt += 1
+            if attempt > max_retries:
+                raise
+            frappe.logger(_LOG).warning(
+                f"{doc.doctype} insert hit a concurrent modification on an "
+                f"unrelated document during validate — retrying "
+                f"(attempt {attempt}/{max_retries})"
+            )
+
+
 def lookup_or_create(
     doctype: str,
     hubspot_id_field: str,
@@ -167,7 +190,7 @@ def lookup_or_create(
 
     frappe.db.savepoint("before_lookup_or_create_insert")
     try:
-        doc.insert(ignore_permissions=True)
+        insert_with_retry(doc)
         frappe.logger(_LOG).info(
             f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})"
         )
@@ -193,6 +216,12 @@ def lookup_or_create(
         if existing_name:
             return frappe.get_doc(doctype, existing_name), False
 
+        raise ConcurrentCreateConflict(doctype, hubspot_id_field, hubspot_id) from e
+    except frappe.QueryDeadlockError as e:
+        frappe.db.rollback()
+        frappe.logger(_LOG).warning(
+            f"HubSpot: deadlock on insert for {doctype} (hubspot_id={hubspot_id}) — signaling re-enqueue"
+        )
         raise ConcurrentCreateConflict(doctype, hubspot_id_field, hubspot_id) from e
 
 
