@@ -37,4 +37,3 @@ ivm.patches.add_warehouse_request_link_indexes
 ivm.patches.remove_broken_workspaces
 ivm.patches.consolidate_tickets_into_it
 ivm.warehouse.patches.create_non_inventory_shipment_item
-ivm.patches.grant_warehouse_role_read_on_warehouse_doctype
