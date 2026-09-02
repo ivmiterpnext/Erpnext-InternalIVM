@@ -1,3 +1,5 @@
+const ROOT_WAREHOUSE = 'All Warehouses - I';
+
 frappe.pages['item_scanner'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
@@ -13,7 +15,7 @@ class ItemScanner {
 		this.warehouse_request = warehouse_request;
 		this.pick_list = null;
 		this.scanned_items = []; // mirrors Pick List locations for rendering
-		this.last_search_scope = 'All Warehouses - I';
+		this.last_search_scope = ROOT_WAREHOUSE;
 
 		if (!this.warehouse_request) {
 			frappe.msgprint('No Warehouse Request specified');
@@ -311,7 +313,7 @@ class ItemScanner {
 	fetch_item_details(item_code) {
 		frappe.call({
 			method: 'ivm.warehouse.services.inventory.get_item_with_warehouse',
-			args: { item_code: item_code, parent_warehouse: 'All Warehouses - I' },
+			args: { item_code: item_code, parent_warehouse: ROOT_WAREHOUSE },
 			callback: (r) => {
 				if (r.message) {
 					if (!r.message.warehouses || r.message.warehouses.length === 0) {

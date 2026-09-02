@@ -10,6 +10,7 @@ class MachineActivityLogType(Document):
 
 @frappe.whitelist()
 def sync():
+    frappe.only_for("System Manager")
     return sync_doctype_from_api(
         doctype="Machine Activity Log Type",
         api_type="icorp",

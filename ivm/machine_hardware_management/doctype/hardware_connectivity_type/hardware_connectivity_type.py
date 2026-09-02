@@ -11,6 +11,7 @@ class HardwareConnectivityType(Document):
 
 @frappe.whitelist()
 def sync():
+    frappe.only_for("System Manager")
     return sync_doctype_from_api(
         doctype="Hardware Connectivity Type",
         api_type="icorp",

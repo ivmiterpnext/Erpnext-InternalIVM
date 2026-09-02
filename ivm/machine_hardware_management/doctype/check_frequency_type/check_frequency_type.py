@@ -11,6 +11,7 @@ class CheckFrequencyType(Document):
 
 @frappe.whitelist()
 def sync():
+    frappe.only_for("System Manager")
     return sync_doctype_from_api(
         doctype="Check Frequency Type",
         api_type="icorp",

@@ -1,26 +1,31 @@
 import frappe
 
+# Root warehouse for stock lookups. Update if the company abbreviation changes.
+ROOT_WAREHOUSE = "All Warehouses - I"
+
+
+def get_available_qty(item_code, warehouse):
+    """Get actual stock qty for an item in a specific warehouse (Bin.actual_qty), or 0 if none."""
+    return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty") or 0
+
 
 def _get_top_level_warehouse_map(warehouse_names):
-    """Map each given leaf warehouse name to its top-level ancestor (the warehouse directly under the tree root)."""
-    parent_map = {
-        w.name: w.parent_warehouse
-        for w in frappe.get_all("Warehouse", fields=["name", "parent_warehouse"])
-    }
-    result = {}
-    for wh in warehouse_names:
-        node = wh
-        while True:
-            parent = parent_map.get(node)
-            if not parent:
-                result[wh] = node
-                break
-            grandparent = parent_map.get(parent)
-            if not grandparent:
-                result[wh] = node
-                break
-            node = parent
-    return result
+    """Map each given leaf warehouse name to its top-level ancestor (child of the tree root)."""
+    if not warehouse_names:
+        return {}
+
+    rows = frappe.db.sql("""
+        SELECT leaf.name AS leaf_name, ancestor.name AS top_level
+        FROM `tabWarehouse` leaf
+        JOIN `tabWarehouse` ancestor
+            ON leaf.lft >= ancestor.lft AND leaf.rgt <= ancestor.rgt
+        JOIN `tabWarehouse` root
+            ON ancestor.parent_warehouse = root.name
+        WHERE leaf.name IN %(names)s
+          AND (root.parent_warehouse IS NULL OR root.parent_warehouse = '')
+    """, {"names": warehouse_names}, as_dict=True)
+
+    return {r.leaf_name: r.top_level for r in rows}
 
 
 def _get_leaf_warehouses(parent_warehouse):
@@ -28,48 +33,62 @@ def _get_leaf_warehouses(parent_warehouse):
     is_group = frappe.db.get_value("Warehouse", parent_warehouse, "is_group")
     if not is_group:
         return [parent_warehouse]
-    warehouses = []
-    for child in frappe.get_all("Warehouse", filters={"parent_warehouse": parent_warehouse, "disabled": 0}, fields=["name", "is_group"]):
-        if child.is_group:
-            warehouses.extend(_get_leaf_warehouses(child.name))
-        else:
-            warehouses.append(child.name)
-    return warehouses
+
+    lft, rgt = frappe.db.get_value("Warehouse", parent_warehouse, ["lft", "rgt"])
+    return frappe.get_all("Warehouse",
+        filters={
+            "lft": [">", lft],
+            "rgt": ["<", rgt],
+            "is_group": 0,
+            "disabled": 0,
+        },
+        pluck="name",
+    )
 
 
 @frappe.whitelist()
-def get_item_with_warehouse(item_code, parent_warehouse='All Warehouses - I'):
+def get_item_with_warehouse(item_code, parent_warehouse=None):
     """Get item details and all leaf warehouses with stock under parent_warehouse, ordered by qty."""
-    item_code, item_name, stock_uom = frappe.db.get_value("Item", item_code, ["item_code", "item_name", "stock_uom"])
+    if not parent_warehouse:
+        parent_warehouse = ROOT_WAREHOUSE
 
-    warehouses_with_stock = []
-    for warehouse in _get_leaf_warehouses(parent_warehouse):
-        stock_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
-        if stock_qty and stock_qty > 0:
-            warehouses_with_stock.append({"warehouse": warehouse, "available_qty": stock_qty})
+    item = frappe.db.get_value("Item", item_code, ["item_code", "item_name", "stock_uom"], as_dict=True)
+    if not item:
+        frappe.throw(f"Item {item_code} not found", frappe.DoesNotExistError)
 
-    warehouses_with_stock.sort(key=lambda x: x["available_qty"], reverse=True)
+    leaf_warehouses = _get_leaf_warehouses(parent_warehouse)
+    if not leaf_warehouses:
+        return {**item, "warehouses": []}
 
-    top_level_map = _get_top_level_warehouse_map([w["warehouse"] for w in warehouses_with_stock])
-    for w in warehouses_with_stock:
-        w["top_level_warehouse"] = top_level_map.get(w["warehouse"], w["warehouse"])
+    warehouses_with_stock = frappe.get_all("Bin",
+        filters={
+            "item_code": item_code,
+            "warehouse": ["in", leaf_warehouses],
+            "actual_qty": [">", 0],
+        },
+        fields=["warehouse", "actual_qty as available_qty"],
+        order_by="actual_qty desc",
+    )
 
-    return {
-        "item_code": item_code,
-        "item_name": item_name,
-        "stock_uom": stock_uom,
-        "warehouses": warehouses_with_stock
-    }
+    if warehouses_with_stock:
+        top_level_map = _get_top_level_warehouse_map([w["warehouse"] for w in warehouses_with_stock])
+        for w in warehouses_with_stock:
+            w["top_level_warehouse"] = top_level_map.get(w["warehouse"], w["warehouse"])
+
+    return {**item, "warehouses": warehouses_with_stock}
 
 
 @frappe.whitelist()
-def search_items_by_name(txt, parent_warehouse='All Warehouses - I', limit=20):
+def search_items_by_name(txt, parent_warehouse=None, limit=20):
     """Search items by partial name match with available stock under parent_warehouse, ordered by total qty."""
     if not txt or len(txt) < 2:
         return []
+    if not parent_warehouse:
+        parent_warehouse = ROOT_WAREHOUSE
     leaf_warehouses = _get_leaf_warehouses(parent_warehouse)
     if not leaf_warehouses:
         return []
+    limit = min(int(limit), 100)
     return frappe.db.sql("""
         SELECT b.item_code, i.item_name, i.stock_uom, SUM(b.actual_qty) as total_qty
         FROM `tabBin` b
@@ -81,4 +100,4 @@ def search_items_by_name(txt, parent_warehouse='All Warehouses - I', limit=20):
         GROUP BY b.item_code
         ORDER BY total_qty DESC
         LIMIT %(limit)s
-    """, {"warehouses": leaf_warehouses, "txt": f"%{txt}%", "limit": int(limit)}, as_dict=True)
+    """, {"warehouses": leaf_warehouses, "txt": f"%{txt}%", "limit": limit}, as_dict=True)

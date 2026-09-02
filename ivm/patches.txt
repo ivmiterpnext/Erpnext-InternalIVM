@@ -37,3 +37,5 @@ ivm.patches.add_warehouse_request_link_indexes
 ivm.patches.remove_broken_workspaces
 ivm.patches.consolidate_tickets_into_it
 ivm.warehouse.patches.create_non_inventory_shipment_item
+ivm.warehouse.patches.drop_wr_created_by_fields
+ivm.patches.remove_deployment_level_equipment_type

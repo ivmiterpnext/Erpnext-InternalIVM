@@ -11,6 +11,7 @@ class PushMessageType(Document):
 
 @frappe.whitelist()
 def sync():
+    frappe.only_for("System Manager")
     return sync_doctype_from_api(
         doctype="Push Message Type",
         api_type="icorp",

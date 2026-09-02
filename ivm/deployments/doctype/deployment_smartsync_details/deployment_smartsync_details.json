@@ -14,8 +14,9 @@
   "workflow",
   "serial_validation",
   "home_screen_logo",
-  "column_break_gviu",
-  "planogram",
+   "column_break_gviu",
+   "equipment_type",
+   "planogram",
   "wrap",
   "logo",
   "column_break_qeex",
@@ -49,16 +50,22 @@
    "label": "Machine Name",
    "reqd": 1
   },
-  {
-   "fieldname": "column_break_gviu",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "3d_printed",
-   "fieldtype": "Check",
-   "label": "3D Printed"
-  },
+   {
+    "fieldname": "column_break_gviu",
+    "fieldtype": "Column Break"
+   },
+   {
+    "fieldname": "equipment_type",
+    "fieldtype": "Select",
+    "label": "Equipment Type",
+    "options": "\nNew\nRefurbished"
+   },
+   {
+    "default": "0",
+    "fieldname": "3d_printed",
+    "fieldtype": "Check",
+    "label": "3D Printed"
+   },
   {
    "fieldname": "bins_data",
    "fieldtype": "JSON",

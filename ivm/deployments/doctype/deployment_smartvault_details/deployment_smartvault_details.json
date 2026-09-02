@@ -13,8 +13,9 @@
   "workflow",
   "serial_validation",
   "home_screen_logo",
-  "column_break_gviu",
-  "planogram",
+   "column_break_gviu",
+   "equipment_type",
+   "planogram",
   "wrap",
   "logo",
   "column_break_ximc",
@@ -48,15 +49,21 @@
    "label": "Machine Name",
    "reqd": 1
   },
-  {
-   "fieldname": "column_break_gviu",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "bins_data",
-   "fieldtype": "JSON",
-   "label": "Bins"
-  },
+   {
+    "fieldname": "column_break_gviu",
+    "fieldtype": "Column Break"
+   },
+   {
+    "fieldname": "equipment_type",
+    "fieldtype": "Select",
+    "label": "Equipment Type",
+    "options": "\nNew\nRefurbished"
+   },
+   {
+    "fieldname": "bins_data",
+    "fieldtype": "JSON",
+    "label": "Bins"
+   },
   {
    "fieldname": "power_connections",
    "fieldtype": "Select",

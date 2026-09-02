@@ -14,8 +14,9 @@
   "workflow",
   "serial_validaton",
   "home_screen_logo",
-  "column_break_emlq",
-  "planogram",
+   "column_break_emlq",
+   "equipment_type",
+   "planogram",
   "wrap",
   "logo",
   "column_break_mltf",
@@ -138,15 +139,21 @@
    "fieldtype": "Section Break",
    "label": "SmartStation Details"
   },
-  {
-   "fieldname": "column_break_emlq",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "notes",
-   "fieldtype": "Small Text",
-   "label": "Notes"
-  },
+   {
+    "fieldname": "column_break_emlq",
+    "fieldtype": "Column Break"
+   },
+   {
+    "fieldname": "equipment_type",
+    "fieldtype": "Select",
+    "label": "Equipment Type",
+    "options": "\nNew\nRefurbished"
+   },
+   {
+    "fieldname": "notes",
+    "fieldtype": "Small Text",
+    "label": "Notes"
+   },
   {
    "fieldname": "column_break_whgz",
    "fieldtype": "Column Break"

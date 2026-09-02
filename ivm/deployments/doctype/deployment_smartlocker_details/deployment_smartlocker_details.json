@@ -14,8 +14,9 @@
   "workflow",
   "serial_validation",
   "home_screen_logo",
-  "column_break_gviu",
-  "planogram",
+   "column_break_gviu",
+   "equipment_type",
+   "planogram",
   "wrap",
   "logo",
   "column_break_tgzp",
@@ -191,16 +192,22 @@
    "fieldtype": "Section Break",
    "label": "SmartLocker Details"
   },
-  {
-   "fieldname": "planogram",
-   "fieldtype": "Attach",
-   "label": "Planogram"
-  },
-  {
-   "fieldname": "wrap",
-   "fieldtype": "Attach",
-   "label": "Wrap"
-  },
+   {
+    "fieldname": "equipment_type",
+    "fieldtype": "Select",
+    "label": "Equipment Type",
+    "options": "\nNew\nRefurbished"
+   },
+   {
+    "fieldname": "planogram",
+    "fieldtype": "Attach",
+    "label": "Planogram"
+   },
+   {
+    "fieldname": "wrap",
+    "fieldtype": "Attach",
+    "label": "Wrap"
+   },
   {
    "fieldname": "logo",
    "fieldtype": "Attach",

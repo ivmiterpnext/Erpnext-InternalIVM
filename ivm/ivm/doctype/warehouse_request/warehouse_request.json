@@ -40,9 +40,8 @@
   "description",
   "machine_names",
   "power_connections",
-  "machine_ownership_status",
-  "equipment_type",
-  "is_refurbished",
+   "machine_ownership_status",
+   "is_refurbished",
   "additional_information",
   "wrap_type",
   "wrap_layout",
@@ -135,9 +134,8 @@
   "5_serial_number",
   "5_mac_address",
   "send_machine_5_numbers_to_ics",
-  "send_numbers_to_ics",
-  "created_by",
-  "column_break_sifxz",
+   "send_numbers_to_ics",
+   "column_break_sifxz",
   "6_machine_number",
   "6_motherboard_number",
   "6_serial_number",
@@ -163,9 +161,8 @@
   "10_serial_number",
   "10_mac_address",
   "send_machine_10_numbers_to_ics",
-  "locale",
-  "created_date",
-  "column_break_ausuf",
+   "locale",
+   "column_break_ausuf",
   "machine_name",
   "tenth_machine_name",
   "tenth_prose_number",
@@ -868,12 +865,7 @@
    "fieldtype": "Check",
    "label": "Send Numbers to ICS"
   },
-  {
-   "fieldname": "created_by",
-   "fieldtype": "Link",
-   "label": "Created By",
-   "options": "User"
-  },
+
   {
    "fieldname": "column_break_sifxz",
    "fieldtype": "Column Break"
@@ -1025,11 +1017,7 @@
    "options": "--None--\nDomestic\nInternational",
    "translatable": 1
   },
-  {
-   "fieldname": "created_date",
-   "fieldtype": "Date",
-   "label": "Created Date"
-  },
+
   {
    "fieldname": "column_break_ausuf",
    "fieldtype": "Column Break"
@@ -1439,22 +1427,15 @@
    "label": "Label Color",
    "translatable": 1
   },
-  {
-   "fetch_from": "related_project.equipment_type",
-   "fieldname": "equipment_type",
-   "fieldtype": "Data",
-   "label": "Equipment Type",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "related_project.is_refurbished",
-   "fieldname": "is_refurbished",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Refurbished?",
-   "read_only": 1
-  },
+   {
+    "default": "0",
+    "fetch_from": "related_project.is_refurbished",
+    "fieldname": "is_refurbished",
+    "fieldtype": "Check",
+    "hidden": 1,
+    "label": "Is Refurbished?",
+    "read_only": 1
+   },
   {
    "fieldname": "column_break_fksy",
    "fieldtype": "Column Break"

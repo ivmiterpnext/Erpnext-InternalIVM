@@ -10,6 +10,7 @@ class BoardLink(Document):
 
 @frappe.whitelist()
 def sync():
+    frappe.only_for("System Manager")
     return sync_doctype_from_api(
         doctype="Board Link",
         api_type="icorp",

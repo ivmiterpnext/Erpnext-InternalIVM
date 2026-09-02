@@ -10,6 +10,7 @@ class Timezone(Document):
 
 @frappe.whitelist()
 def sync():
+    frappe.only_for("System Manager")
     return sync_doctype_from_api(
         doctype="Timezone",
         api_type="icorp",

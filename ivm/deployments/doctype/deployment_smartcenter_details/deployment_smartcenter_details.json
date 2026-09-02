@@ -14,8 +14,9 @@
   "serial_validation",
   "home_screen_logo",
   "column_break_qhcr",
-  "selection_sheet",
-  "planogram",
+   "selection_sheet",
+   "equipment_type",
+   "planogram",
   "wrap",
   "logo",
   "column_break_etjv",
@@ -189,11 +190,17 @@
    "fieldtype": "Attach",
    "label": "Selection Sheet"
   },
-  {
-   "fieldname": "planogram",
-   "fieldtype": "Attach",
-   "label": "Planogram"
-  },
+   {
+    "fieldname": "equipment_type",
+    "fieldtype": "Select",
+    "label": "Equipment Type",
+    "options": "\nNew\nRefurbished"
+   },
+   {
+    "fieldname": "planogram",
+    "fieldtype": "Attach",
+    "label": "Planogram"
+   },
   {
    "fieldname": "wrap",
    "fieldtype": "Attach",

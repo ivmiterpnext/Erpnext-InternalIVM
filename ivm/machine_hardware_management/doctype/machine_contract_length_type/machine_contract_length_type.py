@@ -10,6 +10,7 @@ class MachineContractLengthType(Document):
 
 @frappe.whitelist()
 def sync():
+    frappe.only_for("System Manager")
     return sync_doctype_from_api(
         doctype="Machine Contract Length Type",
         api_type="icorp",

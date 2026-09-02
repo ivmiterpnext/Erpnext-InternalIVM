@@ -2,11 +2,8 @@ from typing import Any, NamedTuple
 
 import frappe
 
-from ivm.warehouse.services.machine import (
-    apply_machine_data,
-    fetch_machine,
-)
-from ivm.warehouse.services.pick_list import create_pick_list, delete_draft_pick_list
+from ivm.warehouse.services.machine import apply_machine_data, fetch_machine
+from ivm.warehouse.services.pick_list import create_pick_list, delete_draft_pick_list, serialize_pick_list
 
 
 _COMMON_DETAIL_FIELDS = [
@@ -146,8 +143,6 @@ def create_build_requests_from_detail_rows(project_name: str, detail_table: str)
         wr.locale = project.get("locale")
         wr.machine_ownership_status = project.get("machine_ownership_status")
         wr.contact = project.get("contact_name")
-        wr.created_by = frappe.session.user
-        wr.created_date = frappe.utils.nowdate()
         wr.subject = f"{location_name} - {reason} [{machine_name}]"
 
         for field in fields_to_copy:
@@ -159,49 +154,7 @@ def create_build_requests_from_detail_rows(project_name: str, detail_table: str)
         wr.insert(ignore_permissions=True)
         created.append(wr.name)
 
-    frappe.db.commit()
     return {"created": created, "skipped": skipped, "failed": []}
-
-
-def _serialize_pick_list(pl_doc) -> dict:
-    """Build a frontend-friendly representation of an existing Pick List."""
-    is_draft = pl_doc.docstatus == 0
-
-    items = []
-    for loc in pl_doc.locations:
-        if is_draft:
-            available_qty = (
-                frappe.db.get_value(
-                    "Bin",
-                    {"item_code": loc.item_code, "warehouse": loc.warehouse},
-                    "actual_qty",
-                ) or 0
-            )
-        else:
-            available_qty = loc.stock_qty
-
-        items.append({
-            "row_name": loc.name,
-            "item_code": loc.item_code,
-            "item_name": loc.item_name,
-            "warehouse": loc.warehouse,
-            "qty": loc.qty,
-            "picked_qty": loc.picked_qty,
-            "uom": loc.uom,
-            "available_qty": available_qty,
-        })
-
-    stock_entry = frappe.db.get_value(
-        "Stock Entry", {"pick_list": pl_doc.name, "docstatus": ["!=", 2]}, "name"
-    )
-
-    return {
-        "pick_list": pl_doc.name,
-        "submitted": pl_doc.docstatus == 1,
-        "target_warehouse": pl_doc.parent_warehouse,
-        "stock_entry": stock_entry,
-        "items": items,
-    }
 
 
 @frappe.whitelist()
@@ -210,7 +163,7 @@ def get_or_create_warehouse_request_pick_list(warehouse_request: str) -> dict:
     pick_list = frappe.db.get_value("Warehouse Request", warehouse_request, "pick_list")
 
     if pick_list:
-        return _serialize_pick_list(frappe.get_doc("Pick List", pick_list))
+        return serialize_pick_list(frappe.get_doc("Pick List", pick_list))
 
     company = (
         frappe.defaults.get_user_default("Company")
@@ -278,6 +231,7 @@ def reset_warehouse_request_pick_list(warehouse_request):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def warehouse_request_query(doctype, txt, searchfield, start, page_len, filters):
+    """Link field search query that shows 'WR-XXXXX - Subject' in dropdowns."""
     return frappe.db.sql("""
         SELECT
             name,
@@ -310,6 +264,14 @@ def _get_default_target_warehouse():
 
 @frappe.whitelist()
 def create_shipping_request_from_build(build_warehouse_request):
+    """Create a Shipping Request linked to a completed Build request.
+
+    Requires the Build WR to be in 'Crated - Ready to Ship' status with a
+    submitted Pick List. 
+    
+    Returns the existing Shipping Request name if one
+    already exists for this Build.
+    """
     build_wr = frappe.get_doc("Warehouse Request", build_warehouse_request)
 
     if not build_wr.request_reason or not build_wr.request_reason.startswith("Build"):
@@ -407,7 +369,7 @@ def send_equipment_info_to_ics(warehouse_request):
     wr = frappe.get_doc("Warehouse Request", warehouse_request)
 
     if (wr.schema_version or 0) < 2:
-        frappe.throw("This action is only available for the new (schema v2) Warehouse Request layout.")
+        frappe.throw("This action is only available for the schema v2 Warehouse Request layout.")
 
     if not (wr.request_reason or "").startswith("Build"):
         frappe.throw("This action is only available for Build requests.")
@@ -424,10 +386,9 @@ def send_equipment_info_to_ics(warehouse_request):
         "custom_customer": wr.customer,
         "project": wr.related_project,
         "custom_warehouse_request": wr.name,
-        "custom_assigned_to": wr.created_by,
+        "custom_assigned_to": wr.owner,
         "description": _build_equipment_info_description(wr),
     })
     task.insert(ignore_permissions=True)
-    frappe.db.commit()
 
     return task.name

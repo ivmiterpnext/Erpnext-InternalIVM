@@ -12,6 +12,7 @@ class FeeRate(Document):
 
 @frappe.whitelist()
 def sync():
+    frappe.only_for("System Manager")
     return sync_doctype_from_api(
         doctype="Fee Rate",
         api_type="icorp",

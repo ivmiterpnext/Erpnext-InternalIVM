@@ -10,17 +10,7 @@
   "script": "frappe.ui.form.on('Warehouse Request', {\n\ton_load(frm) {\n\tfrm.doc.warehouse_request_name = frm.doc.name;\n\t//refresh('warehouse_request_name');\n\t}\n});",
   "view": "Form"
  },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Warehouse Request",
-  "enabled": 1,
-  "modified": "2023-12-10 15:54:29.140515",
-  "module": null,
-  "name": "Warehouse Request Created By",
-  "script": "frappe.ui.form.on('Warehouse Request', {\n\tbefore_save(frm) {\n\t    if(frm.doc.created_by === null ||frm.doc.created_by === undefined){\n\t\t   cur_frm.set_value(\"created_by\", frappe.session.user);\n\t\t   cur_frm.set_value(\"created_date\", frappe.datetime.now_datetime());\n\t\t   //frm.refresh_field('created_by');\n\t   }\n\t}\n});",
-  "view": "Form"
- },
+
  {
   "docstatus": 0,
   "doctype": "Client Script",
@@ -41,17 +31,6 @@
   "module": null,
   "name": "Test Override",
   "script": "frappe.ui.form.on('Opportunity', {\n\tonload: function (frm) {\n\t    frm.set_query(\"deployment_address\", function () {\n             return {\n                \"filters\": [\n                 [\"Deployment Location\", \"opportunity\", \"=\", frm.doc.name],\n                ]\n         }\n\t    \n\t    });\n    }\n});",
-  "view": "Form"
- },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Opportunity",
-  "enabled": 1,
-  "modified": "2023-12-09 13:53:17.398130",
-  "module": null,
-  "name": "Deployment Locations",
-  "script": "frappe.ui.form.on('Opportunity', {\n\tonload: function (frm) {\n\t    frm.set_query(\"deployment_locations\", function () {\n             return {\n                \"filters\": [\n                 [\"Deployment Location\", \"opportunity\", \"=\", frm.doc.name],\n                ]\n         }\n\t    \n\t    });\n    }\n});",
   "view": "Form"
  },
  {
@@ -84,7 +63,7 @@
   "modified": "2023-12-02 11:41:57.856684",
   "module": null,
   "name": "Test Button 2",
-  "script": "frappe.ui.form.on('Warehouse Request', {\n\trefresh(frm) {\n\t\tfrm.add_custom_button('Send to IT', function(){\n\t\t\tfrm.trigger(\"send_to_it\");\n\t    });\n    },\n    send_to_it: function(frm){\n        console.log( frm.get_docinfo().assignments);\n        frappe.db.insert({\n            doctype: 'Issue',\n            subject: 'Connectivity for '+ frm.doc.subject,\n            related_warehouse_request: frm.doc.name,\n            related_deployment: frm.doc.related_project,\n            issue_type: 'Desktop Support',\n            case_reason: 'Desktop Support',\n            case_sub_reason: 'Connectivity',\n            connectivity_type: frm.doc.connectivity,\n            connectivity_devices_quantity: frm.doc.connectivity_device_quantity,\n            machine_name: frm.doc.machine_names,\n            customer: frm.doc.customer,\n            deployment_owner: frm.doc.created_by\n            \n        }).then(doc => {\n            console.log(doc);\n        });\n        \n    }\n});\n\n\n",
+  "script": "frappe.ui.form.on('Warehouse Request', {\n\trefresh(frm) {\n\t\tfrm.add_custom_button('Send to IT', function(){\n\t\t\tfrm.trigger(\"send_to_it\");\n\t    });\n    },\n    send_to_it: function(frm){\n        console.log( frm.get_docinfo().assignments);\n        frappe.db.insert({\n            doctype: 'Issue',\n            subject: 'Connectivity for '+ frm.doc.subject,\n            related_warehouse_request: frm.doc.name,\n            related_deployment: frm.doc.related_project,\n            issue_type: 'Desktop Support',\n            case_reason: 'Desktop Support',\n            case_sub_reason: 'Connectivity',\n            connectivity_type: frm.doc.connectivity,\n            connectivity_devices_quantity: frm.doc.connectivity_device_quantity,\n            machine_name: frm.doc.machine_names,\n            customer: frm.doc.customer,\n            deployment_owner: frm.doc.owner\n            \n        }).then(doc => {\n            console.log(doc);\n        });\n        \n    }\n});\n\n\n",
   "view": "Form"
  },
  {
@@ -109,17 +88,7 @@
   "script": "frappe.ui.form.on('Opportunity', {\r\n    refresh(frm) {\r\n        var df = frappe.meta.get_docfield(\"Deployment Location\",\"opprotunity\", frm.doc.name);\r\n        df.get_route_options_for_new_doc = function (field) {\r\n            return {\r\n                \"opprotunity\": field.doc.name\r\n            }\r\n        }\r\n    }\r\n})",
   "view": "Form"
  },
- {
-  "docstatus": 0,
-  "doctype": "Client Script",
-  "dt": "Opportunity",
-  "enabled": 1,
-  "modified": "2023-12-14 04:46:23.796059",
-  "module": "IVM",
-  "name": "Test Button 3 Opp",
-  "script": "frappe.ui.form.on('Opportunity', {\n\trefresh(frm) {\n\t\tfrm.add_custom_button('Send to IT', function(){\n\t\t\tfrm.trigger(\"send_to_it\");\n\t    });\n    },\n    send_to_it: function(frm){\n        //console.log( frm.get_docinfo().assignments);\n        console.log(frm.doc.deployment_locations);\n        var locationArr = frm.doc.deployment_locations.map(location => location.deployment_locations);\n        console.log(locationArr);\n        locationArr.forEach(location =>{\n            frappe.call({\n\t            method: 'frappe.client.get_value',\n\t            args: {\n\t            'doctype': 'Deployment Location',\n            \t'filters': {'name': location},\n\t            'fieldname':['full_shipping_address', 'full_billing_address', 'customer_name','city_name','state_name','country_name','machines_at_location','total_lockers_at_location','number_of_kiosks','number_of_vaults']\n            \t},\n                    callback: function(r){\t\t\t\t\t\t\n                       var shippingAddress = r.message.full_shipping_address;\n                       var billingAddress = r.message.full_billing_address;\n                       BuildDeployment(r);\n                       console.log(location);\n                       console.log(shippingAddress);\n                       console.log(billingAddress);\n             \n                    \n\t            }\n            });\n        });\n        \n        function  BuildDeployment(r)\n        {\n            projectName = buildSubject(r);\n            \n            frappe.db.insert({\n                doctype: 'Project',\n                project_type: 'Deployment',\n                project_name: projectName,\n                related_warehouse_request: frm.doc.name,\n                related_deployment: frm.doc.related_project,\n                issue_type: 'Desktop Support',\n                case_reason: 'Desktop Support',\n                case_sub_reason: 'Connectivity',\n                connectivity_type: frm.doc.connectivity,\n                connectivity_devices_quantity: frm.doc.connectivity_device_quantity,\n                machine_name: frm.doc.machine_names,\n                customer: frm.doc.account,\n                deployment_owner: frm.doc.created_by\n            \n            }).then(doc => {\n                console.log(doc);\n        });\n        }\n        \n        function buildSubject (r){\n            var subject;\n            \n            if(r.messgae.country_name == 'United States'){\n                subject = r.message.customer_name + ' - '+ r.message.city_name + ', '+ r.message.state_name + '('+r.message.machines_at_location +','+ r.message.total_lockers_at_location +','+r.message.number_of_vaults+','+r.message.number_of_kiosks;\n            }else{\n                subject = r.message.customer_name + ' - '+ r.message.city_name + ', '+ r.message.country_name + '('+r.message.machines_at_location +','+ r.message.total_lockers_at_location +','+r.message.number_of_vaults+','+r.message.number_of_kiosks;\n            }\n            return subject;\n            \n        }\n        /*frappe.db.insert({\n            doctype: 'Issue',\n            subject: 'Connectivity for '+ frm.doc.subject,\n            related_warehouse_request: frm.doc.name,\n            related_deployment: frm.doc.related_project,\n            issue_type: 'Desktop Support',\n            case_reason: 'Desktop Support',\n            case_sub_reason: 'Connectivity',\n            connectivity_type: frm.doc.connectivity,\n            connectivity_devices_quantity: frm.doc.connectivity_device_quantity,\n            machine_name: frm.doc.machine_names,\n            customer: frm.doc.account,\n            deployment_owner: frm.doc.created_by\n            \n        }).then(doc => {\n            console.log(doc);\n        }); */\n        \n    }\n});\n\n\n",
-  "view": "Form"
- },
+
  {
   "docstatus": 0,
   "doctype": "Client Script",

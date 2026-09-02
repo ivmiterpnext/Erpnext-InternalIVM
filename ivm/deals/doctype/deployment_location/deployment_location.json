@@ -8,9 +8,8 @@
  "engine": "InnoDB",
  "field_order": [
   "general_section",
-  "location_name",
-  "equipment_type",
-  "install_type",
+   "location_name",
+   "install_type",
   "column_break_gen1",
   "crm_deal",
   "hubspot_site_id",
@@ -237,17 +236,11 @@
    "fieldtype": "Data",
    "label": "PO and Tracking"
   },
-  {
-   "fieldname": "equipment_type",
-   "fieldtype": "Select",
-   "label": "Equipment Type",
-   "options": "\nNew\nRefurbished"
-  },
-  {
-   "fieldname": "delivery_section",
-   "fieldtype": "Section Break",
-   "label": "Delivery"
-  }
+   {
+    "fieldname": "delivery_section",
+    "fieldtype": "Section Break",
+    "label": "Delivery"
+   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],

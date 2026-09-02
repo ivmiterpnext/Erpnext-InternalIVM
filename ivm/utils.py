@@ -12,4 +12,6 @@ def get_child_table_row(doctype: str, name: str) -> dict:
     if not meta.istable:
         frappe.throw(f"{doctype} is not a child table DocType.")
     row = frappe.get_doc(doctype, name)
+    if row.parenttype and row.parent:
+        frappe.has_permission(row.parenttype, "read", row.parent, throw=True)
     return row.as_dict()

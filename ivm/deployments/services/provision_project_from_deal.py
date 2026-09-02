@@ -20,7 +20,6 @@ DEAL_TO_PROJECT_FIELDS: dict[str, str] = {
 }
 
 LOCATION_TO_PROJECT_FIELDS: dict[str, str] = {
-    "equipment_type": "equipment_type",
     "wrap_type": "wrap_type",
     "card_reader_type": "card_reader_type",
     "connectivity_type": "connectivity_type",

@@ -1,15 +1,4 @@
 frappe.ui.form.on("Opportunity", {
-  refresh: function(frm) {
-    if (frm.doc.sales_stage =='Closed Won'){
-      frm.add_custom_button(__('Deployment'),
-				function() {
-          frappe.model.open_mapped_doc({
-            method:"ivm.api.make_project",
-            frm:frm
-          })
-        }, __('Create'));
-    }
-		},
   // Fetching the value of percentage field on sales_stage trigger
   sales_stage: function (frm) {
     frappe.db.get_value('Sales Stage', frm.doc.sales_stage, 'percentage').then((res) => {
@@ -24,11 +13,6 @@ frappe.ui.form.on("Opportunity", {
         ]
       }
     });
-    frm.fields_dict['sales_stage'].get_query = function (doc, cdt, cdn) {
-      return {
-        query: 'ivm.api.arrangeing_records',
-      }
-    }
     $(document).ready(function () {
       $(".section-head").css({ "color": "#2490EF", 'font-size': '20px' });
 
