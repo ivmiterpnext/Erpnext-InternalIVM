@@ -6,10 +6,12 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 from ivm.warehouse.services.pick_list import (
+    _get_related_project,
     add_item_to_pick_list,
     clear_pick_list_items,
     create_pick_list,
     delete_draft_pick_list,
+    get_pick_list_cost_rows,
     remove_pick_list_item,
     serialize_pick_list,
     submit_pick_list,
@@ -291,3 +293,105 @@ class TestSubmitPickList(ERPNextTestSuite):
         frappe.get_doc("Pick List", name).submit()
         with self.assertRaises(frappe.ValidationError):
             submit_pick_list(name)
+
+
+class TestGetPickListCostRows(ERPNextTestSuite):
+    """get_pick_list_cost_rows"""
+
+    def test_uses_bin_valuation_rate(self):
+        item = make_item()
+        _seed_stock(item.name, qty=10, rate=25)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item.name, WAREHOUSE, 4)
+        rows = get_pick_list_cost_rows(name)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["item_code"], item.name)
+        self.assertEqual(rows[0]["qty"], 4)
+        self.assertEqual(rows[0]["rate"], 25)
+        self.assertEqual(rows[0]["amount"], 100)
+
+    def test_falls_back_to_item_valuation_rate_when_no_bin(self):
+        item = make_item()
+        # No stock seeded for this item at WAREHOUSE — no Bin record exists.
+        frappe.db.set_value("Item", item.name, "valuation_rate", 42)
+        name = create_pick_list(COMPANY)
+        pl = frappe.get_doc("Pick List", name)
+        pl.append("locations", {
+            "item_code": item.name,
+            "item_name": item.item_name,
+            "warehouse": WAREHOUSE,
+            "qty": 2,
+            "picked_qty": 2,
+            "uom": item.stock_uom,
+            "stock_uom": item.stock_uom,
+            "conversion_factor": 1,
+        })
+        pl.save()
+        rows = get_pick_list_cost_rows(name)
+        self.assertEqual(rows[0]["rate"], 42)
+        self.assertEqual(rows[0]["amount"], 84)
+
+    def test_multiple_items_row_shape_and_fields(self):
+        item_a = make_item()
+        item_b = make_item()
+        _seed_stock(item_a.name, qty=5, rate=10)
+        _seed_stock(item_b.name, qty=5, rate=20)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item_a.name, WAREHOUSE, 2)
+        add_item_to_pick_list(name, item_b.name, WAREHOUSE, 3)
+        rows = get_pick_list_cost_rows(name)
+        self.assertEqual(len(rows), 2)
+        total = sum(r["amount"] for r in rows)
+        self.assertEqual(total, 2 * 10 + 3 * 20)
+        for row in rows:
+            self.assertIn("item_code", row)
+            self.assertIn("item_name", row)
+            self.assertIn("warehouse", row)
+            self.assertIn("uom", row)
+
+    def test_empty_pick_list_returns_empty_rows(self):
+        name = create_pick_list(COMPANY)
+        rows = get_pick_list_cost_rows(name)
+        self.assertEqual(rows, [])
+
+
+class TestGetRelatedProject(ERPNextTestSuite):
+    """_get_related_project"""
+
+    def test_returns_project_when_warehouse_request_links_pick_list(self):
+        name = create_pick_list(COMPANY)
+        project = frappe.get_doc({
+            "doctype": "Project",
+            "project_name": "Test Project For Pick List Cost Export",
+            "company": COMPANY,
+        }).insert(ignore_permissions=True)
+        wr = frappe.get_doc({
+            "doctype": "Warehouse Request",
+            "pick_list": name,
+            "related_project": project.name,
+            "request_reason": "Build Machine",
+            "subject": "Test WR",
+        })
+        wr.insert(ignore_permissions=True)
+        project_id, project_name = _get_related_project(name)
+        self.assertEqual(project_id, project.name)
+        self.assertEqual(project_name, project.project_name)
+
+    def test_returns_none_when_no_warehouse_request_references_pick_list(self):
+        name = create_pick_list(COMPANY)
+        project_id, project_name = _get_related_project(name)
+        self.assertIsNone(project_id)
+        self.assertIsNone(project_name)
+
+    def test_returns_none_when_warehouse_request_has_no_related_project(self):
+        name = create_pick_list(COMPANY)
+        wr = frappe.get_doc({
+            "doctype": "Warehouse Request",
+            "pick_list": name,
+            "request_reason": "Build Machine",
+            "subject": "Test WR No Project",
+        })
+        wr.insert(ignore_permissions=True)
+        project_id, project_name = _get_related_project(name)
+        self.assertIsNone(project_id)
+        self.assertIsNone(project_name)

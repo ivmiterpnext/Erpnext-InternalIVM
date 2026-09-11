@@ -57,13 +57,13 @@ app_include_js = [
 doctype_js = {
     # "Opportunity": "public/js/doctype/Opportunity.js",
     "Customer": "public/js/doctype/Customer.js",
-    "User": "public/js/doctype/user.js",
     "Task": "public/js/doctype/Task.js",
     "CRM Deal": "public/js/doctype/CRM_Deal.js",
     "Project": "public/js/doctype/Project.js",
     "Issue": "public/js/doctype/Issue.js",
     "Delivery Note": "public/js/doctype/Delivery_Note.js",
     "Stock Entry": "public/js/doctype/Stock_Entry.js",
+    "Pick List": "public/js/doctype/Pick_List.js",
 }
 
 doctype_list_js = {

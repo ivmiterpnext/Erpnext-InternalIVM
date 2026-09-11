@@ -2,6 +2,7 @@ import frappe
 
 from ivm.warehouse.services.inventory import get_available_qty
 from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry as _create_stock_entry
+from frappe.utils.xlsxutils import build_xlsx_response
 
 
 def _get_draft_pick_list(pick_list):
@@ -183,3 +184,102 @@ def submit_pick_list(pick_list, target_warehouse=None):
     stock_entry.insert()
 
     return {"pick_list": pl_doc.name, "stock_entry": stock_entry.name}
+
+
+def _resolve_item_rate(item_code, warehouse):
+    """Resolve a per-item valuation rate: prefer the Bin's rate for this
+    specific warehouse (reflects actual stock value at that location),
+    falling back to the Item's global valuation_rate if the Bin has none
+    or doesn't exist."""
+    bin_rate = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "valuation_rate")
+    if bin_rate:
+        return bin_rate
+    return frappe.db.get_value("Item", item_code, "valuation_rate") or 0
+
+
+def get_pick_list_cost_rows(pick_list):
+    """Build cost rows for a Pick List: one dict per location row plus
+    rate/amount, for use in the cost Excel export."""
+    pl_doc = frappe.get_doc("Pick List", pick_list)
+
+    rows = []
+    for loc in pl_doc.locations:
+        rate = _resolve_item_rate(loc.item_code, loc.warehouse)
+        qty = loc.qty or 0
+        rows.append({
+            "item_code": loc.item_code,
+            "item_name": loc.item_name,
+            "warehouse": loc.warehouse,
+            "qty": qty,
+            "uom": loc.uom,
+            "rate": rate,
+            "amount": qty * rate,
+        })
+    return rows
+
+
+def _get_related_project(pick_list):
+    """Resolve the Project associated with a Pick List via its Warehouse
+    Request (Pick List has no direct Project link of its own). Returns
+    (project_id, project_name), both None if no Warehouse Request links to
+    this pick list or none has a related_project set. If more than one
+    Warehouse Request references the same pick list (not expected in normal
+    use), the first match is taken with no error."""
+    project_id = frappe.db.get_value(
+        "Warehouse Request",
+        {"pick_list": pick_list, "related_project": ["is", "set"]},
+        "related_project",
+    )
+    if not project_id:
+        return None, None
+    project_name = frappe.db.get_value("Project", project_id, "project_name")
+    return project_id, project_name
+
+
+@frappe.whitelist()
+def export_pick_list_cost_excel(pick_list):
+    """Stream an .xlsx file of item costs for a Pick List, with header rows
+    for Pick List name and associated Project, and a total row. Rate and
+    Amount are always displayed with 2 decimal places, and the total row
+    is bold."""
+    if not frappe.has_permission("Pick List", "read", pick_list):
+        frappe.throw("Not permitted", frappe.PermissionError)
+
+    rows = get_pick_list_cost_rows(pick_list)
+    project_id, project_name = _get_related_project(pick_list)
+
+    RATE_COL = 5
+    AMOUNT_COL = 6
+
+    data = [
+        ["Pick List", pick_list],
+        ["Project", project_id or "", project_name or ""],
+        [],
+        ["Item Code", "Item Name", "Warehouse", "Qty", "UOM", "Rate", "Amount"],
+    ]
+    for row in rows:
+        data.append([
+            row["item_code"], row["item_name"], row["warehouse"],
+            row["qty"], row["uom"], row["rate"], row["amount"],
+        ])
+
+    total_amount = sum(row["amount"] for row in rows)
+    data.append(["", "", "", "", "", "Total", total_amount])
+    total_row_idx = len(data) - 1
+
+    styles = {
+        "styles": [
+            {"num_format": "0.00"},
+            {"bold": True},
+        ],
+        "column_styles": {
+            RATE_COL: [0],
+            AMOUNT_COL: [0],
+        },
+        "row_styles": {
+            0: [1],
+            total_row_idx: [1],
+        },
+    }
+
+    build_xlsx_response(data, f"{pick_list}-cost", styles=styles)
