@@ -20717,7 +20717,7 @@
   "mask": 0,
   "modified": "2023-08-30 12:52:43.576444",
   "module": null,
-  "name": "User-extension",
+  "name": "extension_pin",
   "no_copy": 0,
   "non_negative": 0,
   "options": null,
