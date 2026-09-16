@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "creation": "2026-08-19 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "contact",
+  "user",
+  "signature_method",
+  "status",
+  "accepted_name",
+  "accepted_on",
+  "accepted_ip",
+  "acceptance_statement_snapshot",
+  "external_reference"
+ ],
+ "fields": [
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "Contact",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "contact.user",
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "default": "Portal Checkbox",
+   "fieldname": "signature_method",
+   "fieldtype": "Select",
+   "label": "Signature Method",
+   "options": "Portal Checkbox\nDocuSign\nHelloSign\nManual"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nAccepted\nDeclined"
+  },
+  {
+   "fieldname": "accepted_name",
+   "fieldtype": "Data",
+   "label": "Accepted Name"
+  },
+  {
+   "fieldname": "accepted_on",
+   "fieldtype": "Datetime",
+   "label": "Accepted On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accepted_ip",
+   "fieldtype": "Data",
+   "label": "Accepted IP",
+   "read_only": 1
+  },
+  {
+   "fieldname": "acceptance_statement_snapshot",
+   "fieldtype": "Small Text",
+   "label": "Acceptance Statement Snapshot",
+   "read_only": 1
+  },
+  {
+   "fieldname": "external_reference",
+   "fieldtype": "Data",
+   "label": "External Reference"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-19 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Client Portal",
+ "name": "Service Quote Signer",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

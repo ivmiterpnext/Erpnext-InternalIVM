@@ -19,6 +19,7 @@ fixtures = [
     {"dt": "Print Format", "filters": [["standard", "=", "No"]]},
     {"dt": "Report", "filters": [["is_standard", "=", "No"]]},
     {"dt": "CRM Fields Layout", "filters": [["dt", "=", "CRM Deal"]]},
+    {"dt": "CRM Form Script", "filters": [["dt", "=", "CRM Deal"], ["is_standard", "=", 0]]},
 ]
 
 # include js, css files in header of desk.html
@@ -55,7 +56,6 @@ app_include_js = [
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {
-    # "Opportunity": "public/js/doctype/Opportunity.js",
     "Customer": "public/js/doctype/Customer.js",
     "Task": "public/js/doctype/Task.js",
     "CRM Deal": "public/js/doctype/CRM_Deal.js",
@@ -72,7 +72,6 @@ doctype_list_js = {
     "Customer": "public/js/listview/Customer_listview.js",
     "User": "public/js/listview/user_listview.js",
     "Calendar Events": "public/js/calendar.js",
-    "Issue": "public/js/listview/issue_listview.js",
     # "Project": "public/js/listview/project_listview.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -84,10 +83,8 @@ doctype_list_js = {
 # application home page (will override Website Settings)
 # home_page = "login"
 
-# website user home page (by Role)
-# role_home_page = {
-# "Role": "home_page"
-# }
+# portal home page resolution (see ivm/client_portal/utils/home_page.py)
+get_website_user_home_page = "ivm.client_portal.utils.home_page.get_website_user_home_page"
 
 # Generators
 # ----------
@@ -148,6 +145,9 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
+    "User": {
+        "before_validate": "ivm.client_portal.event_handlers.user.enforce_portal_user_roles",
+    },
     "Communication": {
         "on_update": "ivm.support.event_handlers.communication.on_update",
     },
@@ -159,6 +159,7 @@ doc_events = {
     },
     "CRM Deal": {
         "on_update": "ivm.deployments.event_handlers.deal.on_update",
+        "before_test_insert": "ivm.deployments.event_handlers.deal.ensure_deployment_location_for_test",
     },
     "Project": {
         "before_validate": "ivm.deployments.event_handlers.project.before_validate",
@@ -169,7 +170,24 @@ doc_events = {
         "after_insert": "ivm.warehouse.event_handlers.stock_entry.after_insert",
         "on_submit": "ivm.warehouse.event_handlers.stock_entry.on_submit",
     },
+    "Service Quote": {
+        "on_submit": "ivm.client_portal.event_handlers.service_quote.on_submit",
+    },
 }
+
+# Website Permissions
+# -------------------
+
+has_website_permission = {
+    "Service Quote": "ivm.client_portal.doctype.service_quote.service_quote.has_website_permission",
+}
+
+# Website Routes
+# ---------------
+
+website_route_rules = [
+    {"from_route": "/service-quotes/<path:name>", "to_route": "service_quote"},
+]
 
 # Scheduled Tasks
 # ---------------

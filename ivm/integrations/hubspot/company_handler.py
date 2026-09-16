@@ -23,6 +23,7 @@ from ivm.integrations.hubspot.sync_utils import (
     apply_field_map,
     bucket_employee_count,
     lookup_or_create,
+    retry_via_reenqueue,
     save_doc,
     set_acting_user,
     upsert_address,
@@ -69,6 +70,7 @@ COMPANY_TRANSFORMS: dict[str, Any] = {
 }
 
 
+@retry_via_reenqueue()
 def handle_company_created(
     hubspot_company_id: int | str,
     hubspot_user_id: int | str | None = None,
@@ -89,26 +91,8 @@ def handle_company_created(
             )
             return
         _sync_company(hubspot_company_id, doc.name)
-    except ConcurrentCreateConflict:
-        frappe.logger("hubspot").warning(
-            f"HubSpot: concurrent create conflict for company {hubspot_company_id} — re-enqueueing"
-        )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.company_handler.handle_company_created",
-            queue="long",
-            hubspot_company_id=hubspot_company_id,
-            hubspot_user_id=hubspot_user_id,
-        )
-    except api.HubSpotRateLimitExhausted:
-        frappe.logger("hubspot").warning(
-            f"HubSpot: rate limit exhausted creating CRM Organization for company {hubspot_company_id} — re-enqueueing"
-        )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.company_handler.handle_company_created",
-            queue="long",
-            hubspot_company_id=hubspot_company_id,
-            hubspot_user_id=hubspot_user_id,
-        )
+    except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+        raise
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to create CRM Organization for company {hubspot_company_id}",
@@ -116,6 +100,7 @@ def handle_company_created(
         )
 
 
+@retry_via_reenqueue(exceptions=(api.HubSpotRateLimitExhausted,))
 def handle_company_updated(
     hubspot_company_id: int | str,
     hubspot_user_id: int | str | None = None,
@@ -137,15 +122,7 @@ def handle_company_updated(
             return
         _sync_company(hubspot_company_id, org_name)
     except api.HubSpotRateLimitExhausted:
-        frappe.logger("hubspot").warning(
-            f"HubSpot: rate limit exhausted syncing CRM Organization for company {hubspot_company_id} — re-enqueueing"
-        )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.company_handler.handle_company_updated",
-            queue="long",
-            hubspot_company_id=hubspot_company_id,
-            hubspot_user_id=hubspot_user_id,
-        )
+        raise
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to sync company {hubspot_company_id}",

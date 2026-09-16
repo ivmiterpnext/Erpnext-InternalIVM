@@ -239,6 +239,39 @@ def get_deal_company_ids(deal_id: int | str) -> list[str]:
     return get_associated_ids("deals", deal_id, "companies", "companies")
 
 
+def get_deal_company_associations(deal_id: int | str) -> list[dict[str, Any]]:
+    """Fetch typed (v4) company associations for a deal, including label info."""
+    res = _get(f"/crm/v4/objects/deals/{deal_id}/associations/companies")
+    return [
+        {
+            "to_object_id": r.get("toObjectId"),
+            "labels": [t.get("label") for t in r.get("associationTypes", []) if t.get("label")],
+        }
+        for r in res.get("results", [])
+    ]
+
+
+def get_deal_company_ids_by_role(deal_id: int | str) -> tuple[str | None, str | None]:
+    """Return (primary_company_id, master_company_id) for a deal's company associations.
+
+    Any company association labeled "Master" is the master-client org. Any other
+    associated company — including unlabeled ones — is treated as the primary org.
+
+    NOTE: this assumes "Master" is currently the only distinguishing association
+    label in use between Deal and Company. If a third label is ever introduced
+    (e.g. "Referral Partner"), it would silently fall through and be treated as
+    primary here — revisit this function if that happens.
+    """
+    primary_id: str | None = None
+    master_id: str | None = None
+    for assoc in get_deal_company_associations(deal_id):
+        if "Master" in assoc["labels"]:
+            master_id = master_id or assoc["to_object_id"]
+        else:
+            primary_id = primary_id or assoc["to_object_id"]
+    return primary_id, master_id
+
+
 def get_site_machine_ids(site_id: int | str, machine_type_id: str) -> list[str]:
     """Fetch machine association IDs for a deployment site."""
 

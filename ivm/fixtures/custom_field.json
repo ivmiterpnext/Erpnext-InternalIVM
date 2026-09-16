@@ -12697,7 +12697,7 @@
   "collapsible_depends_on": null,
   "columns": 0,
   "default": null,
-  "depends_on": "eval:doc.issue_type=='Support' || doc.issue_type=='Change Request' || doc.issue_type=='Desktop Support' || doc.issue_type=='Offboarding' || doc.issue_type=='IT' || doc.issue_type=='Onboarding' || doc.issue_type=='Permission Change' || doc.issue_type=='Receivable' || doc.issue_type=='Reconfiguration' || doc.issue_type=='Vending Management'",
+  "depends_on": "eval:0",
   "description": null,
   "docstatus": 0,
   "doctype": "Custom Field",

@@ -161,6 +161,65 @@ def link_existing_customer_to_deal(crm_deal_name: str) -> str:
     return customer_name
 
 
+def resolve_and_link_master_client(crm_deal_name: str) -> str | None:
+    """Resolve (or provision) the master/partner Customer for a Won deal and
+    link it to the deal's own resolved Customer via Customer.custom_master_customer.
+
+    Resolution order:
+    1. deal.custom_master_customer, if already set (either manually entered
+       in Frappe, or auto-populated by _sync_master_organization's proactive
+       lookup at webhook-sync time).
+    2. Fall back to deal.custom_master_organization -- find-or-create a
+       Customer from that CRM Organization.
+
+    No-op (silently) if the deal has neither field set — this is the
+    normal/majority case. Non-blocking: any failure should be caught by the
+    caller and logged, not raised, so it never prevents a deal from being Won.
+    """
+    deal = frappe.get_doc("CRM Deal", crm_deal_name)
+
+    if not deal.custom_master_organization and not deal.custom_master_customer:
+        return None
+
+    if not deal.custom_customer:
+        frappe.log_error(
+            title=f"Master client linking skipped for {crm_deal_name}",
+            message="Deal has a master organization/customer but no custom_customer resolved yet.",
+        )
+        return None
+
+    master_customer_name = deal.custom_master_customer
+    if master_customer_name and not frappe.db.exists("Customer", master_customer_name):
+        master_customer_name = None
+
+    if not master_customer_name and deal.custom_master_organization:
+        master_org = frappe.get_doc("CRM Organization", deal.custom_master_organization)
+        master_customer_name = _find_existing_customer(master_org) or _create_customer_from_org(
+            master_org, deal.custom_pipeline
+        )
+
+    if not master_customer_name:
+        return None
+
+    if master_customer_name == deal.custom_customer:
+        frappe.logger(_LOG).warning(
+            f"Deal {crm_deal_name}: master client resolves to the same "
+            f"Customer as custom_customer — skipping self-referential link"
+        )
+        return None
+
+    if deal.custom_master_customer != master_customer_name:
+        frappe.db.set_value("CRM Deal", crm_deal_name, "custom_master_customer", master_customer_name)
+
+    frappe.db.set_value(
+        "Customer", deal.custom_customer, "custom_master_customer", master_customer_name
+    )
+    frappe.logger(_LOG).info(
+        f"Linked Customer '{deal.custom_customer}' to Master Client '{master_customer_name}'"
+    )
+    return master_customer_name
+
+
 def _find_existing_customer(org: Any) -> str | None:
     """Return the name of an existing Customer that matches the CRM Organization.
 
@@ -209,7 +268,20 @@ def _create_customer_from_org(org: Any, pipeline: str | None = None) -> str | No
             if value is not None and value != "":
                 customer.set(cust_field, value)
 
-        customer.insert(ignore_permissions=True)
+        frappe.db.savepoint("before_create_customer_from_org")
+        try:
+            customer.insert(ignore_permissions=True)
+        except (frappe.DuplicateEntryError, frappe.UniqueValidationError):
+            frappe.db.rollback(save_point="before_create_customer_from_org")
+            # Concurrent creation detected — re-fetch the Customer that was created
+            existing_customer_name = _find_existing_customer(org)
+            if existing_customer_name:
+                frappe.logger(_LOG).warning(
+                    f"Concurrent Customer creation for CRM Organization '{org.organization_name}' "
+                    f"— using existing Customer '{existing_customer_name}'"
+                )
+                return existing_customer_name
+            raise
 
         frappe.logger(_LOG).info(
             f"Created Customer '{customer.name}' from CRM Organization '{org.organization_name}'"

@@ -326,6 +326,7 @@ class TestGetPickListCostRows(ERPNextTestSuite):
             "stock_uom": item.stock_uom,
             "conversion_factor": 1,
         })
+        pl.flags.ignore_validate = True
         pl.save()
         rows = get_pick_list_cost_rows(name)
         self.assertEqual(rows[0]["rate"], 42)

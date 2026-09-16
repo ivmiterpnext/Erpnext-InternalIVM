@@ -37,6 +37,17 @@ def on_update(doc: Document, method: str | None = None) -> None:
         link_existing_customer_to_deal(doc.name)
         doc.reload()  # pick up custom_customer resolved by lookup
 
+    from ivm.deployments.services.provision_client_from_deal import resolve_and_link_master_client
+
+    try:
+        resolve_and_link_master_client(doc.name)
+        doc.reload()  # pick up custom_master_customer set on the Customer, if any
+    except Exception:
+        frappe.log_error(
+            title=f"Master client resolution failed for CRM Deal {doc.name}",
+            message=frappe.get_traceback(with_context=True),
+        )
+
     try:
         created = create_projects_from_deal(doc.name)
 
@@ -55,3 +66,23 @@ def on_update(doc: Document, method: str | None = None) -> None:
             title=f"Failed to create Deployments from CRM Deal {doc.name}",
             message=frappe.get_traceback(with_context=True),
         )
+
+
+def ensure_deployment_location_for_test(doc: Document, method: str | None = None) -> None:
+    """Create a stub Deployment Location so crm's Won-status test fixtures
+    survive ivm's on_update validation.
+
+    Registered as a ``before_test_insert`` doc_event — only ever called by
+    ``frappe.tests.utils.generators._try_create()``, never during real
+    document inserts/saves (confirmed: no production code path invokes
+    ``run_method("before_test_insert")``).
+    """
+    if doc.status != "Won":
+        return
+    if frappe.db.exists("Deployment Location", {"crm_deal": doc.name}):
+        return
+    frappe.get_doc({
+        "doctype": "Deployment Location",
+        "crm_deal": doc.name,
+        "location_name": f"Test Location for {doc.name}",
+    }).insert(ignore_permissions=True, ignore_links=True)

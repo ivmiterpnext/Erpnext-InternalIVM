@@ -17,12 +17,11 @@ DEAL_TO_PROJECT_FIELDS: dict[str, str] = {
     "custom_machine_ownership_status": "machine_ownership_status",
     "custom_opportunity_term": "opportunity_term",
     "deal_owner": "sales_rep",
+    "custom_master_customer": "custom_master_customer",
 }
 
 LOCATION_TO_PROJECT_FIELDS: dict[str, str] = {
     "wrap_type": "wrap_type",
-    "card_reader_type": "card_reader_type",
-    "connectivity_type": "connectivity_type",
     "locale": "locale",
     "ior": "ior",
     "expedited_delivery": "expedited_delivery",

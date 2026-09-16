@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-09-02 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "service_quote",
+  "event_type",
+  "event_time",
+  "column_break_1",
+  "contact",
+  "user",
+  "ip_address",
+  "reason"
+ ],
+ "fields": [
+  {"fieldname": "service_quote", "fieldtype": "Link", "in_list_view": 1, "label": "Service Quote", "options": "Service Quote", "reqd": 1, "search_index": 1},
+  {"default": "View Page", "fieldname": "event_type", "fieldtype": "Select", "in_list_view": 1, "label": "Event Type", "options": "View Page\nView PDF\nAccepted\nDeclined", "reqd": 1},
+  {"fieldname": "event_time", "fieldtype": "Datetime", "in_list_view": 1, "label": "Event Time", "read_only": 1, "reqd": 1},
+  {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+  {"fieldname": "contact", "fieldtype": "Link", "in_list_view": 1, "label": "Contact", "options": "Contact", "read_only": 1},
+  {"fieldname": "user", "fieldtype": "Link", "label": "User", "options": "User", "read_only": 1},
+  {"fieldname": "ip_address", "fieldtype": "Data", "label": "IP Address", "read_only": 1},
+  {"fieldname": "reason", "fieldtype": "Small Text", "label": "Reason (if Declined)"}
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-02 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Client Portal",
+ "name": "Service Quote Activity Log",
+ "owner": "Administrator",
+ "permissions": [
+  {"email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1}
+ ],
+ "sort_field": "event_time",
+ "sort_order": "DESC",
+ "states": []
+}

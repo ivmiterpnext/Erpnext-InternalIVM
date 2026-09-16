@@ -21,7 +21,7 @@ from ivm.integrations.hubspot.constants import (
     MACHINE_TYPES_WITH_BINS,
     SITE_FIELD_MAP,
 )
-from ivm.integrations.hubspot.sync_utils import ConcurrentCreateConflict, coerce_value, set_acting_user
+from ivm.integrations.hubspot.sync_utils import coerce_value, retry_via_reenqueue, set_acting_user
 
 _LOG = "hubspot"
 
@@ -63,6 +63,7 @@ def _map_properties(
     return row
 
 
+@retry_via_reenqueue()
 def handle_site_webhook(
     hubspot_site_id: int | str,
     hubspot_user_id: int | str | None = None,
@@ -71,47 +72,27 @@ def handle_site_webhook(
     set_acting_user(hubspot_user_id)
     site_id_str = str(hubspot_site_id)
 
-    try:
-        crm_deal_name = _resolve_deal_for_site(site_id_str, hubspot_user_id)
-        if not crm_deal_name:
-            return
+    crm_deal_name = _resolve_deal_for_site(site_id_str, hubspot_user_id)
+    if not crm_deal_name:
+        return
 
-        with _log_error(f"failed to sync deployment site {site_id_str}"):
-            site_data = api.get_custom_object(
-                DEPLOYMENT_SITE_TYPE_ID, site_id_str,
-                properties=list(SITE_FIELD_MAP.keys()),
-            )
-            properties = site_data.get("properties", {})
-            machines = _fetch_site_machines(site_id_str)
+    with _log_error(f"failed to sync deployment site {site_id_str}"):
+        site_data = api.get_custom_object(
+            DEPLOYMENT_SITE_TYPE_ID, site_id_str,
+            properties=list(SITE_FIELD_MAP.keys()),
+        )
+        properties = site_data.get("properties", {})
+        machines = _fetch_site_machines(site_id_str)
 
-            _upsert_location_from_webhook(
-                crm_deal_name, site_id_str, properties, machines,
-            )
-            frappe.logger(_LOG).info(
-                f"Synced deployment site {site_id_str} to CRM Deal {crm_deal_name}"
-            )
-    except ConcurrentCreateConflict:
-        frappe.logger(_LOG).warning(
-            f"HubSpot: concurrent create conflict resolving deal for site {site_id_str} — re-enqueueing"
+        _upsert_location_from_webhook(
+            crm_deal_name, site_id_str, properties, machines,
         )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.deployment_site_handler.handle_site_webhook",
-            queue="long",
-            hubspot_site_id=hubspot_site_id,
-            hubspot_user_id=hubspot_user_id,
-        )
-    except api.HubSpotRateLimitExhausted:
-        frappe.logger(_LOG).warning(
-            f"HubSpot: rate limit exhausted syncing site {site_id_str} — re-enqueueing"
-        )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.deployment_site_handler.handle_site_webhook",
-            queue="long",
-            hubspot_site_id=hubspot_site_id,
-            hubspot_user_id=hubspot_user_id,
+        frappe.logger(_LOG).info(
+            f"Synced deployment site {site_id_str} to CRM Deal {crm_deal_name}"
         )
 
 
+@retry_via_reenqueue(exceptions=(api.HubSpotRateLimitExhausted,))
 def handle_machine_webhook(
     machine_type_id: str,
     hubspot_machine_id: int | str,
@@ -121,42 +102,31 @@ def handle_machine_webhook(
     set_acting_user(hubspot_user_id)
     machine_id_str = str(hubspot_machine_id)
 
-    try:
-        site_ids = None
-        with _log_error(
-            f"failed to resolve site for machine {machine_id_str} "
-            f"(type {machine_type_id})",
-        ):
-            site_ids = api.get_machine_site_ids(machine_type_id, machine_id_str)
+    site_ids = None
+    with _log_error(
+        f"failed to resolve site for machine {machine_id_str} "
+        f"(type {machine_type_id})",
+    ):
+        site_ids = api.get_machine_site_ids(machine_type_id, machine_id_str)
 
-        if site_ids is None:
-            return
+    if site_ids is None:
+        return
 
-        if not site_ids:
-            frappe.logger(_LOG).warning(
-                f"No deployment site associated with machine {machine_id_str} "
-                f"(type {machine_type_id}) — skipping"
-            )
-            return
-
-        for site_id in site_ids:
-            with _log_error(
-                f"failed to sync site {site_id} after machine {machine_id_str} change",
-            ):
-                handle_site_webhook(site_id, hubspot_user_id=hubspot_user_id)
-    except api.HubSpotRateLimitExhausted:
+    if not site_ids:
         frappe.logger(_LOG).warning(
-            f"HubSpot: rate limit exhausted syncing machine {machine_id_str} — re-enqueueing"
+            f"No deployment site associated with machine {machine_id_str} "
+            f"(type {machine_type_id}) — skipping"
         )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.deployment_site_handler.handle_machine_webhook",
-            queue="long",
-            machine_type_id=machine_type_id,
-            hubspot_machine_id=hubspot_machine_id,
-            hubspot_user_id=hubspot_user_id,
-        )
+        return
+
+    for site_id in site_ids:
+        with _log_error(
+            f"failed to sync site {site_id} after machine {machine_id_str} change",
+        ):
+            handle_site_webhook(site_id, hubspot_user_id=hubspot_user_id)
 
 
+@retry_via_reenqueue(exceptions=(api.HubSpotRateLimitExhausted,))
 def handle_bin_webhook(
     hubspot_bin_id: int | str,
     hubspot_user_id: int | str | None = None,
@@ -165,37 +135,26 @@ def handle_bin_webhook(
     set_acting_user(hubspot_user_id)
     bin_id_str = str(hubspot_bin_id)
 
-    try:
-        machine_pairs = None
-        with _log_error(f"failed to resolve machine for bin {bin_id_str}"):
-            machine_pairs = api.get_bin_machine_ids(bin_id_str)
+    machine_pairs = None
+    with _log_error(f"failed to resolve machine for bin {bin_id_str}"):
+        machine_pairs = api.get_bin_machine_ids(bin_id_str)
 
-        if machine_pairs is None:
-            return
+    if machine_pairs is None:
+        return
 
-        if not machine_pairs:
-            frappe.logger(_LOG).warning(
-                f"No machine associated with bin {bin_id_str} — skipping"
-            )
-            return
-
-        for machine_type_id, machine_id in machine_pairs:
-            with _log_error(
-                f"failed to sync machine {machine_id} after bin {bin_id_str} change",
-            ):
-                handle_machine_webhook(
-                    machine_type_id, machine_id, hubspot_user_id=hubspot_user_id,
-                )
-    except api.HubSpotRateLimitExhausted:
+    if not machine_pairs:
         frappe.logger(_LOG).warning(
-            f"HubSpot: rate limit exhausted syncing bin {bin_id_str} — re-enqueueing"
+            f"No machine associated with bin {bin_id_str} — skipping"
         )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.deployment_site_handler.handle_bin_webhook",
-            queue="long",
-            hubspot_bin_id=hubspot_bin_id,
-            hubspot_user_id=hubspot_user_id,
-        )
+        return
+
+    for machine_type_id, machine_id in machine_pairs:
+        with _log_error(
+            f"failed to sync machine {machine_id} after bin {bin_id_str} change",
+        ):
+            handle_machine_webhook(
+                machine_type_id, machine_id, hubspot_user_id=hubspot_user_id,
+            )
 
 
 def _resolve_deal_for_site(site_id: str, hubspot_user_id: int | str | None = None) -> str | None:

@@ -1,10 +1,12 @@
 """Generic sync utilities for HubSpot to Frappe document synchronization."""
 
+import functools
 from typing import Any, Callable
 
 import frappe
 from frappe.utils import flt
 
+from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import HUBSPOT_USER
 
 ValueTransform = Callable[[Any, Any], None]
@@ -30,6 +32,38 @@ class ConcurrentCreateConflict(Exception):
         super().__init__(
             f"Concurrent create conflict on {doctype} ({hubspot_id_field}={hubspot_id})"
         )
+
+
+def retry_via_reenqueue(
+    exceptions: tuple[type[Exception], ...] = (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted),
+) -> Callable:
+    """Decorator for HubSpot webhook entry points (keyword-args only).
+
+    On a matching exception, logs a warning and re-enqueues the same
+    function (by dotted ``module.func`` path) with the same kwargs on the
+    'long' queue, instead of propagating. Callers must invoke the wrapped
+    function with keyword arguments only, since the re-enqueue call
+    forwards **kwargs verbatim. The decorated function's own body must let
+    any exception in *exceptions* propagate (i.e. not swallow it in its
+    own except-Exception block) for this to work.
+    """
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            try:
+                return func(*args, **kwargs)
+            except exceptions as e:
+                frappe.logger(_LOG).warning(
+                    f"HubSpot: {type(e).__name__} in {func.__name__}({kwargs}) — re-enqueueing"
+                )
+                frappe.enqueue(
+                    f"{func.__module__}.{func.__name__}",
+                    queue="long",
+                    **kwargs,
+                )
+            return None
+        return wrapper
+    return decorator
 
 
 def coerce_value(value: Any, df: Any = None) -> Any:

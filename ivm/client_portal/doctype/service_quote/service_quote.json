@@ -1,0 +1,183 @@
+{
+ "actions": [],
+ "autoname": "SQ-.YYYY.-.#####",
+ "creation": "2026-08-19 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+  "field_order": [
+   "crm_deal",
+   "sales_representative",
+   "column_break_1",
+   "customer",
+   "crm_organization",
+   "contact",
+   "column_break_qkwk",
+   "status",
+   "valid_until",
+   "items_section",
+   "items",
+   "grand_total",
+   "terms_section",
+   "terms",
+   "signers_section",
+   "signers",
+   "amended_from",
+   "hidden_fields_section",
+   "deal_type"
+  ],
+ "fields": [
+  {
+   "fieldname": "crm_deal",
+   "fieldtype": "Link",
+   "label": "CRM Deal",
+   "options": "CRM Deal"
+  },
+  {
+   "fetch_from": "crm_deal.custom_deal_type",
+   "fieldname": "deal_type",
+   "fieldtype": "Data",
+   "label": "Deal Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Contact",
+   "options": "Contact",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:!doc.crm_deal || doc.deal_type!='New Business'",
+   "fetch_from": "crm_deal.custom_customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:!doc.crm_deal || doc.deal_type!='Existing Business'",
+   "fetch_from": "crm_deal.organization",
+   "fieldname": "crm_organization",
+   "fieldtype": "Link",
+   "label": "Organization",
+   "options": "CRM Organization"
+  },
+  {
+   "fetch_from": "crm_deal.deal_owner",
+   "fieldname": "sales_representative",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Representative",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+   {
+    "fieldname": "valid_until",
+    "fieldtype": "Date",
+    "label": "Valid Until"
+   },
+   {
+    "default": "Draft",
+    "fieldname": "status",
+    "fieldtype": "Select",
+    "label": "Status",
+    "options": "Draft\nSent\nPartially Accepted\nAccepted\nNeeds Rep Review\nCancelled\nExpired"
+   },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Service Quote Item"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terms_section",
+   "fieldtype": "Section Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "signers_section",
+   "fieldtype": "Section Break",
+   "label": "Signers"
+  },
+  {
+   "fieldname": "signers",
+   "fieldtype": "Table",
+   "label": "Signers",
+   "options": "Service Quote Signer"
+  },
+  {
+   "fieldname": "column_break_qkwk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hidden_fields_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hidden Fields"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Service Quote",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+  "links": [
+   {
+    "link_doctype": "Service Quote Activity Log",
+    "link_fieldname": "service_quote"
+   }
+  ],
+ "modified": "2026-08-19 08:39:02.385155",
+ "modified_by": "Administrator",
+ "module": "Client Portal",
+ "name": "Service Quote",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

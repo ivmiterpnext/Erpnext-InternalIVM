@@ -1,0 +1,169 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="container">
+    <a href="/service-quotes">&larr; Back to Service Quotes</a>
+    <h1>Service Quote {{ quote.name }}</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <p><strong>Contact:</strong> {{ quote.contact }}</p>
+            <p><strong>Customer:</strong> {{ quote.customer or "N/A" }}</p>
+            <p><strong>Valid Until:</strong> {{ quote.valid_until or "N/A" }}</p>
+        </div>
+        <div class="col-md-6">
+            <p><strong>Status:</strong> <span class="badge badge-info">{{ quote.status }}</span></p>
+            <p><strong>Sales Representative:</strong> {{ quote.sales_representative }}</p>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Quote Items</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="text-right">Qty</th>
+                        <th class="text-right">Rate</th>
+                        <th class="text-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in quote.items %}
+                    <tr>
+                        <td>{{ item.description }}</td>
+                        <td class="text-right">{{ item.qty }}</td>
+                        <td class="text-right">{{ frappe.utils.fmt_money(item.rate) }}</td>
+                        <td class="text-right">{{ frappe.utils.fmt_money(item.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-right">Grand Total:</th>
+                        <th class="text-right">{{ frappe.utils.fmt_money(quote.grand_total) }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Terms & Conditions</h5>
+        </div>
+        <div class="card-body">
+            {{ quote.terms | safe }}
+        </div>
+    </div>
+    
+    <div class="mb-4">
+        <a href="{{ pdf_url }}" class="btn btn-primary" target="_blank">View As PDF</a>
+    </div>
+    
+    {% if signer.status == "Pending" %}
+    <div class="card">
+        <div class="card-header">
+            <h5>Your Response</h5>
+        </div>
+        <div class="card-body">
+            <form id="signer-response-form">
+                <div class="form-group">
+                    <label for="typed-name">Your Name (as it appears on the agreement)</label>
+                    <input type="text" class="form-control" id="typed-name" 
+                           value="{{ signer.contact }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="agree-terms" required>
+                        <label class="custom-control-label" for="agree-terms">
+                            I have read and agree to the terms above
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="btn-group" id="response-buttons" role="group">
+                    <button type="button" class="btn btn-success" id="accept-btn">Accept</button>
+                    <button type="button" class="btn btn-danger" id="decline-btn">Decline</button>
+                </div>
+
+                <div class="form-group mt-3" id="decline-reason-section" style="display: none;">
+                    <label for="decline-reason">Reason for declining (optional)</label>
+                    <textarea class="form-control" id="decline-reason" rows="3"
+                              placeholder="Let us know why you're declining this quote..."></textarea>
+                    <div class="btn-group mt-2" role="group">
+                        <button type="button" class="btn btn-danger" id="confirm-decline-btn">Confirm Decline</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-decline-btn">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.getElementById('accept-btn').addEventListener('click', function() {
+        if (!document.getElementById('agree-terms').checked) {
+            alert('Please agree to the terms before accepting.');
+            return;
+        }
+        submitResponse('accept');
+    });
+    
+    document.getElementById('decline-btn').addEventListener('click', function() {
+        document.getElementById('response-buttons').style.display = 'none';
+        document.getElementById('decline-reason-section').style.display = 'block';
+    });
+
+    document.getElementById('cancel-decline-btn').addEventListener('click', function() {
+        document.getElementById('decline-reason-section').style.display = 'none';
+        document.getElementById('response-buttons').style.display = '';
+    });
+
+    document.getElementById('confirm-decline-btn').addEventListener('click', function() {
+        const reason = document.getElementById('decline-reason').value.trim();
+        submitResponse('decline', reason);
+    });
+    
+    function submitResponse(action, reason) {
+        const typedName = document.getElementById('typed-name').value;
+        const method = action === 'accept' ? 
+            'ivm.client_portal.services.signing.accept_quote' :
+            'ivm.client_portal.services.signing.decline_quote';
+
+        const args = {
+            service_quote: '{{ quote.name }}',
+            signer: '{{ signer.name }}',
+            typed_name: typedName
+        };
+        if (action === 'decline') {
+            args.reason = reason || '';
+        }
+        
+        frappe.call({
+            method: method,
+            args: args,
+            callback: function(r) {
+                if (r.message) {
+                    frappe.msgprint('Response recorded. Thank you!');
+                    location.reload();
+                }
+            },
+            error: function(r) {
+                frappe.msgprint('Error submitting response. Please try again.');
+            }
+        });
+    }
+    </script>
+    {% else %}
+    <div class="alert alert-info">
+        <strong>Your Response:</strong> {{ signer.status }}<br>
+        <strong>Accepted On:</strong> {{ signer.accepted_on }}<br>
+        <strong>Name:</strong> {{ signer.accepted_name }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

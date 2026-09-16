@@ -20,6 +20,7 @@ from ivm.integrations.hubspot.sync_utils import (
     ConcurrentCreateConflict,
     apply_field_map,
     lookup_or_create,
+    retry_via_reenqueue,
     save_doc,
     set_acting_user,
 )
@@ -139,6 +140,7 @@ DEAL_TRANSFORMS = {
 }
 
 
+@retry_via_reenqueue()
 def handle_deal_created(
     hubspot_deal_id: int | str,
     hubspot_user_id: int | str | None = None,
@@ -159,26 +161,8 @@ def handle_deal_created(
             )
             return
         _sync_deal(hubspot_deal_id, doc.name)
-    except ConcurrentCreateConflict:
-        frappe.logger("hubspot").warning(
-            f"HubSpot: concurrent create conflict for deal {hubspot_deal_id} — re-enqueueing"
-        )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.deal_handler.handle_deal_created",
-            queue="long",
-            hubspot_deal_id=hubspot_deal_id,
-            hubspot_user_id=hubspot_user_id,
-        )
-    except api.HubSpotRateLimitExhausted:
-        frappe.logger("hubspot").warning(
-            f"HubSpot: rate limit exhausted creating CRM Deal for deal {hubspot_deal_id} — re-enqueueing"
-        )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.deal_handler.handle_deal_created",
-            queue="long",
-            hubspot_deal_id=hubspot_deal_id,
-            hubspot_user_id=hubspot_user_id,
-        )
+    except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+        raise
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to create CRM Deal for deal {hubspot_deal_id}",
@@ -186,6 +170,7 @@ def handle_deal_created(
         )
 
 
+@retry_via_reenqueue()
 def handle_deal_updated(
     hubspot_deal_id: int | str,
     hubspot_user_id: int | str | None = None,
@@ -202,26 +187,8 @@ def handle_deal_updated(
         crm_deal_name, was_created = ensure_deal_exists(hubspot_deal_id, hubspot_user_id)
         if not was_created:
             _sync_deal(hubspot_deal_id, crm_deal_name)
-    except ConcurrentCreateConflict:
-        frappe.logger("hubspot").warning(
-            f"HubSpot: concurrent create conflict for deal {hubspot_deal_id} — re-enqueueing"
-        )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.deal_handler.handle_deal_updated",
-            queue="long",
-            hubspot_deal_id=hubspot_deal_id,
-            hubspot_user_id=hubspot_user_id,
-        )
-    except api.HubSpotRateLimitExhausted:
-        frappe.logger("hubspot").warning(
-            f"HubSpot: rate limit exhausted syncing CRM Deal for deal {hubspot_deal_id} — re-enqueueing"
-        )
-        frappe.enqueue(
-            "ivm.integrations.hubspot.deal_handler.handle_deal_updated",
-            queue="long",
-            hubspot_deal_id=hubspot_deal_id,
-            hubspot_user_id=hubspot_user_id,
-        )
+    except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+        raise
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to sync deal {hubspot_deal_id}",
@@ -280,11 +247,30 @@ def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
     )
     properties: dict[str, Any] = hubspot_data.get("properties", {})
 
+    # Fetch company associations once and pass both primary and master IDs
     try:
-        _sync_organization(hubspot_deal_id, crm_deal_name)
+        primary_company_id, master_company_id = api.get_deal_company_ids_by_role(hubspot_deal_id)
+    except Exception:
+        frappe.log_error(
+            title=f"HubSpot: failed to fetch company associations for deal {hubspot_deal_id}",
+            message=frappe.get_traceback(with_context=True),
+        )
+        primary_company_id = None
+        master_company_id = None
+
+    try:
+        _sync_organization(hubspot_deal_id, crm_deal_name, primary_company_id)
     except Exception:
         frappe.log_error(
             title=f"HubSpot: failed to sync organization for deal {crm_deal_name}",
+            message=frappe.get_traceback(with_context=True),
+        )
+
+    try:
+        _sync_master_organization(hubspot_deal_id, crm_deal_name, master_company_id)
+    except Exception:
+        frappe.log_error(
+            title=f"HubSpot: failed to sync master organization for deal {crm_deal_name}",
             message=frappe.get_traceback(with_context=True),
         )
 
@@ -306,43 +292,60 @@ def _sync_deal_fields(crm_deal_name: str, properties: dict[str, Any]) -> None:
     save_doc(deal, "deal")
 
 
-def _sync_organization(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
-    """Link the first associated HubSpot company to the CRM Deal's organization field."""
-    try:
-        company_ids = api.get_deal_company_ids(hubspot_deal_id)
-    except Exception:
-        frappe.log_error(
-            title=f"HubSpot: failed to fetch company associations for deal {hubspot_deal_id}",
-            message=frappe.get_traceback(with_context=True),
-        )
-        return
+def _resolve_or_provision_org(
+    hubspot_company_id: str,
+    context_label: str,
+    company_label: str = "company",
+) -> str | None:
+    """Look up a CRM Organization by HUBSPOT_COMPANY_ID_FIELD; if missing,
+    provision it via company_handler.handle_company_created and look up
+    again. Returns the CRM Organization name, or None (with a warning
+    logged) if it still can't be found after provisioning.
 
-    if not company_ids:
-        return
-
+    *context_label* is used verbatim in the "skipping ..." warning (e.g.
+    "organization link on deal X" or "master link on deal X").
+    *company_label* is used in the "HubSpot {company_label} {id}" phrasing
+    (e.g. "company" or "master company").
+    """
     org_name = frappe.db.get_value(
         "CRM Organization",
-        {HUBSPOT_COMPANY_ID_FIELD: str(company_ids[0])},
+        {HUBSPOT_COMPANY_ID_FIELD: str(hubspot_company_id)},
+        "name",
+    )
+    if org_name:
+        return org_name
+
+    frappe.logger("hubspot").info(
+        f"No CRM Organization found for HubSpot {company_label} {hubspot_company_id} "
+        f"— provisioning from HubSpot"
+    )
+    from ivm.integrations.hubspot.company_handler import handle_company_created
+    handle_company_created(hubspot_company_id)
+    org_name = frappe.db.get_value(
+        "CRM Organization",
+        {HUBSPOT_COMPANY_ID_FIELD: str(hubspot_company_id)},
         "name",
     )
     if not org_name:
-        frappe.logger("hubspot").info(
-            f"No CRM Organization found for HubSpot company {company_ids[0]} "
-            f"— provisioning from HubSpot"
+        frappe.logger("hubspot").warning(
+            f"Failed to provision CRM Organization for HubSpot {company_label} {hubspot_company_id} "
+            f"— skipping {context_label}"
         )
-        from ivm.integrations.hubspot.company_handler import handle_company_created
-        handle_company_created(company_ids[0])
-        org_name = frappe.db.get_value(
-            "CRM Organization",
-            {HUBSPOT_COMPANY_ID_FIELD: str(company_ids[0])},
-            "name",
-        )
-        if not org_name:
-            frappe.logger("hubspot").warning(
-                f"Failed to provision CRM Organization for HubSpot company {company_ids[0]} "
-                f"— skipping organization link on deal {crm_deal_name}"
-            )
-            return
+        return None
+
+    return org_name
+
+
+def _sync_organization(hubspot_deal_id: int | str, crm_deal_name: str, primary_company_id: str | None) -> None:
+    """Link the primary associated HubSpot company to the CRM Deal's organization field."""
+    if not primary_company_id:
+        return
+
+    org_name = _resolve_or_provision_org(
+        primary_company_id, f"organization link on deal {crm_deal_name}",
+    )
+    if not org_name:
+        return
 
     deal = frappe.get_doc("CRM Deal", crm_deal_name)
     if deal.organization == org_name:
@@ -352,6 +355,91 @@ def _sync_organization(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
     save_doc(deal, "deal")
     frappe.logger("hubspot").info(
         f"Linked CRM Organization '{org_name}' to CRM Deal {crm_deal_name}"
+    )
+
+
+def _sync_master_organization(hubspot_deal_id: int | str, crm_deal_name: str, master_company_id: str | None) -> None:
+    """Link the master-labeled associated HubSpot company to the CRM Deal,
+    populating exactly one of custom_master_customer (if the master already
+    exists as a Customer) or custom_master_organization (if it doesn't yet)
+    — never both at once.
+
+    Checks for an existing Customer match directly against raw HubSpot
+    company data first (name + website only — industry is deliberately
+    skipped here since it requires the HUBSPOT_INDUSTRY_LABELS mapping,
+    which today only happens inside company_handler.py, and
+    _find_existing_customer treats industry as an optional secondary filter
+    anyway, not a required field). This avoids provisioning a CRM
+    Organization record for master companies that turn out to already be
+    existing Customers — a CRM Organization is only created as a fallback,
+    when no Customer match is found.
+
+    Unlike the primary client, there's no custom_deal_type-equivalent flag
+    telling us upfront whether the master client is new or already an
+    existing Customer — so we always look it up here rather than branching
+    on a flag. Never overwrites an already-resolved custom_master_customer
+    (whether set manually in Frappe or by a prior sync) — once known, it's
+    known.
+    """
+    if not master_company_id:
+        return
+
+    deal = frappe.get_doc("CRM Deal", crm_deal_name)
+
+    if deal.custom_master_customer:
+        return
+
+    from ivm.deployments.services.provision_client_from_deal import _find_existing_customer
+
+    try:
+        company_data = api.get_company(master_company_id, properties=["name", "website"])
+    except Exception:
+        frappe.log_error(
+            title=f"HubSpot: failed to fetch master company {master_company_id} for deal {crm_deal_name}",
+            message=frappe.get_traceback(with_context=True),
+        )
+        return
+
+    company_props = company_data.get("properties", {})
+    company_name = (company_props.get("name") or "").strip()
+
+    existing_customer = None
+    if company_name:
+        company_like = frappe._dict({
+            "organization_name": company_name,
+            "website": company_props.get("website"),
+            "industry": None,
+        })
+        existing_customer = _find_existing_customer(company_like)
+
+    changed = False
+
+    if existing_customer:
+        deal.custom_master_customer = existing_customer
+        changed = True
+        if deal.custom_master_organization:
+            deal.custom_master_organization = ""
+        frappe.logger("hubspot").info(
+            f"Master company '{master_company_id}' matches existing Customer "
+            f"'{existing_customer}' — linked directly on deal {crm_deal_name}"
+        )
+    else:
+        org_name = _resolve_or_provision_org(
+            master_company_id, f"master link on deal {crm_deal_name}", company_label="master company",
+        )
+        if not org_name:
+            return
+
+        if deal.custom_master_organization != org_name:
+            deal.custom_master_organization = org_name
+            changed = True
+
+    if not changed:
+        return
+
+    save_doc(deal, "deal")
+    frappe.logger("hubspot").info(
+        f"Synced master client for CRM Deal {crm_deal_name}"
     )
 
 
