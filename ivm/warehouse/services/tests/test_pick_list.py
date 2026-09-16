@@ -6,7 +6,9 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 from ivm.warehouse.services.pick_list import (
+    _build_pick_list_excel_payload,
     _get_related_project,
+    _resolve_pick_list_label,
     add_item_to_pick_list,
     clear_pick_list_items,
     create_pick_list,
@@ -396,3 +398,144 @@ class TestGetRelatedProject(ERPNextTestSuite):
         project_id, project_name = _get_related_project(name)
         self.assertIsNone(project_id)
         self.assertIsNone(project_name)
+
+
+class TestResolvePickListLabel(ERPNextTestSuite):
+    """_resolve_pick_list_label"""
+
+    def test_prefers_machine_names(self):
+        name = create_pick_list(COMPANY)
+        wr = frappe.get_doc({
+            "doctype": "Warehouse Request",
+            "pick_list": name,
+            "request_reason": "Build Machine",
+            "subject": "Test WR",
+            "machine_names": "ED01748L",
+            "machine_name": "ED01748L-primary-ignored",
+            "related_project": "",
+        })
+        wr.insert(ignore_permissions=True)
+        self.assertEqual(_resolve_pick_list_label(name), "ED01748L")
+
+    def test_falls_back_to_machine_name_when_machine_names_blank(self):
+        name = create_pick_list(COMPANY)
+        wr = frappe.get_doc({
+            "doctype": "Warehouse Request",
+            "pick_list": name,
+            "request_reason": "Build Machine",
+            "subject": "Test WR",
+            "machine_name": "ED01644V",
+        })
+        wr.insert(ignore_permissions=True)
+        self.assertEqual(_resolve_pick_list_label(name), "ED01644V")
+
+    def test_falls_back_to_related_project_when_no_machine_name(self):
+        name = create_pick_list(COMPANY)
+        project = frappe.get_doc({
+            "doctype": "Project",
+            "project_name": "Test Project For Pick List Label",
+            "company": COMPANY,
+        }).insert(ignore_permissions=True)
+        wr = frappe.get_doc({
+            "doctype": "Warehouse Request",
+            "pick_list": name,
+            "request_reason": "Shipping Request",
+            "subject": "Ship Parts",
+            "related_project": project.name,
+        })
+        wr.insert(ignore_permissions=True)
+        self.assertEqual(_resolve_pick_list_label(name), project.name)
+
+    def test_falls_back_to_pick_list_name_when_no_warehouse_request(self):
+        name = create_pick_list(COMPANY)
+        self.assertEqual(_resolve_pick_list_label(name), name)
+
+    def test_falls_back_to_pick_list_name_when_warehouse_request_has_no_label_fields(self):
+        name = create_pick_list(COMPANY)
+        wr = frappe.get_doc({
+            "doctype": "Warehouse Request",
+            "pick_list": name,
+            "request_reason": "Shipping Request",
+            "subject": "Ship Parts",
+        })
+        wr.insert(ignore_permissions=True)
+        self.assertEqual(_resolve_pick_list_label(name), name)
+
+    def test_sanitizes_illegal_filename_characters(self):
+        name = create_pick_list(COMPANY)
+        wr = frappe.get_doc({
+            "doctype": "Warehouse Request",
+            "pick_list": name,
+            "request_reason": "Build Machine",
+            "subject": "Test WR",
+            "machine_names": 'ED0174/8L:*?"<>|',
+        })
+        wr.insert(ignore_permissions=True)
+        self.assertEqual(_resolve_pick_list_label(name), "ED01748L")
+
+
+class TestBuildPickListExcelPayload(ERPNextTestSuite):
+    """_build_pick_list_excel_payload"""
+
+    def test_header_row_matches_template(self):
+        name = create_pick_list(COMPANY)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertEqual(
+            payload["data"][0],
+            ["Inventory Part ", None, "Qty Picked", None, "Price", None, "Total"],
+        )
+
+    def test_item_rows_and_total_formula(self):
+        item_a = make_item()
+        item_b = make_item()
+        _seed_stock(item_a.name, qty=5, rate=10)
+        _seed_stock(item_b.name, qty=5, rate=20)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item_a.name, WAREHOUSE, 2)
+        add_item_to_pick_list(name, item_b.name, WAREHOUSE, 3)
+        payload = _build_pick_list_excel_payload(name)
+        data = payload["data"]
+
+        # row 1 (index 1) = Excel row 2, row 2 (index 2) = Excel row 3
+        self.assertEqual(data[1][0], f"{item_a.name}: {item_a.item_name}")
+        self.assertEqual(data[1][2], 2)
+        self.assertEqual(data[1][4], 10)
+        self.assertEqual(data[1][6], "=C2*E2")
+
+        self.assertEqual(data[2][0], f"{item_b.name}: {item_b.item_name}")
+        self.assertEqual(data[2][2], 3)
+        self.assertEqual(data[2][4], 20)
+        self.assertEqual(data[2][6], "=C3*E3")
+
+        # index 3 = blank spacer row, index 4 = total row
+        self.assertEqual(data[3], [None] * 7)
+        self.assertEqual(data[4], [None, None, None, None, None, None, "=SUM(G2:G3)"])
+
+    def test_empty_pick_list_has_no_sum_formula(self):
+        name = create_pick_list(COMPANY)
+        payload = _build_pick_list_excel_payload(name)
+        data = payload["data"]
+        self.assertEqual(len(data), 3)  # header + blank spacer + blank total row
+        self.assertEqual(data[1], [None] * 7)
+        self.assertEqual(data[2], [None] * 7)
+
+    def test_column_widths_and_styles(self):
+        name = create_pick_list(COMPANY)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertEqual(payload["column_widths"], [57.86, None, 10.14, None, 9.14, None, 9.57])
+        self.assertIn("column_styles", payload["styles"])
+        self.assertEqual(payload["styles"]["column_styles"][4], [1])
+        self.assertEqual(payload["styles"]["column_styles"][6], [1])
+
+    def test_filename_uses_resolved_label(self):
+        name = create_pick_list(COMPANY)
+        wr = frappe.get_doc({
+            "doctype": "Warehouse Request",
+            "pick_list": name,
+            "request_reason": "Build Machine",
+            "subject": "Test WR",
+            "machine_names": "ED01748L",
+        })
+        wr.insert(ignore_permissions=True)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertEqual(payload["filename"], "ED01748L - Pick List")

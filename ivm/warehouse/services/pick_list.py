@@ -1,8 +1,10 @@
+import re
 import frappe
 
 from ivm.warehouse.services.inventory import get_available_qty
 from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry as _create_stock_entry
-from frappe.utils.xlsxutils import build_xlsx_response
+from frappe.desk.utils import provide_binary_file
+from frappe.utils.xlsxutils import make_xlsx
 
 
 def _get_draft_pick_list(pick_list):
@@ -236,50 +238,100 @@ def _get_related_project(pick_list):
     return project_id, project_name
 
 
-@frappe.whitelist()
-def export_pick_list_cost_excel(pick_list):
-    """Stream an .xlsx file of item costs for a Pick List, with header rows
-    for Pick List name and associated Project, and a total row. Rate and
-    Amount are always displayed with 2 decimal places, and the total row
-    is bold."""
-    if not frappe.has_permission("Pick List", "read", pick_list):
-        frappe.throw("Not permitted", frappe.PermissionError)
+FILENAME_ILLEGAL_CHARS_RE = re.compile(r'[\\/:*?"<>|]')
 
+ACCOUNTING_NUMBER_FORMAT = '_(* #,##0.00_);_(* \\(#,##0.00\\);_(* "-"??_);_(@_)'
+
+
+def _sanitize_filename_label(label: str) -> str:
+    return FILENAME_ILLEGAL_CHARS_RE.sub("", label).strip()
+
+
+def _resolve_pick_list_label(pick_list: str) -> str:
+    """Resolve a human-readable label for a Pick List's export filename:
+    prefer the linked Warehouse Request's machine name, then its related
+    Project (Deployment) ID, then fall back to the Pick List's own docname."""
+    wr = frappe.db.get_value(
+        "Warehouse Request",
+        {"pick_list": pick_list},
+        ["machine_names", "machine_name", "related_project"],
+        as_dict=True,
+    )
+    label = None
+    if wr:
+        label = wr.machine_names or wr.machine_name or wr.related_project
+    return _sanitize_filename_label(label) if label else pick_list
+
+
+def _build_pick_list_excel_payload(pick_list: str) -> dict:
+    """Build the data/styles/column widths/filename for a Pick List's Excel
+    export: Inventory Part / Qty Picked / Price / Total columns (with
+    spacer columns B/D/F), Total column uses a formula, no bold/fill
+    styling, matching the company's standard Pick List template."""
     rows = get_pick_list_cost_rows(pick_list)
-    project_id, project_name = _get_related_project(pick_list)
 
-    RATE_COL = 5
-    AMOUNT_COL = 6
+    data = [["Inventory Part ", None, "Qty Picked", None, "Price", None, "Total"]]
 
-    data = [
-        ["Pick List", pick_list],
-        ["Project", project_id or "", project_name or ""],
-        [],
-        ["Item Code", "Item Name", "Warehouse", "Qty", "UOM", "Rate", "Amount"],
-    ]
+    first_data_row = len(data) + 1  # 1-based Excel row number of first item row
     for row in rows:
         data.append([
-            row["item_code"], row["item_name"], row["warehouse"],
-            row["qty"], row["uom"], row["rate"], row["amount"],
+            f"{row['item_code']}: {row['item_name']}", None,
+            row["qty"], None,
+            row["rate"], None,
+            None,
         ])
 
-    total_amount = sum(row["amount"] for row in rows)
-    data.append(["", "", "", "", "", "Total", total_amount])
-    total_row_idx = len(data) - 1
+    last_data_row = first_data_row + len(rows) - 1
+
+    for i, excel_row in enumerate(range(first_data_row, last_data_row + 1)):
+        data[i + 1][6] = f"=C{excel_row}*E{excel_row}"
+
+    data.append([None] * 7)  # blank spacer row before total
+
+    if rows:
+        data.append([None, None, None, None, None, None, f"=SUM(G{first_data_row}:G{last_data_row})"])
+    else:
+        data.append([None] * 7)
 
     styles = {
         "styles": [
-            {"num_format": "0.00"},
-            {"bold": True},
+            {"align": "left", "valign": "vcenter"},
+            {"num_format": ACCOUNTING_NUMBER_FORMAT},
         ],
         "column_styles": {
-            RATE_COL: [0],
-            AMOUNT_COL: [0],
-        },
-        "row_styles": {
-            0: [1],
-            total_row_idx: [1],
+            0: [0],
+            4: [1],
+            6: [1],
         },
     }
 
-    build_xlsx_response(data, f"{pick_list}-cost", styles=styles)
+    column_widths = [57.86, None, 10.14, None, 9.14, None, 9.57]
+
+    filename = f"{_resolve_pick_list_label(pick_list)} - Pick List"
+
+    return {
+        "data": data,
+        "column_widths": column_widths,
+        "styles": styles,
+        "filename": filename,
+    }
+
+
+@frappe.whitelist()
+def export_pick_list_cost_excel(pick_list):
+    """Stream an .xlsx file of item costs for a Pick List, matching the
+    company's standard Pick List template: Inventory Part / Qty Picked /
+    Price / Total columns with formulas, no header identifier rows, no
+    bold styling."""
+    if not frappe.has_permission("Pick List", "read", pick_list):
+        frappe.throw("Not permitted", frappe.PermissionError)
+
+    payload = _build_pick_list_excel_payload(pick_list)
+
+    xlsx_file = make_xlsx(
+        payload["data"],
+        payload["filename"],
+        column_widths=payload["column_widths"],
+        styles=payload["styles"],
+    )
+    provide_binary_file(payload["filename"], "xlsx", xlsx_file.getvalue())
