@@ -36,6 +36,7 @@ fixtures = [
 	{"dt": "Report", "filters": [["is_standard", "=", "No"]]},
 	{"dt": "CRM Fields Layout", "filters": [["dt", "=", "CRM Deal"]]},
 	{"dt": "CRM Form Script", "filters": [["dt", "=", "CRM Deal"], ["is_standard", "=", 0]]},
+	{"dt": "Assignment Rule", "filters": [["name", "=", "Warehouse Request Assignment"]]},
 ]
 
 # include js, css files in header of desk.html

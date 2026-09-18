@@ -1,0 +1,49 @@
+[
+ {
+  "assign_condition": "status == 'New'",
+  "assign_condition_json": null,
+  "assignment_days": [
+   {
+    "day": "Monday"
+   },
+   {
+    "day": "Tuesday"
+   },
+   {
+    "day": "Wednesday"
+   },
+   {
+    "day": "Thursday"
+   },
+   {
+    "day": "Friday"
+   },
+   {
+    "day": "Saturday"
+   },
+   {
+    "day": "Sunday"
+   }
+  ],
+  "close_condition": null,
+  "description": "Automatic Assignment",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Assignment Rule",
+  "document_type": "Warehouse Request",
+  "due_date_based_on": "due_date",
+  "modified": "2026-09-18 20:06:33.914132",
+  "name": "Warehouse Request Assignment",
+  "priority": 1,
+  "rule": "Load Balancing",
+  "unassign_condition": null,
+  "unassign_condition_json": null,
+  "users": [
+   {
+    "user": "afish@ivminc.com",
+    "weight": 1
+   }
+  ],
+  "weighted_users": []
+ }
+]
