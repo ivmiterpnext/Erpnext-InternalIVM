@@ -187,7 +187,12 @@ ivm.EmbeddedForm = class {
             if (meta.istable) {
                 frappe.call({
                     method: 'ivm.utils.get_child_table_row',
-                    args: { doctype, name: docname },
+                    args: {
+                        doctype,
+                        name: docname,
+                        host_doctype: self.parent_form.doctype,
+                        host_name: self.parent_form.docname,
+                    },
                     callback: function(r) {
                         if (r.message) _do_render(r.message);
                     }

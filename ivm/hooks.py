@@ -8,35 +8,50 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 fixtures = [
-    "Issue Type", "Campaign", "Case Reason", "Translation", "Connectivity Type", "Card Reader Type",
-    "List View Settings", "Workflow Action Master", "Custom DocPerm", "Workflow", "Property Setter",
-    "Workflow State", "Industry Type", "Role", "Custom Field", "Project Type", "CRM Pipeline",
-    "CRM Deal Status", "Server Script", "Client Script",
-    "Workspace",
-    "Workspace Shortcut",
-    {"dt": "Desktop Icon", "filters": [["standard", "=", 0]]},
-    {"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]},
-    {"dt": "Print Format", "filters": [["standard", "=", "No"]]},
-    {"dt": "Report", "filters": [["is_standard", "=", "No"]]},
-    {"dt": "CRM Fields Layout", "filters": [["dt", "=", "CRM Deal"]]},
-    {"dt": "CRM Form Script", "filters": [["dt", "=", "CRM Deal"], ["is_standard", "=", 0]]},
+	"Issue Type",
+	"Campaign",
+	"Case Reason",
+	"Translation",
+	"Connectivity Type",
+	"Card Reader Type",
+	"List View Settings",
+	"Workflow Action Master",
+	"Custom DocPerm",
+	"Workflow",
+	"Property Setter",
+	"Workflow State",
+	"Industry Type",
+	"Role",
+	"Custom Field",
+	"Project Type",
+	"CRM Pipeline",
+	"CRM Deal Status",
+	"Server Script",
+	"Client Script",
+	"Workspace",
+	"Workspace Shortcut",
+	{"dt": "Desktop Icon", "filters": [["standard", "=", 0]]},
+	{"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]},
+	{"dt": "Print Format", "filters": [["standard", "=", "No"]]},
+	{"dt": "Report", "filters": [["is_standard", "=", "No"]]},
+	{"dt": "CRM Fields Layout", "filters": [["dt", "=", "CRM Deal"]]},
+	{"dt": "CRM Form Script", "filters": [["dt", "=", "CRM Deal"], ["is_standard", "=", 0]]},
 ]
 
 # include js, css files in header of desk.html
 app_include_css = [
-    "/assets/ivm/css/chatbox_widget.css",
-    "/assets/ivm/css/embedded_form.css",
-    "/assets/ivm/css/project.css"
+	"/assets/ivm/css/chatbox_widget.css",
+	"/assets/ivm/css/embedded_form.css",
+	"/assets/ivm/css/project.css",
 ]
 
 app_include_js = [
 	# "/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js",
-
-    "/assets/ivm/js/utils.js",
-    "/assets/ivm/js/embedded_form.js",
-    "/assets/ivm/js/chatbox_widget.js",
-    "/assets/ivm/js/barcode_scanner_override.js",
-    "/assets/ivm/js/machine_detail_grids.js"
+	"/assets/ivm/js/utils.js",
+	"/assets/ivm/js/embedded_form.js",
+	"/assets/ivm/js/chatbox_widget.js",
+	"/assets/ivm/js/barcode_scanner_override.js",
+	"/assets/ivm/js/machine_detail_grids.js",
 ]
 
 # include js, css files in header of web template
@@ -56,23 +71,23 @@ app_include_js = [
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {
-    "Customer": "public/js/doctype/Customer.js",
-    "Task": "public/js/doctype/Task.js",
-    "CRM Deal": "public/js/doctype/CRM_Deal.js",
-    "Project": "public/js/doctype/Project.js",
-    "Issue": "public/js/doctype/Issue.js",
-    "Delivery Note": "public/js/doctype/Delivery_Note.js",
-    "Stock Entry": "public/js/doctype/Stock_Entry.js",
-    "Pick List": "public/js/doctype/Pick_List.js",
+	"Customer": "public/js/doctype/Customer.js",
+	"Task": "public/js/doctype/Task.js",
+	"CRM Deal": "public/js/doctype/CRM_Deal.js",
+	"Project": "public/js/doctype/Project.js",
+	"Issue": "public/js/doctype/Issue.js",
+	"Delivery Note": "public/js/doctype/Delivery_Note.js",
+	"Stock Entry": "public/js/doctype/Stock_Entry.js",
+	"Pick List": "public/js/doctype/Pick_List.js",
 }
 
 doctype_list_js = {
-    # "Lead": "public/js/listview/Lead_listview.js",
-    # "Opportunity": "public/js/listview/Opportunity_listview.js",
-    "Customer": "public/js/listview/Customer_listview.js",
-    "User": "public/js/listview/user_listview.js",
-    "Calendar Events": "public/js/calendar.js",
-    # "Project": "public/js/listview/project_listview.js",
+	# "Lead": "public/js/listview/Lead_listview.js",
+	# "Opportunity": "public/js/listview/Opportunity_listview.js",
+	"Customer": "public/js/listview/Customer_listview.js",
+	"User": "public/js/listview/user_listview.js",
+	"Calendar Events": "public/js/calendar.js",
+	# "Project": "public/js/listview/project_listview.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -95,18 +110,15 @@ get_website_user_home_page = "ivm.client_portal.utils.home_page.get_website_user
 # Jinja
 # ----------
 
-# add methods and filters to jinja environment
-# jinja = {
-# "methods": "ivm.utils.jinja_methods",
-# "filters": "ivm.utils.jinja_filters"
-# }
+jinja = {
+	"methods": ["ivm.warehouse.services.warehouse_request.render_machine_details_html"],
+}
 
 # Installation
 # ------------
 
 # before_install = "ivm.install.before_install"
 # after_install = "ivm.install.after_install"
-
 
 
 # Uninstallation
@@ -138,77 +150,75 @@ get_website_user_home_page = "ivm.client_portal.utils.home_page.get_website_user
 # Override standard doctype classes
 
 override_doctype_class = {
-    "Email Account": "ivm.support.overrides.CustomEmailAccount",
+	"Email Account": "ivm.support.overrides.CustomEmailAccount",
 }
 # Document Events
 # ---------------
 # Hook on document methods and events
 
 doc_events = {
-    "User": {
-        "before_validate": "ivm.client_portal.event_handlers.user.enforce_portal_user_roles",
-    },
-    "Communication": {
-        "on_update": "ivm.support.event_handlers.communication.on_update",
-    },
-    "Item": {
-        "before_save": "ivm.warehouse.event_handlers.item.before_save"
-    },
-    "Wiki Document": {
-        "on_update": "ivm.integrations.wiki.content_webhook.on_wiki_document_update",
-    },
-    "CRM Deal": {
-        "on_update": "ivm.deployments.event_handlers.deal.on_update",
-        "before_test_insert": "ivm.deployments.event_handlers.deal.ensure_deployment_location_for_test",
-    },
-    "Project": {
-        "before_validate": "ivm.deployments.event_handlers.project.before_validate",
-        "validate": "ivm.deployments.event_handlers.project.validate",
-        #"after_insert": "ivm.deployments.event_handlers.project.after_insert",
-    },
-    "Stock Entry": {
-        "after_insert": "ivm.warehouse.event_handlers.stock_entry.after_insert",
-        "on_submit": "ivm.warehouse.event_handlers.stock_entry.on_submit",
-    },
-    "Service Quote": {
-        "on_submit": "ivm.client_portal.event_handlers.service_quote.on_submit",
-    },
+	"User": {
+		"before_validate": "ivm.client_portal.event_handlers.user.enforce_portal_user_roles",
+	},
+	"Communication": {
+		"on_update": "ivm.support.event_handlers.communication.on_update",
+	},
+	"Item": {"before_save": "ivm.warehouse.event_handlers.item.before_save"},
+	"Wiki Document": {
+		"on_update": "ivm.integrations.wiki.content_webhook.on_wiki_document_update",
+	},
+	"CRM Deal": {
+		"on_update": "ivm.deployments.event_handlers.deal.on_update",
+		"before_test_insert": "ivm.deployments.event_handlers.deal.ensure_deployment_location_for_test",
+	},
+	"Project": {
+		"before_validate": "ivm.deployments.event_handlers.project.before_validate",
+		"validate": "ivm.deployments.event_handlers.project.validate",
+		# "after_insert": "ivm.deployments.event_handlers.project.after_insert",
+	},
+	"Stock Entry": {
+		"after_insert": "ivm.warehouse.event_handlers.stock_entry.after_insert",
+		"on_submit": "ivm.warehouse.event_handlers.stock_entry.on_submit",
+	},
+	"Service Quote": {
+		"on_submit": "ivm.client_portal.event_handlers.service_quote.on_submit",
+	},
 }
 
 # Website Permissions
 # -------------------
 
 has_website_permission = {
-    "Service Quote": "ivm.client_portal.doctype.service_quote.service_quote.has_website_permission",
+	"Service Quote": "ivm.client_portal.doctype.service_quote.service_quote.has_website_permission",
 }
 
 # Website Routes
 # ---------------
 
 website_route_rules = [
-    {"from_route": "/service-quotes/<path:name>", "to_route": "service_quote"},
+	{"from_route": "/service-quotes/<path:name>", "to_route": "service_quote"},
 ]
 
 # Scheduled Tasks
 # ---------------
 
 scheduler_events = {
-    # "all": [
-    # "ivm.tasks.all"
-    # ],
-    # "daily": [
-    # "ivm.tasks.daily"
-    # ],
-    "hourly": [
-        # Catch inbound reply emails that HubSpot does not surface via webhooks.
-        "ivm.integrations.hubspot.scheduled_tasks.sync_inbound_emails",
-    ],
-    # "weekly": [
-    # "ivm.tasks.weekly"
-    # ],
-    # "monthly": [
-    # "ivm.tasks.monthly"
-    # ],
+	# "all": [
+	# "ivm.tasks.all"
+	# ],
+	# "daily": [
+	# "ivm.tasks.daily"
+	# ],
+	"hourly": [
+		# Catch inbound reply emails that HubSpot does not surface via webhooks.
+		"ivm.integrations.hubspot.scheduled_tasks.sync_inbound_emails",
+	],
+	# "weekly": [
+	# "ivm.tasks.weekly"
+	# ],
+	# "monthly": [
+	# "ivm.tasks.monthly"
+	# ],
 }
 
 # Testing
@@ -220,16 +230,16 @@ scheduler_events = {
 # ------------------------------
 #
 override_whitelisted_methods = {
-    "frappe.desk.search.get_value": "ivm.machine_hardware_management.overrides.virtual_get_value.virtual_get_value",
-    "frappe.realtime.has_permission": "ivm.overrides.realtime_permission.has_permission",
+	"frappe.desk.search.get_value": "ivm.machine_hardware_management.overrides.virtual_get_value.virtual_get_value",
+	"frappe.realtime.has_permission": "ivm.overrides.realtime_permission.has_permission",
 }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
-    "Issue": "ivm.api.get_data",
-    "Project": "ivm.api.override_project_dashboard",
+	"Issue": "ivm.api.get_data",
+	"Project": "ivm.api.override_project_dashboard",
 }
 
 # exempt linked doctypes from being automatically cancelled

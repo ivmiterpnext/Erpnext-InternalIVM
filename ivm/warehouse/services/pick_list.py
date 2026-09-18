@@ -1,10 +1,16 @@
 import re
+from io import BytesIO
+from urllib.parse import quote
+
 import frappe
+import xlsxwriter
+from xlsxwriter.url import Url
+from xlsxwriter.utility import cell_autofit_width
 
 from ivm.warehouse.services.inventory import get_available_qty
 from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry as _create_stock_entry
 from frappe.desk.utils import provide_binary_file
-from frappe.utils.xlsxutils import make_xlsx
+from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, get_sanitized_sheet_name, make_xlsx
 
 
 def _get_draft_pick_list(pick_list):
@@ -243,39 +249,81 @@ FILENAME_ILLEGAL_CHARS_RE = re.compile(r'[\\/:*?"<>|]')
 ACCOUNTING_NUMBER_FORMAT = '_(* #,##0.00_);_(* \\(#,##0.00\\);_(* "-"??_);_(@_)'
 
 
+def _build_item_link(item_code: str, item_name: str) -> Url:
+    """Build a clickable link for an Inventory Part cell, pointing at that
+    item's Desk page on the current site, displaying '{item_code}: {item_name}'
+    as the visible text (same text shown before this became a link).
+    Uses frappe.utils.get_url() rather than a hardcoded domain so the link
+    always points at whichever site actually generated the export."""
+    display_text = ILLEGAL_CHARACTERS_RE.sub("", f"{item_code}: {item_name}")
+    link = Url(f"{frappe.utils.get_url()}/desk/item/{quote(item_code)}")
+    link.text = display_text
+    return link
+
+
 def _sanitize_filename_label(label: str) -> str:
     return FILENAME_ILLEGAL_CHARS_RE.sub("", label).strip()
 
 
 def _resolve_pick_list_label(pick_list: str) -> str:
-    """Resolve a human-readable label for a Pick List's export filename:
-    prefer the linked Warehouse Request's machine name, then its related
-    Project (Deployment) ID, then fall back to the Pick List's own docname."""
-    wr = frappe.db.get_value(
-        "Warehouse Request",
-        {"pick_list": pick_list},
-        ["machine_names", "machine_name", "related_project"],
-        as_dict=True,
-    )
-    label = None
-    if wr:
-        label = wr.machine_names or wr.machine_name or wr.related_project
-    return _sanitize_filename_label(label) if label else pick_list
+     """Resolve a human-readable label for a Pick List's export filename:
+     prefer the linked Warehouse Request's machine name, then its related
+     Project (Deployment) ID, then fall back to the Pick List's own docname."""
+     wr = frappe.db.get_value(
+         "Warehouse Request",
+         {"pick_list": pick_list},
+         ["machine_names", "machine_name", "related_project"],
+         as_dict=True,
+     )
+     label = None
+     if wr:
+         label = wr.machine_names or wr.machine_name or wr.related_project
+     return _sanitize_filename_label(label) if label else pick_list
+
+
+def _pixels_to_character_width(pixels: float) -> float:
+    """Convert a pixel width to Excel's character-unit column width, using
+    the same formula xlsxwriter's own worksheet.autofit() uses internally.
+    Reimplemented here (rather than reused) because autofit() itself is a
+    no-op in constant_memory mode, which this export relies on."""
+    max_digit_width = 7.0
+    padding = 5.0
+    if pixels <= 12:
+        return pixels / (max_digit_width + padding)
+    return (pixels - padding) / max_digit_width
+
+
+def _autofit_column_width(values, minimum_width: float) -> float:
+    """Compute the character-unit column width needed to fit the widest of
+    `values` without truncation, never going narrower than `minimum_width`."""
+    max_pixels = max((cell_autofit_width(v) for v in values), default=0)
+    return max(minimum_width, _pixels_to_character_width(max_pixels))
 
 
 def _build_pick_list_excel_payload(pick_list: str) -> dict:
     """Build the data/styles/column widths/filename for a Pick List's Excel
     export: Inventory Part / Qty Picked / Price / Total columns (with
-    spacer columns B/D/F), Total column uses a formula, no bold/fill
-    styling, matching the company's standard Pick List template."""
+    spacer columns B/D/F), no bold/fill styling, matching the company's
+    standard Pick List template. Total column uses Excel formulas
+    (=Cn*En per row, =SUM(...) for the grand total) rather than static
+    values — accepted trade-off: xlsxwriter caches a formula's result as
+    0 unless an explicit value is supplied, so Excel's Protected View
+    (the default for any downloaded file) will show 0 until the user
+    clicks "Enable Editing", after which the formulas recalculate
+    correctly. The last item row gets a thin bottom border across
+    columns A-G, matching the template's rule line before the total.
+    Returns `last_item_row_idx` so the caller can scope an AutoFilter to
+    the header + item rows only, excluding the blank spacer/total rows
+    below."""
     rows = get_pick_list_cost_rows(pick_list)
 
     data = [["Inventory Part ", None, "Qty Picked", None, "Price", None, "Total"]]
 
     first_data_row = len(data) + 1  # 1-based Excel row number of first item row
+
     for row in rows:
         data.append([
-            f"{row['item_code']}: {row['item_name']}", None,
+            _build_item_link(row["item_code"], row["item_name"]), None,
             row["qty"], None,
             row["rate"], None,
             None,
@@ -293,19 +341,52 @@ def _build_pick_list_excel_payload(pick_list: str) -> dict:
     else:
         data.append([None] * 7)
 
+    ALIGN_STYLE_ID = 0
+    CURRENCY_STYLE_ID = 1
+    BORDER_STYLE_ID = 2
+    HYPERLINK_STYLE_ID = 3
+
     styles = {
         "styles": [
             {"align": "left", "valign": "vcenter"},
             {"num_format": ACCOUNTING_NUMBER_FORMAT},
+            {"bottom": 1},
+            {"font_color": "blue", "underline": 1, "align": "left", "valign": "vcenter"},
         ],
         "column_styles": {
-            0: [0],
-            4: [1],
-            6: [1],
+            0: [ALIGN_STYLE_ID],
+            4: [CURRENCY_STYLE_ID],
+            6: [CURRENCY_STYLE_ID],
         },
+        "cell_styles": {},
     }
 
-    column_widths = [57.86, None, 10.14, None, 9.14, None, 9.57]
+    for row_idx in range(1, len(rows) + 1):
+        styles["cell_styles"][(row_idx, 0)] = [HYPERLINK_STYLE_ID]
+
+    last_item_row_idx = None
+    if rows:
+        # 0-based row index of the last item row (row 0 in `data` is the header)
+        last_item_row_idx = len(rows)
+        for col_idx in range(7):
+            if col_idx == 0:
+                styles["cell_styles"][(last_item_row_idx, 0)] = [HYPERLINK_STYLE_ID, BORDER_STYLE_ID]
+            else:
+                styles["cell_styles"][(last_item_row_idx, col_idx)] = [BORDER_STYLE_ID]
+
+    inventory_part_texts = ["Inventory Part "] + [
+        f"{row['item_code']}: {row['item_name']}" for row in rows
+    ]
+
+    column_widths = [
+        _autofit_column_width(inventory_part_texts, 57.86),
+        None,
+        10.14,
+        None,
+        11,
+        None,
+        12,
+    ]
 
     filename = f"{_resolve_pick_list_label(pick_list)} - Pick List"
 
@@ -314,6 +395,7 @@ def _build_pick_list_excel_payload(pick_list: str) -> dict:
         "column_widths": column_widths,
         "styles": styles,
         "filename": filename,
+        "last_item_row_idx": last_item_row_idx,
     }
 
 
@@ -321,17 +403,45 @@ def _build_pick_list_excel_payload(pick_list: str) -> dict:
 def export_pick_list_cost_excel(pick_list):
     """Stream an .xlsx file of item costs for a Pick List, matching the
     company's standard Pick List template: Inventory Part / Qty Picked /
-    Price / Total columns with formulas, no header identifier rows, no
-    bold styling."""
+    Price / Total columns, no header identifier rows, no bold styling,
+    and a sort/filter AutoFilter on the header row scoped to the item
+    rows (excluding the blank spacer/total rows). Column widths for
+    columns that also carry a column-level style (Inventory Part, Price,
+    Total) are re-applied after make_xlsx() runs, working around a core
+    bug where make_xlsx()'s column-style loop calls ws.set_column()
+    without re-passing the width set by its earlier column-width loop,
+    silently resetting it to xlsxwriter's internal default."""
     if not frappe.has_permission("Pick List", "read", pick_list):
         frappe.throw("Not permitted", frappe.PermissionError)
 
     payload = _build_pick_list_excel_payload(pick_list)
 
-    xlsx_file = make_xlsx(
+    xlsx_stream = BytesIO()
+    wb = xlsxwriter.Workbook(xlsx_stream, {"constant_memory": True})
+
+    make_xlsx(
         payload["data"],
         payload["filename"],
+        wb=wb,
         column_widths=payload["column_widths"],
         styles=payload["styles"],
     )
-    provide_binary_file(payload["filename"], "xlsx", xlsx_file.getvalue())
+
+    ws = wb.get_worksheet_by_name(get_sanitized_sheet_name(payload["filename"]))
+
+    styled_column_formats = {
+        0: wb.add_format({"align": "left", "valign": "vcenter"}),
+        4: wb.add_format({"num_format": ACCOUNTING_NUMBER_FORMAT}),
+        6: wb.add_format({"num_format": ACCOUNTING_NUMBER_FORMAT}),
+    }
+    for col_idx, width in enumerate(payload["column_widths"]):
+        if width and col_idx in styled_column_formats:
+            ws.set_column(col_idx, col_idx, width, styled_column_formats[col_idx])
+
+    if payload["last_item_row_idx"] is not None:
+        ws.autofilter(0, 0, payload["last_item_row_idx"], 6)
+
+    wb.close()
+    xlsx_stream.seek(0)
+
+    provide_binary_file(payload["filename"], "xlsx", xlsx_stream.getvalue())

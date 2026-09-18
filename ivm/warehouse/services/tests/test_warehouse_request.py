@@ -421,3 +421,43 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 			create_build_requests_from_detail_rows(
 				project.name, "custom_deployment_smartstation_details"
 			)
+
+
+class TestWarehouseRequestQuery(ERPNextTestSuite):
+	"""warehouse_request_query
+
+	Note: request_reason must NOT contain "Build" or "Wrap Ready" here --
+	two Before Insert Server Scripts ("Build Request Subject Generation",
+	"Wrap Ready Subject") silently overwrite `subject` whenever it does,
+	which would make these subject-based assertions fail for reasons
+	unrelated to warehouse_request_query itself.
+	"""
+
+	def test_matches_by_name(self):
+		wr = _make_warehouse_request(request_reason="Shipping Request", subject="Unique Subject XYZ")
+		from ivm.warehouse.services.warehouse_request import warehouse_request_query
+		result = warehouse_request_query("Warehouse Request", wr.name, "name", 0, 20, {})
+		names = {row[0] for row in result}
+		self.assertIn(wr.name, names)
+
+	def test_matches_by_subject(self):
+		wr = _make_warehouse_request(request_reason="Shipping Request", subject="FindMeBySubjectABC")
+		from ivm.warehouse.services.warehouse_request import warehouse_request_query
+		result = warehouse_request_query("Warehouse Request", "FindMeBySubjectABC", "name", 0, 20, {})
+		names = {row[0] for row in result}
+		self.assertIn(wr.name, names)
+
+	def test_description_includes_subject_when_present(self):
+		wr = _make_warehouse_request(request_reason="Shipping Request", subject="Descriptive Subject")
+		from ivm.warehouse.services.warehouse_request import warehouse_request_query
+		result = warehouse_request_query("Warehouse Request", wr.name, "name", 0, 20, {})
+		match = next(row for row in result if row[0] == wr.name)
+		self.assertEqual(match[1], f"{wr.name} - Descriptive Subject")
+
+	def test_cancelled_requests_excluded(self):
+		wr = _make_warehouse_request(request_reason="Shipping Request", subject="Cancelled Search Target")
+		frappe.db.set_value("Warehouse Request", wr.name, "docstatus", 2)
+		from ivm.warehouse.services.warehouse_request import warehouse_request_query
+		result = warehouse_request_query("Warehouse Request", "Cancelled Search Target", "name", 0, 20, {})
+		names = {row[0] for row in result}
+		self.assertNotIn(wr.name, names)

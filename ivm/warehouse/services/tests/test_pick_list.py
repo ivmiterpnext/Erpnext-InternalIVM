@@ -4,15 +4,20 @@ import frappe
 from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from xlsxwriter.url import Url
 
 from ivm.warehouse.services.pick_list import (
+    _autofit_column_width,
+    _build_item_link,
     _build_pick_list_excel_payload,
     _get_related_project,
+    _pixels_to_character_width,
     _resolve_pick_list_label,
     add_item_to_pick_list,
     clear_pick_list_items,
     create_pick_list,
     delete_draft_pick_list,
+    export_pick_list_cost_excel,
     get_pick_list_cost_rows,
     remove_pick_list_item,
     serialize_pick_list,
@@ -496,13 +501,14 @@ class TestBuildPickListExcelPayload(ERPNextTestSuite):
         payload = _build_pick_list_excel_payload(name)
         data = payload["data"]
 
-        # row 1 (index 1) = Excel row 2, row 2 (index 2) = Excel row 3
-        self.assertEqual(data[1][0], f"{item_a.name}: {item_a.item_name}")
+        self.assertIsInstance(data[1][0], Url)
+        self.assertEqual(data[1][0].text, f"{item_a.name}: {item_a.item_name}")
         self.assertEqual(data[1][2], 2)
         self.assertEqual(data[1][4], 10)
         self.assertEqual(data[1][6], "=C2*E2")
 
-        self.assertEqual(data[2][0], f"{item_b.name}: {item_b.item_name}")
+        self.assertIsInstance(data[2][0], Url)
+        self.assertEqual(data[2][0].text, f"{item_b.name}: {item_b.item_name}")
         self.assertEqual(data[2][2], 3)
         self.assertEqual(data[2][4], 20)
         self.assertEqual(data[2][6], "=C3*E3")
@@ -519,13 +525,42 @@ class TestBuildPickListExcelPayload(ERPNextTestSuite):
         self.assertEqual(data[1], [None] * 7)
         self.assertEqual(data[2], [None] * 7)
 
-    def test_column_widths_and_styles(self):
+    def test_price_and_total_column_widths_are_fixed(self):
         name = create_pick_list(COMPANY)
         payload = _build_pick_list_excel_payload(name)
-        self.assertEqual(payload["column_widths"], [57.86, None, 10.14, None, 9.14, None, 9.57])
+        widths = payload["column_widths"]
+        self.assertEqual(widths[4], 11)
+        self.assertEqual(widths[6], 12)
+        self.assertEqual(widths[2], 10.14)
+        self.assertIsNone(widths[1])
+        self.assertIsNone(widths[3])
+        self.assertIsNone(widths[5])
         self.assertIn("column_styles", payload["styles"])
         self.assertEqual(payload["styles"]["column_styles"][4], [1])
         self.assertEqual(payload["styles"]["column_styles"][6], [1])
+
+    def test_inventory_part_width_floor_when_descriptions_are_short(self):
+        item = make_item()
+        _seed_stock(item.name, qty=5, rate=10)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item.name, WAREHOUSE, 2)
+        payload = _build_pick_list_excel_payload(name)
+        # short item name/code shouldn't push the width below the template floor
+        self.assertEqual(payload["column_widths"][0], 57.86)
+
+    def test_inventory_part_width_grows_for_long_descriptions(self):
+        long_name = "A" * 140
+        item = make_item(properties={"item_name": long_name})
+        _seed_stock(item.name, qty=5, rate=10)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item.name, WAREHOUSE, 2, item_name=long_name)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertGreater(payload["column_widths"][0], 57.86)
+
+    def test_inventory_part_width_floor_when_pick_list_empty(self):
+        name = create_pick_list(COMPANY)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertEqual(payload["column_widths"][0], 57.86)
 
     def test_filename_uses_resolved_label(self):
         name = create_pick_list(COMPANY)
@@ -539,3 +574,138 @@ class TestBuildPickListExcelPayload(ERPNextTestSuite):
         wr.insert(ignore_permissions=True)
         payload = _build_pick_list_excel_payload(name)
         self.assertEqual(payload["filename"], "ED01748L - Pick List")
+
+    def test_last_item_row_has_bottom_border_across_all_columns(self):
+        item_a = make_item()
+        item_b = make_item()
+        _seed_stock(item_a.name, qty=5, rate=10)
+        _seed_stock(item_b.name, qty=5, rate=20)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item_a.name, WAREHOUSE, 2)
+        add_item_to_pick_list(name, item_b.name, WAREHOUSE, 3)
+        payload = _build_pick_list_excel_payload(name)
+
+        border_style_id = payload["styles"]["styles"].index({"bottom": 1})
+        hyperlink_style_id = payload["styles"]["styles"].index(
+            {"font_color": "blue", "underline": 1, "align": "left", "valign": "vcenter"}
+        )
+        last_item_row_idx = 2  # header=0, item_a=1, item_b=2
+
+        cell_styles = payload["styles"]["cell_styles"]
+        self.assertEqual(cell_styles[(last_item_row_idx, 0)], [hyperlink_style_id, border_style_id])
+        for col_idx in range(1, 7):
+            self.assertEqual(cell_styles[(last_item_row_idx, col_idx)], [border_style_id])
+
+        # first item row: hyperlink style present, but no border
+        self.assertEqual(cell_styles[(1, 0)], [hyperlink_style_id])
+        self.assertNotIn((1, 1), cell_styles)
+
+    def test_empty_pick_list_has_no_border_cell_styles(self):
+        name = create_pick_list(COMPANY)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertEqual(payload["styles"]["cell_styles"], {})
+
+    def test_last_item_row_idx_present_when_rows_exist(self):
+        item = make_item()
+        _seed_stock(item.name, qty=5, rate=10)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item.name, WAREHOUSE, 2)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertEqual(payload["last_item_row_idx"], 1)
+
+    def test_last_item_row_idx_none_when_empty(self):
+        name = create_pick_list(COMPANY)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertIsNone(payload["last_item_row_idx"])
+
+
+class TestExportPickListCostExcel(ERPNextTestSuite):
+    """export_pick_list_cost_excel"""
+
+    def test_autofilter_scoped_to_header_and_item_rows(self):
+        import openpyxl
+        from io import BytesIO
+
+        item_a = make_item()
+        item_b = make_item()
+        _seed_stock(item_a.name, qty=5, rate=10)
+        _seed_stock(item_b.name, qty=5, rate=20)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item_a.name, WAREHOUSE, 2)
+        add_item_to_pick_list(name, item_b.name, WAREHOUSE, 3)
+
+        export_pick_list_cost_excel(name)
+        content = frappe.response["filecontent"]
+
+        wb = openpyxl.load_workbook(BytesIO(content))
+        ws = wb.active
+        self.assertEqual(ws.auto_filter.ref, "A1:G3")
+
+    def test_no_autofilter_when_pick_list_empty(self):
+        import openpyxl
+        from io import BytesIO
+
+        name = create_pick_list(COMPANY)
+        export_pick_list_cost_excel(name)
+        content = frappe.response["filecontent"]
+
+        wb = openpyxl.load_workbook(BytesIO(content))
+        ws = wb.active
+        self.assertEqual(ws.auto_filter.ref, None)
+
+    def test_column_widths_survive_column_level_styles(self):
+        import openpyxl
+        from io import BytesIO
+
+        item = make_item()
+        _seed_stock(item.name, qty=5, rate=10)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item.name, WAREHOUSE, 2)
+
+        export_pick_list_cost_excel(name)
+        content = frappe.response["filecontent"]
+
+        wb = openpyxl.load_workbook(BytesIO(content))
+        ws = wb.active
+        # widths round-trip through xlsxwriter's internal unit conversion
+        # with minor float drift, so assert comfortably above the
+        # xlsxwriter-internal-default (~9.14) that this bug would produce,
+        # not exact equality
+        self.assertGreater(ws.column_dimensions["A"].width, 50)
+        self.assertGreater(ws.column_dimensions["E"].width, 10)
+        self.assertGreater(ws.column_dimensions["G"].width, 11)
+        # alignment/format on those columns should also still be correct
+        self.assertEqual(ws["A2"].alignment.horizontal, "left")
+
+
+class TestBuildItemLink(ERPNextTestSuite):
+    """_build_item_link"""
+
+    def test_builds_url_with_display_text_and_desk_path(self):
+        link = _build_item_link("SCX4IT1918", "Wire Locker 94-Inch")
+        self.assertIsInstance(link, Url)
+        self.assertEqual(link.text, "SCX4IT1918: Wire Locker 94-Inch")
+        self.assertTrue(link._link.endswith("/desk/item/SCX4IT1918"))
+        self.assertTrue(link._link.startswith("http"))
+
+    def test_sanitizes_illegal_characters_in_display_text(self):
+        link = _build_item_link("ITM001", "Bad\x00Name")
+        self.assertEqual(link.text, "ITM001: BadName")
+
+    def test_url_encodes_item_code_with_special_characters(self):
+        link = _build_item_link("ITM 001/A", "Widget")
+        self.assertIn("ITM%20001/A", link._link)
+
+
+class TestAutofitColumnWidth(ERPNextTestSuite):
+    """_autofit_column_width / _pixels_to_character_width"""
+
+    def test_never_narrower_than_minimum(self):
+        self.assertEqual(_autofit_column_width(["a"], 50), 50)
+
+    def test_grows_beyond_minimum_for_long_text(self):
+        result = _autofit_column_width(["A" * 100], 10)
+        self.assertGreater(result, 10)
+
+    def test_empty_values_returns_minimum(self):
+        self.assertEqual(_autofit_column_width([], 20), 20)

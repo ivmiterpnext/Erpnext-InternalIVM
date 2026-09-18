@@ -41,3 +41,6 @@ ivm.warehouse.patches.drop_wr_created_by_fields
 ivm.patches.remove_deployment_level_equipment_type
 ivm.patches.drop_customer_and_crm_deal_master_client_columns
 ivm.patches.remove_dead_client_scripts
+ivm.patches.drop_department_leave_block_list_column
+ivm.patches.drop_orphaned_legacy_hr_columns
+ivm.patches.drop_orphaned_designation_skills_field

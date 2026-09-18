@@ -1055,22 +1055,22 @@
   "row_name": null,
   "value": "0"
  },
- {
-  "default_value": null,
-  "doc_type": "Customer",
-  "docstatus": 0,
-  "doctype": "Property Setter",
-  "doctype_or_field": "DocField",
-  "field_name": "customer_group",
-  "is_system_generated": 0,
-  "modified": "2026-08-19 09:35:00.614076",
-  "module": null,
-  "name": "Customer-customer_group-default",
-  "property": "default",
-  "property_type": "Text",
-  "row_name": null,
-  "value": "All Customer Groups"
- },
+  {
+   "default_value": null,
+   "doc_type": "Customer",
+   "docstatus": 0,
+   "doctype": "Property Setter",
+   "doctype_or_field": "DocField",
+   "field_name": "customer_group",
+   "is_system_generated": 0,
+   "modified": "2026-08-19 09:35:00.614076",
+   "module": null,
+   "name": "Customer-customer_group-default",
+   "property": "default",
+   "property_type": "Text",
+   "row_name": null,
+   "value": "Individual"
+  },
  {
   "default_value": null,
   "doc_type": "Customer",
