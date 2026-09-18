@@ -19,8 +19,9 @@
   "due_date",
   "notes",
   "machine_details_section",
-  "machine_details_html",
-  "device_numbers_section",
+   "machine_details_html",
+   "machine_details_print_html",
+   "device_numbers_section",
   "serial_number",
   "prose_number",
   "column_break_sijq",
@@ -704,13 +705,19 @@
    "fieldname": "machine_details_section",
    "fieldtype": "Section Break"
   },
-  {
-   "depends_on": "eval:doc.schema_version >= 2",
-   "fieldname": "machine_details_html",
-   "fieldtype": "HTML",
-   "label": "Machine Details",
-   "options": "{{ render_machine_details_html(doc) }}"
-  },
+   {
+    "depends_on": "eval:doc.schema_version >= 2",
+    "fieldname": "machine_details_html",
+    "fieldtype": "HTML",
+    "label": "Machine Details",
+    "options": ""
+   },
+   {
+    "fieldname": "machine_details_print_html",
+    "fieldtype": "HTML",
+    "hidden": 1,
+    "options": "{{ render_machine_details_html(doc) }}"
+   },
   {
    "collapsible": 1,
    "fieldname": "hidden_fields_section",
@@ -1130,13 +1137,13 @@
   },
   {
    "fieldname": "serial_number",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Serial Number"
   },
   {
    "fieldname": "prose_number",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "PROSE Number"
   },

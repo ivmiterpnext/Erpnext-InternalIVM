@@ -417,13 +417,12 @@ def send_equipment_info_to_ics(warehouse_request):
 
 def render_machine_details_html(doc):
 	"""Jinja helper (registered in hooks.py) that renders the Warehouse Request's
-	linked machine-detail child row as a read-only HTML block for print/PDF output,
-	reusing the same row/label/value markup Frappe's own standard print format uses
-	for every other field on the document (see
-	frappe/templates/print_formats/standard_macros.html::render_field_with_label),
-	so this block is visually indistinguishable from the rest of the printed page.
-	Mirrors the field-driven approach used by ivm.EmbeddedForm on the desk form,
-	but server-side, since machine_details_html itself stores no value.
+	linked machine-detail child row as a read-only HTML block for print/PDF output.
+
+	Mirrors the section/column layout defined in the child doctype's meta, producing
+	the same Bootstrap grid markup that Frappe's standard print format
+	(standard.html + standard_macros.html) uses for every other section on the page,
+	so this block is visually indistinguishable from the rest of the printed document.
 	"""
 	doctype = doc.get("source_detail_doctype")
 	name = doc.get("source_detail_row")
@@ -433,50 +432,133 @@ def render_machine_details_html(doc):
 	meta = frappe.get_meta(doctype)
 	row = frappe.get_doc(doctype, name)
 
-	rows_html = []
-	for df in meta.fields:
-		if df.fieldtype in ("Section Break", "Column Break", "Tab Break"):
-			continue
-		if df.hidden:
-			continue
-
-		value = row.get(df.fieldname)
-
-		if df.fieldname == "bins_data":
-			bin_html = _render_bins_table(value)
-			if bin_html:
-				rows_html.append(_render_field_row(df.label or "Bins", bin_html, full_width=True))
-			continue
-
-		if df.fieldtype == "Check":
-			if not value:
-				continue
-			display_value = (
-				"<svg viewBox='0 0 16 16' fill='transparent' stroke='#1F272E' stroke-width='2' "
-				"xmlns='http://www.w3.org/2000/svg' style='width: 12px; height: 12px; margin-top: 5px;'>"
-				"<path d='M2 9.66667L5.33333 13L14 3' stroke-miterlimit='10' "
-				"stroke-linecap='round' stroke-linejoin='round'></path></svg>"
-			)
-		elif value in (None, ""):
-			continue
-		else:
-			display_value = frappe.utils.escape_html(str(value))
-
-		rows_html.append(_render_field_row(df.label or df.fieldname, display_value))
-
-	if not rows_html:
+	sections = _build_print_sections(meta, row)
+	if not sections:
 		return ""
 
-	return "".join(rows_html)
+	return "".join(_render_print_section(s) for s in sections)
 
 
-def _render_field_row(label, value_html, full_width=False):
+def _build_print_sections(meta, row):
+	"""Walk the child doctype's meta.fields and group renderable fields into
+	a list of sections, each containing a list of columns, each containing a
+	list of (label, value_html, full_width) tuples.
+	"""
+	sections = []
+	current_section = {"label": "", "columns": [[]], "hidden": False}
+
+	for df in meta.fields:
+		if df.fieldtype in ("Tab Break", "Section Break"):
+			if _section_has_data(current_section):
+				sections.append(current_section)
+			current_section = {
+				"label": df.label or "",
+				"columns": [[]],
+				"hidden": bool(df.hidden),
+			}
+			continue
+
+		if df.fieldtype == "Column Break":
+			current_section["columns"].append([])
+			continue
+
+		if current_section["hidden"] or df.hidden:
+			continue
+
+		field_html = _render_field_for_print(df, row)
+		if field_html is not None:
+			current_section["columns"][-1].append(field_html)
+
+	if _section_has_data(current_section):
+		sections.append(current_section)
+
+	return sections
+
+
+def _section_has_data(section):
+	if section["hidden"]:
+		return False
+	return any(col for col in section["columns"])
+
+
+def _render_field_for_print(df, row):
+	"""Render a single field as a (label, value_html, full_width) tuple,
+	or return None if the field should be skipped.
+	"""
+	value = row.get(df.fieldname)
+
+	if df.fieldname == "bins_data":
+		bin_html = _render_bins_table(value)
+		if not bin_html:
+			return None
+		return (df.label or "Bins", bin_html, True)
+
+	if df.fieldtype == "Check":
+		if not value:
+			return None
+		display_value = (
+			"<svg viewBox='0 0 16 16' fill='transparent' stroke='#1F272E' stroke-width='2' "
+			"xmlns='http://www.w3.org/2000/svg' style='width: 12px; height: 12px; margin-top: 5px;'>"
+			"<path d='M2 9.66667L5.33333 13L14 3' stroke-miterlimit='10' "
+			"stroke-linecap='round' stroke-linejoin='round'></path></svg>"
+		)
+		return (df.label or df.fieldname, display_value, False)
+
+	if value in (None, ""):
+		return None
+
+	display_value = frappe.utils.escape_html(str(value))
+	return (df.label or df.fieldname, display_value, False)
+
+
+def _render_print_section(section):
+	"""Render a section dict as HTML matching standard.html's markup:
+	  <div class="row section-break">
+	    <div class="col-xs-{N} column-break">
+	      ...fields...
+	    </div>
+	  </div>
+	"""
+	non_empty_columns = [col for col in section["columns"] if col]
+	if not non_empty_columns:
+		return ""
+
+	no_of_cols = len(non_empty_columns)
+	col_width = 12 // no_of_cols
+
+	columns_html = []
+	for col_fields in non_empty_columns:
+		fields_html = "".join(
+			_render_field_row(label, value_html, full_width, no_of_cols)
+			for label, value_html, full_width in col_fields
+		)
+		columns_html.append(
+			f"<div class='col-xs-{col_width} column-break'>{fields_html}</div>"
+		)
+
+	return f"<div class='row section-break'>{''.join(columns_html)}</div>"
+
+
+def _render_field_row(label, value_html, full_width=False, no_of_cols=2):
+	"""Render a single field row matching standard_macros.html::render_field_with_label.
+
+	When no_of_cols >= 3, uses full-width (col-xs-12) for both label and value,
+	matching Frappe's own behavior for 3+ column sections.
+	"""
 	escaped_label = frappe.utils.escape_html(label)
 
 	if full_width:
 		return (
 			"<div class='row data-field'>"
 			f"<div class='col-xs-12'><label>{escaped_label}</label>{value_html}</div>"
+			"</div>"
+		)
+
+	if no_of_cols >= 3:
+		return (
+			"<div class='row data-field'>"
+			f"<div class='col-xs-12'><label>{escaped_label}: </label></div>"
+			f"<div class='col-xs-12 value'>{value_html}</div>"
 			"</div>"
 		)
 

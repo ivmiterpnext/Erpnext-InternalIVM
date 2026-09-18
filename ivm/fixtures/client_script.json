@@ -10,7 +10,6 @@
   "script": "frappe.ui.form.on('Warehouse Request', {\n\ton_load(frm) {\n\tfrm.doc.warehouse_request_name = frm.doc.name;\n\t//refresh('warehouse_request_name');\n\t}\n});",
   "view": "Form"
  },
-
  {
   "docstatus": 0,
   "doctype": "Client Script",
@@ -88,7 +87,6 @@
   "script": "frappe.ui.form.on('Opportunity', {\r\n    refresh(frm) {\r\n        var df = frappe.meta.get_docfield(\"Deployment Location\",\"opprotunity\", frm.doc.name);\r\n        df.get_route_options_for_new_doc = function (field) {\r\n            return {\r\n                \"opprotunity\": field.doc.name\r\n            }\r\n        }\r\n    }\r\n})",
   "view": "Form"
  },
-
  {
   "docstatus": 0,
   "doctype": "Client Script",
