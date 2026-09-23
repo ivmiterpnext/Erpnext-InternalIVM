@@ -1,19 +1,21 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from ivm.machine_hardware_management.utils.base_virtual_doctype import BaseVirtualDoctype
+from typing import ClassVar
+
 from ivm.integrations.icorp.utils import convert_fields_to_bool
-from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict
 from ivm.machine_hardware_management.doctype.machine_link.machine_link import get_machine_name_from_machine_id
+from ivm.machine_hardware_management.utils.base_virtual_doctype import BaseVirtualDoctype
+from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict
 
 
 class MachineAddress(BaseVirtualDoctype):
 	API_TYPE = "icorp"
-	BOOL_FIELDS = ["is_active"]
-	FIELD_MAP = {"name": "id"}
+	BOOL_FIELDS: ClassVar[list[str]] = ["is_active"]
+	FIELD_MAP: ClassVar[dict[str, str]] = {"name": "id"}
 	endpoint = "SV/Machine/Address"
 
-# Get List Overrides
+	# Get List Overrides
 	@classmethod
 	def preprocess_filters(cls, filters, args=None):
 		new_filters = []
@@ -40,18 +42,21 @@ class MachineAddress(BaseVirtualDoctype):
 
 			# Build a readable address string for the address_id field
 			address_row["address_id"] = ", ".join(
-				filter(None, [
-					address_row.get("address_line_one"),
-					address_row.get("address_line_two"),
-					address_row.get("city"),
-					address_row.get("state_code"),
-					address_row.get("postal_code"),
-				])
+				filter(
+					None,
+					[
+						address_row.get("address_line_one"),
+						address_row.get("address_line_two"),
+						address_row.get("city"),
+						address_row.get("state_code"),
+						address_row.get("postal_code"),
+					],
+				)
 			)
 			items.append(address_row)
 		return items
 
-# Load From DB Overrides
+	# Load From DB Overrides
 	def process_load_response(self, data):
 		if data.get("id"):
 			self.name = str(data["id"])
@@ -59,7 +64,7 @@ class MachineAddress(BaseVirtualDoctype):
 			data["machine_name"] = get_machine_name_from_machine_id(data["machine_id"])
 		set_attrs_from_dict(self, data)
 
-# Insert Overrides
+	# Insert Overrides
 	def prepare_insert_data(self, data):
 		data = convert_fields_to_bool(data, self.BOOL_FIELDS)
 		if "machine_id" in data:
@@ -72,7 +77,7 @@ class MachineAddress(BaseVirtualDoctype):
 		print("Insert response data:", data)
 		set_attrs_from_dict(self, data)
 
-# Update Overrides
+	# Update Overrides
 	def prepare_update_data(self, data):
 		data = convert_fields_to_bool(data, self.BOOL_FIELDS)
 		if "machine_id" in data:
@@ -84,7 +89,7 @@ class MachineAddress(BaseVirtualDoctype):
 			data["address_id"] = str(data["id"])
 		set_attrs_from_dict(self, data)
 
-# Count Overrides
+	# Count Overrides
 	@classmethod
 	def extract_count(cls, response):
 		data = response.get("data", {}).get("address_machines", [])

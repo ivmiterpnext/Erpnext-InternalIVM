@@ -1,7 +1,8 @@
 """Generic sync utilities for HubSpot to Frappe document synchronization."""
 
 import functools
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import frappe
 from frappe.utils import flt
@@ -19,351 +20,354 @@ _BOOLEAN_ISH = _TRUTHY | _FALSY
 
 
 class ConcurrentCreateConflict(Exception):
-    """Raised when lookup_or_create hits a unique-constraint violation on insert
-    but the concurrently-committed row is not yet visible in this transaction's
-    snapshot (MariaDB REPEATABLE READ). Callers should re-enqueue their job so
-    the retry runs in a fresh transaction that can see the committed row.
-    """
+	"""Raised when lookup_or_create hits a unique-constraint violation on insert
+	but the concurrently-committed row is not yet visible in this transaction's
+	snapshot (MariaDB REPEATABLE READ). Callers should re-enqueue their job so
+	the retry runs in a fresh transaction that can see the committed row.
+	"""
 
-    def __init__(self, doctype: str, hubspot_id_field: str, hubspot_id: str) -> None:
-        self.doctype = doctype
-        self.hubspot_id_field = hubspot_id_field
-        self.hubspot_id = hubspot_id
-        super().__init__(
-            f"Concurrent create conflict on {doctype} ({hubspot_id_field}={hubspot_id})"
-        )
+	def __init__(self, doctype: str, hubspot_id_field: str, hubspot_id: str) -> None:
+		self.doctype = doctype
+		self.hubspot_id_field = hubspot_id_field
+		self.hubspot_id = hubspot_id
+		super().__init__(f"Concurrent create conflict on {doctype} ({hubspot_id_field}={hubspot_id})")
 
 
 def retry_via_reenqueue(
-    exceptions: tuple[type[Exception], ...] = (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted),
+	exceptions: tuple[type[Exception], ...] = (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted),
 ) -> Callable:
-    """Decorator for HubSpot webhook entry points (keyword-args only).
+	"""Decorator for HubSpot webhook entry points (keyword-args only).
 
-    On a matching exception, logs a warning and re-enqueues the same
-    function (by dotted ``module.func`` path) with the same kwargs on the
-    'long' queue, instead of propagating. Callers must invoke the wrapped
-    function with keyword arguments only, since the re-enqueue call
-    forwards **kwargs verbatim. The decorated function's own body must let
-    any exception in *exceptions* propagate (i.e. not swallow it in its
-    own except-Exception block) for this to work.
-    """
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            try:
-                return func(*args, **kwargs)
-            except exceptions as e:
-                frappe.logger(_LOG).warning(
-                    f"HubSpot: {type(e).__name__} in {func.__name__}({kwargs}) — re-enqueueing"
-                )
-                frappe.enqueue(
-                    f"{func.__module__}.{func.__name__}",
-                    queue="long",
-                    **kwargs,
-                )
-            return None
-        return wrapper
-    return decorator
+	On a matching exception, logs a warning and re-enqueues the same
+	function (by dotted ``module.func`` path) with the same kwargs on the
+	'long' queue, instead of propagating. Callers must invoke the wrapped
+	function with keyword arguments only, since the re-enqueue call
+	forwards **kwargs verbatim. The decorated function's own body must let
+	any exception in *exceptions* propagate (i.e. not swallow it in its
+	own except-Exception block) for this to work.
+	"""
+
+	def decorator(func: Callable) -> Callable:
+		@functools.wraps(func)
+		def wrapper(*args: Any, **kwargs: Any) -> Any:
+			try:
+				return func(*args, **kwargs)
+			except exceptions as e:
+				frappe.logger(_LOG).warning(
+					f"HubSpot: {type(e).__name__} in {func.__name__}({kwargs}) — re-enqueueing"
+				)
+				frappe.enqueue(
+					f"{func.__module__}.{func.__name__}",
+					queue="long",
+					**kwargs,
+				)
+			return None
+
+		return wrapper
+
+	return decorator
 
 
 def coerce_value(value: Any, df: Any = None) -> Any:
-    """Coerce a single HubSpot value based on the target Frappe field type."""
-    if df is None:
-        if isinstance(value, str) and value.lower() in _BOOLEAN_ISH:
-            return 1 if value.lower() in _TRUTHY else 0
-        return value
+	"""Coerce a single HubSpot value based on the target Frappe field type."""
+	if df is None:
+		if isinstance(value, str) and value.lower() in _BOOLEAN_ISH:
+			return 1 if value.lower() in _TRUTHY else 0
+		return value
 
-    str_lower = str(value).lower().strip()
-    is_boolean_ish = str_lower in _BOOLEAN_ISH
+	str_lower = str(value).lower().strip()
+	is_boolean_ish = str_lower in _BOOLEAN_ISH
 
-    if df.fieldtype == "Check":
-        if is_boolean_ish:
-            return 1 if str_lower in _TRUTHY else 0
-        return value
+	if df.fieldtype == "Check":
+		if is_boolean_ish:
+			return 1 if str_lower in _TRUTHY else 0
+		return value
 
-    if df.fieldtype == "Select":
-        options = [o for o in (df.options or "").split("\n") if o]
+	if df.fieldtype == "Select":
+		options = [o for o in (df.options or "").split("\n") if o]
 
-        if is_boolean_ish and "Yes" in options and "No" in options:
-            return "Yes" if str_lower in _TRUTHY else "No"
+		if is_boolean_ish and "Yes" in options and "No" in options:
+			return "Yes" if str_lower in _TRUTHY else "No"
 
-        if str(value) in options:
-            return str(value)
+		if str(value) in options:
+			return str(value)
 
-        if is_boolean_ish:
-            return ""
+		if is_boolean_ish:
+			return ""
 
-        frappe.logger(_LOG).warning(
-            f"HubSpot value '{value}' is not a valid option for "
-            f"Select field '{df.fieldname}' (options: {options}) — clearing"
-        )
-        return ""
+		frappe.logger(_LOG).warning(
+			f"HubSpot value '{value}' is not a valid option for "
+			f"Select field '{df.fieldname}' (options: {options}) — clearing"
+		)
+		return ""
 
-    return value
+	return value
 
 
 def apply_field_map(
-    doc: Any,
-    properties: dict[str, Any],
-    field_map: dict[str, str],
-    value_transforms: dict[str, ValueTransform] | None = None,
+	doc: Any,
+	properties: dict[str, Any],
+	field_map: dict[str, str],
+	value_transforms: dict[str, ValueTransform] | None = None,
 ) -> None:
-    """Map HubSpot properties onto a Frappe doc using *field_map*.
+	"""Map HubSpot properties onto a Frappe doc using *field_map*.
 
-    Custom transforms take precedence. The generic path skips empty values,
-    validates Link fields, and truncates ISO timestamps for Date fields.
-    """
-    transforms = value_transforms or {}
-    meta = frappe.get_meta(doc.doctype)
+	Custom transforms take precedence. The generic path skips empty values,
+	validates Link fields, and truncates ISO timestamps for Date fields.
+	"""
+	transforms = value_transforms or {}
+	meta = frappe.get_meta(doc.doctype)
 
-    for hs_key, frappe_field in field_map.items():
-        value = properties.get(hs_key)
+	for hs_key, frappe_field in field_map.items():
+		value = properties.get(hs_key)
 
-        if frappe_field in transforms:
-            transforms[frappe_field](doc, value)
-            continue
+		if frappe_field in transforms:
+			transforms[frappe_field](doc, value)
+			continue
 
-        if value is None or value == "":
-            continue
+		if value is None or value == "":
+			continue
 
-        df = meta.get_field(frappe_field)
+		df = meta.get_field(frappe_field)
 
-        if df and df.fieldtype == "Link" and df.options:
-            if not frappe.db.exists(df.options, value):
-                frappe.logger(_LOG).warning(
-                    f"{df.options} '{value}' (from {hs_key}) not found — skipping {frappe_field}"
-                )
-                continue
+		if df and df.fieldtype == "Link" and df.options:
+			if not frappe.db.exists(df.options, value):
+				frappe.logger(_LOG).warning(
+					f"{df.options} '{value}' (from {hs_key}) not found — skipping {frappe_field}"
+				)
+				continue
 
-        if df and df.fieldtype == "Date" and isinstance(value, str) and "T" in value:
-            value = value.split("T")[0]
+		if df and df.fieldtype == "Date" and isinstance(value, str) and "T" in value:
+			value = value.split("T")[0]
 
-        doc.set(frappe_field, value)
+		doc.set(frappe_field, value)
 
 
 def save_doc(
-    doc: Any,
-    label: str = "hubspot",
-    mutate: Callable[[Any], None] | None = None,
-    max_retries: int = 3,
+	doc: Any,
+	label: str = "hubspot",
+	mutate: Callable[[Any], None] | None = None,
+	max_retries: int = 3,
 ) -> None:
-    """Save a Frappe doc with ignore_permissions, skip link validation, and log the result.
+	"""Save a Frappe doc with ignore_permissions, skip link validation, and log the result.
 
-    On ``TimestampMismatchError`` (concurrent modification), reloads the
-    doc and retries up to *max_retries* times. If *mutate* is provided,
-    it is called with the freshly-reloaded doc after each reload to
-    re-apply any field changes that were made before the failed save
-    (since ``reload()`` discards in-memory mutations).
-    """
-    doc.flags.ignore_links = True
-    attempt = 0
-    while True:
-        try:
-            doc.save(ignore_permissions=True)
-            break
-        except frappe.exceptions.TimestampMismatchError:
-            attempt += 1
-            if attempt > max_retries:
-                raise
-            frappe.logger(_LOG).warning(
-                f"{doc.doctype} {doc.name} modified concurrently — "
-                f"reloading and retrying save (attempt {attempt}/{max_retries})"
-            )
-            doc.reload()
-            if mutate:
-                mutate(doc)
+	On ``TimestampMismatchError`` (concurrent modification), reloads the
+	doc and retries up to *max_retries* times. If *mutate* is provided,
+	it is called with the freshly-reloaded doc after each reload to
+	re-apply any field changes that were made before the failed save
+	(since ``reload()`` discards in-memory mutations).
+	"""
+	doc.flags.ignore_links = True
+	attempt = 0
+	while True:
+		try:
+			doc.save(ignore_permissions=True)
+			break
+		except frappe.exceptions.TimestampMismatchError:
+			attempt += 1
+			if attempt > max_retries:
+				raise
+			frappe.logger(_LOG).warning(
+				f"{doc.doctype} {doc.name} modified concurrently — "
+				f"reloading and retrying save (attempt {attempt}/{max_retries})"
+			)
+			doc.reload()
+			if mutate:
+				mutate(doc)
 
-    frappe.logger(_LOG).info(
-        f"Synced {label} fields on {doc.doctype} {doc.name}"
-    )
+	frappe.logger(_LOG).info(f"Synced {label} fields on {doc.doctype} {doc.name}")
 
 
 def insert_with_retry(doc: Any, max_retries: int = 3) -> None:
-    """Insert doc, retrying on TimestampMismatchError caused by an unrelated
-    shared document (e.g. crm's lost-reason sidepanel layout singleton) being
-    saved concurrently inside validate(). Since db_insert() only runs after
-    validate() succeeds, a TimestampMismatchError here means nothing was
-    persisted yet — safe to retry the same doc object as-is.
-    """
-    attempt = 0
-    while True:
-        try:
-            doc.insert(ignore_permissions=True)
-            return
-        except frappe.exceptions.TimestampMismatchError:
-            attempt += 1
-            if attempt > max_retries:
-                raise
-            frappe.logger(_LOG).warning(
-                f"{doc.doctype} insert hit a concurrent modification on an "
-                f"unrelated document during validate — retrying "
-                f"(attempt {attempt}/{max_retries})"
-            )
+	"""Insert doc, retrying on TimestampMismatchError caused by an unrelated
+	shared document (e.g. crm's lost-reason sidepanel layout singleton) being
+	saved concurrently inside validate(). Since db_insert() only runs after
+	validate() succeeds, a TimestampMismatchError here means nothing was
+	persisted yet — safe to retry the same doc object as-is.
+	"""
+	attempt = 0
+	while True:
+		try:
+			doc.insert(ignore_permissions=True)
+			return
+		except frappe.exceptions.TimestampMismatchError:
+			attempt += 1
+			if attempt > max_retries:
+				raise
+			frappe.logger(_LOG).warning(
+				f"{doc.doctype} insert hit a concurrent modification on an "
+				f"unrelated document during validate — retrying "
+				f"(attempt {attempt}/{max_retries})"
+			)
 
 
 def lookup_or_create(
-    doctype: str,
-    hubspot_id_field: str,
-    hubspot_id: str,
-    defaults: dict[str, Any] | None = None,
+	doctype: str,
+	hubspot_id_field: str,
+	hubspot_id: str,
+	defaults: dict[str, Any] | None = None,
 ) -> tuple[Any, bool]:
-    """Return ``(doc, is_new)`` for the given HubSpot ID, creating the doc if it doesn't exist."""
-    hubspot_id = str(hubspot_id)
+	"""Return ``(doc, is_new)`` for the given HubSpot ID, creating the doc if it doesn't exist."""
+	hubspot_id = str(hubspot_id)
 
-    existing_name = frappe.db.get_value(
-        doctype, {hubspot_id_field: hubspot_id}, "name",
-    )
+	existing_name = frappe.db.get_value(
+		doctype,
+		{hubspot_id_field: hubspot_id},
+		"name",
+	)
 
-    if existing_name:
-        return frappe.get_doc(doctype, existing_name), False
+	if existing_name:
+		return frappe.get_doc(doctype, existing_name), False
 
-    doc = frappe.new_doc(doctype)
-    doc.set(hubspot_id_field, hubspot_id)
-    for key, val in (defaults or {}).items():
-        doc.set(key, val)
+	doc = frappe.new_doc(doctype)
+	doc.set(hubspot_id_field, hubspot_id)
+	for key, val in (defaults or {}).items():
+		doc.set(key, val)
 
-    frappe.db.savepoint("before_lookup_or_create_insert")
-    try:
-        insert_with_retry(doc)
-        frappe.logger(_LOG).info(
-            f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})"
-        )
-        return doc, True
-    except (frappe.DuplicateEntryError, frappe.UniqueValidationError) as e:
-        frappe.db.rollback(save_point="before_lookup_or_create_insert")
-        frappe.logger(_LOG).warning(
-            f"HubSpot: duplicate on insert for {doctype} '{doc.name}' — concurrent write, fetching existing"
-        )
-        existing_name = frappe.db.get_value(
-            doctype, {hubspot_id_field: hubspot_id}, "name",
-        )
-        if existing_name:
-            return frappe.get_doc(doctype, existing_name), False
+	frappe.db.savepoint("before_lookup_or_create_insert")
+	try:
+		insert_with_retry(doc)
+		frappe.logger(_LOG).info(f"Created {doctype} {doc.name} (HubSpot ID {hubspot_id})")
+		return doc, True
+	except (frappe.DuplicateEntryError, frappe.UniqueValidationError) as e:
+		frappe.db.rollback(save_point="before_lookup_or_create_insert")
+		frappe.logger(_LOG).warning(
+			f"HubSpot: duplicate on insert for {doctype} '{doc.name}' — concurrent write, fetching existing"
+		)
+		existing_name = frappe.db.get_value(
+			doctype,
+			{hubspot_id_field: hubspot_id},
+			"name",
+		)
+		if existing_name:
+			return frappe.get_doc(doctype, existing_name), False
 
-        # Concurrent committer's row may not be visible yet under this
-        # transaction's REPEATABLE READ snapshot. Force a fresh snapshot
-        # and check once more before giving up.
-        frappe.db.commit()
-        existing_name = frappe.db.get_value(
-            doctype, {hubspot_id_field: hubspot_id}, "name",
-        )
-        if existing_name:
-            return frappe.get_doc(doctype, existing_name), False
+		# Concurrent committer's row may not be visible yet under this
+		# transaction's REPEATABLE READ snapshot. Force a fresh snapshot
+		# and check once more before giving up.
+		frappe.db.commit()
+		existing_name = frappe.db.get_value(
+			doctype,
+			{hubspot_id_field: hubspot_id},
+			"name",
+		)
+		if existing_name:
+			return frappe.get_doc(doctype, existing_name), False
 
-        raise ConcurrentCreateConflict(doctype, hubspot_id_field, hubspot_id) from e
-    except frappe.QueryDeadlockError as e:
-        frappe.db.rollback()
-        frappe.logger(_LOG).warning(
-            f"HubSpot: deadlock on insert for {doctype} (hubspot_id={hubspot_id}) — signaling re-enqueue"
-        )
-        raise ConcurrentCreateConflict(doctype, hubspot_id_field, hubspot_id) from e
+		raise ConcurrentCreateConflict(doctype, hubspot_id_field, hubspot_id) from e
+	except frappe.QueryDeadlockError as e:
+		frappe.db.rollback()
+		frappe.logger(_LOG).warning(
+			f"HubSpot: deadlock on insert for {doctype} (hubspot_id={hubspot_id}) — signaling re-enqueue"
+		)
+		raise ConcurrentCreateConflict(doctype, hubspot_id_field, hubspot_id) from e
 
 
 def upsert_address(
-    address_line1: str,
-    city: str = "",
-    state: str = "",
-    country: str = "",
-    pincode: str = "",
-    link_doctype: str = "",
-    link_name: str = "",
+	address_line1: str,
+	city: str = "",
+	state: str = "",
+	country: str = "",
+	pincode: str = "",
+	link_doctype: str = "",
+	link_name: str = "",
 ) -> str | None:
-    """Create or update an Address linked to *link_doctype* / *link_name*.
+	"""Create or update an Address linked to *link_doctype* / *link_name*.
 
-    Returns the Address ``name``, or ``None`` if *address_line1* is empty.
-    """
-    address_line1 = (address_line1 or "").strip()
-    if not address_line1:
-        return None
+	Returns the Address ``name``, or ``None`` if *address_line1* is empty.
+	"""
+	address_line1 = (address_line1 or "").strip()
+	if not address_line1:
+		return None
 
-    city, state, country, pincode = (
-        (v or "").strip() for v in (city, state, country, pincode)
-    )
+	city, state, country, pincode = ((v or "").strip() for v in (city, state, country, pincode))
 
-    if country and not frappe.db.exists("Country", country):
-        frappe.logger(_LOG).warning(
-            f"Country '{country}' not found — skipping address for {link_doctype} {link_name}"
-        )
-        return None
+	if country and not frappe.db.exists("Country", country):
+		frappe.logger(_LOG).warning(
+			f"Country '{country}' not found — skipping address for {link_doctype} {link_name}"
+		)
+		return None
 
-    existing_address = _find_linked_address(link_doctype, link_name)
+	existing_address = _find_linked_address(link_doctype, link_name)
 
-    if existing_address:
-        doc = frappe.get_doc("Address", existing_address)
-        doc.address_line1 = address_line1
-        for field, value in {"city": city, "state": state, "country": country, "pincode": pincode}.items():
-            if value:
-                doc.set(field, value)
-        doc.save(ignore_permissions=True)
-        frappe.logger(_LOG).info(f"Updated Address {doc.name} for {link_doctype} {link_name}")
-        return doc.name
+	if existing_address:
+		doc = frappe.get_doc("Address", existing_address)
+		doc.address_line1 = address_line1
+		for field, value in {"city": city, "state": state, "country": country, "pincode": pincode}.items():
+			if value:
+				doc.set(field, value)
+		doc.save(ignore_permissions=True)
+		frappe.logger(_LOG).info(f"Updated Address {doc.name} for {link_doctype} {link_name}")
+		return doc.name
 
-    doc = frappe.get_doc({
-        "doctype": "Address",
-        "address_title": link_name,
-        "address_type": "Office",
-        "address_line1": address_line1,
-        "city": city or "Unknown",
-        "state": state,
-        "country": country or "United States",
-        "pincode": pincode,
-        "links": [
-            {"link_doctype": link_doctype, "link_name": link_name},
-        ],
-    })
-    doc.insert(ignore_permissions=True)
-    frappe.logger(_LOG).info(f"Created Address {doc.name} for {link_doctype} {link_name}")
+	doc = frappe.get_doc(
+		{
+			"doctype": "Address",
+			"address_title": link_name,
+			"address_type": "Office",
+			"address_line1": address_line1,
+			"city": city or "Unknown",
+			"state": state,
+			"country": country or "United States",
+			"pincode": pincode,
+			"links": [
+				{"link_doctype": link_doctype, "link_name": link_name},
+			],
+		}
+	)
+	doc.insert(ignore_permissions=True)
+	frappe.logger(_LOG).info(f"Created Address {doc.name} for {link_doctype} {link_name}")
 
-    parent_meta = frappe.get_meta(link_doctype)
-    if parent_meta.get_field("address"):
-        frappe.db.set_value(link_doctype, link_name, "address", doc.name)
+	parent_meta = frappe.get_meta(link_doctype)
+	if parent_meta.get_field("address"):
+		frappe.db.set_value(link_doctype, link_name, "address", doc.name)
 
-    return doc.name
+	return doc.name
 
 
 def _find_linked_address(link_doctype: str, link_name: str) -> str | None:
-    """Find an existing Address linked to the given document via Dynamic Link."""
-    if not link_doctype or not link_name:
-        return None
-    result = frappe.db.get_value(
-        "Dynamic Link",
-        {"link_doctype": link_doctype, "link_name": link_name, "parenttype": "Address"},
-        "parent",
-    )
-    return result
+	"""Find an existing Address linked to the given document via Dynamic Link."""
+	if not link_doctype or not link_name:
+		return None
+	result = frappe.db.get_value(
+		"Dynamic Link",
+		{"link_doctype": link_doctype, "link_name": link_name, "parenttype": "Address"},
+		"parent",
+	)
+	return result
 
 
 def bucket_employee_count(count_str: str | None) -> str:
-    """Convert a raw employee count to a Frappe select range."""
-    if not count_str:
-        return ""
-    try:
-        count = int(flt(count_str))
-    except (ValueError, TypeError):
-        return ""
-    if count <= 0:
-        return ""
-    if count <= 10:
-        return "1-10"
-    if count <= 50:
-        return "11-50"
-    if count <= 200:
-        return "51-200"
-    if count <= 500:
-        return "201-500"
-    if count <= 1000:
-        return "501-1000"
-    return "1000+"
+	"""Convert a raw employee count to a Frappe select range."""
+	if not count_str:
+		return ""
+	try:
+		count = int(flt(count_str))
+	except (ValueError, TypeError):
+		return ""
+	if count <= 0:
+		return ""
+	if count <= 10:
+		return "1-10"
+	if count <= 50:
+		return "11-50"
+	if count <= 200:
+		return "51-200"
+	if count <= 500:
+		return "201-500"
+	if count <= 1000:
+		return "501-1000"
+	return "1000+"
 
 
 def set_acting_user(hubspot_user_id: int | str | None = None) -> None:
-    """Set the Frappe session user to the HubSpot integration service account.
+	"""Set the Frappe session user to the HubSpot integration service account.
 
-    All HubSpot sync operations run as the dedicated ``HUBSPOT_USER`` service
-    account so they have consistent, sufficient permissions regardless of
-    which HubSpot user triggered the webhook. ``hubspot_user_id`` is accepted
-    for backwards compatibility but is no longer used to switch the acting
-    user — attribution (e.g. ``doc.owner``, ``doc.assigned_to``) should be
-    set explicitly by callers instead of relying on the session user.
-    """
-    frappe.set_user(HUBSPOT_USER)
+	All HubSpot sync operations run as the dedicated ``HUBSPOT_USER`` service
+	account so they have consistent, sufficient permissions regardless of
+	which HubSpot user triggered the webhook. ``hubspot_user_id`` is accepted
+	for backwards compatibility but is no longer used to switch the acting
+	user — attribution (e.g. ``doc.owner``, ``doc.assigned_to``) should be
+	set explicitly by callers instead of relying on the session user.
+	"""
+	frappe.set_user(HUBSPOT_USER)

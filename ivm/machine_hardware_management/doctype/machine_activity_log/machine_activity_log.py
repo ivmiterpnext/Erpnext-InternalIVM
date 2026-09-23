@@ -1,16 +1,22 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
-from ivm.machine_hardware_management.doctype.machine_link.machine_link import get_machine_name_from_machine_id, get_machine_id_from_machine_name
-from ivm.machine_hardware_management.utils.base_virtual_doctype import BaseVirtualDoctype
+from typing import ClassVar
+
 from ivm.integrations.icorp.utils import api_data_to_frappe_dict
+from ivm.machine_hardware_management.doctype.machine_link.machine_link import (
+	get_machine_id_from_machine_name,
+	get_machine_name_from_machine_id,
+)
+from ivm.machine_hardware_management.utils.base_virtual_doctype import BaseVirtualDoctype
+
 
 class MachineActivityLog(BaseVirtualDoctype):
 	API_TYPE = "icorp"
-	FIELD_MAP = { "name": "id", "machine_id": "machine_name" }
+	FIELD_MAP: ClassVar[dict[str, str]] = {"name": "id", "machine_id": "machine_name"}
 	endpoint = "SV/MachineActivityLog"
 
-# Get List Overrides
+	# Get List Overrides
 	@classmethod
 	def preprocess_filters(cls, filters):
 		new_filters = []
@@ -34,23 +40,20 @@ class MachineActivityLog(BaseVirtualDoctype):
 			if "id" in row:
 				row["name"] = str(row["id"])
 
-		return api_data_to_frappe_dict(
-			data,
-			cls.FIELD_MAP["name"]
-		)
+		return api_data_to_frappe_dict(data, cls.FIELD_MAP["name"])
 
-# Load from DB Overrides
+	# Load from DB Overrides
 	def load_from_db(self):
 		raise NotImplementedError
 
-# Insert Overrides
+	# Insert Overrides
 	def db_insert(self, *args, **kwargs):
 		raise NotImplementedError
 
-# Update Overrides
+	# Update Overrides
 	def db_update(self):
 		raise NotImplementedError
 
-# Delete Overrides
+	# Delete Overrides
 	def delete(self):
 		raise NotImplementedError

@@ -39,18 +39,18 @@ import frappe
 
 
 def execute():
-    names = frappe.get_all(
-        "Property Setter",
-        filters={"doc_type": "Deployment Location"},
-        pluck="name",
-    )
+	names = frappe.get_all(
+		"Property Setter",
+		filters={"doc_type": "Deployment Location"},
+		pluck="name",
+	)
 
-    if not names:
-        print("  No Deployment Location Property Setters found — nothing to do.")
-        return
+	if not names:
+		print("  No Deployment Location Property Setters found — nothing to do.")
+		return
 
-    for name in names:
-        frappe.delete_doc("Property Setter", name, ignore_permissions=True, force=True)
-        print(f"  Deleted Property Setter: {name}")
+	for name in names:
+		frappe.delete_doc("Property Setter", name, ignore_permissions=True, force=True)
+		print(f"  Deleted Property Setter: {name}")
 
-    frappe.clear_cache(doctype="Deployment Location")
+	frappe.clear_cache(doctype="Deployment Location")

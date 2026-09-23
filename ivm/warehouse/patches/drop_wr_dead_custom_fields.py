@@ -48,60 +48,61 @@ Safe to run repeatedly (idempotent).
 
 import frappe
 
-
 FIELDS_WITH_COLUMNS = [
-    "time_spent",
-    "new_request",
-    "bonus_timestamp",
-    "explanation",
-    "number_of_devices",
-    "time_due",
-    "use_existing_plan",
-    "owner_name",
+	"time_spent",
+	"new_request",
+	"bonus_timestamp",
+	"explanation",
+	"number_of_devices",
+	"time_due",
+	"use_existing_plan",
+	"owner_name",
 ]
 
 FIELDS_WITHOUT_COLUMNS = [
-    "section_break_csbpl",
+	"section_break_csbpl",
 ]
 
 
 def execute():
-    for fieldname in FIELDS_WITH_COLUMNS + FIELDS_WITHOUT_COLUMNS:
-        custom_field_name = f"Warehouse Request-{fieldname}"
-        if frappe.db.exists("Custom Field", custom_field_name):
-            frappe.delete_doc("Custom Field", custom_field_name, ignore_permissions=True, force=True)
-            print(f"  Deleted Custom Field: {custom_field_name}")
-        else:
-            print(f"  Custom Field {custom_field_name} does not exist — skipping")
+	for fieldname in FIELDS_WITH_COLUMNS + FIELDS_WITHOUT_COLUMNS:
+		custom_field_name = f"Warehouse Request-{fieldname}"
+		if frappe.db.exists("Custom Field", custom_field_name):
+			frappe.delete_doc("Custom Field", custom_field_name, ignore_permissions=True, force=True)
+			print(f"  Deleted Custom Field: {custom_field_name}")
+		else:
+			print(f"  Custom Field {custom_field_name} does not exist — skipping")
 
-    frappe.db.commit()
-    existing_columns = {
-        row[0] for row in frappe.db.sql("SHOW COLUMNS FROM `tabWarehouse Request`")
-    }
-    for fieldname in FIELDS_WITH_COLUMNS:
-        if fieldname in existing_columns:
-            frappe.db.sql_ddl(f"ALTER TABLE `tabWarehouse Request` DROP COLUMN `{fieldname}`")
-            print(f"  Dropped column tabWarehouse Request.{fieldname}")
-        else:
-            print(f"  tabWarehouse Request.{fieldname} does not exist — skipping")
+	frappe.db.commit()
+	existing_columns = {row[0] for row in frappe.db.sql("SHOW COLUMNS FROM `tabWarehouse Request`")}
+	for fieldname in FIELDS_WITH_COLUMNS:
+		if fieldname in existing_columns:
+			frappe.db.sql_ddl(f"ALTER TABLE `tabWarehouse Request` DROP COLUMN `{fieldname}`")
+			print(f"  Dropped column tabWarehouse Request.{fieldname}")
+		else:
+			print(f"  tabWarehouse Request.{fieldname} does not exist — skipping")
 
-    # Also clean up the "Open Warehouse Requests" / "Warehouse Requests
-    # Closed This Month" reports and dashboard charts that depended on
-    # owner_name — deleted from source (report/dashboard_chart module
-    # folders removed from the app); this drops the leftover DB records
-    # for sites that already migrated the standard docs in before removal.
-    for report_name in ["Open Warehouse Requests", "Warehouse Requests Closed This Month"]:
-        if frappe.db.exists("Report", report_name):
-            frappe.delete_doc("Report", report_name, ignore_permissions=True, force=True)
-            print(f"  Deleted Report: {report_name}")
-        else:
-            print(f"  Report {report_name} does not exist — skipping")
+	# Also clean up the "Open Warehouse Requests" / "Warehouse Requests
+	# Closed This Month" reports and dashboard charts that depended on
+	# owner_name — deleted from source (report/dashboard_chart module
+	# folders removed from the app); this drops the leftover DB records
+	# for sites that already migrated the standard docs in before removal.
+	for report_name in ["Open Warehouse Requests", "Warehouse Requests Closed This Month"]:
+		if frappe.db.exists("Report", report_name):
+			frappe.delete_doc("Report", report_name, ignore_permissions=True, force=True)
+			print(f"  Deleted Report: {report_name}")
+		else:
+			print(f"  Report {report_name} does not exist — skipping")
 
-    for chart_name in ["Open Warehouse Request", "Warehouse Requests Closed This Month", "Open Warehouse Requests"]:
-        if frappe.db.exists("Dashboard Chart", chart_name):
-            frappe.delete_doc("Dashboard Chart", chart_name, ignore_permissions=True, force=True)
-            print(f"  Deleted Dashboard Chart: {chart_name}")
-        else:
-            print(f"  Dashboard Chart {chart_name} does not exist — skipping")
+	for chart_name in [
+		"Open Warehouse Request",
+		"Warehouse Requests Closed This Month",
+		"Open Warehouse Requests",
+	]:
+		if frappe.db.exists("Dashboard Chart", chart_name):
+			frappe.delete_doc("Dashboard Chart", chart_name, ignore_permissions=True, force=True)
+			print(f"  Deleted Dashboard Chart: {chart_name}")
+		else:
+			print(f"  Dashboard Chart {chart_name} does not exist — skipping")
 
-    frappe.clear_cache(doctype="Warehouse Request")
+	frappe.clear_cache(doctype="Warehouse Request")

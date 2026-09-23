@@ -3,19 +3,22 @@
 
 import frappe
 from frappe.model.document import Document
+
 from ivm.machine_hardware_management.utils.sync_util import sync_doctype_from_api
+
 
 class MachineType(Document):
 	pass
 
+
 @frappe.whitelist()
 def sync():
-    frappe.only_for("System Manager")
-    return sync_doctype_from_api(
-        doctype="Machine Type",
-        api_type="icorp",
-        endpoint="SV/MachineType",
-        key_field="id",
-        api_fields=["id", "name", "is_active"],
-		field_map={"name": "machine_type_name"}
-    )
+	frappe.only_for("System Manager")
+	return sync_doctype_from_api(
+		doctype="Machine Type",
+		api_type="icorp",
+		endpoint="SV/MachineType",
+		key_field="id",
+		api_fields=["id", "name", "is_active"],
+		field_map={"name": "machine_type_name"},
+	)

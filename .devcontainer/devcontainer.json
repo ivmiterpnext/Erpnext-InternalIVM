@@ -10,9 +10,11 @@
         "grapecity.gc-excelviewer",
         "mtxr.sqltools",
         "mtxr.sqltools-driver-mysql",
-        "visualstudioexptteam.vscodeintellicode"
+        "visualstudioexptteam.vscodeintellicode",
+        "charliermarsh.ruff"
       ],
       "settings": {
+        "pylint.enabled": false,
         "terminal.integrated.profiles.linux": {
           "frappe bash": {
             "path": "/bin/bash"

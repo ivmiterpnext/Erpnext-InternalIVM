@@ -26,48 +26,46 @@ import frappe
 
 
 def execute():
-    existing = frappe.db.get_value(
-        "Custom Field",
-        {"dt": "Warehouse Request", "fieldname": "card_reader_type"},
-        "name",
-    )
-    if existing:
-        frappe.delete_doc("Custom Field", existing, ignore_permissions=True)
-        print(f"  Deleted duplicate Custom Field '{existing}' on Warehouse Request.card_reader_type")
-    else:
-        print("  No duplicate Custom Field found on Warehouse Request.card_reader_type — skipping")
+	existing = frappe.db.get_value(
+		"Custom Field",
+		{"dt": "Warehouse Request", "fieldname": "card_reader_type"},
+		"name",
+	)
+	if existing:
+		frappe.delete_doc("Custom Field", existing, ignore_permissions=True)
+		print(f"  Deleted duplicate Custom Field '{existing}' on Warehouse Request.card_reader_type")
+	else:
+		print("  No duplicate Custom Field found on Warehouse Request.card_reader_type — skipping")
 
-    existing = frappe.db.get_value(
-        "Custom Field",
-        {"dt": "Project", "fieldname": "card_reader_type"},
-        "name",
-    )
-    if existing:
-        frappe.delete_doc("Custom Field", existing, ignore_permissions=True)
-        print(f"  Deleted removed Custom Field '{existing}' on Project.card_reader_type")
-    else:
-        print("  No Custom Field found on Project.card_reader_type — skipping")
+	existing = frappe.db.get_value(
+		"Custom Field",
+		{"dt": "Project", "fieldname": "card_reader_type"},
+		"name",
+	)
+	if existing:
+		frappe.delete_doc("Custom Field", existing, ignore_permissions=True)
+		print(f"  Deleted removed Custom Field '{existing}' on Project.card_reader_type")
+	else:
+		print("  No Custom Field found on Project.card_reader_type — skipping")
 
-    affected = frappe.db.count("Issue", filters={"card_reader_type": "--None--"})
-    if affected:
-        frappe.db.set_value(
-            "Issue",
-            {"card_reader_type": "--None--"},
-            "card_reader_type",
-            "",
-            update_modified=False,
-        )
-        print(f"  Cleared '--None--' on {affected} Issue(s) for field: card_reader_type")
-    else:
-        print("  No Issues with card_reader_type = '--None--' found — skipping")
+	affected = frappe.db.count("Issue", filters={"card_reader_type": "--None--"})
+	if affected:
+		frappe.db.set_value(
+			"Issue",
+			{"card_reader_type": "--None--"},
+			"card_reader_type",
+			"",
+			update_modified=False,
+		)
+		print(f"  Cleared '--None--' on {affected} Issue(s) for field: card_reader_type")
+	else:
+		print("  No Issues with card_reader_type = '--None--' found — skipping")
 
-    if frappe.db.exists("DocType", "Project Card Reader Type"):
-        frappe.delete_doc(
-            "DocType", "Project Card Reader Type", force=True, ignore_permissions=True
-        )
-        print("  Deleted orphaned DocType 'Project Card Reader Type' (and its backing table).")
-    else:
-        print("  DocType 'Project Card Reader Type' not found — skipping")
+	if frappe.db.exists("DocType", "Project Card Reader Type"):
+		frappe.delete_doc("DocType", "Project Card Reader Type", force=True, ignore_permissions=True)
+		print("  Deleted orphaned DocType 'Project Card Reader Type' (and its backing table).")
+	else:
+		print("  DocType 'Project Card Reader Type' not found — skipping")
 
-    frappe.db.commit()
-    print("Card Reader Type migration prep complete.")
+	frappe.db.commit()
+	print("Card Reader Type migration prep complete.")

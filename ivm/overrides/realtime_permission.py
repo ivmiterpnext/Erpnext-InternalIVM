@@ -14,19 +14,19 @@ See: https://github.com/frappe/frappe/issues/16726
 """
 
 import re
-import frappe
 
+import frappe
 
 _LOCAL_DOC_NAME = re.compile(r"^new-[a-z0-9-]+-[a-z0-9]{10}$")
 
 
 @frappe.whitelist(allow_guest=True)
 def has_permission(doctype: str, name: str) -> bool:
-    if _LOCAL_DOC_NAME.match(name):
-        # Unsaved client-side doc — no DB row exists, nothing to subscribe to.
-        # Return False so the socket.io handler's promise never resolves
-        # (socket silently does not join the room). Identical end-user effect
-        # to the current behavior, minus the Error Log entry.
-        return False
-    frappe.has_permission(doctype, doc=name, throw=True)
-    return True
+	if _LOCAL_DOC_NAME.match(name):
+		# Unsaved client-side doc — no DB row exists, nothing to subscribe to.
+		# Return False so the socket.io handler's promise never resolves
+		# (socket silently does not join the room). Identical end-user effect
+		# to the current behavior, minus the Error Log entry.
+		return False
+	frappe.has_permission(doctype, doc=name, throw=True)
+	return True

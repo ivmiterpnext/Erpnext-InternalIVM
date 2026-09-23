@@ -3,19 +3,22 @@
 
 import frappe
 from frappe.model.document import Document
+
 from ivm.machine_hardware_management.utils.sync_util import sync_doctype_from_api
+
 
 class VendorLink(Document):
 	pass
 
+
 @frappe.whitelist()
 def sync():
-    frappe.only_for("System Manager")
-    return sync_doctype_from_api(
-        doctype="Vendor Link",
-        api_type="icorp",
-        endpoint="Vendor?hasActiveSVMachines=yes&pageSize=9999&page=1",
-        key_field="id",
-        api_fields=["id", "name"],
-		field_map={"name": "vendor_name"}
-    )
+	frappe.only_for("System Manager")
+	return sync_doctype_from_api(
+		doctype="Vendor Link",
+		api_type="icorp",
+		endpoint="Vendor?hasActiveSVMachines=yes&pageSize=9999&page=1",
+		key_field="id",
+		api_fields=["id", "name"],
+		field_map={"name": "vendor_name"},
+	)

@@ -9,8 +9,8 @@ import frappe
 
 
 def execute():
-    if frappe.db.exists("Server Script", "Link Project to Deal"):
-        frappe.delete_doc("Server Script", "Link Project to Deal", ignore_permissions=True)
-        print("  Deleted Server Script 'Link Project to Deal'")
-    else:
-        print("  Server Script 'Link Project to Deal' not found — skipping")
+	if frappe.db.exists("Server Script", "Link Project to Deal"):
+		frappe.delete_doc("Server Script", "Link Project to Deal", ignore_permissions=True)
+		print("  Deleted Server Script 'Link Project to Deal'")
+	else:
+		print("  Server Script 'Link Project to Deal' not found — skipping")

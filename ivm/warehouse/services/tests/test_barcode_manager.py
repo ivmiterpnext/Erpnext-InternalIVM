@@ -10,58 +10,58 @@ own validate_barcode() checksum/charset check on save.
 """
 
 import frappe
-from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.utils import ERPNextTestSuite
 
 from ivm.warehouse.services.barcode_manager import add_barcode_to_item, lookup_item_by_barcode
 
 
 def _make_test_item(item_code):
-    return make_item(item_code=item_code)
+	return make_item(item_code=item_code)
 
 
 class TestAddBarcodeToItem(ERPNextTestSuite):
-    def test_adds_new_barcode(self):
-        item = _make_test_item("TESTBC001")
-        initial_count = len(item.barcodes)  # 1, from the auto-added item_code barcode
-        added = add_barcode_to_item(item, "1234567890")
-        self.assertTrue(added)
-        self.assertEqual(len(item.barcodes), initial_count + 1)
-        self.assertIn("1234567890", [b.barcode for b in item.barcodes])
+	def test_adds_new_barcode(self):
+		item = _make_test_item("TESTBC001")
+		initial_count = len(item.barcodes)  # 1, from the auto-added item_code barcode
+		added = add_barcode_to_item(item, "1234567890")
+		self.assertTrue(added)
+		self.assertEqual(len(item.barcodes), initial_count + 1)
+		self.assertIn("1234567890", [b.barcode for b in item.barcodes])
 
-    def test_duplicate_barcode_not_added_again(self):
-        item = _make_test_item("TESTBC002")
-        add_barcode_to_item(item, "1234567890")
-        count_after_first_add = len(item.barcodes)
-        added_again = add_barcode_to_item(item, "1234567890")
-        self.assertFalse(added_again)
-        self.assertEqual(len(item.barcodes), count_after_first_add)
+	def test_duplicate_barcode_not_added_again(self):
+		item = _make_test_item("TESTBC002")
+		add_barcode_to_item(item, "1234567890")
+		count_after_first_add = len(item.barcodes)
+		added_again = add_barcode_to_item(item, "1234567890")
+		self.assertFalse(added_again)
+		self.assertEqual(len(item.barcodes), count_after_first_add)
 
-    def test_empty_barcode_returns_false(self):
-        item = _make_test_item("TESTBC003")
-        initial_count = len(item.barcodes)
-        added = add_barcode_to_item(item, "")
-        self.assertFalse(added)
-        self.assertEqual(len(item.barcodes), initial_count)
+	def test_empty_barcode_returns_false(self):
+		item = _make_test_item("TESTBC003")
+		initial_count = len(item.barcodes)
+		added = add_barcode_to_item(item, "")
+		self.assertFalse(added)
+		self.assertEqual(len(item.barcodes), initial_count)
 
 
 class TestLookupItemByBarcode(ERPNextTestSuite):
-    def test_returns_none_for_empty_barcode(self):
-        self.assertIsNone(lookup_item_by_barcode(""))
+	def test_returns_none_for_empty_barcode(self):
+		self.assertIsNone(lookup_item_by_barcode(""))
 
-    def test_finds_item_via_barcode_table(self):
-        item = _make_test_item("TESTBC004")
-        add_barcode_to_item(item, "9998887776")
-        item.save(ignore_permissions=True)
+	def test_finds_item_via_barcode_table(self):
+		item = _make_test_item("TESTBC004")
+		add_barcode_to_item(item, "9998887776")
+		item.save(ignore_permissions=True)
 
-        result = lookup_item_by_barcode("9998887776")
-        self.assertEqual(result, item.name)
+		result = lookup_item_by_barcode("9998887776")
+		self.assertEqual(result, item.name)
 
-    def test_falls_back_to_item_code_match(self):
-        item = _make_test_item("TESTBC005")
-        result = lookup_item_by_barcode(item.name)
-        self.assertEqual(result, item.name)
+	def test_falls_back_to_item_code_match(self):
+		item = _make_test_item("TESTBC005")
+		result = lookup_item_by_barcode(item.name)
+		self.assertEqual(result, item.name)
 
-    def test_returns_none_when_not_found(self):
-        result = lookup_item_by_barcode("NO-SUCH-BARCODE-OR-ITEM")
-        self.assertIsNone(result)
+	def test_returns_none_when_not_found(self):
+		result = lookup_item_by_barcode("NO-SUCH-BARCODE-OR-ITEM")
+		self.assertIsNone(result)

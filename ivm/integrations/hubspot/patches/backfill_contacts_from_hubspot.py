@@ -30,9 +30,9 @@ import frappe
 
 from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
-    CONTACT_ADDRESS_PROPERTIES,
-    CONTACT_FIELD_MAP,
-    HUBSPOT_CONTACT_ID_FIELD,
+	CONTACT_ADDRESS_PROPERTIES,
+	CONTACT_FIELD_MAP,
+	HUBSPOT_CONTACT_ID_FIELD,
 )
 from ivm.integrations.hubspot.contact_handler import upsert_contact
 
@@ -41,115 +41,114 @@ _PROPERTIES = list(CONTACT_FIELD_MAP.keys()) + CONTACT_ADDRESS_PROPERTIES
 
 
 def execute() -> None:
-    previous_user = frappe.session.user
-    frappe.set_user("hubspot@ivm.local")
-    try:
-        print(f"Fetching HubSpot contacts created since {_SINCE_DATE}...")
-        try:
-            hs_contacts = _fetch_hubspot_contacts(_SINCE_DATE)
-        except Exception:
-            frappe.log_error(
-                title="Backfill: failed to fetch HubSpot contacts",
-                message=frappe.get_traceback(with_context=True),
-            )
-            print("ERROR: failed to fetch HubSpot contacts — see Error Log")
-            return
+	previous_user = frappe.session.user
+	frappe.set_user("hubspot@ivm.local")
+	try:
+		print(f"Fetching HubSpot contacts created since {_SINCE_DATE}...")
+		try:
+			hs_contacts = _fetch_hubspot_contacts(_SINCE_DATE)
+		except Exception:
+			frappe.log_error(
+				title="Backfill: failed to fetch HubSpot contacts",
+				message=frappe.get_traceback(with_context=True),
+			)
+			print("ERROR: failed to fetch HubSpot contacts — see Error Log")
+			return
 
-        print(f"Found {len(hs_contacts)} contact(s) to process.")
+		print(f"Found {len(hs_contacts)} contact(s) to process.")
 
-        created = skipped = errors = 0
+		created = skipped = errors = 0
 
-        for idx, hs_contact in enumerate(hs_contacts, start=1):
-            hs_id = str(hs_contact["id"])
-            try:
-                was_created = _sync_one_contact(hs_id, hs_contact["properties"])
-                if was_created:
-                    created += 1
-                else:
-                    skipped += 1
-            except api.HubSpotRateLimitExhausted as exc:
-                print(
-                    f"  Rate limit hit at contact {idx}/{len(hs_contacts)} "
-                    f"(retry after {exc.retry_after_seconds}s). Stopping early — re-run to resume."
-                )
-                frappe.log_error(
-                    title="Backfill: HubSpot rate limit exhausted — stopped early",
-                    message=(
-                        f"Processed {idx - 1}/{len(hs_contacts)} contacts before rate limit. "
-                        f"Created: {created}, Skipped: {skipped}, Errors: {errors}. "
-                        f"Re-run the patch to resume."
-                    ),
-                )
-                break
-            except Exception:
-                errors += 1
-                frappe.log_error(
-                    title=f"Backfill: failed to sync HubSpot contact {hs_id}",
-                    message=frappe.get_traceback(with_context=True),
-                )
-                print(f"  ERROR: contact {hs_id} — see Error Log")
+		for idx, hs_contact in enumerate(hs_contacts, start=1):
+			hs_id = str(hs_contact["id"])
+			try:
+				was_created = _sync_one_contact(hs_id, hs_contact["properties"])
+				if was_created:
+					created += 1
+				else:
+					skipped += 1
+			except api.HubSpotRateLimitExhausted as exc:
+				print(
+					f"  Rate limit hit at contact {idx}/{len(hs_contacts)} "
+					f"(retry after {exc.retry_after_seconds}s). Stopping early — re-run to resume."
+				)
+				frappe.log_error(
+					title="Backfill: HubSpot rate limit exhausted — stopped early",
+					message=(
+						f"Processed {idx - 1}/{len(hs_contacts)} contacts before rate limit. "
+						f"Created: {created}, Skipped: {skipped}, Errors: {errors}. "
+						f"Re-run the patch to resume."
+					),
+				)
+				break
+			except Exception:
+				errors += 1
+				frappe.log_error(
+					title=f"Backfill: failed to sync HubSpot contact {hs_id}",
+					message=frappe.get_traceback(with_context=True),
+				)
+				print(f"  ERROR: contact {hs_id} — see Error Log")
 
-        frappe.db.commit()
-        print(f"\\nDone. Created: {created}, Skipped (already existed): {skipped}, Errors: {errors}")
-    finally:
-        frappe.set_user(previous_user)
+		frappe.db.commit()
+		print(f"\\nDone. Created: {created}, Skipped (already existed): {skipped}, Errors: {errors}")
+	finally:
+		frappe.set_user(previous_user)
 
 
 def _fetch_hubspot_contacts(since_date: str) -> list[dict]:
-    """Page through HubSpot search results and return all matching contacts."""
-    filters = [
-        {
-            "propertyName": "createdate",
-            "operator": "GTE",
-            "value": f"{since_date}T00:00:00.000Z",
-        },
-        {
-            "propertyName": "associatedcompanyid",
-            "operator": "HAS_PROPERTY",
-        },
-    ]
+	"""Page through HubSpot search results and return all matching contacts."""
+	filters = [
+		{
+			"propertyName": "createdate",
+			"operator": "GTE",
+			"value": f"{since_date}T00:00:00.000Z",
+		},
+		{
+			"propertyName": "associatedcompanyid",
+			"operator": "HAS_PROPERTY",
+		},
+	]
 
-    results = []
-    after = None
+	results = []
+	after = None
 
-    while True:
-        try:
-            response = api.search_contacts(filters=filters, properties=_PROPERTIES, after=after)
-        except api.HubSpotRateLimitExhausted as exc:
-            print(
-                f"  Rate limit hit while fetching contact list "
-                f"(retry after {exc.retry_after_seconds}s). "
-                f"Returning {len(results)} contact(s) fetched so far — re-run to resume."
-            )
-            frappe.log_error(
-                title="Backfill: HubSpot rate limit exhausted during contact fetch",
-                message=f"Fetched {len(results)} contact(s) before rate limit. Re-run the patch to resume.",
-            )
-            break
+	while True:
+		try:
+			response = api.search_contacts(filters=filters, properties=_PROPERTIES, after=after)
+		except api.HubSpotRateLimitExhausted as exc:
+			print(
+				f"  Rate limit hit while fetching contact list "
+				f"(retry after {exc.retry_after_seconds}s). "
+				f"Returning {len(results)} contact(s) fetched so far — re-run to resume."
+			)
+			frappe.log_error(
+				title="Backfill: HubSpot rate limit exhausted during contact fetch",
+				message=f"Fetched {len(results)} contact(s) before rate limit. Re-run the patch to resume.",
+			)
+			break
 
-        results.extend(response.get("results", []))
-        next_page = response.get("paging", {}).get("next", {})
-        after = next_page.get("after")
-        if not after:
-            break
+		results.extend(response.get("results", []))
+		next_page = response.get("paging", {}).get("next", {})
+		after = next_page.get("after")
+		if not after:
+			break
 
-    return results
+	return results
 
 
 def _sync_one_contact(hs_id: str, raw_properties: dict) -> bool:
-    """Create a Frappe Contact if one doesn't already exist. Returns True if created."""
-    if frappe.db.exists("Contact", {HUBSPOT_CONTACT_ID_FIELD: hs_id}):
-        return False
+	"""Create a Frappe Contact if one doesn't already exist. Returns True if created."""
+	if frappe.db.exists("Contact", {HUBSPOT_CONTACT_ID_FIELD: hs_id}):
+		return False
 
-    mapped = {
-        frappe_key: raw_properties.get(hs_key) or ""
-        for hs_key, frappe_key in CONTACT_FIELD_MAP.items()
-    }
-    email = (mapped.get("email") or "").strip()
-    if email and frappe.db.exists("Contact", {"email_id": email}):
-        return False
+	mapped = {
+		frappe_key: raw_properties.get(hs_key) or "" for hs_key, frappe_key in CONTACT_FIELD_MAP.items()
+	}
+	email = (mapped.get("email") or "").strip()
+	if email and frappe.db.exists("Contact", {"email_id": email}):
+		return False
 
-    address_props = {key: raw_properties.get(key) or "" for key in CONTACT_ADDRESS_PROPERTIES}
+	address_props = {key: raw_properties.get(key) or "" for key in CONTACT_ADDRESS_PROPERTIES}
 
-    contact_name = upsert_contact(mapped, hubspot_contact_id=hs_id, address_props=address_props)
-    return bool(contact_name)
+	contact_name = upsert_contact(mapped, hubspot_contact_id=hs_id, address_props=address_props)
+	return bool(contact_name)

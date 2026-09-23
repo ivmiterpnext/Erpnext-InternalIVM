@@ -1,4 +1,5 @@
 import frappe
+
 from ivm.integrations.icorp import icorp_api_get
 
 # def check_if_location_exists(location_name, client_id):

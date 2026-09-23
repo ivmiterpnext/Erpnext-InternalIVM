@@ -15,12 +15,12 @@ import frappe
 
 @frappe.whitelist()
 def run_activity_backfill(dry_run: bool = False) -> str:
-    frappe.only_for("System Manager")
-    frappe.enqueue(
-        "ivm.integrations.hubspot.patches.backfill_activities_from_hubspot.execute",
-        queue="long",
-        timeout=3600,
-        dry_run=frappe.utils.cint(dry_run),
-    )
-    mode = "dry run" if frappe.utils.cint(dry_run) else "live run"
-    return f"Activity backfill ({mode}) enqueued. Check Error Log for results."
+	frappe.only_for("System Manager")
+	frappe.enqueue(
+		"ivm.integrations.hubspot.patches.backfill_activities_from_hubspot.execute",
+		queue="long",
+		timeout=3600,
+		dry_run=frappe.utils.cint(dry_run),
+	)
+	mode = "dry run" if frappe.utils.cint(dry_run) else "live run"
+	return f"Activity backfill ({mode}) enqueued. Check Error Log for results."

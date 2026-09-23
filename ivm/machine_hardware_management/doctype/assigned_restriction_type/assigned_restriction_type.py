@@ -6,7 +6,6 @@ from frappe.model.document import Document
 
 
 class AssignedRestrictionType(Document):
-	
 	def db_insert(self, *args, **kwargs):
 		raise NotImplementedError
 

@@ -2,57 +2,55 @@ import frappe
 
 
 def sync_doctype_from_api(doctype, api_type, endpoint, key_field, api_fields, field_map=None):
-    from ivm.integrations.icorp import icorp_api_get
-    from ivm.integrations.headwind import headwind_api_request
-    try:
-        frappe.logger().info(f"Syncing {doctype}")
-        if api_type == "headwind":
-            data = headwind_api_request("GET", endpoint)
-        elif api_type == "icorp":
-            print("Testing the catch here")
-            data = icorp_api_get(endpoint)
-        else:
-            frappe.logger().error(f"Unknown api_type: {api_type}")
-            return f"Unknown api_type: {api_type}"
+	from ivm.integrations.headwind import headwind_api_request
+	from ivm.integrations.icorp import icorp_api_get
 
-        items = data.get("data", [])
+	try:
+		frappe.logger().info(f"Syncing {doctype}")
+		if api_type == "headwind":
+			data = headwind_api_request("GET", endpoint)
+		elif api_type == "icorp":
+			print("Testing the catch here")
+			data = icorp_api_get(endpoint)
+		else:
+			frappe.logger().error(f"Unknown api_type: {api_type}")
+			return f"Unknown api_type: {api_type}"
 
-        for item in items:
-            filters = { "name": item[key_field] }
-            docs = frappe.get_all(doctype, filters=filters, fields=["*"])
+		items = data.get("data", [])
 
-            if docs:
-                doc = docs[0]
-                updated_fields = {}
+		for item in items:
+			filters = {"name": item[key_field]}
+			docs = frappe.get_all(doctype, filters=filters, fields=["*"])
 
-                for key in api_fields:
-                    frappe_field = field_map[key] if field_map and key in field_map else key
-                    api_value = str(item.get(key)).strip()
-                    doc_value = str(doc.get(frappe_field)).strip()
-                    if doc_value != api_value:
-                        updated_fields[frappe_field] = item.get(key)
+			if docs:
+				doc = docs[0]
+				updated_fields = {}
 
-                if updated_fields:
-                    frappe.db.set_value(doctype, item[key_field], updated_fields)
-                    frappe.logger().info("Updated %s: %s", item[key_field], updated_fields)
-                else:
-                    frappe.logger().info("No changes for %s", item[key_field])
+				for key in api_fields:
+					frappe_field = field_map[key] if field_map and key in field_map else key
+					api_value = str(item.get(key)).strip()
+					doc_value = str(doc.get(frappe_field)).strip()
+					if doc_value != api_value:
+						updated_fields[frappe_field] = item.get(key)
 
-            else:
-                doc_fields = {
-                    "doctype": doctype,
-                    "name": item[key_field]
-                }
+				if updated_fields:
+					frappe.db.set_value(doctype, item[key_field], updated_fields)
+					frappe.logger().info("Updated %s: %s", item[key_field], updated_fields)
+				else:
+					frappe.logger().info("No changes for %s", item[key_field])
 
-                for key in api_fields:
-                    frappe_field = field_map[key] if field_map and key in field_map else key
-                    doc_fields[frappe_field] = item.get(key)
+			else:
+				doc_fields = {"doctype": doctype, "name": item[key_field]}
 
-                new_doc = frappe.get_doc(doc_fields)
-                new_doc.insert(ignore_permissions=True)
-        frappe.db.commit()
+				for key in api_fields:
+					frappe_field = field_map[key] if field_map and key in field_map else key
+					doc_fields[frappe_field] = item.get(key)
 
-    except Exception:
-        frappe.log_error(frappe.get_traceback(), f"{doctype}.sync error")
+				new_doc = frappe.get_doc(doc_fields)
+				new_doc.insert(ignore_permissions=True)
+		frappe.db.commit()
 
-    return "Sync complete"
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), f"{doctype}.sync error")
+
+	return "Sync complete"

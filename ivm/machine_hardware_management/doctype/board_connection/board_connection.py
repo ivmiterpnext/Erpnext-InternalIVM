@@ -3,19 +3,22 @@
 
 import frappe
 from frappe.model.document import Document
+
 from ivm.machine_hardware_management.utils.sync_util import sync_doctype_from_api
+
 
 class BoardConnection(Document):
 	pass
 
+
 @frappe.whitelist()
 def sync():
-    frappe.only_for("System Manager")
-    return sync_doctype_from_api(
-        doctype="Board Connection",
-        api_type="icorp",
-        endpoint="SV/BoardConnection",
-        key_field="id",
-        api_fields=["id", "name", "ip_address", "port"],
-		field_map={"name": "connection_name"}
-    )
+	frappe.only_for("System Manager")
+	return sync_doctype_from_api(
+		doctype="Board Connection",
+		api_type="icorp",
+		endpoint="SV/BoardConnection",
+		key_field="id",
+		api_fields=["id", "name", "ip_address", "port"],
+		field_map={"name": "connection_name"},
+	)

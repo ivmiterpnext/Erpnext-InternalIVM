@@ -16,28 +16,26 @@ import frappe
 
 
 def execute():
-    scripts_to_delete = [
-        "Warehouse Request Created Date",
-        "Warehouse Request Modified By",
-        "Warehouse Request Modified Date",
-    ]
-    for name in scripts_to_delete:
-        if frappe.db.exists("Client Script", name):
-            frappe.delete_doc("Client Script", name, ignore_permissions=True, force=True)
-            print(f"  Deleted Client Script: {name}")
-        else:
-            print(f"  Client Script {name} does not exist — skipping")
+	scripts_to_delete = [
+		"Warehouse Request Created Date",
+		"Warehouse Request Modified By",
+		"Warehouse Request Modified Date",
+	]
+	for name in scripts_to_delete:
+		if frappe.db.exists("Client Script", name):
+			frappe.delete_doc("Client Script", name, ignore_permissions=True, force=True)
+			print(f"  Deleted Client Script: {name}")
+		else:
+			print(f"  Client Script {name} does not exist — skipping")
 
-    columns_to_drop = ["modified_by1", "modified_date"]
-    existing_columns = {
-        row[0] for row in frappe.db.sql("SHOW COLUMNS FROM `tabWarehouse Request`")
-    }
-    for column in columns_to_drop:
-        if column not in existing_columns:
-            print(f"  tabWarehouse Request.{column} does not exist — skipping")
-            continue
-        frappe.db.commit()
-        frappe.db.sql_ddl(f"ALTER TABLE `tabWarehouse Request` DROP COLUMN `{column}`")
-        print(f"  Dropped column tabWarehouse Request.{column}")
+	columns_to_drop = ["modified_by1", "modified_date"]
+	existing_columns = {row[0] for row in frappe.db.sql("SHOW COLUMNS FROM `tabWarehouse Request`")}
+	for column in columns_to_drop:
+		if column not in existing_columns:
+			print(f"  tabWarehouse Request.{column} does not exist — skipping")
+			continue
+		frappe.db.commit()
+		frappe.db.sql_ddl(f"ALTER TABLE `tabWarehouse Request` DROP COLUMN `{column}`")
+		print(f"  Dropped column tabWarehouse Request.{column}")
 
-    frappe.clear_cache(doctype="Warehouse Request")
+	frappe.clear_cache(doctype="Warehouse Request")

@@ -447,13 +447,17 @@ def _depends_on_satisfied(depends_on, row) -> bool:
 	"""
 	if not depends_on:
 		return True
-	condition = depends_on[len("eval:"):] if depends_on.startswith("eval:") else depends_on
+	condition = depends_on[len("eval:") :] if depends_on.startswith("eval:") else depends_on
 	# Tolerate JS-authored operators in case a future depends_on is copied verbatim.
-	condition = condition.replace("&&", " and ").replace("||", " or ").replace("===", "==").replace("!==", "!=")
+	condition = (
+		condition.replace("&&", " and ").replace("||", " or ").replace("===", "==").replace("!==", "!=")
+	)
 	try:
 		return bool(eval(condition, {"__builtins__": {}}, {"doc": row}))
 	except Exception:
-		frappe.log_error(title="Machine details print depends_on eval failed", message=f"{depends_on!r} on {row.doctype}")
+		frappe.log_error(
+			title="Machine details print depends_on eval failed", message=f"{depends_on!r} on {row.doctype}"
+		)
 		return True
 
 
@@ -534,11 +538,11 @@ def _render_field_for_print(df, row):
 
 def _render_print_section(section):
 	"""Render a section dict as HTML matching standard.html's markup:
-	  <div class="row section-break">
-	    <div class="col-xs-{N} column-break">
-	      ...fields...
-	    </div>
+	<div class="row section-break">
+	  <div class="col-xs-{N} column-break">
+	    ...fields...
 	  </div>
+	</div>
 	"""
 	non_empty_columns = [col for col in section["columns"] if col]
 	if not non_empty_columns:
@@ -553,9 +557,7 @@ def _render_print_section(section):
 			_render_field_row(label, value_html, full_width, no_of_cols)
 			for label, value_html, full_width in col_fields
 		)
-		columns_html.append(
-			f"<div class='col-xs-{col_width} column-break'>{fields_html}</div>"
-		)
+		columns_html.append(f"<div class='col-xs-{col_width} column-break'>{fields_html}</div>")
 
 	return f"<div class='row section-break'>{''.join(columns_html)}</div>"
 

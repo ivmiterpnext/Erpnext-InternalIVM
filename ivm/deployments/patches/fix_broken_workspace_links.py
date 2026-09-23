@@ -16,13 +16,13 @@ import frappe
 
 
 def execute():
-    if frappe.db.exists("Workspace", "Financial Reports"):
-        frappe.db.set_value("Workspace", "Financial Reports", "parent_page", "", update_modified=False)
-        print("  Cleared parent_page on Financial Reports workspace")
+	if frappe.db.exists("Workspace", "Financial Reports"):
+		frappe.db.set_value("Workspace", "Financial Reports", "parent_page", "", update_modified=False)
+		print("  Cleared parent_page on Financial Reports workspace")
 
-    frappe.db.delete("Workspace Link", {"parent": "Manufacturing", "link_to": "BOM Stock Report"})
-    print("  Removed broken BOM Stock Report link from Manufacturing workspace")
+	frappe.db.delete("Workspace Link", {"parent": "Manufacturing", "link_to": "BOM Stock Report"})
+	print("  Removed broken BOM Stock Report link from Manufacturing workspace")
 
-    if frappe.db.exists("Workspace", "Frappe CRM"):
-        frappe.db.set_value("Workspace", "Frappe CRM", "type", "Workspace", update_modified=False)
-        print("  Set missing type on Frappe CRM workspace")
+	if frappe.db.exists("Workspace", "Frappe CRM"):
+		frappe.db.set_value("Workspace", "Frappe CRM", "type", "Workspace", update_modified=False)
+		print("  Set missing type on Frappe CRM workspace")

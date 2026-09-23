@@ -29,21 +29,21 @@ import frappe
 
 
 def execute():
-    if frappe.db.exists("Client Script", "Filter Opportunities"):
-        frappe.delete_doc("Client Script", "Filter Opportunities", ignore_permissions=True, force=True)
-        print("  Deleted Client Script: Filter Opportunities")
-    else:
-        print("  Client Script Filter Opportunities does not exist — skipping")
+	if frappe.db.exists("Client Script", "Filter Opportunities"):
+		frappe.delete_doc("Client Script", "Filter Opportunities", ignore_permissions=True, force=True)
+		print("  Deleted Client Script: Filter Opportunities")
+	else:
+		print("  Client Script Filter Opportunities does not exist — skipping")
 
-    ps_name = frappe.db.get_value(
-        "Property Setter",
-        {"doc_type": "Deployment Location", "property": "autoname"},
-        "name",
-    )
-    if ps_name:
-        frappe.delete_doc("Property Setter", ps_name, ignore_permissions=True, force=True)
-        print(f"  Deleted stale Property Setter: {ps_name}")
-    else:
-        print("  No autoname Property Setter found on Deployment Location — skipping")
+	ps_name = frappe.db.get_value(
+		"Property Setter",
+		{"doc_type": "Deployment Location", "property": "autoname"},
+		"name",
+	)
+	if ps_name:
+		frappe.delete_doc("Property Setter", ps_name, ignore_permissions=True, force=True)
+		print(f"  Deleted stale Property Setter: {ps_name}")
+	else:
+		print("  No autoname Property Setter found on Deployment Location — skipping")
 
-    frappe.clear_cache(doctype="Deployment Location")
+	frappe.clear_cache(doctype="Deployment Location")

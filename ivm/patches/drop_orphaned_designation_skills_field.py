@@ -13,9 +13,9 @@ import frappe
 
 
 def execute():
-    cf_name = "Designation-skills"
-    if frappe.db.exists("Custom Field", cf_name):
-        frappe.delete_doc("Custom Field", cf_name, ignore_permissions=True, force=True)
-        print(f"  Deleted Custom Field: {cf_name}")
-    else:
-        print(f"  Custom Field {cf_name} does not exist — skipping")
+	cf_name = "Designation-skills"
+	if frappe.db.exists("Custom Field", cf_name):
+		frappe.delete_doc("Custom Field", cf_name, ignore_permissions=True, force=True)
+		print(f"  Deleted Custom Field: {cf_name}")
+	else:
+		print(f"  Custom Field {cf_name} does not exist — skipping")

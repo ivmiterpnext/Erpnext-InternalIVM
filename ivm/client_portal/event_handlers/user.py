@@ -16,26 +16,21 @@ user_type recompute occurs.
 
 import frappe
 
-
 PORTAL_ROLE = "Service Portal User"
 
 
 def enforce_portal_user_roles(doc, method):
-    portal_user_roles = {r.role for r in doc.get("roles", [])}
-    if PORTAL_ROLE not in portal_user_roles:
-        return
+	portal_user_roles = {r.role for r in doc.get("roles", [])}
+	if PORTAL_ROLE not in portal_user_roles:
+		return
 
-    desk_access_roles = set(
-        frappe.get_all("Role", filters={"desk_access": 1}, pluck="name")
-    )
+	desk_access_roles = set(frappe.get_all("Role", filters={"desk_access": 1}, pluck="name"))
 
-    stripped = []
-    for role_row in list(doc.roles):
-        if role_row.role in desk_access_roles:
-            doc.roles.remove(role_row)
-            stripped.append(role_row.role)
+	stripped = []
+	for role_row in list(doc.roles):
+		if role_row.role in desk_access_roles:
+			doc.roles.remove(role_row)
+			stripped.append(role_row.role)
 
-    if stripped:
-        frappe.logger().warning(
-            f"Stripped desk-access roles {stripped} from portal user {doc.name}"
-        )
+	if stripped:
+		frappe.logger().warning(f"Stripped desk-access roles {stripped} from portal user {doc.name}")

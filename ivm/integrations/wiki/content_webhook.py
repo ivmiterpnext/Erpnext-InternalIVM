@@ -42,7 +42,9 @@ def send_wiki_content_webhook(payload: dict[str, Any]) -> None:
 		token_header = frappe.conf.get("wiki_content_webhook_token_header") or DEFAULT_TOKEN_HEADER
 		headers[str(token_header)] = str(token)
 
-	timeout_seconds = cint_or_default(frappe.conf.get("wiki_content_webhook_timeout"), DEFAULT_TIMEOUT_SECONDS)
+	timeout_seconds = cint_or_default(
+		frappe.conf.get("wiki_content_webhook_timeout"), DEFAULT_TIMEOUT_SECONDS
+	)
 
 	content_bytes = (payload.get("content") or "").encode("utf-8")
 	file_obj = io.BytesIO(content_bytes)

@@ -1,17 +1,22 @@
 # Copyright (c) 2025, Dev and contributors
 # For license information, please see license.txt
 
+from typing import ClassVar
+
 from ivm.machine_hardware_management.utils.base_virtual_doctype import BaseVirtualDoctype
-from ivm.machine_hardware_management.utils.filter_utils import replace_machine_id_with_name, frappe_filters_to_dict
 from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict
+from ivm.machine_hardware_management.utils.filter_utils import (
+	frappe_filters_to_dict,
+	replace_machine_id_with_name,
+)
 
 
 class MachinePurchaseOrder(BaseVirtualDoctype):
 	API_TYPE = "icorp"
 	endpoint = "PurchaseOrder/Machines"
-	FIELD_MAP = {"name": "id"}
+	FIELD_MAP: ClassVar[dict[str, str]] = {"name": "id"}
 
-# Get List Overrides
+	# Get List Overrides
 	@classmethod
 	def build_list_api_params(cls, args):
 		# Only filters, no page/pageSize/sort
@@ -34,7 +39,7 @@ class MachinePurchaseOrder(BaseVirtualDoctype):
 				row["name"] = str(row["id"])
 		return data
 
-# Load from DB Overrides
+	# Load from DB Overrides
 	def get_load_endpoint(self):
 		return f"PurchaseOrder/Machine/GetById?Id={self.name}"
 
@@ -45,7 +50,7 @@ class MachinePurchaseOrder(BaseVirtualDoctype):
 			data["machine_name"] = data["name"]
 		set_attrs_from_dict(self, data)
 
-# Insert Overrides
+	# Insert Overrides
 	def prepare_insert_data(self, data):
 		data["name"] = data.get("machine_name")
 		return data
@@ -57,7 +62,7 @@ class MachinePurchaseOrder(BaseVirtualDoctype):
 			self.name = str(data["id"])
 		set_attrs_from_dict(self, data)
 
-# Update Overrides
+	# Update Overrides
 	def prepare_update_data(self, data):
 		data["id"] = self.name
 		data["name"] = self.machine_name

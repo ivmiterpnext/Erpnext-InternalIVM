@@ -17,25 +17,25 @@ import frappe
 
 
 def execute():
-    # Fix shortcuts whose parent Workspace exists
-    fixed = frappe.db.sql(
-        """
+	# Fix shortcuts whose parent Workspace exists
+	frappe.db.sql(
+		"""
         UPDATE `tabWorkspace Shortcut` ws
         INNER JOIN `tabWorkspace` w ON ws.parent = w.name
         SET ws.parenttype = 'Workspace', ws.parentfield = 'shortcuts'
         WHERE ws.parenttype IS NULL
         """,
-    )
-    fixed_count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
-    print(f"  Fixed parenttype/parentfield on {fixed_count} Workspace Shortcut records")
+	)
+	fixed_count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
+	print(f"  Fixed parenttype/parentfield on {fixed_count} Workspace Shortcut records")
 
-    # Delete orphaned shortcuts whose parent Workspace does not exist
-    deleted = frappe.db.sql(
-        """
+	# Delete orphaned shortcuts whose parent Workspace does not exist
+	frappe.db.sql(
+		"""
         DELETE ws FROM `tabWorkspace Shortcut` ws
         LEFT JOIN `tabWorkspace` w ON ws.parent = w.name
         WHERE ws.parenttype IS NULL AND w.name IS NULL
         """,
-    )
-    deleted_count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
-    print(f"  Deleted {deleted_count} orphaned Workspace Shortcut records")
+	)
+	deleted_count = frappe.db.sql("SELECT ROW_COUNT()")[0][0]
+	print(f"  Deleted {deleted_count} orphaned Workspace Shortcut records")

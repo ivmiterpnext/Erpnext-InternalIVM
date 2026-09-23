@@ -20,11 +20,11 @@ import frappe
 
 
 def execute():
-    script_name = "Text Feild Resize"
-    if frappe.db.exists("Client Script", script_name):
-        frappe.delete_doc("Client Script", script_name, ignore_permissions=True, force=True)
-        print(f"  Deleted Client Script: {script_name}")
-    else:
-        print(f"  Client Script {script_name} does not exist — skipping")
+	script_name = "Text Feild Resize"
+	if frappe.db.exists("Client Script", script_name):
+		frappe.delete_doc("Client Script", script_name, ignore_permissions=True, force=True)
+		print(f"  Deleted Client Script: {script_name}")
+	else:
+		print(f"  Client Script {script_name} does not exist — skipping")
 
-    frappe.clear_cache(doctype="Warehouse Request")
+	frappe.clear_cache(doctype="Warehouse Request")

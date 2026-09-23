@@ -17,46 +17,44 @@ import frappe
 
 
 def execute():
-    custom_fields_to_delete = {
-        "Designation": ["appraisal_template"],
-        "Employee": [
-            "grade",
-            "default_shift",
-            "job_applicant",
-            "employment_type",
-            "health_insurance_provider",
-        ],
-        "Timesheet": ["salary_slip"],
-    }
+	custom_fields_to_delete = {
+		"Designation": ["appraisal_template"],
+		"Employee": [
+			"grade",
+			"default_shift",
+			"job_applicant",
+			"employment_type",
+			"health_insurance_provider",
+		],
+		"Timesheet": ["salary_slip"],
+	}
 
-    for doctype, fieldnames in custom_fields_to_delete.items():
-        for fieldname in fieldnames:
-            cf_name = f"{doctype}-{fieldname}"
-            if frappe.db.exists("Custom Field", cf_name):
-                frappe.delete_doc("Custom Field", cf_name, ignore_permissions=True, force=True)
-                print(f"  Deleted Custom Field: {cf_name}")
-            else:
-                print(f"  Custom Field {cf_name} does not exist — skipping")
+	for doctype, fieldnames in custom_fields_to_delete.items():
+		for fieldname in fieldnames:
+			cf_name = f"{doctype}-{fieldname}"
+			if frappe.db.exists("Custom Field", cf_name):
+				frappe.delete_doc("Custom Field", cf_name, ignore_permissions=True, force=True)
+				print(f"  Deleted Custom Field: {cf_name}")
+			else:
+				print(f"  Custom Field {cf_name} does not exist — skipping")
 
-    columns_to_drop = {
-        "tabDesignation": ["appraisal_template"],
-        "tabEmployee": [
-            "grade",
-            "default_shift",
-            "job_applicant",
-            "employment_type",
-            "health_insurance_provider",
-        ],
-        "tabTimesheet": ["salary_slip"],
-    }
+	columns_to_drop = {
+		"tabDesignation": ["appraisal_template"],
+		"tabEmployee": [
+			"grade",
+			"default_shift",
+			"job_applicant",
+			"employment_type",
+			"health_insurance_provider",
+		],
+		"tabTimesheet": ["salary_slip"],
+	}
 
-    for table, columns in columns_to_drop.items():
-        existing_columns = {
-            row[0] for row in frappe.db.sql(f"SHOW COLUMNS FROM `{table}`")
-        }
-        for column in columns:
-            if column not in existing_columns:
-                print(f"  {table}.{column} does not exist — skipping")
-                continue
-            frappe.db.sql_ddl(f"ALTER TABLE `{table}` DROP COLUMN `{column}`")
-            print(f"  Dropped column {table}.{column}")
+	for table, columns in columns_to_drop.items():
+		existing_columns = {row[0] for row in frappe.db.sql(f"SHOW COLUMNS FROM `{table}`")}
+		for column in columns:
+			if column not in existing_columns:
+				print(f"  {table}.{column} does not exist — skipping")
+				continue
+			frappe.db.sql_ddl(f"ALTER TABLE `{table}` DROP COLUMN `{column}`")
+			print(f"  Dropped column {table}.{column}")

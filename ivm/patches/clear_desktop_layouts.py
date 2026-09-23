@@ -9,5 +9,5 @@ import frappe
 
 
 def execute():
-    frappe.db.sql("UPDATE `tabDesktop Layout` SET layout = '[]'")
-    print("  Cleared all Desktop Layout records")
+	frappe.db.sql("UPDATE `tabDesktop Layout` SET layout = '[]'")
+	print("  Cleared all Desktop Layout records")

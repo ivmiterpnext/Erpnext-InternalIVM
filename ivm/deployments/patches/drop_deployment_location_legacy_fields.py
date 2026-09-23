@@ -28,50 +28,48 @@ import frappe
 
 
 def execute():
-    scripts_to_delete = [
-        "Address Filter Deployment Location",
-        "Created Info Deployment Location",
-        "Modified Info Deployment Location",
-        "Fetch Full Shipping Address",
-        "Full Billing Address",
-        "Billing Adress Filter DL",
-    ]
-    for name in scripts_to_delete:
-        if frappe.db.exists("Client Script", name):
-            frappe.delete_doc("Client Script", name, ignore_permissions=True, force=True)
-            print(f"  Deleted Client Script: {name}")
-        else:
-            print(f"  Client Script {name} does not exist — skipping")
+	scripts_to_delete = [
+		"Address Filter Deployment Location",
+		"Created Info Deployment Location",
+		"Modified Info Deployment Location",
+		"Fetch Full Shipping Address",
+		"Full Billing Address",
+		"Billing Adress Filter DL",
+	]
+	for name in scripts_to_delete:
+		if frappe.db.exists("Client Script", name):
+			frappe.delete_doc("Client Script", name, ignore_permissions=True, force=True)
+			print(f"  Deleted Client Script: {name}")
+		else:
+			print(f"  Client Script {name} does not exist — skipping")
 
-    fields_to_drop = [
-        "created_by",
-        "modified_by1",
-        "party_name",
-        "city_name",
-        "country_name",
-        "state_name",
-        "location_shipping_address",
-        "full_shipping_address",
-        "full_billing_address",
-    ]
+	fields_to_drop = [
+		"created_by",
+		"modified_by1",
+		"party_name",
+		"city_name",
+		"country_name",
+		"state_name",
+		"location_shipping_address",
+		"full_shipping_address",
+		"full_billing_address",
+	]
 
-    for fieldname in fields_to_drop:
-        cf_name = f"Deployment Location-{fieldname}"
-        if frappe.db.exists("Custom Field", cf_name):
-            frappe.delete_doc("Custom Field", cf_name, ignore_permissions=True, force=True)
-            print(f"  Deleted Custom Field: {cf_name}")
-        else:
-            print(f"  Custom Field {cf_name} does not exist — skipping")
+	for fieldname in fields_to_drop:
+		cf_name = f"Deployment Location-{fieldname}"
+		if frappe.db.exists("Custom Field", cf_name):
+			frappe.delete_doc("Custom Field", cf_name, ignore_permissions=True, force=True)
+			print(f"  Deleted Custom Field: {cf_name}")
+		else:
+			print(f"  Custom Field {cf_name} does not exist — skipping")
 
-    existing_columns = {
-        row[0] for row in frappe.db.sql("SHOW COLUMNS FROM `tabDeployment Location`")
-    }
-    for fieldname in fields_to_drop:
-        if fieldname not in existing_columns:
-            print(f"  tabDeployment Location.{fieldname} does not exist — skipping")
-            continue
-        frappe.db.commit()
-        frappe.db.sql_ddl(f"ALTER TABLE `tabDeployment Location` DROP COLUMN `{fieldname}`")
-        print(f"  Dropped column tabDeployment Location.{fieldname}")
+	existing_columns = {row[0] for row in frappe.db.sql("SHOW COLUMNS FROM `tabDeployment Location`")}
+	for fieldname in fields_to_drop:
+		if fieldname not in existing_columns:
+			print(f"  tabDeployment Location.{fieldname} does not exist — skipping")
+			continue
+		frappe.db.commit()
+		frappe.db.sql_ddl(f"ALTER TABLE `tabDeployment Location` DROP COLUMN `{fieldname}`")
+		print(f"  Dropped column tabDeployment Location.{fieldname}")
 
-    frappe.clear_cache(doctype="Deployment Location")
+	frappe.clear_cache(doctype="Deployment Location")

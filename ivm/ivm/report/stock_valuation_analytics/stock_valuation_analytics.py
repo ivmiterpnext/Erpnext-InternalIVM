@@ -2,15 +2,14 @@
 # For license information, please see license.txt
 import datetime
 
-import frappe
-from frappe import _, scrub
-from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start, getdate
-from frappe.utils import get_first_day as get_first_day_of_month
-
 import erpnext
+import frappe
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
+from frappe import _, scrub
+from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start, getdate
+from frappe.utils import get_first_day as get_first_day_of_month
 
 
 def execute(filters=None):
@@ -113,7 +112,7 @@ def round_down_to_nearest_frequency(date: str, frequency: str) -> datetime.datet
 
 	def _get_first_day_of_fiscal_year(date):
 		fiscal_year = get_fiscal_year(date)
-		return fiscal_year and fiscal_year[1] or date
+		return (fiscal_year and fiscal_year[1]) or date
 
 	round_down_function = {
 		"Monthly": get_first_day_of_month,

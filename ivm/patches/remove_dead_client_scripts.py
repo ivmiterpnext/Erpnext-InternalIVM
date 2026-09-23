@@ -21,18 +21,18 @@ import frappe
 
 
 def execute():
-    scripts_to_delete = [
-        "Test Button 3 Opp",
-        "Test Override",
-        "Create Deployment Location From Opportunity",
-        "Warehouse Request Created By",
-        "Warehouse Request Naming",
-        "Close Button",
-    ]
+	scripts_to_delete = [
+		"Test Button 3 Opp",
+		"Test Override",
+		"Create Deployment Location From Opportunity",
+		"Warehouse Request Created By",
+		"Warehouse Request Naming",
+		"Close Button",
+	]
 
-    for script_name in scripts_to_delete:
-        if frappe.db.exists("Client Script", script_name):
-            frappe.delete_doc("Client Script", script_name, ignore_permissions=True)
-            print(f"  Deleted Client Script '{script_name}'")
-        else:
-            print(f"  Client Script '{script_name}' not found — skipping")
+	for script_name in scripts_to_delete:
+		if frappe.db.exists("Client Script", script_name):
+			frappe.delete_doc("Client Script", script_name, ignore_permissions=True)
+			print(f"  Deleted Client Script '{script_name}'")
+		else:
+			print(f"  Client Script '{script_name}' not found — skipping")

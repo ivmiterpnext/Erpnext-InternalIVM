@@ -11,16 +11,17 @@ ignore_permissions=True). Without share=1, hubspot@ivm.local's CRM Task
 inserts fail (and roll back) the moment a hubspot_owner_id is resolved
 and assigned_to is set.
 """
+
 import frappe
+
 from ivm.integrations.hubspot.constants import HUBSPOT_ROLE
 
+
 def execute() -> None:
-    name = frappe.db.get_value(
-        "Custom DocPerm", {"parent": "CRM Task", "role": HUBSPOT_ROLE}, "name"
-    )
-    if not name:
-        return
-    if frappe.db.get_value("Custom DocPerm", name, "share"):
-        return
-    frappe.db.set_value("Custom DocPerm", name, "share", 1)
-    frappe.clear_cache()
+	name = frappe.db.get_value("Custom DocPerm", {"parent": "CRM Task", "role": HUBSPOT_ROLE}, "name")
+	if not name:
+		return
+	if frappe.db.get_value("Custom DocPerm", name, "share"):
+		return
+	frappe.db.set_value("Custom DocPerm", name, "share", 1)
+	frappe.clear_cache()

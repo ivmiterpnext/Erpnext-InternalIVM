@@ -3,10 +3,11 @@
 from unittest.mock import patch
 
 import frappe
-from erpnext.tests.utils import ERPNextTestSuite
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestSuite
 
+from ivm.warehouse.services.pick_list import add_item_to_pick_list
 from ivm.warehouse.services.warehouse_request import (
 	create_build_requests_from_detail_rows,
 	create_shipping_request_from_build,
@@ -16,7 +17,6 @@ from ivm.warehouse.services.warehouse_request import (
 	reset_warehouse_request_pick_list,
 	send_equipment_info_to_ics,
 )
-from ivm.warehouse.services.pick_list import add_item_to_pick_list
 
 COMPANY = "_Test Company"
 WAREHOUSE = "_Test Warehouse - _TC"
@@ -25,17 +25,19 @@ TARGET_WAREHOUSE = "_Test Warehouse 1 - _TC"
 
 def _make_warehouse_request(**kwargs):
 	"""Create a minimal Warehouse Request for testing."""
-	doc = frappe.get_doc({
-		"doctype": "Warehouse Request",
-		"request_reason": kwargs.get("request_reason", "Build Machine"),
-		"subject": kwargs.get("subject", "Test WR"),
-		"customer": kwargs.get("customer"),
-		"related_project": kwargs.get("related_project"),
-		"schema_version": kwargs.get("schema_version", 2),
-		"status": kwargs.get("status", "New"),
-		"machine_name": kwargs.get("machine_name"),
-		"pick_list": kwargs.get("pick_list"),
-	})
+	doc = frappe.get_doc(
+		{
+			"doctype": "Warehouse Request",
+			"request_reason": kwargs.get("request_reason", "Build Machine"),
+			"subject": kwargs.get("subject", "Test WR"),
+			"customer": kwargs.get("customer"),
+			"related_project": kwargs.get("related_project"),
+			"schema_version": kwargs.get("schema_version", 2),
+			"status": kwargs.get("status", "New"),
+			"machine_name": kwargs.get("machine_name"),
+			"pick_list": kwargs.get("pick_list"),
+		}
+	)
 	doc.insert(ignore_permissions=True)
 	return doc
 
@@ -55,10 +57,12 @@ def _seed_stock(item_code, warehouse=WAREHOUSE, qty=100, rate=10):
 def _ensure_task_type():
 	"""Ensure the 'add machine info' Task Type exists on the test site."""
 	if not frappe.db.exists("Task Type", "add machine info"):
-		frappe.get_doc({
-			"doctype": "Task Type",
-			"name": "add machine info",
-		}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "Task Type",
+				"name": "add machine info",
+			}
+		).insert(ignore_permissions=True)
 
 
 def _set_default_company():
@@ -72,6 +76,7 @@ def _make_build_wr_with_submitted_stock_entry():
 	_seed_stock(item.name)
 
 	from ivm.warehouse.services.pick_list import create_pick_list
+
 	pl_name = create_pick_list(COMPANY)
 	add_item_to_pick_list(pl_name, item.name, WAREHOUSE, 5)
 
@@ -230,12 +235,14 @@ class TestGetEquipmentInfoTask(ERPNextTestSuite):
 
 	def test_returns_task_name(self):
 		wr = _make_warehouse_request()
-		task = frappe.get_doc({
-			"doctype": "Task",
-			"subject": "Test equipment info task",
-			"type": "add machine info",
-			"custom_warehouse_request": wr.name,
-		})
+		task = frappe.get_doc(
+			{
+				"doctype": "Task",
+				"subject": "Test equipment info task",
+				"type": "add machine info",
+				"custom_warehouse_request": wr.name,
+			}
+		)
 		task.insert(ignore_permissions=True)
 		result = get_equipment_info_task(wr.name)
 		self.assertEqual(result, task.name)
@@ -298,26 +305,33 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 			"prose_number": "PN-001",
 		}
 
-		customer = frappe.get_doc({
-			"doctype": "Customer",
-			"customer_name": frappe.generate_hash(length=10),
-			"customer_group": "_Test Customer Group",
-			"territory": "_Test Territory",
-			"icorp_client_id": "TEST-CLIENT-ID",
-		})
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": frappe.generate_hash(length=10),
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+				"icorp_client_id": "TEST-CLIENT-ID",
+			}
+		)
 		customer.insert(ignore_permissions=True)
 
-		project = frappe.get_doc({
-			"doctype": "Project",
-			"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
-			"customer": customer.name,
-			"company": COMPANY,
-		})
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
+				"customer": customer.name,
+				"company": COMPANY,
+			}
+		)
 		project.insert(ignore_permissions=True)
 
-		project.append("custom_deployment_smartstation_details", {
-			"machine_name": f"MACH-{frappe.generate_hash(length=6)}",
-		})
+		project.append(
+			"custom_deployment_smartstation_details",
+			{
+				"machine_name": f"MACH-{frappe.generate_hash(length=6)}",
+			},
+		)
 		project.save(ignore_permissions=True)
 
 		result = create_build_requests_from_detail_rows(
@@ -341,31 +355,36 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 			"prose_number": "PN-SKIP",
 		}
 
-		customer = frappe.get_doc({
-			"doctype": "Customer",
-			"customer_name": frappe.generate_hash(length=10),
-			"customer_group": "_Test Customer Group",
-			"territory": "_Test Territory",
-			"icorp_client_id": "TEST-CLIENT-SKIP",
-		})
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": frappe.generate_hash(length=10),
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+				"icorp_client_id": "TEST-CLIENT-SKIP",
+			}
+		)
 		customer.insert(ignore_permissions=True)
 
 		machine_name = f"MACH-{frappe.generate_hash(length=6)}"
-		project = frappe.get_doc({
-			"doctype": "Project",
-			"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
-			"customer": customer.name,
-			"company": COMPANY,
-		})
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
+				"customer": customer.name,
+				"company": COMPANY,
+			}
+		)
 		project.insert(ignore_permissions=True)
-		project.append("custom_deployment_smartstation_details", {
-			"machine_name": machine_name,
-		})
+		project.append(
+			"custom_deployment_smartstation_details",
+			{
+				"machine_name": machine_name,
+			},
+		)
 		project.save(ignore_permissions=True)
 
-		first = create_build_requests_from_detail_rows(
-			project.name, "custom_deployment_smartstation_details"
-		)
+		first = create_build_requests_from_detail_rows(project.name, "custom_deployment_smartstation_details")
 		self.assertEqual(len(first["created"]), 1)
 
 		second = create_build_requests_from_detail_rows(
@@ -378,25 +397,32 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 	def test_failed_lookup_returns_failures(self, mock_fetch):
 		mock_fetch.return_value = None
 
-		customer = frappe.get_doc({
-			"doctype": "Customer",
-			"customer_name": frappe.generate_hash(length=10),
-			"customer_group": "_Test Customer Group",
-			"territory": "_Test Territory",
-			"icorp_client_id": "TEST-CLIENT-FAIL",
-		})
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": frappe.generate_hash(length=10),
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+				"icorp_client_id": "TEST-CLIENT-FAIL",
+			}
+		)
 		customer.insert(ignore_permissions=True)
 
-		project = frappe.get_doc({
-			"doctype": "Project",
-			"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
-			"customer": customer.name,
-			"company": COMPANY,
-		})
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
+				"customer": customer.name,
+				"company": COMPANY,
+			}
+		)
 		project.insert(ignore_permissions=True)
-		project.append("custom_deployment_smartstation_details", {
-			"machine_name": "WILL-FAIL",
-		})
+		project.append(
+			"custom_deployment_smartstation_details",
+			{
+				"machine_name": "WILL-FAIL",
+			},
+		)
 		project.save(ignore_permissions=True)
 
 		result = create_build_requests_from_detail_rows(
@@ -406,21 +432,24 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 		self.assertIn("WILL-FAIL", result["failed"])
 
 	def test_no_customer_raises(self):
-		project = frappe.get_doc({
-			"doctype": "Project",
-			"project_name": f"No Customer Project - {frappe.generate_hash(length=6)}",
-			"company": COMPANY,
-		})
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": f"No Customer Project - {frappe.generate_hash(length=6)}",
+				"company": COMPANY,
+			}
+		)
 		project.insert(ignore_permissions=True)
-		project.append("custom_deployment_smartstation_details", {
-			"machine_name": "MACH-NO-CUST",
-		})
+		project.append(
+			"custom_deployment_smartstation_details",
+			{
+				"machine_name": "MACH-NO-CUST",
+			},
+		)
 		project.save(ignore_permissions=True)
 
 		with self.assertRaises(frappe.ValidationError):
-			create_build_requests_from_detail_rows(
-				project.name, "custom_deployment_smartstation_details"
-			)
+			create_build_requests_from_detail_rows(project.name, "custom_deployment_smartstation_details")
 
 
 class TestWarehouseRequestQuery(ERPNextTestSuite):
@@ -436,6 +465,7 @@ class TestWarehouseRequestQuery(ERPNextTestSuite):
 	def test_matches_by_name(self):
 		wr = _make_warehouse_request(request_reason="Shipping Request", subject="Unique Subject XYZ")
 		from ivm.warehouse.services.warehouse_request import warehouse_request_query
+
 		result = warehouse_request_query("Warehouse Request", wr.name, "name", 0, 20, {})
 		names = {row[0] for row in result}
 		self.assertIn(wr.name, names)
@@ -443,6 +473,7 @@ class TestWarehouseRequestQuery(ERPNextTestSuite):
 	def test_matches_by_subject(self):
 		wr = _make_warehouse_request(request_reason="Shipping Request", subject="FindMeBySubjectABC")
 		from ivm.warehouse.services.warehouse_request import warehouse_request_query
+
 		result = warehouse_request_query("Warehouse Request", "FindMeBySubjectABC", "name", 0, 20, {})
 		names = {row[0] for row in result}
 		self.assertIn(wr.name, names)
@@ -450,6 +481,7 @@ class TestWarehouseRequestQuery(ERPNextTestSuite):
 	def test_description_includes_subject_when_present(self):
 		wr = _make_warehouse_request(request_reason="Shipping Request", subject="Descriptive Subject")
 		from ivm.warehouse.services.warehouse_request import warehouse_request_query
+
 		result = warehouse_request_query("Warehouse Request", wr.name, "name", 0, 20, {})
 		match = next(row for row in result if row[0] == wr.name)
 		self.assertEqual(match[1], f"{wr.name} - Descriptive Subject")
@@ -458,6 +490,7 @@ class TestWarehouseRequestQuery(ERPNextTestSuite):
 		wr = _make_warehouse_request(request_reason="Shipping Request", subject="Cancelled Search Target")
 		frappe.db.set_value("Warehouse Request", wr.name, "docstatus", 2)
 		from ivm.warehouse.services.warehouse_request import warehouse_request_query
+
 		result = warehouse_request_query("Warehouse Request", "Cancelled Search Target", "name", 0, 20, {})
 		names = {row[0] for row in result}
 		self.assertNotIn(wr.name, names)

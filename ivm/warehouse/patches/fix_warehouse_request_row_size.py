@@ -12,40 +12,39 @@ renamed fields that were never cleaned up at the database level.
 
 import frappe
 
-
 ORPHAN_COLUMNS = [
-    "warehouse_request_name",
-    "rasied_by",
-    "raised_by",
-    "machine_number_1",
-    "1_machine_number_1",
-    "_1_mac_address",
-    "testprose1",
-    "imported_equipment_numbers",
-    "number_4_task_sent",
+	"warehouse_request_name",
+	"rasied_by",
+	"raised_by",
+	"machine_number_1",
+	"1_machine_number_1",
+	"_1_mac_address",
+	"testprose1",
+	"imported_equipment_numbers",
+	"number_4_task_sent",
 ]
 
 
 def execute():
-    # Get actual columns in the table to avoid ALTER errors on missing columns
-    existing_columns = {
-        row[0]
-        for row in frappe.db.sql(
-            """SELECT COLUMN_NAME FROM information_schema.COLUMNS
+	# Get actual columns in the table to avoid ALTER errors on missing columns
+	existing_columns = {
+		row[0]
+		for row in frappe.db.sql(
+			"""SELECT COLUMN_NAME FROM information_schema.COLUMNS
                WHERE TABLE_NAME = 'tabWarehouse Request'
                AND TABLE_SCHEMA = DATABASE()"""
-        )
-    }
+		)
+	}
 
-    columns_to_drop = [c for c in ORPHAN_COLUMNS if c in existing_columns]
+	columns_to_drop = [c for c in ORPHAN_COLUMNS if c in existing_columns]
 
-    if not columns_to_drop:
-        print("No orphan columns found — nothing to do.")
-        return
+	if not columns_to_drop:
+		print("No orphan columns found — nothing to do.")
+		return
 
-    drop_clauses = ", ".join(f"DROP COLUMN `{c}`" for c in columns_to_drop)
-    query = f"ALTER TABLE `tabWarehouse Request` {drop_clauses}"
+	drop_clauses = ", ".join(f"DROP COLUMN `{c}`" for c in columns_to_drop)
+	query = f"ALTER TABLE `tabWarehouse Request` {drop_clauses}"
 
-    print(f"Dropping {len(columns_to_drop)} orphan columns: {columns_to_drop}")
-    frappe.db.sql_ddl(query)
-    print("Done.")
+	print(f"Dropping {len(columns_to_drop)} orphan columns: {columns_to_drop}")
+	frappe.db.sql_ddl(query)
+	print("Done.")
