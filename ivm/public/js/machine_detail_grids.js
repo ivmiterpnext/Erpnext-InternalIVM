@@ -33,7 +33,9 @@ function injectBinsEditor(frm, cdt, cdn) {
 	let existing = [];
 	try {
 		existing = row.bins_data ? JSON.parse(row.bins_data) : [];
-	} catch (e) {}
+	} catch (e) {
+		console.warn("Failed to parse bins_data", row.bins_data, e);
+	}
 
 	$container.html(`
 		<table class="table table-bordered table-sm mb-2">
@@ -186,7 +188,9 @@ function renderBinsReadOnly($container, value, df) {
 	let bins = [];
 	try {
 		bins = value ? JSON.parse(value) : [];
-	} catch (e) {}
+	} catch (e) {
+		console.warn("Failed to parse bins_data", value, e);
+	}
 
 	if (!bins.length) {
 		$container.html(

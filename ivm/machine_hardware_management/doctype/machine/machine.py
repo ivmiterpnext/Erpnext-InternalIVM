@@ -108,7 +108,6 @@ class Machine(BaseVirtualDoctype):
 		if "time_zone_id" in data:
 			data["time_zone_id"] = str(data["time_zone_id"])
 
-		print("data: ", data)
 		return data
 
 	def process_update_response(self, data):

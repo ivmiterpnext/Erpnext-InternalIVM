@@ -120,6 +120,12 @@
 		"after": true,
 		"qz": true,
 		"localforage": true,
-		"extend_cscript": true
+		"extend_cscript": true,
+		"ivm": true,
+		"injectBinsEditor": true,
+		"setupMachineDetailGrids": true,
+		"validateUniqueMachineNames": true,
+		"renderBinsReadOnly": true,
+		"Html5Qrcode": true
 	}
 }

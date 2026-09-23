@@ -9,10 +9,10 @@ window.verify = {};
 
 
 login.bind_events = function () {
-   
+
 	$(window).on("hashchange", function () {
 		login.route();
-        
+
 	});
 
 
@@ -105,7 +105,7 @@ login.bind_events = function () {
 	});
 	{% endif %}
 
-   
+
 }
 
 
@@ -133,7 +133,7 @@ login.reset_sections = function (hide) {
 login.login = function () {
 	login.reset_sections();
 	$(".for-login").toggle(true);
-   
+
 }
 
 login.email = function () {
@@ -175,7 +175,7 @@ login.signup = function () {
 
 // Login
 login.call = function (args, callback) {
-    
+
 	login.set_status('{{ _("Verifying...") }}', 'blue');
 
 	return frappe.call({

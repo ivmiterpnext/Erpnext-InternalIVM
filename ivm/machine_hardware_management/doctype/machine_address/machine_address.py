@@ -74,7 +74,6 @@ class MachineAddress(BaseVirtualDoctype):
 	def process_insert_response(self, data):
 		if "id" in data:
 			self.name = str(data["id"])
-		print("Insert response data:", data)
 		set_attrs_from_dict(self, data)
 
 	# Update Overrides

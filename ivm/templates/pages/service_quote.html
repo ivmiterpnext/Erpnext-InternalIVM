@@ -4,7 +4,7 @@
 <div class="container">
     <a href="/service-quotes">&larr; Back to Service Quotes</a>
     <h1>Service Quote {{ quote.name }}</h1>
-    
+
     <div class="row mb-4">
         <div class="col-md-6">
             <p><strong>Contact:</strong> {{ quote.contact }}</p>
@@ -16,7 +16,7 @@
             <p><strong>Sales Representative:</strong> {{ quote.sales_representative }}</p>
         </div>
     </div>
-    
+
     <div class="card mb-4">
         <div class="card-header">
             <h5>Quote Items</h5>
@@ -50,7 +50,7 @@
             </table>
         </div>
     </div>
-    
+
     <div class="card mb-4">
         <div class="card-header">
             <h5>Terms & Conditions</h5>
@@ -59,11 +59,11 @@
             {{ quote.terms | safe }}
         </div>
     </div>
-    
+
     <div class="mb-4">
         <a href="{{ pdf_url }}" class="btn btn-primary" target="_blank">View As PDF</a>
     </div>
-    
+
     {% if signer.status == "Pending" %}
     <div class="card">
         <div class="card-header">
@@ -73,10 +73,10 @@
             <form id="signer-response-form">
                 <div class="form-group">
                     <label for="typed-name">Your Name (as it appears on the agreement)</label>
-                    <input type="text" class="form-control" id="typed-name" 
+                    <input type="text" class="form-control" id="typed-name"
                            value="{{ signer.contact }}" required>
                 </div>
-                
+
                 <div class="form-group">
                     <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input" id="agree-terms" required>
@@ -85,7 +85,7 @@
                         </label>
                     </div>
                 </div>
-                
+
                 <div class="btn-group" id="response-buttons" role="group">
                     <button type="button" class="btn btn-success" id="accept-btn">Accept</button>
                     <button type="button" class="btn btn-danger" id="decline-btn">Decline</button>
@@ -103,7 +103,7 @@
             </form>
         </div>
     </div>
-    
+
     <script>
     document.getElementById('accept-btn').addEventListener('click', function() {
         if (!document.getElementById('agree-terms').checked) {
@@ -112,7 +112,7 @@
         }
         submitResponse('accept');
     });
-    
+
     document.getElementById('decline-btn').addEventListener('click', function() {
         document.getElementById('response-buttons').style.display = 'none';
         document.getElementById('decline-reason-section').style.display = 'block';
@@ -127,10 +127,10 @@
         const reason = document.getElementById('decline-reason').value.trim();
         submitResponse('decline', reason);
     });
-    
+
     function submitResponse(action, reason) {
         const typedName = document.getElementById('typed-name').value;
-        const method = action === 'accept' ? 
+        const method = action === 'accept' ?
             'ivm.client_portal.services.signing.accept_quote' :
             'ivm.client_portal.services.signing.decline_quote';
 
@@ -142,7 +142,7 @@
         if (action === 'decline') {
             args.reason = reason || '';
         }
-        
+
         frappe.call({
             method: method,
             args: args,

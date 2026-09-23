@@ -22,6 +22,35 @@
             "presentation": { "reveal": "silent", "panel": "shared" },
             "runOptions": { "runOn": "folderOpen" },
             "group": { "kind": "build", "isDefault": true }
+        },
+        {
+            "label": "ESLint: Check Workspace",
+            "type": "shell",
+            "command": "${workspaceFolder}/node_modules/.bin/eslint",
+            "args": [".", "--format=compact"],
+            "problemMatcher": "$eslint-compact",
+            "presentation": { "reveal": "silent", "panel": "shared" },
+            "runOptions": { "runOn": "folderOpen" },
+            "group": "build"
+        },
+        {
+            "label": "Prettier: Check Workspace",
+            "type": "shell",
+            "command": "${workspaceFolder}/node_modules/.bin/prettier",
+            "args": ["--check", "ivm/**/*.js"],
+            "problemMatcher": {
+                "owner": "prettier",
+                "severity": "warning",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^\\[warn\\]\\s+(.*)$",
+                    "file": 1,
+                    "message": 1
+                }
+            },
+            "presentation": { "reveal": "silent", "panel": "shared" },
+            "runOptions": { "runOn": "folderOpen" },
+            "group": "build"
         }
     ]
 }

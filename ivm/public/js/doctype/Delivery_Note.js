@@ -1,27 +1,34 @@
-frappe.ui.form.on('Delivery Note', {
-	refresh: function(frm) {
+frappe.ui.form.on("Delivery Note", {
+	refresh: function (frm) {
 		if (frm.doc.custom_related_warehouse_request) {
-			frm.add_custom_button(__('Warehouse Request'), function() {
-				frappe.set_route('Form', 'Warehouse Request', frm.doc.custom_related_warehouse_request);
-			}, __('View'));
+			frm.add_custom_button(
+				__("Warehouse Request"),
+				function () {
+					frappe.set_route(
+						"Form",
+						"Warehouse Request",
+						frm.doc.custom_related_warehouse_request
+					);
+				},
+				__("View")
+			);
 		}
 	},
 
-	
-	custom_related_warehouse_request: function(frm) {
+	custom_related_warehouse_request: function (frm) {
 		if (frm.doc.custom_related_warehouse_request) {
 			frappe.call({
-				method: 'ivm.warehouse.services.stock_entry.get_stock_entry_items_from_warehouse_request',
+				method: "ivm.warehouse.services.stock_entry.get_stock_entry_items_from_warehouse_request",
 				args: {
-					warehouse_request: frm.doc.custom_related_warehouse_request
+					warehouse_request: frm.doc.custom_related_warehouse_request,
 				},
 
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message && r.message.length > 0) {
-						frm.clear_table('items');
-						
-						r.message.forEach(function(item) {
-							var row = frm.add_child('items');
+						frm.clear_table("items");
+
+						r.message.forEach(function (item) {
+							var row = frm.add_child("items");
 							row.item_code = item.item_code;
 							row.item_name = item.item_name;
 							row.description = item.description;
@@ -33,29 +40,36 @@ frappe.ui.form.on('Delivery Note', {
 							row.rate = item.rate || 0;
 							row.price_list_rate = item.price_list_rate || 0;
 						});
-						
-						frm.refresh_field('items');
-						frappe.show_alert({
-							message: __('Items loaded from Warehouse Request {0}', [frm.doc.custom_related_warehouse_request]),
-							indicator: 'green'
-						}, 3);
+
+						frm.refresh_field("items");
+						frappe.show_alert(
+							{
+								message: __("Items loaded from Warehouse Request {0}", [
+									frm.doc.custom_related_warehouse_request,
+								]),
+								indicator: "green",
+							},
+							3
+						);
 					} else {
 						frappe.msgprint({
-							title: __('No Items Found'),
-							message: __('No items found for Warehouse Request {0}', [frm.doc.custom_related_warehouse_request]),
-							indicator: 'orange'
+							title: __("No Items Found"),
+							message: __("No items found for Warehouse Request {0}", [
+								frm.doc.custom_related_warehouse_request,
+							]),
+							indicator: "orange",
 						});
 					}
 				},
-				
-				error: function(r) {
+
+				error: function (r) {
 					frappe.msgprint({
-						title: __('Error'),
-						message: __('Could not fetch items from Warehouse Request'),
-						indicator: 'red'
+						title: __("Error"),
+						message: __("Could not fetch items from Warehouse Request"),
+						indicator: "red",
 					});
-				}
+				},
 			});
 		}
-	}
+	},
 });

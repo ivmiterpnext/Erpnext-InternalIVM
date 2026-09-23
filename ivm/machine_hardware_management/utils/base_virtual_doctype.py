@@ -50,8 +50,6 @@ class BaseVirtualDoctype(Document):
 		if cached:
 			return cached
 
-		print("endpoint: ", cls.endpoint)
-		print("params: ", params)
 		try:
 			response = cls.get_list_via_api(cls.endpoint, params)
 			response_data = cls.extract_data(response)
