@@ -517,6 +517,11 @@ class TestBuildPickListExcelPayload(ERPNextTestSuite):
         self.assertEqual(data[3], [None] * 7)
         self.assertEqual(data[4], [None, None, None, None, None, None, "=SUM(G2:G3)"])
 
+        self.assertEqual(
+            payload["total_cells"],
+            [(1, "=C2*E2", 20), (2, "=C3*E3", 60), (4, "=SUM(G2:G3)", 80)],
+        )
+
     def test_empty_pick_list_has_no_sum_formula(self):
         name = create_pick_list(COMPANY)
         payload = _build_pick_list_excel_payload(name)
@@ -524,6 +529,7 @@ class TestBuildPickListExcelPayload(ERPNextTestSuite):
         self.assertEqual(len(data), 3)  # header + blank spacer + blank total row
         self.assertEqual(data[1], [None] * 7)
         self.assertEqual(data[2], [None] * 7)
+        self.assertEqual(payload["total_cells"], [])
 
     def test_price_and_total_column_widths_are_fixed(self):
         name = create_pick_list(COMPANY)
@@ -618,6 +624,52 @@ class TestBuildPickListExcelPayload(ERPNextTestSuite):
         payload = _build_pick_list_excel_payload(name)
         self.assertIsNone(payload["last_item_row_idx"])
 
+    def test_missing_price_warning_shown_when_any_rate_is_zero(self):
+        item_a = make_item()
+        item_b = make_item()
+        _seed_stock(item_a.name, qty=5, rate=10)
+        # item_b: no stock seeded (no Bin) and no Item.valuation_rate set — rate resolves to 0
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item_a.name, WAREHOUSE, 2)
+        pl = frappe.get_doc("Pick List", name)
+        pl.append("locations", {
+            "item_code": item_b.name,
+            "item_name": item_b.item_name,
+            "warehouse": WAREHOUSE,
+            "qty": 3,
+            "picked_qty": 3,
+            "uom": item_b.stock_uom,
+            "stock_uom": item_b.stock_uom,
+            "conversion_factor": 1,
+        })
+        pl.flags.ignore_validate = True
+        pl.save()
+
+        payload = _build_pick_list_excel_payload(name)
+        self.assertTrue(payload["has_missing_price"])
+        grand_total_row = payload["data"][4]
+        self.assertEqual(grand_total_row[0], "* Missing Price data — Total may be understated")
+        self.assertIn((4, 0), payload["styles"]["cell_styles"])
+
+    def test_no_missing_price_warning_when_all_rates_resolved(self):
+        item_a = make_item()
+        item_b = make_item()
+        _seed_stock(item_a.name, qty=5, rate=10)
+        _seed_stock(item_b.name, qty=5, rate=20)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item_a.name, WAREHOUSE, 2)
+        add_item_to_pick_list(name, item_b.name, WAREHOUSE, 3)
+
+        payload = _build_pick_list_excel_payload(name)
+        self.assertFalse(payload["has_missing_price"])
+        self.assertIsNone(payload["data"][4][0])
+        self.assertNotIn((4, 0), payload["styles"]["cell_styles"])
+
+    def test_no_missing_price_warning_when_pick_list_empty(self):
+        name = create_pick_list(COMPANY)
+        payload = _build_pick_list_excel_payload(name)
+        self.assertFalse(payload["has_missing_price"])
+
 
 class TestExportPickListCostExcel(ERPNextTestSuite):
     """export_pick_list_cost_excel"""
@@ -676,6 +728,62 @@ class TestExportPickListCostExcel(ERPNextTestSuite):
         self.assertGreater(ws.column_dimensions["G"].width, 11)
         # alignment/format on those columns should also still be correct
         self.assertEqual(ws["A2"].alignment.horizontal, "left")
+
+    def test_total_column_cached_values_are_correct_not_zero(self):
+        import openpyxl
+        from io import BytesIO
+
+        item_a = make_item()
+        item_b = make_item()
+        _seed_stock(item_a.name, qty=5, rate=10)
+        _seed_stock(item_b.name, qty=5, rate=20)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item_a.name, WAREHOUSE, 2)
+        add_item_to_pick_list(name, item_b.name, WAREHOUSE, 3)
+
+        export_pick_list_cost_excel(name)
+        content = frappe.response["filecontent"]
+
+        wb = openpyxl.load_workbook(BytesIO(content), data_only=True)
+        ws = wb.active
+        self.assertEqual(ws["G2"].value, 20)
+        self.assertEqual(ws["G3"].value, 60)
+        self.assertEqual(ws["G5"].value, 80)
+
+    def test_export_shows_missing_price_warning_in_red(self):
+        import openpyxl
+        from io import BytesIO
+
+        item_a = make_item()
+        item_b = make_item()
+        _seed_stock(item_a.name, qty=5, rate=10)
+        name = create_pick_list(COMPANY)
+        add_item_to_pick_list(name, item_a.name, WAREHOUSE, 2)
+        pl = frappe.get_doc("Pick List", name)
+        pl.append("locations", {
+            "item_code": item_b.name,
+            "item_name": item_b.item_name,
+            "warehouse": WAREHOUSE,
+            "qty": 3,
+            "picked_qty": 3,
+            "uom": item_b.stock_uom,
+            "stock_uom": item_b.stock_uom,
+            "conversion_factor": 1,
+        })
+        pl.flags.ignore_validate = True
+        pl.save()
+
+        export_pick_list_cost_excel(name)
+        content = frappe.response["filecontent"]
+
+        wb = openpyxl.load_workbook(BytesIO(content))
+        ws = wb.active
+        cell = ws["A5"]
+        self.assertEqual(cell.value, "* Missing Price data — Total may be understated")
+        # openpyxl returns color as ARGB hex string, e.g. "FFFF0000" (red) or "FF0000FF" (blue)
+        self.assertIn(cell.font.color.rgb[-6:].upper(), ["FF0000", "0000FF"])  # red or blue in RGB
+        # More robust: check if it's red (FF0000)
+        self.assertEqual(cell.font.color.rgb[-6:].upper(), "FF0000")
 
 
 class TestBuildItemLink(ERPNextTestSuite):

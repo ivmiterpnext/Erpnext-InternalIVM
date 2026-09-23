@@ -305,16 +305,16 @@ def _build_pick_list_excel_payload(pick_list: str) -> dict:
     export: Inventory Part / Qty Picked / Price / Total columns (with
     spacer columns B/D/F), no bold/fill styling, matching the company's
     standard Pick List template. Total column uses Excel formulas
-    (=Cn*En per row, =SUM(...) for the grand total) rather than static
-    values — accepted trade-off: xlsxwriter caches a formula's result as
-    0 unless an explicit value is supplied, so Excel's Protected View
-    (the default for any downloaded file) will show 0 until the user
-    clicks "Enable Editing", after which the formulas recalculate
-    correctly. The last item row gets a thin bottom border across
-    columns A-G, matching the template's rule line before the total.
-    Returns `last_item_row_idx` so the caller can scope an AutoFilter to
-    the header + item rows only, excluding the blank spacer/total rows
-    below."""
+    (=Cn*En per row, =SUM(...) for the grand total) with cached values
+    explicitly supplied alongside each formula, so the Total column always
+    displays the correct value immediately on open, regardless of Protected
+    View, Enable Editing, or Excel's calculation mode. The last item row
+    gets a thin bottom border across columns A-G, matching the template's
+    rule line before the total. Grand total row displays a red warning
+    message in column A if any item's Price resolved to 0, since a $0 rate
+    is otherwise indistinguishable from a real cost value. Returns
+    `last_item_row_idx` so the caller can scope an AutoFilter to the header
+    + item rows only, excluding the blank spacer/total rows below."""
     rows = get_pick_list_cost_rows(pick_list)
 
     data = [["Inventory Part ", None, "Qty Picked", None, "Price", None, "Total"]]
@@ -331,20 +331,32 @@ def _build_pick_list_excel_payload(pick_list: str) -> dict:
 
     last_data_row = first_data_row + len(rows) - 1
 
+    total_cells = []
+
     for i, excel_row in enumerate(range(first_data_row, last_data_row + 1)):
-        data[i + 1][6] = f"=C{excel_row}*E{excel_row}"
+        formula = f"=C{excel_row}*E{excel_row}"
+        data[i + 1][6] = formula
+        total_cells.append((i + 1, formula, rows[i]["amount"]))
 
     data.append([None] * 7)  # blank spacer row before total
 
+    has_missing_price = bool(rows) and any(row["rate"] == 0 for row in rows)
+
     if rows:
-        data.append([None, None, None, None, None, None, f"=SUM(G{first_data_row}:G{last_data_row})"])
+        grand_total_row_idx = len(data)
+        grand_total_formula = f"=SUM(G{first_data_row}:G{last_data_row})"
+        warning_text = "* Missing Price data — Total may be understated" if has_missing_price else None
+        data.append([warning_text, None, None, None, None, None, grand_total_formula])
+        total_cells.append((grand_total_row_idx, grand_total_formula, sum(row["amount"] for row in rows)))
     else:
         data.append([None] * 7)
+        grand_total_row_idx = None
 
     ALIGN_STYLE_ID = 0
     CURRENCY_STYLE_ID = 1
     BORDER_STYLE_ID = 2
     HYPERLINK_STYLE_ID = 3
+    WARNING_STYLE_ID = 4
 
     styles = {
         "styles": [
@@ -352,6 +364,7 @@ def _build_pick_list_excel_payload(pick_list: str) -> dict:
             {"num_format": ACCOUNTING_NUMBER_FORMAT},
             {"bottom": 1},
             {"font_color": "blue", "underline": 1, "align": "left", "valign": "vcenter"},
+            {"font_color": "red"},
         ],
         "column_styles": {
             0: [ALIGN_STYLE_ID],
@@ -373,6 +386,9 @@ def _build_pick_list_excel_payload(pick_list: str) -> dict:
                 styles["cell_styles"][(last_item_row_idx, 0)] = [HYPERLINK_STYLE_ID, BORDER_STYLE_ID]
             else:
                 styles["cell_styles"][(last_item_row_idx, col_idx)] = [BORDER_STYLE_ID]
+
+    if has_missing_price:
+        styles["cell_styles"][(grand_total_row_idx, 0)] = [WARNING_STYLE_ID]
 
     inventory_part_texts = ["Inventory Part "] + [
         f"{row['item_code']}: {row['item_name']}" for row in rows
@@ -396,6 +412,8 @@ def _build_pick_list_excel_payload(pick_list: str) -> dict:
         "styles": styles,
         "filename": filename,
         "last_item_row_idx": last_item_row_idx,
+        "total_cells": total_cells,
+        "has_missing_price": has_missing_price,
     }
 
 
@@ -405,19 +423,21 @@ def export_pick_list_cost_excel(pick_list):
     company's standard Pick List template: Inventory Part / Qty Picked /
     Price / Total columns, no header identifier rows, no bold styling,
     and a sort/filter AutoFilter on the header row scoped to the item
-    rows (excluding the blank spacer/total rows). Column widths for
-    columns that also carry a column-level style (Inventory Part, Price,
-    Total) are re-applied after make_xlsx() runs, working around a core
-    bug where make_xlsx()'s column-style loop calls ws.set_column()
-    without re-passing the width set by its earlier column-width loop,
-    silently resetting it to xlsxwriter's internal default."""
+    rows (excluding the blank spacer/total rows). Total column formulas
+    are written with cached values so the column displays correctly
+    immediately on open. Column widths for columns that also carry a
+    column-level style (Inventory Part, Price, Total) are re-applied
+    after make_xlsx() runs, working around a core bug where make_xlsx()'s
+    column-style loop calls ws.set_column() without re-passing the width
+    set by its earlier column-width loop, silently resetting it to
+    xlsxwriter's internal default."""
     if not frappe.has_permission("Pick List", "read", pick_list):
         frappe.throw("Not permitted", frappe.PermissionError)
 
     payload = _build_pick_list_excel_payload(pick_list)
 
     xlsx_stream = BytesIO()
-    wb = xlsxwriter.Workbook(xlsx_stream, {"constant_memory": True})
+    wb = xlsxwriter.Workbook(xlsx_stream)
 
     make_xlsx(
         payload["data"],
@@ -437,6 +457,16 @@ def export_pick_list_cost_excel(pick_list):
     for col_idx, width in enumerate(payload["column_widths"]):
         if width and col_idx in styled_column_formats:
             ws.set_column(col_idx, col_idx, width, styled_column_formats[col_idx])
+
+    last_row_total_format = wb.add_format({"num_format": ACCOUNTING_NUMBER_FORMAT, "bottom": 1})
+
+    for row_idx, formula, value in payload["total_cells"]:
+        cell_format = (
+            last_row_total_format
+            if row_idx == payload["last_item_row_idx"]
+            else styled_column_formats[6]
+        )
+        ws.write_formula(row_idx, 6, formula, cell_format, value)
 
     if payload["last_item_row_idx"] is not None:
         ws.autofilter(0, 0, payload["last_item_row_idx"], 6)
