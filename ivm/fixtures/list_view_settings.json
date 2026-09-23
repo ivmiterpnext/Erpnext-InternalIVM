@@ -9,8 +9,8 @@
   "disable_sidebar_stats": 0,
   "docstatus": 0,
   "doctype": "List View Settings",
-  "fields": "[{\"fieldname\":\"subject\",\"label\":\"Subject\"},{\"fieldname\":\"customer\",\"label\":\"Customer\"},{\"fieldname\":\"status_field\",\"label\":\"Status\"},{\"fieldname\":\"priority\",\"label\":\"Priority\"},{\"fieldname\":\"issue_type\",\"label\":\"Ticket Type\"}]",
-  "modified": "2026-09-11 23:51:13.122566",
+   "fields": "[{\"fieldname\":\"subject\",\"label\":\"Subject\"},{\"fieldname\":\"customer\",\"label\":\"Customer\"},{\"fieldname\":\"status_field\",\"label\":\"Status\"},{\"fieldname\":\"status\",\"label\":\"Status\"},{\"fieldname\":\"priority\",\"label\":\"Priority\"},{\"fieldname\":\"issue_type\",\"label\":\"Ticket Type\"}]",
+   "modified": "2026-09-22 12:00:00.000000",
   "name": "Issue",
   "show_tags": 0
  },
