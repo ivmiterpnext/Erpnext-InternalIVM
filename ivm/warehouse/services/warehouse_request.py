@@ -439,6 +439,24 @@ def render_machine_details_html(doc):
 	return "".join(_render_print_section(s) for s in sections)
 
 
+def _depends_on_satisfied(depends_on, row) -> bool:
+	"""Evaluate a docfield's depends_on string against a document.
+
+	Mirrors ivm.EmbeddedForm._evaluate_depends_on's fail-open behavior on the
+	client: unparseable/unexpected conditions default to visible.
+	"""
+	if not depends_on:
+		return True
+	condition = depends_on[len("eval:"):] if depends_on.startswith("eval:") else depends_on
+	# Tolerate JS-authored operators in case a future depends_on is copied verbatim.
+	condition = condition.replace("&&", " and ").replace("||", " or ").replace("===", "==").replace("!==", "!=")
+	try:
+		return bool(eval(condition, {"__builtins__": {}}, {"doc": row}))
+	except Exception:
+		frappe.log_error(title="Machine details print depends_on eval failed", message=f"{depends_on!r} on {row.doctype}")
+		return True
+
+
 def _build_print_sections(meta, row):
 	"""Walk the child doctype's meta.fields and group renderable fields into
 	a list of sections, each containing a list of columns, each containing a
@@ -454,7 +472,7 @@ def _build_print_sections(meta, row):
 			current_section = {
 				"label": df.label or "",
 				"columns": [[]],
-				"hidden": bool(df.hidden),
+				"hidden": bool(df.hidden) or not _depends_on_satisfied(df.depends_on, row),
 			}
 			continue
 
@@ -463,6 +481,9 @@ def _build_print_sections(meta, row):
 			continue
 
 		if current_section["hidden"] or df.hidden:
+			continue
+
+		if not _depends_on_satisfied(df.depends_on, row):
 			continue
 
 		field_html = _render_field_for_print(df, row)

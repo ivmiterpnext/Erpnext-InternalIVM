@@ -286,7 +286,6 @@ _COMMON_LOCKER_FIELDS: dict[str, str] = {
 SMARTSTATION_FIELD_MAP: dict[str, str] = {
     **_COMMON_MACHINE_FIELDS,
     "name": "machine_name",  # SmartStation uses "name" not "machine_name"; overrides common
-    "serial_validation": "serial_validaton",  # Note: typo in Frappe fieldname
     "casters": "casters",
     "machine_key": "machine_key",
     "offline_sales": "offline_sales",

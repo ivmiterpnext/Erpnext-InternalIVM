@@ -137,27 +137,30 @@
    "fieldtype": "Check",
    "label": "SmartScreen"
   },
-  {
-   "fieldname": "workflow",
-   "fieldtype": "Select",
-   "label": "Workflow",
-   "mandatory_depends_on": "eval:doc.smartscreen",
-   "options": "\nFree Vend\nAuto Vend\nHybrid Vend (Free Vend with Assignments)\nEnhanced Assignments\nVend and Return"
-  },
-  {
-   "fieldname": "serial_validation",
-   "fieldtype": "Select",
-   "label": "Serial Validation",
-   "mandatory_depends_on": "eval:doc.smartscreen",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "home_screen_logo",
-   "fieldtype": "Select",
-   "label": "Home Screen Logo",
-   "mandatory_depends_on": "eval:doc.smartscreen",
-   "options": "\nIVM Logo\nCient Logo"
-  },
+   {
+    "depends_on": "eval:doc.smartscreen",
+    "fieldname": "workflow",
+    "fieldtype": "Select",
+    "label": "Workflow",
+    "mandatory_depends_on": "eval:doc.smartscreen",
+    "options": "\nFree Vend\nAuto Vend\nHybrid Vend (Free Vend with Assignments)\nEnhanced Assignments\nVend and Return"
+   },
+   {
+    "depends_on": "eval:doc.smartscreen",
+    "fieldname": "serial_validation",
+    "fieldtype": "Select",
+    "label": "Serial Validation",
+    "mandatory_depends_on": "eval:doc.smartscreen",
+    "options": "\nYes\nNo"
+   },
+   {
+    "depends_on": "eval:doc.smartscreen",
+    "fieldname": "home_screen_logo",
+    "fieldtype": "Select",
+    "label": "Home Screen Logo",
+    "mandatory_depends_on": "eval:doc.smartscreen",
+    "options": "\nIVM Logo\nCient Logo"
+   },
   {
    "fieldname": "hidden_fields_section",
    "fieldtype": "Section Break",
