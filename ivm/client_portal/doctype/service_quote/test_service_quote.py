@@ -3,7 +3,6 @@
 from unittest.mock import patch
 
 import frappe
-from erpnext.tests.utils import ERPNextTestSuite
 from frappe.utils import add_days, today
 
 from ivm.client_portal.doctype.service_quote.service_quote import has_website_permission
@@ -41,7 +40,7 @@ def _make_quote(top_contact_name, signers=None):
 	return doc
 
 
-class TestHasWebsitePermission(ERPNextTestSuite):
+class TestHasWebsitePermission:
 	"""has_website_permission"""
 
 	def test_guest_is_denied(self):
@@ -121,7 +120,7 @@ def _make_draft_quote(**overrides):
 	return doc
 
 
-class TestBeforeInsertValidUntil(ERPNextTestSuite):
+class TestBeforeInsertValidUntil:
 	"""before_insert: valid_until default"""
 
 	def test_defaults_to_30_days_when_unset(self):
@@ -134,7 +133,7 @@ class TestBeforeInsertValidUntil(ERPNextTestSuite):
 		self.assertEqual(doc.valid_until, explicit)
 
 
-class TestComputeItemAmounts(ERPNextTestSuite):
+class TestComputeItemAmounts:
 	"""validate: _compute_item_amounts"""
 
 	def test_amount_computed_from_qty_and_rate(self):
@@ -154,7 +153,7 @@ class TestComputeItemAmounts(ERPNextTestSuite):
 		self.assertEqual(doc.items[0].amount, 0)
 
 
-class TestComputeGrandTotal(ERPNextTestSuite):
+class TestComputeGrandTotal:
 	"""validate: _compute_grand_total"""
 
 	def test_sums_all_item_amounts(self):
@@ -178,7 +177,7 @@ class TestComputeGrandTotal(ERPNextTestSuite):
 		self.assertEqual(doc.grand_total, 17)
 
 
-class TestResolveCustomerOrOrganization(ERPNextTestSuite):
+class TestResolveCustomerOrOrganization:
 	"""validate: _resolve_customer_or_organization"""
 
 	def test_new_business_sets_organization_clears_customer(self):
