@@ -85,9 +85,8 @@ def handle_company_created(
 			defaults={"organization_name": f"HS-{hubspot_company_id}"},
 		)
 		if not is_new:
-			frappe.log_error(
-				title=f"HubSpot: CRM Organization already exists for company {hubspot_company_id}",
-				message="Skipping duplicate company creation.",
+			frappe.logger("hubspot").info(
+				f"CRM Organization already exists for company {hubspot_company_id} — skipping"
 			)
 			return
 		_sync_company(hubspot_company_id, doc.name)

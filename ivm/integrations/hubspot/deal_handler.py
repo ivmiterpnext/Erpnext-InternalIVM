@@ -313,7 +313,7 @@ def _resolve_or_provision_org(
 	)
 	from ivm.integrations.hubspot.company_handler import handle_company_created
 
-	handle_company_created(hubspot_company_id)
+	handle_company_created(hubspot_company_id=hubspot_company_id)
 	org_name = frappe.db.get_value(
 		"CRM Organization",
 		{HUBSPOT_COMPANY_ID_FIELD: str(hubspot_company_id)},

@@ -50,6 +50,12 @@ def retry_via_reenqueue(
 	def decorator(func: Callable) -> Callable:
 		@functools.wraps(func)
 		def wrapper(*args: Any, **kwargs: Any) -> Any:
+			if args:
+				raise TypeError(
+					f"{func.__qualname__}() was called with positional args {args!r}, "
+					f"but @retry_via_reenqueue requires keyword-only calls "
+					f"(positional args are silently dropped on re-enqueue)."
+				)
 			try:
 				return func(*args, **kwargs)
 			except exceptions as e:

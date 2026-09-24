@@ -190,13 +190,21 @@ def handle_webhook() -> dict[str, str]:
 		)
 		return {"status": "error", "message": "Invalid JSON payload"}
 
+	any_event_failed = False
 	for event in events:
 		_logger.info(
 			f"Received event: subscriptionType={event.get('subscriptionType')}, "
 			f"objectTypeId={event.get('objectTypeId')}, "
 			f"objectId={event.get('objectId')}"
 		)
-		_route_event(event)
+		try:
+			_route_event(event)
+		except Exception:
+			any_event_failed = True
+
+	if any_event_failed:
+		frappe.local.response.http_status_code = 500
+		return {"status": "error", "message": "One or more events could not be enqueued"}
 
 	return {"status": "ok"}
 
@@ -241,3 +249,4 @@ def _route_event(event: dict[str, Any]) -> None:
 			f"(objectTypeId={object_type_id}, objectId={object_id_str})",
 			message=frappe.get_traceback(with_context=True),
 		)
+		raise
