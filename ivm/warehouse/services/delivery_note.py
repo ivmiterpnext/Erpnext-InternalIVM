@@ -102,6 +102,8 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
 	)
 
 	if wr.source_build_request:
-		frappe.db.set_value("Warehouse Request", wr.source_build_request, "status", "Closed")
+		build_wr = frappe.get_doc("Warehouse Request", wr.source_build_request)
+		build_wr.status = "Closed"
+		build_wr.save(ignore_permissions=True)
 
 	return dn.name

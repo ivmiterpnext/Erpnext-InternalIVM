@@ -8,35 +8,216 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 fixtures = [
-	"Issue Type",
-	"Campaign",
+	{
+		"dt": "Issue Type",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Change Request",
+					"Reconfiguration",
+					"Offboarding",
+					"Onboarding",
+					"Permission Change",
+					"IT",
+					"Desktop Support",
+					"Vending Management",
+					"Receivable",
+					"Support",
+				],
+			]
+		],
+	},
 	"Case Reason",
-	"Translation",
+	{
+		"dt": "Translation",
+		"filters": [["source_text", "in", ["Projects", "Project", "Issue", "User Group"]]],
+	},
 	"Connectivity Type",
 	"Card Reader Type",
-	"List View Settings",
-	"Workflow Action Master",
-	"Custom DocPerm",
-	"Workflow",
-	"Property Setter",
-	"Workflow State",
-	"Industry Type",
-	"Role",
-	"Custom Field",
-	"Project Type",
+	{
+		"dt": "List View Settings",
+		"filters": [["name", "in", ["Issue", "Project", "Warehouse Request", "Version", "Lead"]]],
+	},
+	{
+		"dt": "Workflow Action Master",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Approve",
+					"Reject",
+					"Review",
+					"Set As Beginning Stage",
+					"Set As Active Dialogue",
+					"Set As Pending Contract",
+					"Set As Contract Sent",
+					"Set As Redline/PO",
+					"Set As Closed Lost",
+					"Set As Closed Won",
+				],
+			]
+		],
+	},
+	{
+		"dt": "Custom DocPerm",
+		"filters": [
+			[
+				"role",
+				"in",
+				[
+					"CEO",
+					"COO",
+					"CTO",
+					"Graphic Designer",
+					"Integration",
+					"ITAdmin",
+					"Management",
+					"Operations",
+					"President",
+					"Regional Sales Director",
+					"S&I Manager",
+					"Sales Representatives",
+					"Support",
+					"Warehouse",
+					"Technician",
+				],
+			]
+		],
+	},
+	{"dt": "Workflow", "filters": [["document_type", "=", "Opportunity"]]},
+	{
+		"dt": "Workflow State",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Pending",
+					"Approved",
+					"Rejected",
+					"Active Dialogue",
+					"Pending Contract",
+					"Contract Sent",
+					"Redline/PO",
+					"Closed Won",
+					"Closed Lost",
+					"Beginning Stages",
+					"Discovery",
+				],
+			]
+		],
+	},
+	{
+		"dt": "Role",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"CEO",
+					"COO",
+					"CTO",
+					"Graphic Designer",
+					"Integration",
+					"ITAdmin",
+					"Management",
+					"Operations",
+					"President",
+					"Regional Sales Director",
+					"S&I Manager",
+					"Sales Representatives",
+					"Support",
+					"Warehouse",
+					"Technician",
+				],
+			]
+		],
+	},
+	{
+		"dt": "Project Type",
+		"filters": [["name", "in", ["Internal", "Other", "External", "Deployment"]]],
+	},
 	"CRM Pipeline",
-	"CRM Deal Status",
-	"Server Script",
-	"Client Script",
-	"Workspace",
-	"Workspace Shortcut",
+	{
+		"dt": "CRM Deal Status",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Lost",
+					"On-Hold / Timing",
+					"Discovery",
+					"Solution Design",
+					"Presentation",
+					"Contracting",
+					"Due Diligence",
+					"Proposal & Pricing",
+					"RFP / Decision TBD",
+					"Won",
+				],
+			]
+		],
+	},
+	{
+		"dt": "Server Script",
+		"filters": [["module", "=", "IVM"]],
+	},
+	{
+		"dt": "Client Script",
+		"filters": [["module", "=", "IVM"]],
+	},
+	{"dt": "Workspace", "filters": [["module", "is", "not set"], ["app", "is", "not set"]]},
+	# NOTE: "Workspace Shortcut" is intentionally NOT declared as its own top-level
+	# fixture here. Workspace's own fixture export already embeds its full
+	# "shortcuts" child table via as_dict(), so a separate standalone declaration
+	# would cause every sync_fixtures() call to insert two full copies of every
+	# shortcut (see ivm.patches.dedupe_workspace_shortcuts for the historical fix).
 	{"dt": "Desktop Icon", "filters": [["standard", "=", 0]]},
-	{"dt": "Workspace Sidebar", "filters": [["standard", "=", 0]]},
+	{
+		"dt": "Workspace Sidebar",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Change Request",
+					"Clients",
+					"Deployments",
+					"Desktop Support",
+					"IT",
+					"Offboarding",
+					"Onboarding",
+					"Permission Change",
+					"Receivable",
+					"Reconfiguration",
+					"Support Queue",
+					"Vending Management",
+					"Warehouse Management",
+					"Warehouse Requests",
+					"Warehousing",
+				],
+			]
+		],
+	},
 	{"dt": "Print Format", "filters": [["standard", "=", "No"]]},
-	{"dt": "Report", "filters": [["is_standard", "=", "No"]]},
+	{
+		"dt": "Report",
+		"filters": [
+			["is_standard", "=", "No"],
+			["name", "not in", ["Q3 2022", "Current Quarter Metrics", "Test 2", "Test 3"]],
+		],
+	},
 	{"dt": "CRM Fields Layout", "filters": [["dt", "=", "CRM Deal"]]},
 	{"dt": "CRM Form Script", "filters": [["dt", "=", "CRM Deal"], ["is_standard", "=", 0]]},
 	{"dt": "Assignment Rule", "filters": [["name", "=", "Warehouse Request Assignment"]]},
+	{
+		"dt": "Notification",
+		"filters": [["name", "in", ["Shipping Warehouse", "Warehouse Request Resolved/Closed Notification"]]],
+	},
 ]
 
 # include js, css files in header of desk.html

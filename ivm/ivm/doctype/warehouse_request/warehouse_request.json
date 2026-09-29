@@ -218,15 +218,15 @@
   "date_and_time_closed"
  ],
  "fields": [
-  {
-   "default": "WR-",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "WR-",
-   "print_hide": 1
-  },
+   {
+    "default": "WR - ",
+    "fieldname": "naming_series",
+    "fieldtype": "Select",
+    "hidden": 1,
+    "label": "Series",
+    "options": "WR - ",
+    "print_hide": 1
+   },
   {
    "fieldname": "related_project",
    "fieldtype": "Link",
