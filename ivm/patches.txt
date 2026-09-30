@@ -49,6 +49,7 @@ ivm.patches.populate_ivm_module_on_customizations
 ivm.patches.drop_orphaned_project_custom_fields
 ivm.patches.delete_zombie_server_script_created_date
 ivm.warehouse.patches.cleanup_wr_property_setter_overrides
+ivm.warehouse.patches.fix_wr_naming_series_regression
 ivm.patches.cleanup_orphaned_customizations
 ivm.patches.cleanup_module_tags_on_non_ivm_customizations
 ivm.patches.dedupe_workspace_shortcuts

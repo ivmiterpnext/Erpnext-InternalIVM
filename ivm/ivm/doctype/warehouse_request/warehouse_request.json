@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "naming_series",
+ "autoname": "format:WR - {#####}",
  "creation": "2023-10-03 05:05:19.791405",
  "default_view": "List",
  "doctype": "DocType",
@@ -1592,7 +1592,6 @@
   },
    {
     "default": "0",
-    "fetch_from": "related_project.is_refurbished",
     "fieldname": "is_refurbished",
     "fieldtype": "Check",
     "hidden": 1,
@@ -1637,7 +1636,7 @@
  "modified_by": "Administrator",
  "module": "IVM",
  "name": "Warehouse Request",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1657,10 +1656,10 @@
  "search_fields": "subject",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
- "show_title_field_in_link": 1,
+ "show_title_field_in_link": 0,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "subject",
+ "title_field": "",
  "track_changes": 1
 }

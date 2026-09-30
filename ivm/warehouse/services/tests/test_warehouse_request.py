@@ -494,3 +494,17 @@ class TestWarehouseRequestQuery(ERPNextTestSuite):
 		result = warehouse_request_query("Warehouse Request", "Cancelled Search Target", "name", 0, 20, {})
 		names = {row[0] for row in result}
 		self.assertNotIn(wr.name, names)
+
+
+class TestWarehouseRequestDoctypeMetadata(ERPNextTestSuite):
+	def test_autoname_naming_rule_and_title_field(self):
+		meta = frappe.get_meta("Warehouse Request")
+		self.assertEqual(meta.autoname, "format:WR - {#####}")
+		self.assertEqual(meta.naming_rule, "Expression")
+		self.assertEqual(meta.title_field, "")
+		self.assertEqual(meta.show_title_field_in_link, 0)
+
+	def test_is_refurbished_no_longer_fetches(self):
+		meta = frappe.get_meta("Warehouse Request")
+		field = meta.get_field("is_refurbished")
+		self.assertFalse(field.fetch_from)
