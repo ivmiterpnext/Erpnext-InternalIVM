@@ -289,8 +289,8 @@ class TestHandleWebhook(FrappeTestCase):
 					self.assertEqual(result["status"], "ok")
 					self.assertEqual(mock_enqueue.call_count, 3)  # 1 for dev relay + 2 for events
 
-	def test_valid_request_one_of_two_events_fails_returns_error_with_500_status(self):
-		"""Valid request, 1 of 2 events fails during routing returns error dict with 500 status."""
+	def test_valid_request_one_of_two_events_fails_returns_ok_with_counts(self):
+		"""Valid request, 1 of 2 events fails during routing still returns 200 with enqueued/failed counts."""
 		current_ts_ms = int(time.time() * 1000)
 		events = [
 			{
@@ -332,8 +332,9 @@ class TestHandleWebhook(FrappeTestCase):
 					mock_enqueue.side_effect = enqueue_side_effect
 					with patch("frappe.log_error"):
 						result = handle_webhook()
-						self.assertEqual(result["status"], "error")
-						self.assertIn("One or more events", result["message"])
+						self.assertEqual(result["status"], "ok")
+						self.assertEqual(result["enqueued"], 1)
+						self.assertEqual(result["failed"], 1)
 
 	def test_invalid_json_body_logs_error_returns_error_dict_no_exception(self):
 		"""Invalid JSON body logs error, returns error dict, no exception propagates."""

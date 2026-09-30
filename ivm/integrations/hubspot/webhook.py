@@ -190,7 +190,8 @@ def handle_webhook() -> dict[str, str]:
 		)
 		return {"status": "error", "message": "Invalid JSON payload"}
 
-	any_event_failed = False
+	enqueued = 0
+	failed = 0
 	for event in events:
 		_logger.info(
 			f"Received event: subscriptionType={event.get('subscriptionType')}, "
@@ -199,14 +200,16 @@ def handle_webhook() -> dict[str, str]:
 		)
 		try:
 			_route_event(event)
+			enqueued += 1
 		except Exception:
-			any_event_failed = True
+			failed += 1
 
-	if any_event_failed:
-		frappe.local.response.http_status_code = 500
-		return {"status": "error", "message": "One or more events could not be enqueued"}
+	if failed:
+		_logger.warning(
+			f"HubSpot webhook batch: {enqueued} enqueued, {failed} failed (of {enqueued + failed} total)"
+		)
 
-	return {"status": "ok"}
+	return {"status": "ok", "enqueued": enqueued, "failed": failed}
 
 
 def _route_event(event: dict[str, Any]) -> None:
