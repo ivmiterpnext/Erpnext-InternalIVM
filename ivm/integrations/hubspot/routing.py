@@ -80,11 +80,11 @@ def _machine_kwargs(machine_type_id: str) -> Callable[[str], dict]:
 	return _builder
 
 
-def _engagement_kwargs(engagement_type: str) -> Callable[[str], dict]:
-	"""Return a kwargs builder for a specific engagement type name."""
+def _engagement_kwargs(engagement_type_id: str) -> Callable[[str], dict]:
+	"""Return a kwargs builder for a specific engagement object type ID."""
 
 	def _builder(object_id: str) -> dict:
-		return {"engagement_type": engagement_type, "engagement_id": object_id}
+		return {"engagement_type_id": engagement_type_id, "engagement_id": object_id}
 
 	return _builder
 
@@ -124,10 +124,10 @@ for _machine_type_id in MACHINE_TYPE_TO_CHILD_TABLE:
 		gate=_always,
 	)
 
-for _engagement_type_id, _engagement_type in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID.items():
+for _engagement_type_id in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID:
 	SYNC_TARGETS[_engagement_type_id] = SyncTarget(
 		method=f"{_HANDLER_PREFIX}.activity_handler.sync_engagement",
-		kwargs_builder=_engagement_kwargs(_engagement_type),
+		kwargs_builder=_engagement_kwargs(_engagement_type_id),
 		gate=_always,
 	)
 

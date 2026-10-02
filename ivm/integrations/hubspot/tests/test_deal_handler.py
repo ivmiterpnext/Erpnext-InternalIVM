@@ -18,9 +18,9 @@ from ivm.integrations.hubspot.deal_handler import (
 	_ensure_contacts,
 	_resolve_or_provision_org,
 	_sync_contacts,
-	_sync_deal,
-	handle_deal_created,
-	handle_deal_updated,
+	_sync_deal_core,
+	ensure_deal_exists,
+	sync_deal,
 )
 from ivm.integrations.hubspot.sync_utils import ConcurrentCreateConflict
 
@@ -29,40 +29,41 @@ class TestResolveOrProvisionOrg(FrappeTestCase):
 	"""_resolve_or_provision_org helper function"""
 
 	def test_returns_existing_org_without_provisioning(self):
-		"""When org exists, return it immediately without calling handle_company_created."""
+		"""When org exists, return it immediately without calling _sync_company_core."""
 		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler.handle_company_created") as mock_create:
+			with patch("ivm.integrations.hubspot.company_handler._sync_company_core") as mock_sync:
 				mock_get_value.return_value = "Existing Org"
 				result = _resolve_or_provision_org("123", "test context")
 				self.assertEqual(result, "Existing Org")
-				mock_create.assert_not_called()
+				mock_sync.assert_not_called()
 
-	def test_provisions_when_missing_then_found(self):
-		"""When org missing initially, provision it, then find it on second lookup."""
+	def test_provisions_when_missing_returns_org_name(self):
+		"""When org missing initially, provision it via _sync_company_core and return name."""
 		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler.handle_company_created") as mock_create:
-				# First call returns None (not found), second call returns the org name
-				mock_get_value.side_effect = [None, "Newly Provisioned Org"]
+			with patch("ivm.integrations.hubspot.company_handler._sync_company_core") as mock_sync:
+				mock_get_value.return_value = None  # Not found initially
+				mock_sync.return_value = "Newly Provisioned Org"  # Returns org name directly
 				result = _resolve_or_provision_org("456", "test context")
 				self.assertEqual(result, "Newly Provisioned Org")
-				mock_create.assert_called_once_with(hubspot_company_id="456")
+				mock_sync.assert_called_once_with("456")
 
-	def test_returns_none_and_logs_when_still_missing_after_provisioning(self):
-		"""When org still missing after provisioning, return None."""
+	def test_returns_none_when_provisioning_returns_none(self):
+		"""When provisioning returns None, return None and log warning."""
 		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler.handle_company_created") as mock_create:
-				# Both calls return None (not found before or after provisioning)
-				mock_get_value.side_effect = [None, None]
-				result = _resolve_or_provision_org("789", "test context")
-				self.assertIsNone(result)
-				mock_create.assert_called_once_with(hubspot_company_id="789")
+			with patch("ivm.integrations.hubspot.company_handler._sync_company_core") as mock_sync:
+				with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
+					mock_get_value.return_value = None
+					mock_sync.return_value = None  # Provisioning failed
+					result = _resolve_or_provision_org("789", "test context")
+					self.assertIsNone(result)
+					mock_logger.assert_called()
 
 	def test_uses_custom_company_label_in_logging(self):
 		"""Custom company_label is used in log messages."""
 		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler.handle_company_created"):
+			with patch("ivm.integrations.hubspot.company_handler._sync_company_core"):
 				with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
-					mock_get_value.side_effect = [None, None]
+					mock_get_value.return_value = None
 					_resolve_or_provision_org(
 						"999",
 						"master link on deal X",
@@ -332,159 +333,32 @@ class TestApplyClientId(FrappeTestCase):
 		self.assertFalse(hasattr(doc, "custom_customer"))
 
 
-class TestHandleDealCreated(FrappeTestCase):
-	"""handle_deal_created webhook handler"""
+class TestSyncDealEntry(FrappeTestCase):
+	"""sync_deal entry point (decorated with @retry_via_reenqueue)"""
 
-	def test_new_deal_calls_sync_deal(self):
-		"""New deal (is_new=True) calls _sync_deal"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
+	def test_calls_lookup_or_create_and_sync_deal_core(self):
+		"""sync_deal calls lookup_or_create then _sync_deal_core with set_acting_user."""
+		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user") as mock_set_user:
 			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_deal") as mock_sync:
+				with patch("ivm.integrations.hubspot.deal_handler._sync_deal_core") as mock_sync_core:
 					mock_doc = MagicMock()
 					mock_doc.name = "Deal-001"
-					mock_doc.doctype = "CRM Deal"
 					mock_lookup.return_value = (mock_doc, True)
-					handle_deal_created(hubspot_deal_id="12345")
-					mock_sync.assert_called_once_with("12345", "Deal-001")
-
-	def test_duplicate_deal_logs_info_returns_without_sync(self):
-		"""Duplicate (is_new=False) logs info, returns without calling _sync_deal"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_deal") as mock_sync:
-					with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
-						mock_doc = MagicMock()
-						mock_doc.name = "Deal-001"
-						mock_doc.doctype = "CRM Deal"
-						mock_lookup.return_value = (mock_doc, False)
-						handle_deal_created(hubspot_deal_id="12345")
-						mock_sync.assert_not_called()
-						mock_logger.assert_called()
-
-	def test_concurrent_create_conflict_re_enqueues(self):
-		"""ConcurrentCreateConflict raised internally -> re-enqueued via decorator"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
-				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
-						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
-							mock_lookup.side_effect = ConcurrentCreateConflict(
-								"CRM Deal", "custom_hubspot_deal_id", "12345"
-							)
-							# Should not raise, decorator catches and re-enqueues
-							handle_deal_created(hubspot_deal_id="12345")
-							mock_enqueue.assert_called_once()
-							args, kwargs = mock_enqueue.call_args
-							self.assertTrue(args[0].endswith(".handle_deal_created"))
-							self.assertEqual(args[1], DEAL_TYPE_ID)
-							self.assertEqual(args[2], "12345")
-							self.assertEqual(kwargs["attempt"], 1)
-
-	def test_hubspot_rate_limit_exhausted_re_enqueues(self):
-		"""api.HubSpotRateLimitExhausted raised internally -> re-enqueued via decorator"""
-		from ivm.integrations.hubspot import api
-
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
-				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
-						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
-							mock_lookup.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
-							# Should not raise, decorator catches and re-enqueues
-							handle_deal_created(hubspot_deal_id="12345")
-							mock_enqueue.assert_called_once()
-
-	def test_generic_exception_logged_not_propagated(self):
-		"""Generic Exception logged via frappe.log_error, does not propagate"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
-				with patch("ivm.integrations.hubspot.deal_handler.frappe.log_error") as mock_log_error:
-					with patch("ivm.integrations.hubspot.deal_handler.frappe.get_traceback"):
-						mock_lookup.side_effect = ValueError("test error")
-						# Should not raise
-						handle_deal_created(hubspot_deal_id="12345")
-						mock_log_error.assert_called_once()
+					sync_deal(hubspot_deal_id="12345")
+					mock_set_user.assert_called_once_with()
+					mock_lookup.assert_called_once()
+					mock_sync_core.assert_called_once_with("12345", "Deal-001")
 
 	def test_requires_keyword_only_args(self):
-		"""handle_deal_created requires keyword-only args (decorated with @retry_via_reenqueue)"""
+		"""sync_deal requires keyword-only args (decorated with @retry_via_reenqueue)"""
 		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
 			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create"):
-				# Positional args should raise TypeError
 				with self.assertRaises(TypeError):
-					handle_deal_created("12345")
+					sync_deal("12345")
 
 
-class TestHandleDealUpdated(FrappeTestCase):
-	"""handle_deal_updated webhook handler"""
-
-	def test_existing_deal_calls_sync_deal(self):
-		"""Deal already exists (was_created=False) calls _sync_deal"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists") as mock_ensure:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_deal") as mock_sync:
-					mock_ensure.return_value = ("Deal-001", False)
-					handle_deal_updated(hubspot_deal_id="12345")
-					mock_sync.assert_called_once_with("12345", "Deal-001")
-
-	def test_newly_created_deal_does_not_call_sync_deal_again(self):
-		"""Deal did not exist (was_created=True) does NOT call _sync_deal again"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists") as mock_ensure:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_deal") as mock_sync:
-					mock_ensure.return_value = ("Deal-001", True)
-					handle_deal_updated(hubspot_deal_id="12345")
-					mock_sync.assert_not_called()
-
-	def test_concurrent_create_conflict_re_enqueues(self):
-		"""ConcurrentCreateConflict raised internally -> re-enqueued via decorator"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists") as mock_ensure:
-				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
-						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
-							mock_ensure.side_effect = ConcurrentCreateConflict(
-								"CRM Deal", "custom_hubspot_deal_id", "12345"
-							)
-							# Should not raise, decorator catches and re-enqueues
-							handle_deal_updated(hubspot_deal_id="12345")
-							mock_enqueue.assert_called_once()
-
-	def test_hubspot_rate_limit_exhausted_re_enqueues(self):
-		"""api.HubSpotRateLimitExhausted raised internally -> re-enqueued via decorator"""
-		from ivm.integrations.hubspot import api
-
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists") as mock_ensure:
-				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
-						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
-							mock_ensure.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
-							# Should not raise, decorator catches and re-enqueues
-							handle_deal_updated(hubspot_deal_id="12345")
-							mock_enqueue.assert_called_once()
-
-	def test_generic_exception_logged_not_propagated(self):
-		"""Generic Exception logged via frappe.log_error, does not propagate"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists") as mock_ensure:
-				with patch("ivm.integrations.hubspot.deal_handler.frappe.log_error") as mock_log_error:
-					with patch("ivm.integrations.hubspot.deal_handler.frappe.get_traceback"):
-						mock_ensure.side_effect = ValueError("test error")
-						# Should not raise
-						handle_deal_updated(hubspot_deal_id="12345")
-						mock_log_error.assert_called_once()
-
-	def test_requires_keyword_only_args(self):
-		"""handle_deal_updated requires keyword-only args (decorated with @retry_via_reenqueue)"""
-		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
-			with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists"):
-				# Positional args should raise TypeError
-				with self.assertRaises(TypeError):
-					handle_deal_updated("12345")
-
-
-class TestSyncDeal(FrappeTestCase):
-	"""_sync_deal orchestration function"""
+class TestSyncDealCore(FrappeTestCase):
+	"""_sync_deal_core orchestration function"""
 
 	def test_normal_flow_calls_all_sync_steps(self):
 		"""Normal flow calls api.get_deal, _sync_organization, _sync_master_organization, _sync_contacts, _sync_deal_fields"""
@@ -504,7 +378,7 @@ class TestSyncDeal(FrappeTestCase):
 							) as mock_sync_fields:
 								mock_get_deal.return_value = {"properties": {}}
 								mock_get_companies.return_value = ("company-1", "company-2")
-								_sync_deal("12345", "Deal-001")
+								_sync_deal_core("12345", "Deal-001")
 								mock_get_deal.assert_called_once()
 								mock_sync_org.assert_called_once()
 								mock_sync_master.assert_called_once()
@@ -533,7 +407,7 @@ class TestSyncDeal(FrappeTestCase):
 									mock_get_deal.return_value = {"properties": {}}
 									mock_get_companies.return_value = ("company-1", "company-2")
 									mock_sync_org.side_effect = ValueError("org sync failed")
-									_sync_deal("12345", "Deal-001")
+									_sync_deal_core("12345", "Deal-001")
 									mock_log_error.assert_called()
 									mock_sync_master.assert_called_once()
 									mock_sync_contacts.assert_called_once()
@@ -559,12 +433,12 @@ class TestSyncDeal(FrappeTestCase):
 									mock_get_deal.return_value = {"properties": {}}
 									mock_get_companies.return_value = ("company-1", "company-2")
 									mock_sync_contacts.side_effect = ValueError("contacts sync failed")
-									_sync_deal("12345", "Deal-001")
+									_sync_deal_core("12345", "Deal-001")
 									mock_log_error.assert_called()
 									mock_sync_fields.assert_called_once()
 
 	def test_sync_deal_fields_exception_propagates(self):
-		"""_sync_deal_fields raises -> propagates out of _sync_deal (NOT wrapped in try/except)"""
+		"""_sync_deal_fields raises -> propagates out of _sync_deal_core (NOT wrapped in try/except)"""
 		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
 			with patch(
 				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
@@ -579,7 +453,7 @@ class TestSyncDeal(FrappeTestCase):
 								mock_get_companies.return_value = ("company-1", "company-2")
 								mock_sync_fields.side_effect = ValueError("fields sync failed")
 								with self.assertRaises(ValueError):
-									_sync_deal("12345", "Deal-001")
+									_sync_deal_core("12345", "Deal-001")
 
 	def test_get_deal_company_ids_exception_logged_and_suppressed(self):
 		"""get_deal_company_ids_by_role raises -> logged, None values passed to sync functions"""
@@ -598,11 +472,75 @@ class TestSyncDeal(FrappeTestCase):
 								) as mock_log_error:
 									mock_get_deal.return_value = {"properties": {}}
 									mock_get_companies.side_effect = ValueError("company fetch failed")
-									_sync_deal("12345", "Deal-001")
+									_sync_deal_core("12345", "Deal-001")
 									mock_log_error.assert_called()
 									# Verify None values passed
 									mock_sync_org.assert_called_once_with("12345", "Deal-001", None)
 									mock_sync_master.assert_called_once_with("12345", "Deal-001", None)
+
+	def test_won_with_no_location_triggers_inline_site_sync(self):
+		"""When deal status becomes Won and no Deployment Location exists, inline site sync is triggered."""
+		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
+			with patch(
+				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
+			) as mock_get_companies:
+				with patch("ivm.integrations.hubspot.deal_handler._sync_organization"):
+					with patch("ivm.integrations.hubspot.deal_handler._sync_master_organization"):
+						with patch("ivm.integrations.hubspot.deal_handler._sync_contacts"):
+							with patch("ivm.integrations.hubspot.deal_handler._sync_deal_fields"):
+								with patch(
+									"ivm.integrations.hubspot.deal_handler.frappe.db.get_value"
+								) as mock_get_value:
+									with patch(
+										"ivm.integrations.hubspot.deal_handler.frappe.db.exists"
+									) as mock_exists:
+										with patch(
+											"ivm.integrations.hubspot.deal_handler.api.get_deal_deployment_site_ids"
+										) as mock_get_sites:
+											with patch(
+												"ivm.integrations.hubspot.deployment_site_handler._sync_site_core"
+											) as mock_sync_site:
+												mock_get_deal.return_value = {
+													"properties": {"dealstage": "closedwon"}
+												}
+												mock_get_companies.return_value = (None, None)
+												mock_get_value.return_value = (
+													"Discovery"  # Current status != Won
+												)
+												mock_exists.return_value = False  # No Deployment Location
+												mock_get_sites.return_value = ["site-1", "site-2"]
+												_sync_deal_core("12345", "Deal-001")
+												self.assertEqual(mock_sync_site.call_count, 2)
+												mock_sync_site.assert_any_call(
+													"site-1", "Deal-001", trigger_deal_sync=False
+												)
+												mock_sync_site.assert_any_call(
+													"site-2", "Deal-001", trigger_deal_sync=False
+												)
+
+	def test_already_won_skips_inline_site_sync(self):
+		"""When deal is already Won, inline site sync is skipped."""
+		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
+			with patch(
+				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
+			) as mock_get_companies:
+				with patch("ivm.integrations.hubspot.deal_handler._sync_organization"):
+					with patch("ivm.integrations.hubspot.deal_handler._sync_master_organization"):
+						with patch("ivm.integrations.hubspot.deal_handler._sync_contacts"):
+							with patch("ivm.integrations.hubspot.deal_handler._sync_deal_fields"):
+								with patch(
+									"ivm.integrations.hubspot.deal_handler.frappe.db.get_value"
+								) as mock_get_value:
+									with patch(
+										"ivm.integrations.hubspot.deployment_site_handler._sync_site_core"
+									) as mock_sync_site:
+										mock_get_deal.return_value = {
+											"properties": {"dealstage": "closedwon"}
+										}
+										mock_get_companies.return_value = (None, None)
+										mock_get_value.return_value = "Won"  # Already Won
+										_sync_deal_core("12345", "Deal-001")
+										mock_sync_site.assert_not_called()
 
 
 class TestSyncContacts(FrappeTestCase):
@@ -669,6 +607,50 @@ class TestSyncContacts(FrappeTestCase):
 					_sync_contacts("12345", "Deal-001")
 					mock_log_error.assert_called()
 					mock_ensure.assert_not_called()
+
+
+class TestEnsureDealExists(FrappeTestCase):
+	"""ensure_deal_exists helper function"""
+
+	def test_returns_existing_deal_name(self):
+		"""When deal exists, return its name directly without creating stub."""
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
+			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
+				mock_get_value.return_value = "Deal-001"
+				result = ensure_deal_exists("12345")
+				self.assertEqual(result, "Deal-001")
+				mock_lookup.assert_not_called()
+
+	def test_creates_stub_and_enqueues_sync(self):
+		"""When deal missing, create stub and enqueue sync with after_commit=True."""
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
+			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
+				with patch("ivm.integrations.hubspot.deal_handler.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
+						mock_get_value.return_value = None
+						mock_doc = MagicMock()
+						mock_doc.name = "Deal-002"
+						mock_lookup.return_value = (mock_doc, True)
+						result = ensure_deal_exists("12345")
+						self.assertEqual(result, "Deal-002")
+						mock_enqueue.assert_called_once()
+						call_args = mock_enqueue.call_args
+						self.assertTrue(call_args[0][0].endswith(".sync_deal"))
+						self.assertEqual(call_args[1]["after_commit"], True)
+
+	def test_existing_stub_not_new_does_not_enqueue(self):
+		"""When stub already exists (is_new=False), do not enqueue."""
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
+			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
+				with patch("ivm.integrations.hubspot.deal_handler.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
+						mock_get_value.return_value = None
+						mock_doc = MagicMock()
+						mock_doc.name = "Deal-003"
+						mock_lookup.return_value = (mock_doc, False)  # is_new=False
+						result = ensure_deal_exists("12345")
+						self.assertEqual(result, "Deal-003")
+						mock_enqueue.assert_not_called()
 
 
 class TestEnsureContacts(FrappeTestCase):
@@ -761,3 +743,11 @@ class TestEnsureContacts(FrappeTestCase):
 		with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
 			_ensure_contacts("Deal-001", [])
 			mock_get_doc.assert_not_called()
+
+	def test_concurrent_conflict_propagates(self):
+		"""ConcurrentCreateConflict raised during upsert propagates out."""
+		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
+			mock_upsert.side_effect = ConcurrentCreateConflict("Contact", "hubspot_contact_id", "123")
+			contacts = [{"first_name": "John", "last_name": "Doe"}]
+			with self.assertRaises(ConcurrentCreateConflict):
+				_ensure_contacts("Deal-001", contacts)

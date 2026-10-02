@@ -8,7 +8,9 @@ import frappe
 
 from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
+	CONTACT_ADDRESS_PROPERTIES,
 	CONTACT_FIELD_MAP,
+	CONTACT_PROPERTIES,
 	DEAL_FIELD_MAP,
 	DEAL_TYPE_ID,
 	DEALSTAGE_TO_STATUS,
@@ -20,6 +22,7 @@ from ivm.integrations.hubspot.constants import (
 from ivm.integrations.hubspot.sync_utils import (
 	ConcurrentCreateConflict,
 	apply_field_map,
+	enqueue_sync,
 	lookup_or_create,
 	retry_via_reenqueue,
 	save_doc,
@@ -136,74 +139,31 @@ DEAL_TRANSFORMS = {
 
 
 @retry_via_reenqueue(object_type_id=DEAL_TYPE_ID, id_kwarg="hubspot_deal_id")
-def handle_deal_created(
+def sync_deal(
 	hubspot_deal_id: int | str,
-	hubspot_user_id: int | str | None = None,
 	attempt: int = 0,
 ) -> None:
-	"""Create a CRM Deal from a newly created HubSpot deal and sync all data."""
-	set_acting_user(hubspot_user_id)
-	try:
-		doc, is_new = lookup_or_create(
-			doctype="CRM Deal",
-			hubspot_id_field=HUBSPOT_DEAL_ID_FIELD,
-			hubspot_id=str(hubspot_deal_id),
-			defaults={"status": "Discovery"},
-		)
-		if not is_new:
-			frappe.logger("hubspot").info(
-				f"CRM Deal already exists for HubSpot deal {hubspot_deal_id} "
-				f"(created by a concurrent event or self-heal) — skipping duplicate creation"
-			)
-			return
-		_sync_deal(hubspot_deal_id, doc.name)
-	except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
-		raise
-	except Exception:
-		frappe.log_error(
-			title=f"HubSpot: failed to create CRM Deal for deal {hubspot_deal_id}",
-			message=frappe.get_traceback(with_context=True),
-		)
+	"""Create-or-update a CRM Deal from the current HubSpot deal state."""
+	set_acting_user()
+	doc, _ = lookup_or_create(
+		doctype="CRM Deal",
+		hubspot_id_field=HUBSPOT_DEAL_ID_FIELD,
+		hubspot_id=str(hubspot_deal_id),
+		defaults={"status": "Discovery"},
+	)
+	_sync_deal_core(hubspot_deal_id, doc.name)
 
 
-@retry_via_reenqueue(object_type_id=DEAL_TYPE_ID, id_kwarg="hubspot_deal_id")
-def handle_deal_updated(
-	hubspot_deal_id: int | str,
-	hubspot_user_id: int | str | None = None,
-	attempt: int = 0,
-) -> None:
-	"""Sync a HubSpot deal's current state to the matching CRM Deal.
+def ensure_deal_exists(hubspot_deal_id: int | str) -> str:
+	"""Return the CRM Deal name for hubspot_deal_id, creating a minimal stub
+	and enqueueing a full sync if it doesn't exist yet.
 
-	Creates the CRM Deal first (via ensure_deal_exists) if it doesn't exist
-	yet — a propertyChange or associationChange event can arrive for a deal
-	whose object.creation event was missed, deduplicated away, or not yet
-	processed.
-	"""
-	set_acting_user(hubspot_user_id)
-	try:
-		crm_deal_name, was_created = ensure_deal_exists(hubspot_deal_id, hubspot_user_id)
-		if not was_created:
-			_sync_deal(hubspot_deal_id, crm_deal_name)
-	except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
-		raise
-	except Exception:
-		frappe.log_error(
-			title=f"HubSpot: failed to sync deal {hubspot_deal_id}",
-			message=frappe.get_traceback(with_context=True),
-		)
-
-
-def ensure_deal_exists(
-	hubspot_deal_id: int | str,
-	hubspot_user_id: int | str | None = None,
-) -> tuple[str, bool]:
-	"""Return (crm_deal_name, was_created) for hubspot_deal_id.
-
-	Creates the CRM Deal (and fully syncs it via _sync_deal) if it doesn't
-	exist yet. Used by callers that reference a deal — engagements,
-	deployment sites, or the deal's own propertyChange/associationChange
-	events — which may arrive before the deal's own object.creation event
-	has been processed (missed, deduplicated, or simply not yet run).
+	Used by callers that reference a deal — engagements or deployment sites —
+	which may arrive before the deal's own object.creation event has been
+	processed. The stub is created immediately so the caller's own record can
+	attach to it right away; field population happens asynchronously via the
+	enqueued sync_deal job (enqueued after the current transaction commits,
+	so the stub is guaranteed visible to the job when it runs).
 
 	May raise ConcurrentCreateConflict or api.HubSpotRateLimitExhausted —
 	callers are responsible for catching and re-enqueueing their own job.
@@ -214,20 +174,27 @@ def ensure_deal_exists(
 		"name",
 	)
 	if crm_deal_name:
-		return crm_deal_name, False
+		return crm_deal_name
 
-	frappe.logger("hubspot").info(f"No CRM Deal found for HubSpot deal {hubspot_deal_id} — creating")
-	doc, _ = lookup_or_create(
+	frappe.logger("hubspot").info(f"No CRM Deal found for HubSpot deal {hubspot_deal_id} — creating stub")
+	doc, is_new = lookup_or_create(
 		doctype="CRM Deal",
 		hubspot_id_field=HUBSPOT_DEAL_ID_FIELD,
 		hubspot_id=str(hubspot_deal_id),
 		defaults={"status": "Discovery"},
 	)
-	_sync_deal(hubspot_deal_id, doc.name)
-	return doc.name, True
+	if is_new:
+		enqueue_sync(
+			f"{__name__}.sync_deal",
+			DEAL_TYPE_ID,
+			str(hubspot_deal_id),
+			hubspot_deal_id=str(hubspot_deal_id),
+			after_commit=True,
+		)
+	return doc.name
 
 
-def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
+def _sync_deal_core(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 	"""Sync deal-level fields and contacts.
 
 	Deployment locations, machines, bins, and activities are no longer
@@ -245,6 +212,8 @@ def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 	# Fetch company associations once and pass both primary and master IDs
 	try:
 		primary_company_id, master_company_id = api.get_deal_company_ids_by_role(hubspot_deal_id)
+	except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+		raise
 	except Exception:
 		frappe.log_error(
 			title=f"HubSpot: failed to fetch company associations for deal {hubspot_deal_id}",
@@ -255,6 +224,8 @@ def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 
 	try:
 		_sync_organization(hubspot_deal_id, crm_deal_name, primary_company_id)
+	except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+		raise
 	except Exception:
 		frappe.log_error(
 			title=f"HubSpot: failed to sync organization for deal {crm_deal_name}",
@@ -263,6 +234,8 @@ def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 
 	try:
 		_sync_master_organization(hubspot_deal_id, crm_deal_name, master_company_id)
+	except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+		raise
 	except Exception:
 		frappe.log_error(
 			title=f"HubSpot: failed to sync master organization for deal {crm_deal_name}",
@@ -271,11 +244,36 @@ def _sync_deal(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 
 	try:
 		_sync_contacts(hubspot_deal_id, crm_deal_name)
+	except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+		raise
 	except Exception:
 		frappe.log_error(
 			title=f"HubSpot: failed to sync contacts for deal {crm_deal_name}",
 			message=frappe.get_traceback(with_context=True),
 		)
+
+	mapped_status = DEALSTAGE_TO_STATUS.get(properties.get("dealstage") or "")
+	if (
+		mapped_status == "Won"
+		and frappe.db.get_value("CRM Deal", crm_deal_name, "status") != "Won"
+		and not frappe.db.exists("Deployment Location", {"crm_deal": crm_deal_name})
+	):
+		from ivm.integrations.hubspot.deployment_site_handler import _sync_site_core
+
+		site_ids: list = []
+		try:
+			site_ids = api.get_deal_deployment_site_ids(hubspot_deal_id)
+		except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+			raise
+		except Exception:
+			frappe.log_error(
+				title=f"HubSpot: failed to fetch deployment sites for Won deal {crm_deal_name}",
+				message=frappe.get_traceback(with_context=True),
+			)
+			site_ids = []
+
+		for site_id in site_ids:
+			_sync_site_core(str(site_id), crm_deal_name, trigger_deal_sync=False)
 
 	_sync_deal_fields(crm_deal_name, properties)
 
@@ -293,9 +291,9 @@ def _resolve_or_provision_org(
 	company_label: str = "company",
 ) -> str | None:
 	"""Look up a CRM Organization by HUBSPOT_COMPANY_ID_FIELD; if missing,
-	provision it via company_handler.handle_company_created and look up
-	again. Returns the CRM Organization name, or None (with a warning
-	logged) if it still can't be found after provisioning.
+	provision it via company_handler._sync_company_core and return the name.
+	Returns the CRM Organization name, or None (with a warning logged) if
+	provisioning fails.
 
 	*context_label* is used verbatim in the "skipping ..." warning (e.g.
 	"organization link on deal X" or "master link on deal X").
@@ -314,14 +312,9 @@ def _resolve_or_provision_org(
 		f"No CRM Organization found for HubSpot {company_label} {hubspot_company_id} "
 		f"— provisioning from HubSpot"
 	)
-	from ivm.integrations.hubspot.company_handler import handle_company_created
+	from ivm.integrations.hubspot.company_handler import _sync_company_core
 
-	handle_company_created(hubspot_company_id=hubspot_company_id)
-	org_name = frappe.db.get_value(
-		"CRM Organization",
-		{HUBSPOT_COMPANY_ID_FIELD: str(hubspot_company_id)},
-		"name",
-	)
+	org_name = _sync_company_core(hubspot_company_id)
 	if not org_name:
 		frappe.logger("hubspot").warning(
 			f"Failed to provision CRM Organization for HubSpot {company_label} {hubspot_company_id} "
@@ -458,16 +451,15 @@ def _sync_contacts(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 	if not contact_ids:
 		return
 
-	hs_properties = list(CONTACT_FIELD_MAP.keys())
-	contacts: list[dict[str, Any]] = []
+	contacts: list[tuple[dict[str, Any], dict[str, Any]]] = []
 
 	for contact_id in contact_ids:
 		try:
-			contact_data = api.get_contact(contact_id, properties=hs_properties)
+			contact_data = api.get_contact(contact_id, properties=CONTACT_PROPERTIES)
 			props = contact_data.get("properties", {})
-			contacts.append(
-				{frappe_key: props.get(hs_key) or "" for hs_key, frappe_key in CONTACT_FIELD_MAP.items()}
-			)
+			mapped = {frappe_key: props.get(hs_key) or "" for hs_key, frappe_key in CONTACT_FIELD_MAP.items()}
+			address_props = {key: props.get(key) or "" for key in CONTACT_ADDRESS_PROPERTIES}
+			contacts.append((mapped, address_props))
 		except Exception:
 			frappe.log_error(
 				title=f"HubSpot: failed to fetch contact {contact_id} for deal {hubspot_deal_id}",
@@ -478,14 +470,16 @@ def _sync_contacts(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 		_ensure_contacts(crm_deal_name, contacts)
 
 
-def _ensure_contacts(crm_deal_name: str, contacts: list[dict[str, Any]]) -> None:
+def _ensure_contacts(crm_deal_name: str, contacts: list[tuple[dict[str, Any], dict[str, Any]]]) -> None:
 	"""Create Contact records (if needed) and link them to the CRM Deal."""
 	from ivm.integrations.hubspot.contact_handler import upsert_contact
 
 	resolved: list[tuple[str, int]] = []
-	for idx, entry in enumerate(contacts):
+	for idx, (entry, address_props) in enumerate(contacts):
 		try:
-			contact_name = upsert_contact(entry)
+			contact_name = upsert_contact(entry, address_props=address_props)
+		except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+			raise
 		except Exception:
 			frappe.log_error(
 				title=f"HubSpot: failed to upsert contact for deal {crm_deal_name}",

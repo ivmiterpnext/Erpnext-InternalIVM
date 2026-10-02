@@ -5,10 +5,61 @@ from unittest.mock import MagicMock, patch
 from frappe.tests.utils import FrappeTestCase
 
 from ivm.integrations.hubspot.contact_handler import (
+	_fetch_contact_properties,
 	_normalize_primary,
 	_sanitize_phone,
+	sync_contact,
 	upsert_contact,
 )
+from ivm.integrations.hubspot.sync_utils import ConcurrentCreateConflict
+
+
+class TestSyncContact(FrappeTestCase):
+	"""sync_contact entry point (decorated with @retry_via_reenqueue)"""
+
+	def test_fetches_and_upserts(self):
+		"""sync_contact fetches properties and calls upsert_contact."""
+		with patch("ivm.integrations.hubspot.contact_handler.set_acting_user") as mock_set_user:
+			with patch("ivm.integrations.hubspot.contact_handler._fetch_contact_properties") as mock_fetch:
+				with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
+					mock_fetch.return_value = (
+						{"first_name": "John", "email": "john@example.com"},
+						{"address": "123 Main St", "city": "Springfield"},
+					)
+					sync_contact(hubspot_contact_id="123")
+					mock_set_user.assert_called_once_with()
+					mock_fetch.assert_called_once_with("123")
+					mock_upsert.assert_called_once()
+					call_args = mock_upsert.call_args
+					self.assertEqual(call_args[1]["hubspot_contact_id"], "123")
+					self.assertEqual(call_args[1]["address_props"]["address"], "123 Main St")
+
+
+class TestFetchContactProperties(FrappeTestCase):
+	"""_fetch_contact_properties function"""
+
+	def test_fetches_and_maps_properties(self):
+		"""Fetches contact from API and returns mapped properties and address dict."""
+		with patch("ivm.integrations.hubspot.contact_handler.api.get_contact") as mock_get:
+			mock_get.return_value = {
+				"properties": {
+					"firstname": "John",
+					"lastname": "Doe",
+					"email": "john@example.com",
+					"address": "123 Main St",
+					"city": "Springfield",
+				}
+			}
+			props, addr_props = _fetch_contact_properties("123")
+			self.assertEqual(props["first_name"], "John")
+			self.assertEqual(addr_props["address"], "123 Main St")
+
+	def test_propagates_api_errors(self):
+		"""API errors propagate out (no silent swallow)."""
+		with patch("ivm.integrations.hubspot.contact_handler.api.get_contact") as mock_get:
+			mock_get.side_effect = ValueError("API error")
+			with self.assertRaises(ValueError):
+				_fetch_contact_properties("123")
 
 
 class TestSanitizePhone(FrappeTestCase):
@@ -305,8 +356,8 @@ class TestUpsertContactInsert(FrappeTestCase):
 
 									self.assertIsNone(result)
 
-	def test_query_deadlock_error_reraises(self):
-		"""QueryDeadlockError on insert rolls back and re-raises."""
+	def test_query_deadlock_error_raises_concurrent_create_conflict(self):
+		"""QueryDeadlockError on insert rolls back and raises ConcurrentCreateConflict."""
 		new_doc = MagicMock()
 		new_doc.doctype = "Contact"
 		new_doc.name = "Contact-Deadlock"
@@ -327,7 +378,7 @@ class TestUpsertContactInsert(FrappeTestCase):
 									mock_insert.side_effect = frappe.QueryDeadlockError()
 									mock_meta.return_value = MagicMock(get_field=MagicMock(return_value=None))
 
-									with self.assertRaises(frappe.QueryDeadlockError):
+									with self.assertRaises(ConcurrentCreateConflict):
 										upsert_contact(
 											{"first_name": "Eve", "email": "eve@example.com"},
 											hubspot_contact_id="hs222",

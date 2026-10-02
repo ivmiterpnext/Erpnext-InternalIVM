@@ -94,15 +94,15 @@ class TestRoute(FrappeTestCase):
 				hubspot_machine_id="9",
 			)
 
-	def test_engagement_kwargs_include_engagement_type(self):
-		"""An engagement type's sync target closes over its own type name (e.g. 'notes')."""
+	def test_engagement_kwargs_include_engagement_type_id(self):
+		"""An engagement type's sync target closes over its own type ID."""
 		with patch("ivm.integrations.hubspot.routing.enqueue_sync", return_value="queued") as mock_enqueue:
 			routing.route(NOTE_TYPE_ID, "3")
 			mock_enqueue.assert_called_once_with(
 				"ivm.integrations.hubspot.activity_handler.sync_engagement",
 				NOTE_TYPE_ID,
 				"3",
-				engagement_type="notes",
+				engagement_type_id=NOTE_TYPE_ID,
 				engagement_id="3",
 			)
 

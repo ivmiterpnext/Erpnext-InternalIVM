@@ -35,12 +35,25 @@ class ConcurrentCreateConflict(Exception):
 		super().__init__(f"Concurrent create conflict on {doctype} ({hubspot_id_field}={hubspot_id})")
 
 
+class SyncLockBusy(Exception):
+	"""Raised when a per-record HubSpot sync lock could not be acquired within
+	the blocking timeout — another job is already syncing this exact record.
+	Callers re-enqueue via retry_via_reenqueue's normal capped-retry path.
+	"""
+
+	def __init__(self, object_type_id: str, object_id: str) -> None:
+		self.object_type_id = object_type_id
+		self.object_id = object_id
+		super().__init__(f"Could not acquire sync lock for {object_type_id}:{object_id}")
+
+
 def enqueue_sync(
 	method: str,
 	object_type_id: str,
 	object_id: str,
 	*,
 	attempt: int = 0,
+	after_commit: bool = False,
 	**kwargs: Any,
 ) -> str:
 	"""Enqueue a HubSpot sync job, deduplicated per ``(object_type_id, object_id)``.
@@ -69,20 +82,26 @@ def enqueue_sync(
 			queue="long",
 			job_id=followup_id,
 			deduplicate=True,
+			enqueue_after_commit=after_commit,
 			attempt=attempt,
 			**kwargs,
 		)
+		if after_commit:
+			return "followup"
 		return "followup" if job else "skipped"
 
-	frappe.enqueue(
+	job = frappe.enqueue(
 		method,
 		queue="long",
 		job_id=primary_id,
 		deduplicate=True,
+		enqueue_after_commit=after_commit,
 		attempt=attempt,
 		**kwargs,
 	)
-	return "queued"
+	if after_commit:
+		return "queued"
+	return "queued" if job else "skipped"
 
 
 def retry_via_reenqueue(
@@ -90,7 +109,11 @@ def retry_via_reenqueue(
 	id_kwarg: str,
 	object_type_id: str | None = None,
 	type_kwarg: str | None = None,
-	exceptions: tuple[type[Exception], ...] = (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted),
+	exceptions: tuple[type[Exception], ...] = (
+		ConcurrentCreateConflict,
+		api.HubSpotRateLimitExhausted,
+		SyncLockBusy,
+	),
 	max_attempts: int = 5,
 ) -> Callable:
 	"""Decorator for HubSpot sync entry points (keyword-args only).
@@ -101,6 +124,13 @@ def retry_via_reenqueue(
 	final attempt, logs to the Error Log and stops — nothing retries it
 	further; the next change to the record in HubSpot (webhook or the
 	reconciliation job) will try again from scratch.
+
+	A per-record lock prevents the primary and "_again" followup jobs from
+	running concurrently on the same record. If SyncLockBusy triggers a
+	re-enqueue while the primary job is still running, the followup job id
+	is still JobStatus.STARTED so the dedup in enqueue_sync may drop the
+	re-enqueue — this known gap is intended to be covered later by a
+	scheduled reconciliation job.
 
 	Exactly one of *object_type_id* (a fixed HubSpot object type ID) or
 	*type_kwarg* (the name of the kwarg carrying a dynamic type ID — e.g.
@@ -127,8 +157,20 @@ def retry_via_reenqueue(
 					f"(positional args are silently dropped on re-enqueue)."
 				)
 			attempt = kwargs.get("attempt", 0)
+			resolved_type_id = object_type_id or str(kwargs.get(type_kwarg))
+			resolved_object_id = str(kwargs.get(id_kwarg))
 			try:
-				return func(*args, **kwargs)
+				lock_key = frappe.cache.make_key(f"hubspot_sync_lock:{resolved_type_id}:{resolved_object_id}")
+				lock = frappe.cache.lock(lock_key, timeout=1500, blocking_timeout=300)
+				if not lock.acquire():
+					raise SyncLockBusy(resolved_type_id, resolved_object_id)
+				try:
+					return func(*args, **kwargs)
+				finally:
+					try:
+						lock.release()
+					except Exception:
+						pass
 			except exceptions as e:
 				if attempt + 1 >= max_attempts:
 					frappe.log_error(
@@ -147,8 +189,6 @@ def retry_via_reenqueue(
 				)
 				time.sleep(delay)
 
-				resolved_type_id = object_type_id or str(kwargs.get(type_kwarg))
-				resolved_object_id = str(kwargs.get(id_kwarg))
 				new_kwargs = {**kwargs, "attempt": attempt + 1}
 				enqueue_sync(
 					f"{func.__module__}.{func.__name__}",

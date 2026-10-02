@@ -18,11 +18,12 @@ from ivm.integrations.hubspot.activity_handler import (
 	_sync_note,
 	_sync_task,
 	_truncate,
-	handle_engagement_webhook,
+	sync_engagement,
 )
 from ivm.integrations.hubspot.constants import (
 	CALL_DIRECTION_MAP,
 	CALL_STATUS_MAP,
+	ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID,
 	ENGAGEMENT_TYPE_CALLS,
 	ENGAGEMENT_TYPE_EMAILS,
 	ENGAGEMENT_TYPE_MEETINGS,
@@ -726,89 +727,180 @@ class TestSyncAttachments(FrappeTestCase):
 		mock_get_value.assert_not_called()
 
 
-class TestHandleEngagementWebhook(FrappeTestCase):
-	"""handle_engagement_webhook function"""
+class TestSyncEngagement(FrappeTestCase):
+	"""sync_engagement function"""
 
-	@patch("ivm.integrations.hubspot.activity_handler.api.get_engagement")
-	@patch("ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids")
-	@patch("ivm.integrations.hubspot.activity_handler.frappe.db.get_value")
-	@patch("ivm.integrations.hubspot.sync_utils.set_acting_user")
-	def test_syncs_engagement_to_existing_deal(
-		self, mock_set_user, mock_get_value, mock_get_deal_ids, mock_get_eng
-	):
-		mock_get_deal_ids.return_value = ["deal_123"]
-		mock_get_value.return_value = "Deal-001"
-		mock_get_eng.return_value = {"properties": {"hs_note_body": "Test note"}}
+	def test_unknown_type_id_returns_early(self):
+		"""Unknown engagement_type_id -> returns without calling api.get_engagement_deal_ids"""
+		with patch("ivm.integrations.hubspot.sync_utils.set_acting_user"):
+			with patch(
+				"ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids"
+			) as mock_get_deal_ids:
+				with patch("ivm.integrations.hubspot.activity_handler.frappe.logger"):
+					sync_engagement(engagement_type_id="9-999", engagement_id="e-1")
 
-		mock_handler = MagicMock()
-		with patch("ivm.integrations.hubspot.activity_handler.frappe.db.set_value"):
-			with patch.dict(
-				"ivm.integrations.hubspot.activity_handler._TYPE_HANDLERS",
-				{ENGAGEMENT_TYPE_NOTES: mock_handler},
-			):
-				handle_engagement_webhook(ENGAGEMENT_TYPE_NOTES, "eng_123")
+					mock_get_deal_ids.assert_not_called()
 
-		mock_handler.assert_called_once()
+	def test_known_type_resolves_and_syncs(self):
+		"""Known engagement_type_id -> resolves deal and calls handler"""
+		with patch("ivm.integrations.hubspot.sync_utils.set_acting_user"):
+			with patch(
+				"ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids"
+			) as mock_get_deal_ids:
+				with patch("ivm.integrations.hubspot.activity_handler.api.get_engagement") as mock_get_eng:
+					with patch(
+						"ivm.integrations.hubspot.activity_handler.frappe.db.get_value"
+					) as mock_get_value:
+						mock_handler = MagicMock()
+						with patch.dict(
+							"ivm.integrations.hubspot.activity_handler._TYPE_HANDLERS",
+							{ENGAGEMENT_TYPE_NOTES: mock_handler},
+						):
+							mock_get_deal_ids.return_value = ["deal-1"]
+							mock_get_value.return_value = "Deal-001"
+							mock_get_eng.return_value = {"properties": {"hs_note_body": "Test"}}
 
-	@patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists")
-	@patch("ivm.integrations.hubspot.activity_handler.api.get_engagement")
-	@patch("ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids")
-	@patch("ivm.integrations.hubspot.activity_handler.frappe.db.get_value")
-	@patch("ivm.integrations.hubspot.sync_utils.set_acting_user")
-	def test_creates_deal_if_missing(
-		self, mock_set_user, mock_get_value, mock_get_deal_ids, mock_get_eng, mock_ensure_deal
-	):
-		mock_get_deal_ids.return_value = ["deal_123"]
-		mock_get_value.return_value = None
-		mock_ensure_deal.return_value = ("Deal-001", {})
-		mock_get_eng.return_value = {"properties": {"hs_note_body": "Test note"}}
+							# Use the actual type ID for notes from constants
+							notes_type_id = next(
+								k
+								for k, v in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID.items()
+								if v == ENGAGEMENT_TYPE_NOTES
+							)
 
-		mock_handler = MagicMock()
-		with patch("ivm.integrations.hubspot.activity_handler.frappe.db.set_value"):
-			with patch.dict(
-				"ivm.integrations.hubspot.activity_handler._TYPE_HANDLERS",
-				{ENGAGEMENT_TYPE_NOTES: mock_handler},
-			):
-				handle_engagement_webhook(ENGAGEMENT_TYPE_NOTES, "eng_123")
+							sync_engagement(engagement_type_id=notes_type_id, engagement_id="e-1")
 
-		mock_ensure_deal.assert_called_once()
-		mock_handler.assert_called_once()
+							mock_handler.assert_called_once_with("e-1", {"hs_note_body": "Test"}, "Deal-001")
 
-	@patch("ivm.integrations.hubspot.activity_handler.frappe.enqueue")
-	@patch("ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids")
-	@patch("ivm.integrations.hubspot.sync_utils.set_acting_user")
-	def test_re_enqueues_on_rate_limit(self, mock_set_user, mock_get_deal_ids, mock_enqueue):
+	def test_no_deals_returns_early(self):
+		"""No deals associated -> returns without calling api.get_engagement"""
+		with patch("ivm.integrations.hubspot.sync_utils.set_acting_user"):
+			with patch(
+				"ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids"
+			) as mock_get_deal_ids:
+				with patch("ivm.integrations.hubspot.activity_handler.api.get_engagement") as mock_get_eng:
+					with patch("ivm.integrations.hubspot.activity_handler.frappe.logger"):
+						notes_type_id = next(
+							k
+							for k, v in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID.items()
+							if v == ENGAGEMENT_TYPE_NOTES
+						)
+
+						mock_get_deal_ids.return_value = []
+
+						sync_engagement(engagement_type_id=notes_type_id, engagement_id="e-1")
+
+						mock_get_eng.assert_not_called()
+
+	def test_missing_deal_calls_ensure_deal_exists(self):
+		"""Deal not found locally -> calls ensure_deal_exists and uses returned name"""
+		with patch("ivm.integrations.hubspot.sync_utils.set_acting_user"):
+			with patch(
+				"ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids"
+			) as mock_get_deal_ids:
+				with patch("ivm.integrations.hubspot.activity_handler.api.get_engagement") as mock_get_eng:
+					with patch(
+						"ivm.integrations.hubspot.activity_handler.frappe.db.get_value"
+					) as mock_get_value:
+						with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists") as mock_ensure:
+							mock_handler = MagicMock()
+							with patch.dict(
+								"ivm.integrations.hubspot.activity_handler._TYPE_HANDLERS",
+								{ENGAGEMENT_TYPE_NOTES: mock_handler},
+							):
+								notes_type_id = next(
+									k
+									for k, v in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID.items()
+									if v == ENGAGEMENT_TYPE_NOTES
+								)
+
+								mock_get_deal_ids.return_value = ["deal-1"]
+								mock_get_value.return_value = None
+								mock_ensure.return_value = "Deal-002"
+								mock_get_eng.return_value = {"properties": {"hs_note_body": "Test"}}
+
+								sync_engagement(engagement_type_id=notes_type_id, engagement_id="e-1")
+
+								mock_ensure.assert_called_once_with("deal-1")
+								mock_handler.assert_called_once_with(
+									"e-1", {"hs_note_body": "Test"}, "Deal-002"
+								)
+
+	def test_rate_limit_from_handler_propagates(self):
+		"""Handler raises HubSpotRateLimitExhausted -> propagates (not caught)"""
 		from ivm.integrations.hubspot import api
 
-		mock_get_deal_ids.side_effect = api.HubSpotRateLimitExhausted(60)
+		with patch("ivm.integrations.hubspot.sync_utils.set_acting_user"):
+			with patch(
+				"ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids"
+			) as mock_get_deal_ids:
+				with patch("ivm.integrations.hubspot.activity_handler.api.get_engagement") as mock_get_eng:
+					with patch(
+						"ivm.integrations.hubspot.activity_handler.frappe.db.get_value"
+					) as mock_get_value:
+						mock_handler = MagicMock()
+						mock_handler.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
+						with patch.dict(
+							"ivm.integrations.hubspot.activity_handler._TYPE_HANDLERS",
+							{ENGAGEMENT_TYPE_NOTES: mock_handler},
+						):
+							notes_type_id = next(
+								k
+								for k, v in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID.items()
+								if v == ENGAGEMENT_TYPE_NOTES
+							)
 
-		with patch("ivm.integrations.hubspot.activity_handler.frappe.logger"):
-			handle_engagement_webhook(ENGAGEMENT_TYPE_NOTES, "eng_123")
+							mock_get_deal_ids.return_value = ["deal-1"]
+							mock_get_value.return_value = "Deal-001"
+							mock_get_eng.return_value = {"properties": {}}
 
-		mock_enqueue.assert_called_once()
+							# Call the undecorated body directly: sync_engagement itself is
+							# wrapped by @retry_via_reenqueue, which catches
+							# HubSpotRateLimitExhausted as part of its own default retry
+							# handling (sleeping for up to 30s and re-enqueueing) — that's
+							# the decorator's correct, intended job, not a bug. What this
+							# test actually needs to prove is that sync_engagement's own
+							# function BODY lets the exception propagate out of its
+							# per-handler try/except rather than swallowing it alongside
+							# generic failures, so the decorator gets a chance to catch it
+							# at all. functools.wraps sets __wrapped__ to the raw function.
+							with self.assertRaises(api.HubSpotRateLimitExhausted):
+								sync_engagement.__wrapped__(
+									engagement_type_id=notes_type_id, engagement_id="e-1"
+								)
 
-	@patch("ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids")
-	@patch("ivm.integrations.hubspot.sync_utils.set_acting_user")
-	def test_returns_when_no_deal_associated(self, mock_set_user, mock_get_deal_ids):
-		mock_get_deal_ids.return_value = []
+	def test_generic_handler_exception_logged_and_continues_to_next_deal(self):
+		"""Handler raises generic Exception for first deal -> logged, continues to second deal"""
+		with patch("ivm.integrations.hubspot.sync_utils.set_acting_user"):
+			with patch(
+				"ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids"
+			) as mock_get_deal_ids:
+				with patch("ivm.integrations.hubspot.activity_handler.api.get_engagement") as mock_get_eng:
+					with patch(
+						"ivm.integrations.hubspot.activity_handler.frappe.db.get_value"
+					) as mock_get_value:
+						with patch(
+							"ivm.integrations.hubspot.activity_handler.frappe.log_error"
+						) as mock_log_error:
+							mock_handler = MagicMock()
+							# First call raises, second succeeds
+							mock_handler.side_effect = [ValueError("sync failed"), None]
+							with patch.dict(
+								"ivm.integrations.hubspot.activity_handler._TYPE_HANDLERS",
+								{ENGAGEMENT_TYPE_NOTES: mock_handler},
+							):
+								notes_type_id = next(
+									k
+									for k, v in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID.items()
+									if v == ENGAGEMENT_TYPE_NOTES
+								)
 
-		with patch("ivm.integrations.hubspot.activity_handler.frappe.logger"):
-			handle_engagement_webhook(ENGAGEMENT_TYPE_NOTES, "eng_123")
+								mock_get_deal_ids.return_value = ["deal-1", "deal-2"]
+								mock_get_value.side_effect = ["Deal-001", "Deal-002"]
+								mock_get_eng.return_value = {"properties": {}}
 
-		# Should return early without further processing
+								sync_engagement(engagement_type_id=notes_type_id, engagement_id="e-1")
 
-	@patch("ivm.integrations.hubspot.activity_handler.api.get_engagement")
-	@patch("ivm.integrations.hubspot.activity_handler.api.get_engagement_deal_ids")
-	@patch("ivm.integrations.hubspot.activity_handler.frappe.db.get_value")
-	@patch("ivm.integrations.hubspot.sync_utils.set_acting_user")
-	def test_logs_warning_for_unknown_engagement_type(
-		self, mock_set_user, mock_get_value, mock_get_deal_ids, mock_get_eng
-	):
-		mock_get_deal_ids.return_value = ["deal_123"]
-		mock_get_value.return_value = "Deal-001"
-		mock_get_eng.return_value = {"properties": {}}
-
-		with patch("ivm.integrations.hubspot.activity_handler.frappe.logger"):
-			handle_engagement_webhook("unknown_type", "eng_123")
-
-		# Should log warning and return
+								# Handler called twice (once per deal)
+								self.assertEqual(mock_handler.call_count, 2)
+								# Error logged once
+								mock_log_error.assert_called_once()

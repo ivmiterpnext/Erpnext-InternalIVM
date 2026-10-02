@@ -143,7 +143,8 @@ def _sync_one_deal(hs_id: str, properties: dict, icorp_client_map: dict[str, str
 	)
 
 	# Org must be linked before deal fields are saved (same order as live sync).
-	_sync_organization(hs_id, doc.name)
+	primary_company_id, _master_company_id = api.get_deal_company_ids_by_role(hs_id)
+	_sync_organization(hs_id, doc.name, primary_company_id)
 	_sync_contacts(hs_id, doc.name)
 
 	# Sync all deal fields except status — status is written via db.set_value below.

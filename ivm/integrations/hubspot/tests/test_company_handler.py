@@ -12,9 +12,9 @@ from ivm.integrations.hubspot.company_handler import (
 	_apply_industry,
 	_maybe_rename_org,
 	_sync_company,
+	_sync_company_core,
 	_sync_org_address,
-	handle_company_created,
-	handle_company_updated,
+	sync_company,
 )
 from ivm.integrations.hubspot.constants import COMPANY_TYPE_ID, HUBSPOT_COMPANY_ID_FIELD
 from ivm.integrations.hubspot.sync_utils import ConcurrentCreateConflict
@@ -100,118 +100,45 @@ class TestApplyIndustry(FrappeTestCase):
 		self.assertFalse(hasattr(doc, "industry"))
 
 
-class TestHandleCompanyCreated(FrappeTestCase):
-	"""handle_company_created entry point"""
+class TestSyncCompanyCore(FrappeTestCase):
+	"""_sync_company_core function"""
 
-	def test_new_company_creates_and_syncs(self):
-		"""New company creates via lookup_or_create and calls _sync_company."""
+	def test_creates_and_syncs(self):
+		"""Creates org via lookup_or_create and calls _sync_company."""
 		with patch("ivm.integrations.hubspot.company_handler.lookup_or_create") as mock_lookup:
 			with patch("ivm.integrations.hubspot.company_handler._sync_company") as mock_sync:
-				with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-					mock_lookup.return_value = (MagicMock(name="Test Org"), True)
-					handle_company_created(hubspot_company_id="123")
-					mock_lookup.assert_called_once()
-					mock_sync.assert_called_once()
+				mock_doc = MagicMock()
+				mock_doc.name = "Test Org"
+				mock_lookup.return_value = (mock_doc, True)
+				mock_sync.return_value = "Test Org"
+				result = _sync_company_core("123")
+				self.assertEqual(result, "Test Org")
+				mock_lookup.assert_called_once()
+				mock_sync.assert_called_once_with("123", "Test Org")
 
-	def test_duplicate_company_logs_and_returns_without_syncing(self):
-		"""Duplicate (is_new=False) logs info and returns without syncing."""
+	def test_always_resyncs_existing_org(self):
+		"""Even if org already existed (is_new=False), _sync_company is still called."""
 		with patch("ivm.integrations.hubspot.company_handler.lookup_or_create") as mock_lookup:
 			with patch("ivm.integrations.hubspot.company_handler._sync_company") as mock_sync:
-				with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-					with patch("ivm.integrations.hubspot.company_handler.frappe.logger") as mock_logger:
-						mock_lookup.return_value = (MagicMock(name="Existing Org"), False)
-						handle_company_created(hubspot_company_id="456")
-						mock_logger.assert_called_once()
-						mock_sync.assert_not_called()
-
-	def test_concurrent_create_conflict_re_enqueues(self):
-		"""ConcurrentCreateConflict raised internally re-enqueues via decorator."""
-		with patch("ivm.integrations.hubspot.company_handler.lookup_or_create") as mock_lookup:
-			with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
-						with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
-							mock_lookup.side_effect = ConcurrentCreateConflict(
-								"CRM Organization", HUBSPOT_COMPANY_ID_FIELD, "789"
-							)
-							result = handle_company_created(hubspot_company_id="789")
-							self.assertIsNone(result)
-							mock_enqueue.assert_called_once()
-							args, kwargs = mock_enqueue.call_args
-							self.assertTrue(args[0].endswith(".handle_company_created"))
-							self.assertEqual(args[1], COMPANY_TYPE_ID)
-							self.assertEqual(args[2], "789")
-							self.assertEqual(kwargs["hubspot_company_id"], "789")
-							self.assertEqual(kwargs["attempt"], 1)
-
-	def test_hubspot_rate_limit_exhausted_re_enqueues(self):
-		"""HubSpotRateLimitExhausted raised internally re-enqueues via decorator."""
-		with patch("ivm.integrations.hubspot.company_handler.lookup_or_create") as mock_lookup:
-			with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
-						with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
-							mock_lookup.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=10.0)
-							result = handle_company_created(hubspot_company_id="999")
-							self.assertIsNone(result)
-							mock_enqueue.assert_called_once()
-
-	def test_generic_exception_logs_error_and_does_not_propagate(self):
-		"""Generic Exception logs error via frappe.log_error and does not propagate."""
-		with patch("ivm.integrations.hubspot.company_handler.lookup_or_create") as mock_lookup:
-			with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-				with patch("ivm.integrations.hubspot.company_handler.frappe.log_error") as mock_log_error:
-					with patch("ivm.integrations.hubspot.company_handler.frappe.get_traceback"):
-						mock_lookup.side_effect = ValueError("test error")
-						handle_company_created(hubspot_company_id="111")
-						mock_log_error.assert_called_once()
+				mock_doc = MagicMock()
+				mock_doc.name = "Existing Org"
+				mock_lookup.return_value = (mock_doc, False)  # is_new=False
+				mock_sync.return_value = "Existing Org"
+				result = _sync_company_core("456")
+				self.assertEqual(result, "Existing Org")
+				mock_sync.assert_called_once_with("456", "Existing Org")
 
 
-class TestHandleCompanyUpdated(FrappeTestCase):
-	"""handle_company_updated entry point"""
+class TestSyncCompanyEntry(FrappeTestCase):
+	"""sync_company entry point (decorated with @retry_via_reenqueue)"""
 
-	def test_existing_org_found_calls_sync_company(self):
-		"""Existing org found calls _sync_company."""
-		with patch("ivm.integrations.hubspot.company_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler._sync_company") as mock_sync:
-				with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-					mock_get_value.return_value = "Existing Org"
-					handle_company_updated(hubspot_company_id="123")
-					mock_sync.assert_called_once_with("123", "Existing Org")
-
-	def test_org_not_found_calls_handle_company_created(self):
-		"""Org not found falls through and calls handle_company_created."""
-		with patch("ivm.integrations.hubspot.company_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler.handle_company_created") as mock_create:
-				with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-					with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
-						mock_get_value.return_value = None
-						handle_company_updated(hubspot_company_id="456", hubspot_user_id="user123")
-						mock_create.assert_called_once_with("456", "user123")
-
-	def test_hubspot_rate_limit_exhausted_re_enqueues(self):
-		"""HubSpotRateLimitExhausted raised internally re-enqueues via decorator."""
-		with patch("ivm.integrations.hubspot.company_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
-						with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
-							mock_get_value.side_effect = api.HubSpotRateLimitExhausted(
-								retry_after_seconds=10.0
-							)
-							result = handle_company_updated(hubspot_company_id="789")
-							self.assertIsNone(result)
-							mock_enqueue.assert_called_once()
-
-	def test_generic_exception_logs_error_and_does_not_propagate(self):
-		"""Generic Exception logs error via frappe.log_error and does not propagate."""
-		with patch("ivm.integrations.hubspot.company_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-				with patch("ivm.integrations.hubspot.company_handler.frappe.log_error") as mock_log_error:
-					with patch("ivm.integrations.hubspot.company_handler.frappe.get_traceback"):
-						mock_get_value.side_effect = RuntimeError("test error")
-						handle_company_updated(hubspot_company_id="999")
-						mock_log_error.assert_called_once()
+	def test_calls_core_with_set_acting_user(self):
+		"""sync_company calls set_acting_user and _sync_company_core."""
+		with patch("ivm.integrations.hubspot.company_handler.set_acting_user") as mock_set_user:
+			with patch("ivm.integrations.hubspot.company_handler._sync_company_core") as mock_core:
+				sync_company(hubspot_company_id="789")
+				mock_set_user.assert_called_once_with()
+				mock_core.assert_called_once_with("789")
 
 
 class TestMaybeRenameOrg(FrappeTestCase):

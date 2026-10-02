@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import frappe
 
+from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import HUBSPOT_DEAL_ID_FIELD
 from ivm.integrations.hubspot.deal_handler import _sync_organization
 
@@ -35,7 +36,8 @@ def execute() -> None:
 		for idx, d in enumerate(deals, start=1):
 			hubspot_deal_id = d[HUBSPOT_DEAL_ID_FIELD]
 			try:
-				_sync_organization(hubspot_deal_id, d["name"])
+				primary_company_id, _master_company_id = api.get_deal_company_ids_by_role(hubspot_deal_id)
+				_sync_organization(hubspot_deal_id, d["name"], primary_company_id)
 			except Exception:
 				frappe.log_error(
 					title=f"Reconcile: failed to sync organization for deal {d['name']}",

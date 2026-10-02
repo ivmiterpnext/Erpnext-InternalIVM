@@ -16,6 +16,7 @@ from ivm.integrations.hubspot.constants import (
 	CALL_DIRECTION_MAP,
 	CALL_STATUS_MAP,
 	ENGAGEMENT_PROPERTIES,
+	ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID,
 	ENGAGEMENT_TYPE_CALLS,
 	ENGAGEMENT_TYPE_EMAILS,
 	ENGAGEMENT_TYPE_MEETINGS,
@@ -26,6 +27,7 @@ from ivm.integrations.hubspot.constants import (
 	TASK_PRIORITY_MAP,
 	TASK_STATUS_MAP,
 )
+from ivm.integrations.hubspot.sync_utils import retry_via_reenqueue
 
 _LOG = "hubspot"
 
@@ -75,78 +77,42 @@ def sync_deal_activities(hubspot_deal_id: int | str, crm_deal_name: str) -> None
 			)
 
 
-def handle_engagement_webhook(
-	engagement_type: str,
+@retry_via_reenqueue(type_kwarg="engagement_type_id", id_kwarg="engagement_id")
+def sync_engagement(
+	engagement_type_id: str,
 	engagement_id: int | str,
-	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
-	"""Handle a single engagement webhook event.
-
-	Looks up associated deal(s) and syncs the engagement to each one.
-	"""
+	"""Sync a single HubSpot engagement to each CRM Deal it's associated with."""
+	from ivm.integrations.hubspot.deal_handler import ensure_deal_exists
 	from ivm.integrations.hubspot.sync_utils import set_acting_user
 
-	set_acting_user(hubspot_user_id)
+	set_acting_user()
+
+	engagement_type = ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID.get(engagement_type_id)
+	if engagement_type is None:
+		frappe.logger(_LOG).warning(f"Unknown engagement objectTypeId '{engagement_type_id}' — skipping")
+		return
 
 	engagement_id_str = str(engagement_id)
 
-	try:
-		deal_ids = api.get_engagement_deal_ids(engagement_type, engagement_id_str)
-	except api.HubSpotRateLimitExhausted:
-		frappe.logger(_LOG).warning(
-			f"HubSpot: rate limit exhausted fetching deal associations for {engagement_type} {engagement_id_str} — re-enqueueing"
-		)
-		frappe.enqueue(
-			"ivm.integrations.hubspot.activity_handler.handle_engagement_webhook",
-			queue="long",
-			engagement_type=engagement_type,
-			engagement_id=engagement_id,
-			hubspot_user_id=hubspot_user_id,
-		)
-		return
-	except Exception:
-		frappe.log_error(
-			title=f"HubSpot: failed to fetch deal associations for {engagement_type} {engagement_id_str}",
-			message=frappe.get_traceback(with_context=True),
-		)
-		return
+	deal_ids = api.get_engagement_deal_ids(engagement_type, engagement_id_str)
 
 	if not deal_ids:
 		frappe.logger(_LOG).info(f"No deal associated with {engagement_type} {engagement_id_str} — skipping")
 		return
 
 	properties = ENGAGEMENT_PROPERTIES.get(engagement_type, [])
-	try:
-		data = api.get_engagement(engagement_type, engagement_id_str, properties)
-	except api.HubSpotRateLimitExhausted:
-		frappe.logger(_LOG).warning(
-			f"HubSpot: rate limit exhausted fetching {engagement_type} {engagement_id_str} — re-enqueueing"
-		)
-		frappe.enqueue(
-			"ivm.integrations.hubspot.activity_handler.handle_engagement_webhook",
-			queue="long",
-			engagement_type=engagement_type,
-			engagement_id=engagement_id,
-			hubspot_user_id=hubspot_user_id,
-		)
-		return
-	except Exception:
-		frappe.log_error(
-			title=f"HubSpot: failed to fetch {engagement_type} {engagement_id_str}",
-			message=frappe.get_traceback(with_context=True),
-		)
-		return
+	data = api.get_engagement(engagement_type, engagement_id_str, properties)
 
 	props = data.get("properties", {})
-	# Fallback timestamp when hs_timestamp is missing.
 	if "createdAt" not in props and data.get("createdAt"):
 		props["_createdAt"] = data["createdAt"]
+
 	handler = _TYPE_HANDLERS.get(engagement_type)
 	if handler is None:
 		frappe.logger(_LOG).warning(f"No handler for engagement type '{engagement_type}'")
 		return
-
-	from ivm.integrations.hubspot.deal_handler import ConcurrentCreateConflict, ensure_deal_exists
 
 	for deal_id in deal_ids:
 		crm_deal_name = frappe.db.get_value(
@@ -155,44 +121,12 @@ def handle_engagement_webhook(
 			"name",
 		)
 		if not crm_deal_name:
-			try:
-				crm_deal_name, _ = ensure_deal_exists(deal_id, hubspot_user_id)
-			except ConcurrentCreateConflict:
-				frappe.logger(_LOG).warning(
-					f"HubSpot: concurrent create conflict for deal {deal_id} — "
-					f"re-enqueueing {engagement_type} {engagement_id_str}"
-				)
-				frappe.enqueue(
-					"ivm.integrations.hubspot.activity_handler.handle_engagement_webhook",
-					queue="long",
-					engagement_type=engagement_type,
-					engagement_id=engagement_id,
-					hubspot_user_id=hubspot_user_id,
-				)
-				return
-			except api.HubSpotRateLimitExhausted:
-				frappe.logger(_LOG).warning(
-					f"HubSpot: rate limit exhausted creating CRM Deal {deal_id} — "
-					f"re-enqueueing {engagement_type} {engagement_id_str}"
-				)
-				frappe.enqueue(
-					"ivm.integrations.hubspot.activity_handler.handle_engagement_webhook",
-					queue="long",
-					engagement_type=engagement_type,
-					engagement_id=engagement_id,
-					hubspot_user_id=hubspot_user_id,
-				)
-				return
-			except Exception:
-				frappe.log_error(
-					title=f"HubSpot: failed to create CRM Deal {deal_id} for "
-					f"{engagement_type} {engagement_id_str}",
-					message=frappe.get_traceback(with_context=True),
-				)
-				continue
+			crm_deal_name = ensure_deal_exists(deal_id)
 
 		try:
 			handler(engagement_id_str, props, crm_deal_name)
+		except api.HubSpotRateLimitExhausted:
+			raise
 		except Exception:
 			frappe.log_error(
 				title=f"HubSpot: failed to sync {engagement_type} {engagement_id_str} "

@@ -204,6 +204,10 @@ COMPANY_ADDRESS_PROPERTIES: list[str] = [
 	"zip",
 ]
 
+# Full set of HubSpot company properties requested during company sync
+# (used by company_handler.py and the webhook subscription generator).
+COMPANY_PROPERTIES: list[str] = ["name", *COMPANY_FIELD_MAP, *COMPANY_ADDRESS_PROPERTIES]
+
 # HubSpot deal property to CRM Deal field
 DEAL_FIELD_MAP: dict[str, str] = {
 	"dealname": "custom_hubspot_deal_name",
@@ -253,6 +257,10 @@ CONTACT_ADDRESS_PROPERTIES: list[str] = [
 	"state",
 	"country",
 ]
+
+# Full set of HubSpot contact properties requested during contact sync
+# (used by contact_handler.py and the webhook subscription generator).
+CONTACT_PROPERTIES: list[str] = [*CONTACT_FIELD_MAP, *CONTACT_ADDRESS_PROPERTIES]
 
 # HubSpot deployment site property to Deployment Location field
 SITE_FIELD_MAP: dict[str, str] = {
@@ -415,6 +423,12 @@ EMAIL_PROPERTIES: list[str] = [
 	"hubspot_owner_id",
 	"hs_attachment_ids",
 ]
+
+# HubSpot does not support generic webhook propertyChange subscriptions for
+# these two EMAIL properties (confirmed via HubSpot's "Create generic webhook
+# subscriptions" docs). Excluded from the webhook subscription generator only —
+# still fetched normally via the API in activity_handler.py.
+EMAIL_WEBHOOK_UNSUPPORTED_PROPERTIES = frozenset({"hs_email_html", "hs_email_subject"})
 
 TASK_PROPERTIES: list[str] = [
 	"hs_task_subject",

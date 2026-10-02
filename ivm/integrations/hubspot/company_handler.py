@@ -15,12 +15,12 @@ from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
 	COMPANY_ADDRESS_PROPERTIES,
 	COMPANY_FIELD_MAP,
+	COMPANY_PROPERTIES,
 	COMPANY_TYPE_ID,
 	HUBSPOT_COMPANY_ID_FIELD,
 	HUBSPOT_INDUSTRY_LABELS,
 )
 from ivm.integrations.hubspot.sync_utils import (
-	ConcurrentCreateConflict,
 	apply_field_map,
 	bucket_employee_count,
 	lookup_or_create,
@@ -71,74 +71,34 @@ COMPANY_TRANSFORMS: dict[str, Any] = {
 }
 
 
+def _sync_company_core(hubspot_company_id: int | str) -> str:
+	"""Look up or create the CRM Organization for this HubSpot company and
+	fully sync its fields. Returns the (possibly renamed) CRM Organization name.
+	Always re-syncs, even if the organization already existed — callers that
+	only want creation should check existence themselves first.
+	"""
+	doc, _ = lookup_or_create(
+		doctype="CRM Organization",
+		hubspot_id_field=HUBSPOT_COMPANY_ID_FIELD,
+		hubspot_id=str(hubspot_company_id),
+		defaults={"organization_name": f"HS-{hubspot_company_id}"},
+	)
+	return _sync_company(hubspot_company_id, doc.name)
+
+
 @retry_via_reenqueue(object_type_id=COMPANY_TYPE_ID, id_kwarg="hubspot_company_id")
-def handle_company_created(
+def sync_company(
 	hubspot_company_id: int | str,
-	hubspot_user_id: int | str | None = None,
 	attempt: int = 0,
 ) -> None:
-	"""Create a CRM Organization from a newly created HubSpot company and sync fields."""
-	set_acting_user(hubspot_user_id)
-	try:
-		doc, is_new = lookup_or_create(
-			doctype="CRM Organization",
-			hubspot_id_field=HUBSPOT_COMPANY_ID_FIELD,
-			hubspot_id=str(hubspot_company_id),
-			defaults={"organization_name": f"HS-{hubspot_company_id}"},
-		)
-		if not is_new:
-			frappe.logger("hubspot").info(
-				f"CRM Organization already exists for company {hubspot_company_id} — skipping"
-			)
-			return
-		_sync_company(hubspot_company_id, doc.name)
-	except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
-		raise
-	except Exception:
-		frappe.log_error(
-			title=f"HubSpot: failed to create CRM Organization for company {hubspot_company_id}",
-			message=frappe.get_traceback(with_context=True),
-		)
+	"""Create-or-update a CRM Organization from the current HubSpot company state."""
+	set_acting_user()
+	_sync_company_core(hubspot_company_id)
 
 
-@retry_via_reenqueue(
-	object_type_id=COMPANY_TYPE_ID,
-	id_kwarg="hubspot_company_id",
-	exceptions=(api.HubSpotRateLimitExhausted,),
-)
-def handle_company_updated(
-	hubspot_company_id: int | str,
-	hubspot_user_id: int | str | None = None,
-	attempt: int = 0,
-) -> None:
-	"""Sync a HubSpot company's current state to the matching CRM Organization."""
-	set_acting_user(hubspot_user_id)
-	try:
-		org_name = frappe.db.get_value(
-			"CRM Organization",
-			{HUBSPOT_COMPANY_ID_FIELD: str(hubspot_company_id)},
-			"name",
-		)
-		if not org_name:
-			frappe.logger("hubspot").info(
-				f"No CRM Organization found for HubSpot company {hubspot_company_id} "
-				f"— provisioning before applying update"
-			)
-			handle_company_created(hubspot_company_id, hubspot_user_id)
-			return
-		_sync_company(hubspot_company_id, org_name)
-	except api.HubSpotRateLimitExhausted:
-		raise
-	except Exception:
-		frappe.log_error(
-			title=f"HubSpot: failed to sync company {hubspot_company_id}",
-			message=frappe.get_traceback(with_context=True),
-		)
-
-
-def _sync_company(hubspot_company_id: int | str, org_name: str) -> None:
+def _sync_company(hubspot_company_id: int | str, org_name: str) -> str:
 	"""Fetch company properties from HubSpot and apply to CRM Organization."""
-	all_properties = ["name", *list(COMPANY_FIELD_MAP.keys()), *COMPANY_ADDRESS_PROPERTIES]
+	all_properties = COMPANY_PROPERTIES
 	hubspot_data = api.get_company(
 		hubspot_company_id,
 		properties=all_properties,
@@ -154,6 +114,8 @@ def _sync_company(hubspot_company_id: int | str, org_name: str) -> None:
 
 	# Sync address fields to a linked Address doc
 	_sync_org_address(org_name, properties)
+
+	return org_name
 
 
 def _maybe_rename_org(org_name: str, properties: dict[str, Any]) -> str:

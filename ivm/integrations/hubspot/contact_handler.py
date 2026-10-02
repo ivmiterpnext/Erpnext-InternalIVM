@@ -23,10 +23,14 @@ from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
 	CONTACT_ADDRESS_PROPERTIES,
 	CONTACT_FIELD_MAP,
+	CONTACT_PROPERTIES,
+	CONTACT_TYPE_ID,
 	HUBSPOT_CONTACT_ID_FIELD,
 )
 from ivm.integrations.hubspot.sync_utils import (
+	ConcurrentCreateConflict,
 	insert_with_retry,
+	retry_via_reenqueue,
 	save_doc,
 	set_acting_user,
 	upsert_address,
@@ -74,73 +78,15 @@ _CHILD_TABLE_KEYS = frozenset({"email", "mobile_no", "phone"})
 _SKIP_FLAT_KEYS = _CHILD_TABLE_KEYS | {"first_name", "last_name"}
 
 
-def handle_contact_created(
+@retry_via_reenqueue(object_type_id=CONTACT_TYPE_ID, id_kwarg="hubspot_contact_id")
+def sync_contact(
 	hubspot_contact_id: int | str,
-	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
-	"""Create a Frappe Contact from a newly created HubSpot contact."""
-	_handle_contact_event(hubspot_contact_id, hubspot_user_id, "create")
-
-
-def handle_contact_updated(
-	hubspot_contact_id: int | str,
-	hubspot_user_id: int | str | None = None,
-) -> None:
-	"""Sync a HubSpot contact's current state to the matching Frappe Contact."""
-	_handle_contact_event(hubspot_contact_id, hubspot_user_id, "sync")
-
-
-def _handle_contact_event(
-	hubspot_contact_id: int | str,
-	hubspot_user_id: int | str | None,
-	action: str,
-) -> None:
-	"""Shared handler for contact creation and update webhooks."""
-	set_acting_user(hubspot_user_id)
-	try:
-		props, address_props = _fetch_contact_properties(hubspot_contact_id)
-		if props is None:
-			return
-		upsert_contact(
-			props,
-			hubspot_contact_id=str(hubspot_contact_id),
-			address_props=address_props,
-		)
-	except api.HubSpotRateLimitExhausted:
-		handler_method = (
-			"ivm.integrations.hubspot.contact_handler.handle_contact_created"
-			if action == "create"
-			else "ivm.integrations.hubspot.contact_handler.handle_contact_updated"
-		)
-		frappe.logger("hubspot").warning(
-			f"HubSpot: rate limit exhausted on contact {hubspot_contact_id} — re-enqueueing"
-		)
-		frappe.enqueue(
-			handler_method,
-			queue="long",
-			hubspot_contact_id=hubspot_contact_id,
-			hubspot_user_id=hubspot_user_id,
-		)
-	except frappe.QueryDeadlockError:
-		handler_method = (
-			"ivm.integrations.hubspot.contact_handler.handle_contact_created"
-			if action == "create"
-			else "ivm.integrations.hubspot.contact_handler.handle_contact_updated"
-		)
-		frappe.logger("hubspot").warning(
-			f"HubSpot: deadlock syncing contact {hubspot_contact_id} — re-enqueueing"
-		)
-		frappe.enqueue(
-			handler_method,
-			queue="long",
-			hubspot_contact_id=hubspot_contact_id,
-			hubspot_user_id=hubspot_user_id,
-		)
-	except Exception:
-		frappe.log_error(
-			title=f"HubSpot: failed to {action} Contact for HubSpot contact {hubspot_contact_id}",
-			message=frappe.get_traceback(with_context=True),
-		)
+	"""Create-or-update a Frappe Contact from the current HubSpot contact state."""
+	set_acting_user()
+	props, address_props = _fetch_contact_properties(hubspot_contact_id)
+	upsert_contact(props, hubspot_contact_id=str(hubspot_contact_id), address_props=address_props)
 
 
 def upsert_contact(
@@ -246,12 +192,12 @@ def upsert_contact(
 
 			_apply_mutations(contact_doc)
 			save_doc(contact_doc, "contact", mutate=_apply_mutations)
-		except frappe.QueryDeadlockError:
+		except frappe.QueryDeadlockError as e:
 			frappe.db.rollback()
 			frappe.logger("hubspot").warning(
 				f"HubSpot: deadlock on Contact insert (hubspot_id={hubspot_contact_id}) — re-raising for re-enqueue"
 			)
-			raise
+			raise ConcurrentCreateConflict("Contact", HUBSPOT_ID_FIELD, hubspot_contact_id or email) from e
 
 	if address_props:
 		_sync_contact_address(contact_doc.name, address_props)
@@ -261,30 +207,20 @@ def upsert_contact(
 
 def _fetch_contact_properties(
 	hubspot_contact_id: int | str,
-) -> tuple[dict[str, Any] | None, dict[str, Any]]:
-	"""Fetch a HubSpot contact and return mapped property + address dicts.
+) -> tuple[dict[str, Any], dict[str, Any]]:
+	"""Fetch a HubSpot contact and return mapped property + address dicts."""
+	hs_properties = CONTACT_PROPERTIES
+	contact_data = api.get_contact(
+		hubspot_contact_id,
+		properties=hs_properties,
+	)
+	raw_props = contact_data.get("properties", {})
 
-	Returns ``(None, {})`` on failure (already logged).
-	"""
-	try:
-		hs_properties = list(CONTACT_FIELD_MAP.keys()) + CONTACT_ADDRESS_PROPERTIES
-		contact_data = api.get_contact(
-			hubspot_contact_id,
-			properties=hs_properties,
-		)
-		raw_props = contact_data.get("properties", {})
+	mapped = {frappe_key: raw_props.get(hs_key) or "" for hs_key, frappe_key in CONTACT_FIELD_MAP.items()}
 
-		mapped = {frappe_key: raw_props.get(hs_key) or "" for hs_key, frappe_key in CONTACT_FIELD_MAP.items()}
+	address_props = {key: raw_props.get(key) or "" for key in CONTACT_ADDRESS_PROPERTIES}
 
-		address_props = {key: raw_props.get(key) or "" for key in CONTACT_ADDRESS_PROPERTIES}
-
-		return mapped, address_props
-	except Exception:
-		frappe.log_error(
-			title=f"HubSpot: failed to fetch contact {hubspot_contact_id}",
-			message=frappe.get_traceback(with_context=True),
-		)
-		return None, {}
+	return mapped, address_props
 
 
 def _find_existing_contact(

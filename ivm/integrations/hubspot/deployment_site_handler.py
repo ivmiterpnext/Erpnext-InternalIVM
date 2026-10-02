@@ -22,7 +22,14 @@ from ivm.integrations.hubspot.constants import (
 	MACHINE_TYPES_WITH_BINS,
 	SITE_FIELD_MAP,
 )
-from ivm.integrations.hubspot.sync_utils import coerce_value, retry_via_reenqueue, set_acting_user
+from ivm.integrations.hubspot.sync_utils import (
+	ConcurrentCreateConflict,
+	coerce_value,
+	enqueue_sync,
+	retry_via_reenqueue,
+	save_doc,
+	set_acting_user,
+)
 
 _LOG = "hubspot"
 
@@ -31,11 +38,12 @@ _LOG = "hubspot"
 def _log_error(title: str):
 	"""Catch any exception, log it with a traceback, then suppress it.
 
-	HubSpotRateLimitExhausted is re-raised so callers can handle re-enqueueing.
+	HubSpotRateLimitExhausted and ConcurrentCreateConflict are re-raised so
+	callers can handle re-enqueueing.
 	"""
 	try:
 		yield
-	except api.HubSpotRateLimitExhausted:
+	except (api.HubSpotRateLimitExhausted, ConcurrentCreateConflict):
 		raise
 	except Exception:
 		frappe.log_error(
@@ -65,60 +73,83 @@ def _map_properties(
 
 
 @retry_via_reenqueue(object_type_id=DEPLOYMENT_SITE_TYPE_ID, id_kwarg="hubspot_site_id")
-def handle_site_webhook(
+def sync_site(
 	hubspot_site_id: int | str,
-	hubspot_user_id: int | str | None = None,
 	attempt: int = 0,
 ) -> None:
 	"""Re-sync a deployment site (properties + machines + bins) into its Deployment Location."""
-	set_acting_user(hubspot_user_id)
+	set_acting_user()
 	site_id_str = str(hubspot_site_id)
 
-	crm_deal_name = _resolve_deal_for_site(site_id_str, hubspot_user_id)
+	crm_deal_name = _resolve_deal_for_site(site_id_str)
 	if not crm_deal_name:
 		return
 
-	with _log_error(f"failed to sync deployment site {site_id_str}"):
-		site_data = api.get_custom_object(
-			DEPLOYMENT_SITE_TYPE_ID,
-			site_id_str,
-			properties=list(SITE_FIELD_MAP.keys()),
-		)
-		properties = site_data.get("properties", {})
-		machines = _fetch_site_machines(site_id_str)
+	_sync_site_core(site_id_str, crm_deal_name, trigger_deal_sync=True)
 
-		_upsert_location_from_webhook(
-			crm_deal_name,
-			site_id_str,
-			properties,
-			machines,
-		)
-		frappe.logger(_LOG).info(f"Synced deployment site {site_id_str} to CRM Deal {crm_deal_name}")
+
+def _sync_site_core(
+	hubspot_site_id: str,
+	crm_deal_name: str,
+	*,
+	trigger_deal_sync: bool,
+) -> None:
+	"""Fetch and upsert a single deployment site into its Deployment Location.
+
+	No blanket exception handling here (per R2) — callers (sync_site, or the
+	inline Won-ordering step in deal_handler._sync_deal_core) are responsible
+	for what happens on failure.
+
+	If this creates a brand-new Deployment Location and trigger_deal_sync is
+	True, enqueues a follow-up sync of the owning deal (e.g. a newly-arrived
+	location should trigger the deal to re-evaluate Won status). Pass
+	trigger_deal_sync=False when calling this from inside a deal sync that's
+	already in progress, to avoid enqueueing a redundant self-resync.
+	"""
+	site_data = api.get_custom_object(
+		DEPLOYMENT_SITE_TYPE_ID,
+		hubspot_site_id,
+		properties=list(SITE_FIELD_MAP.keys()),
+	)
+	properties = site_data.get("properties", {})
+	machines = _fetch_site_machines(hubspot_site_id)
+
+	is_new = _upsert_location_from_webhook(
+		crm_deal_name,
+		hubspot_site_id,
+		properties,
+		machines,
+	)
+	frappe.logger(_LOG).info(f"Synced deployment site {hubspot_site_id} to CRM Deal {crm_deal_name}")
+
+	if is_new and trigger_deal_sync:
+		hubspot_deal_id = frappe.db.get_value("CRM Deal", crm_deal_name, HUBSPOT_DEAL_ID_FIELD)
+		if hubspot_deal_id:
+			from ivm.integrations.hubspot.constants import DEAL_TYPE_ID
+			from ivm.integrations.hubspot.deal_handler import sync_deal
+
+			enqueue_sync(
+				f"{sync_deal.__module__}.{sync_deal.__name__}",
+				DEAL_TYPE_ID,
+				str(hubspot_deal_id),
+				hubspot_deal_id=str(hubspot_deal_id),
+			)
 
 
 @retry_via_reenqueue(
 	type_kwarg="machine_type_id",
 	id_kwarg="hubspot_machine_id",
-	exceptions=(api.HubSpotRateLimitExhausted,),
 )
-def handle_machine_webhook(
+def sync_machine(
 	machine_type_id: str,
 	hubspot_machine_id: int | str,
-	hubspot_user_id: int | str | None = None,
 	attempt: int = 0,
 ) -> None:
-	"""Walk machine → site → deal and re-sync the parent site."""
-	set_acting_user(hubspot_user_id)
+	"""Walk machine → site and enqueue a sync of each associated site."""
+	set_acting_user()
 	machine_id_str = str(hubspot_machine_id)
 
-	site_ids = None
-	with _log_error(
-		f"failed to resolve site for machine {machine_id_str} (type {machine_type_id})",
-	):
-		site_ids = api.get_machine_site_ids(machine_type_id, machine_id_str)
-
-	if site_ids is None:
-		return
+	site_ids = api.get_machine_site_ids(machine_type_id, machine_id_str)
 
 	if not site_ids:
 		frappe.logger(_LOG).warning(
@@ -127,49 +158,43 @@ def handle_machine_webhook(
 		return
 
 	for site_id in site_ids:
-		with _log_error(
-			f"failed to sync site {site_id} after machine {machine_id_str} change",
-		):
-			handle_site_webhook(site_id, hubspot_user_id=hubspot_user_id)
+		enqueue_sync(
+			"ivm.integrations.hubspot.deployment_site_handler.sync_site",
+			DEPLOYMENT_SITE_TYPE_ID,
+			str(site_id),
+			hubspot_site_id=str(site_id),
+		)
 
 
 @retry_via_reenqueue(
 	object_type_id=BIN_TYPE_ID,
 	id_kwarg="hubspot_bin_id",
-	exceptions=(api.HubSpotRateLimitExhausted,),
 )
-def handle_bin_webhook(
+def sync_bin(
 	hubspot_bin_id: int | str,
-	hubspot_user_id: int | str | None = None,
 	attempt: int = 0,
 ) -> None:
-	"""Walk bin → machine → site → deal and re-sync the parent site."""
-	set_acting_user(hubspot_user_id)
+	"""Walk bin → machine and enqueue a sync of each associated machine."""
+	set_acting_user()
 	bin_id_str = str(hubspot_bin_id)
 
-	machine_pairs = None
-	with _log_error(f"failed to resolve machine for bin {bin_id_str}"):
-		machine_pairs = api.get_bin_machine_ids(bin_id_str)
-
-	if machine_pairs is None:
-		return
+	machine_pairs = api.get_bin_machine_ids(bin_id_str)
 
 	if not machine_pairs:
 		frappe.logger(_LOG).warning(f"No machine associated with bin {bin_id_str} — skipping")
 		return
 
 	for machine_type_id, machine_id in machine_pairs:
-		with _log_error(
-			f"failed to sync machine {machine_id} after bin {bin_id_str} change",
-		):
-			handle_machine_webhook(
-				machine_type_id,
-				machine_id,
-				hubspot_user_id=hubspot_user_id,
-			)
+		enqueue_sync(
+			"ivm.integrations.hubspot.deployment_site_handler.sync_machine",
+			machine_type_id,
+			str(machine_id),
+			machine_type_id=machine_type_id,
+			hubspot_machine_id=str(machine_id),
+		)
 
 
-def _resolve_deal_for_site(site_id: str, hubspot_user_id: int | str | None = None) -> str | None:
+def _resolve_deal_for_site(site_id: str) -> str | None:
 	"""Find the CRM Deal for a site via HubSpot associations, falling back to local lookup.
 
 	Self-heals by creating the CRM Deal if HubSpot has at least one deal
@@ -177,7 +202,7 @@ def _resolve_deal_for_site(site_id: str, hubspot_user_id: int | str | None = Non
 	(e.g. the deal's own object.creation event hasn't been processed yet).
 
 	May raise ConcurrentCreateConflict or api.HubSpotRateLimitExhausted —
-	the caller (handle_site_webhook) handles re-enqueueing.
+	the caller (sync_site) handles re-enqueueing.
 	"""
 	from ivm.integrations.hubspot.deal_handler import ensure_deal_exists
 
@@ -203,8 +228,7 @@ def _resolve_deal_for_site(site_id: str, hubspot_user_id: int | str | None = Non
 		return crm_deal
 
 	if deal_ids:
-		crm_deal_name, _ = ensure_deal_exists(deal_ids[0], hubspot_user_id)
-		return crm_deal_name
+		return ensure_deal_exists(deal_ids[0])
 
 	frappe.logger(_LOG).warning(f"No CRM Deal found for deployment site {site_id} — skipping")
 	return None
@@ -236,13 +260,18 @@ def _upsert_location_from_webhook(
 	hubspot_site_id: str,
 	site_properties: dict[str, Any],
 	machines: dict[str, list[dict[str, Any]]],
-) -> None:
-	"""Create or update a Deployment Location from webhook data."""
+) -> bool:
+	"""Create or update a Deployment Location from webhook data.
+
+	Returns True if a new Deployment Location was created, False if updated.
+	"""
 	existing_name = frappe.db.get_value(
 		"Deployment Location",
 		{"hubspot_site_id": hubspot_site_id},
 		"name",
 	)
+
+	is_new = existing_name is None
 
 	if existing_name:
 		loc = frappe.get_doc("Deployment Location", existing_name)
@@ -259,51 +288,14 @@ def _upsert_location_from_webhook(
 	_apply_machine_data(loc, machines)
 
 	if existing_name:
-		loc.save(ignore_permissions=True)
+		save_doc(loc, "site")
 	else:
 		loc.insert(ignore_permissions=True)
 
 	action = "Updated" if existing_name else "Created"
 	frappe.logger(_LOG).info(f"{action} Deployment Location {loc.name} (HubSpot site {hubspot_site_id})")
 
-
-def fetch_all_deployment_sites(hubspot_deal_id: int | str) -> list[dict[str, Any]]:
-	"""Return site dicts for a deal, each with properties and machine associations."""
-	hubspot_deal_id_str = str(hubspot_deal_id)
-
-	association_ids: list = []
-	with _log_error(
-		f"failed to fetch deployment site associations for deal {hubspot_deal_id_str}",
-	):
-		association_ids = api.get_deal_deployment_site_ids(hubspot_deal_id_str)
-
-	if not association_ids:
-		frappe.logger(_LOG).info(f"No deployment sites associated with HubSpot deal {hubspot_deal_id_str}")
-		return []
-
-	sites: list[dict[str, Any]] = []
-
-	for site_id in association_ids:
-		with _log_error(
-			f"failed to fetch deployment site {site_id} for deal {hubspot_deal_id_str}",
-		):
-			site_data = api.get_custom_object(
-				DEPLOYMENT_SITE_TYPE_ID,
-				site_id,
-				properties=list(SITE_FIELD_MAP.keys()),
-			)
-			properties = site_data.get("properties", {})
-			machines = _fetch_site_machines(site_id)
-
-			sites.append(
-				{
-					"hubspot_site_id": str(site_id),
-					"properties": properties,
-					"machines": machines,
-				}
-			)
-
-	return sites
+	return is_new
 
 
 def _fetch_site_machines(site_id: int | str) -> dict[str, list[dict[str, Any]]]:

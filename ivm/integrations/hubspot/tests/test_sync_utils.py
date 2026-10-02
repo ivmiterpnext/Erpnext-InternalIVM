@@ -8,6 +8,7 @@ from frappe.tests.utils import FrappeTestCase
 from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.sync_utils import (
 	ConcurrentCreateConflict,
+	SyncLockBusy,
 	apply_field_map,
 	bucket_employee_count,
 	coerce_value,
@@ -143,6 +144,85 @@ class TestRetryViaReenqueue(FrappeTestCase):
 			stub_func("123")
 
 
+class TestRetryViaReenqueueLock(FrappeTestCase):
+	"""retry_via_reenqueue lock acquisition and release"""
+
+	def test_lock_busy_triggers_reenqueue(self):
+		"""When lock.acquire() returns False, SyncLockBusy is caught and re-enqueued."""
+
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id")
+		def stub_func(deal_id: str, attempt: int = 0) -> None:
+			return "success"
+
+		with patch("ivm.integrations.hubspot.sync_utils.frappe.cache") as mock_cache:
+			mock_lock = MagicMock()
+			mock_lock.acquire.return_value = False
+			mock_cache.lock.return_value = mock_lock
+			mock_cache.make_key.return_value = "test_key"
+
+			with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+				with patch("ivm.integrations.hubspot.sync_utils.time.sleep") as mock_sleep:
+					result = stub_func(deal_id="123")
+					self.assertIsNone(result)
+					mock_sleep.assert_called_once()
+					mock_enqueue.assert_called_once()
+
+	def test_lock_released_after_successful_call(self):
+		"""Lock is released after successful function execution."""
+
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id")
+		def stub_func(deal_id: str, attempt: int = 0) -> str:
+			return "success"
+
+		with patch("ivm.integrations.hubspot.sync_utils.frappe.cache") as mock_cache:
+			mock_lock = MagicMock()
+			mock_lock.acquire.return_value = True
+			mock_cache.lock.return_value = mock_lock
+			mock_cache.make_key.return_value = "test_key"
+
+			result = stub_func(deal_id="123")
+			self.assertEqual(result, "success")
+			mock_lock.release.assert_called_once()
+
+	def test_lock_released_after_exception(self):
+		"""Lock is released even when function raises a non-retryable exception."""
+
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id")
+		def stub_func(deal_id: str, attempt: int = 0) -> None:
+			raise ValueError("test error")
+
+		with patch("ivm.integrations.hubspot.sync_utils.frappe.cache") as mock_cache:
+			mock_lock = MagicMock()
+			mock_lock.acquire.return_value = True
+			mock_cache.lock.return_value = mock_lock
+			mock_cache.make_key.return_value = "test_key"
+
+			with self.assertRaises(ValueError):
+				stub_func(deal_id="123")
+			mock_lock.release.assert_called_once()
+
+	def test_max_attempts_exhausted_logs_and_stops(self):
+		"""After max_attempts, logs error and returns None without re-enqueueing."""
+
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id", max_attempts=2)
+		def stub_func(deal_id: str, attempt: int = 0) -> None:
+			raise ConcurrentCreateConflict("CRM Deal", "hubspot_deal_id", deal_id)
+
+		with patch("ivm.integrations.hubspot.sync_utils.frappe.cache") as mock_cache:
+			mock_lock = MagicMock()
+			mock_lock.acquire.return_value = True
+			mock_cache.lock.return_value = mock_lock
+			mock_cache.make_key.return_value = "test_key"
+
+			with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+				with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+					with patch("ivm.integrations.hubspot.sync_utils.frappe.log_error") as mock_log_error:
+						result = stub_func(deal_id="123", attempt=1)
+						self.assertIsNone(result)
+						mock_enqueue.assert_not_called()
+						mock_log_error.assert_called_once()
+
+
 class TestEnqueueSync(FrappeTestCase):
 	"""enqueue_sync dedup helper"""
 
@@ -200,6 +280,33 @@ class TestEnqueueSync(FrappeTestCase):
 				enqueue_sync("some.module.func", "0-3", "123", attempt=2, deal_id="123")
 				_, kwargs = mock_enqueue.call_args
 				self.assertEqual(kwargs["attempt"], 2)
+
+
+class TestEnqueueSyncAfterCommit(FrappeTestCase):
+	"""enqueue_sync after_commit parameter"""
+
+	def test_after_commit_true_passes_through(self):
+		"""after_commit=True with no job queued returns 'queued' (not 'skipped')."""
+		with patch("ivm.integrations.hubspot.sync_utils.get_job_status", return_value=None):
+			with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue", return_value=None):
+				result = enqueue_sync("some.module.func", "0-3", "123", after_commit=True, deal_id="123")
+				self.assertEqual(result, "queued")
+
+	def test_after_commit_false_respects_truthiness(self):
+		"""after_commit=False with frappe.enqueue returning None reports 'skipped'."""
+		with patch("ivm.integrations.hubspot.sync_utils.get_job_status", return_value=None):
+			with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue", return_value=None):
+				result = enqueue_sync("some.module.func", "0-3", "123", after_commit=False, deal_id="123")
+				self.assertEqual(result, "skipped")
+
+	def test_after_commit_followup_branch(self):
+		"""after_commit=True with running primary job returns 'followup'."""
+		from frappe.utils.background_jobs import JobStatus
+
+		with patch("ivm.integrations.hubspot.sync_utils.get_job_status", return_value=JobStatus.STARTED):
+			with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue", return_value=None):
+				result = enqueue_sync("some.module.func", "0-3", "123", after_commit=True, deal_id="123")
+				self.assertEqual(result, "followup")
 
 
 class TestCoerceValue(FrappeTestCase):
