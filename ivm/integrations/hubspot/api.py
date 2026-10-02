@@ -501,6 +501,43 @@ def search_contacts(
 	return _post("/crm/v3/objects/contacts/search", payload)
 
 
+def search_objects(
+	object_type: str,
+	filters: list[dict],
+	after: str | None = None,
+	limit: int = 100,
+	properties: list[str] | None = None,
+) -> dict[str, Any]:
+	"""POST to /crm/v3/objects/{object_type}/search with cursor-based pagination.
+
+	*object_type* is the HubSpot path segment: a standard object's plural
+	name ("deals", "contacts", "companies"), an engagement's plural name
+	("notes", "calls", "emails", "tasks", "meetings"), or a custom object's
+	numeric type ID (e.g. "2-230236986") — the v3 search endpoint accepts
+	all three forms directly.
+
+	Args:
+	    object_type: The {objectType} path segment, as above.
+	    filters: HubSpot filter dicts (combined into a single filterGroup).
+	    after: Pagination cursor from paging.next.after of the previous response.
+	    limit: Page size, up to HubSpot's max of 200.
+	    properties: HubSpot property names to include in each result. If
+	        omitted, only each object's default properties (and always its
+	        id) come back.
+
+	Returns the raw HubSpot search response dict.
+	"""
+	payload: dict[str, Any] = {
+		"filterGroups": [{"filters": filters}],
+		"limit": limit,
+	}
+	if properties:
+		payload["properties"] = properties
+	if after:
+		payload["after"] = after
+	return _post(f"/crm/v3/objects/{object_type}/search", payload)
+
+
 @frappe.whitelist()
 def get_hubspot_deal_url(deal_id: int | str) -> str:
 	"""Build the full HubSpot deal URL from deal ID and configured portal ID."""

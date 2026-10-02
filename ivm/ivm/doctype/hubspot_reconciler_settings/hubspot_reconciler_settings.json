@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "creation": "2026-10-03 00:00:00",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "last_checkpoint",
+  "column_break_1",
+  "last_run_at",
+  "last_run_status",
+  "last_run_error"
+ ],
+ "fields": [
+  {
+   "description": "HubSpot objects modified after this time are scanned on the next run. Must be set by hand before the reconciler does anything \u2014 left blank, the job is a safe no-op. Automatically advances (with a 5-minute safety lag) after every successful run.",
+   "fieldname": "last_checkpoint",
+   "fieldtype": "Datetime",
+   "label": "Last Checkpoint"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_run_at",
+   "fieldtype": "Datetime",
+   "label": "Last Run At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_run_status",
+   "fieldtype": "Select",
+   "label": "Last Run Status",
+   "options": "\nSuccess\nFailed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_run_error",
+   "fieldtype": "Small Text",
+   "label": "Last Run Error",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-03 00:19:59.216157",
+ "modified_by": "Administrator",
+ "module": "IVM",
+ "name": "HubSpot Reconciler Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

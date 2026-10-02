@@ -401,6 +401,11 @@ scheduler_events = {
 	# "monthly": [
 	# "ivm.tasks.monthly"
 	# ],
+	"cron": {
+		"0/15 * * * *": [
+			"ivm.integrations.hubspot.reconciler.reconcile",
+		],
+	},
 }
 
 # Testing
