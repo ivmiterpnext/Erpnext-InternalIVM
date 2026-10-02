@@ -53,3 +53,4 @@ ivm.warehouse.patches.fix_wr_naming_series_regression
 ivm.patches.cleanup_orphaned_customizations
 ivm.patches.cleanup_module_tags_on_non_ivm_customizations
 ivm.patches.dedupe_workspace_shortcuts
+ivm.patches.remove_solution_selection_doctypes
