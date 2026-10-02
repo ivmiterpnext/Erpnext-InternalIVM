@@ -13,6 +13,7 @@ import frappe
 from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
 	BIN_FIELD_MAP,
+	BIN_TYPE_ID,
 	DEPLOYMENT_SITE_TYPE_ID,
 	HUBSPOT_DEAL_ID_FIELD,
 	MACHINE_FIELD_MAPS,
@@ -63,10 +64,11 @@ def _map_properties(
 	return row
 
 
-@retry_via_reenqueue()
+@retry_via_reenqueue(object_type_id=DEPLOYMENT_SITE_TYPE_ID, id_kwarg="hubspot_site_id")
 def handle_site_webhook(
 	hubspot_site_id: int | str,
 	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
 	"""Re-sync a deployment site (properties + machines + bins) into its Deployment Location."""
 	set_acting_user(hubspot_user_id)
@@ -94,11 +96,16 @@ def handle_site_webhook(
 		frappe.logger(_LOG).info(f"Synced deployment site {site_id_str} to CRM Deal {crm_deal_name}")
 
 
-@retry_via_reenqueue(exceptions=(api.HubSpotRateLimitExhausted,))
+@retry_via_reenqueue(
+	type_kwarg="machine_type_id",
+	id_kwarg="hubspot_machine_id",
+	exceptions=(api.HubSpotRateLimitExhausted,),
+)
 def handle_machine_webhook(
 	machine_type_id: str,
 	hubspot_machine_id: int | str,
 	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
 	"""Walk machine → site → deal and re-sync the parent site."""
 	set_acting_user(hubspot_user_id)
@@ -126,10 +133,15 @@ def handle_machine_webhook(
 			handle_site_webhook(site_id, hubspot_user_id=hubspot_user_id)
 
 
-@retry_via_reenqueue(exceptions=(api.HubSpotRateLimitExhausted,))
+@retry_via_reenqueue(
+	object_type_id=BIN_TYPE_ID,
+	id_kwarg="hubspot_bin_id",
+	exceptions=(api.HubSpotRateLimitExhausted,),
+)
 def handle_bin_webhook(
 	hubspot_bin_id: int | str,
 	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
 	"""Walk bin → machine → site → deal and re-sync the parent site."""
 	set_acting_user(hubspot_user_id)

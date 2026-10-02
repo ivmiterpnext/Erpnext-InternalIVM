@@ -7,6 +7,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from ivm.integrations.hubspot import api
+from ivm.integrations.hubspot.constants import DEPLOYMENT_SITE_TYPE_ID
 from ivm.integrations.hubspot.deployment_site_handler import (
 	_map_properties,
 	_resolve_deal_for_site,
@@ -324,16 +325,20 @@ class TestHandleSiteWebhook(FrappeTestCase):
 				with patch(
 					"ivm.integrations.hubspot.deployment_site_handler.api.get_custom_object"
 				) as mock_get_obj:
-					with patch(
-						"ivm.integrations.hubspot.deployment_site_handler.frappe.enqueue"
-					) as mock_enqueue:
-						mock_resolve.return_value = "Deal-001"
-						mock_get_obj.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
+					with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+						with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+							mock_resolve.return_value = "Deal-001"
+							mock_get_obj.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
 
-						# Rate limit exception is re-raised by _log_error, caught by @retry_via_reenqueue decorator
-						# which enqueues it instead of propagating
-						handle_site_webhook(hubspot_site_id="site-456")
-						mock_enqueue.assert_called_once()
+							# Rate limit exception is re-raised by _log_error, caught by
+							# @retry_via_reenqueue decorator, which enqueues it instead of propagating
+							handle_site_webhook(hubspot_site_id="site-456")
+							mock_enqueue.assert_called_once()
+							args, kwargs = mock_enqueue.call_args
+							self.assertTrue(args[0].endswith(".handle_site_webhook"))
+							self.assertEqual(args[1], DEPLOYMENT_SITE_TYPE_ID)
+							self.assertEqual(args[2], "site-456")
+							self.assertEqual(kwargs["attempt"], 1)
 
 	def test_generic_exception_logged_not_propagated(self):
 		"""Generic Exception raised -> logged and suppressed"""

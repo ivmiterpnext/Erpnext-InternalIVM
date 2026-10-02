@@ -16,7 +16,7 @@ from ivm.integrations.hubspot.company_handler import (
 	handle_company_created,
 	handle_company_updated,
 )
-from ivm.integrations.hubspot.constants import HUBSPOT_COMPANY_ID_FIELD
+from ivm.integrations.hubspot.constants import COMPANY_TYPE_ID, HUBSPOT_COMPANY_ID_FIELD
 from ivm.integrations.hubspot.sync_utils import ConcurrentCreateConflict
 
 
@@ -128,25 +128,33 @@ class TestHandleCompanyCreated(FrappeTestCase):
 		"""ConcurrentCreateConflict raised internally re-enqueues via decorator."""
 		with patch("ivm.integrations.hubspot.company_handler.lookup_or_create") as mock_lookup:
 			with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-				with patch("ivm.integrations.hubspot.company_handler.frappe.enqueue") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
-						mock_lookup.side_effect = ConcurrentCreateConflict(
-							"CRM Organization", HUBSPOT_COMPANY_ID_FIELD, "789"
-						)
-						result = handle_company_created(hubspot_company_id="789")
-						self.assertIsNone(result)
-						mock_enqueue.assert_called_once()
+				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+						with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
+							mock_lookup.side_effect = ConcurrentCreateConflict(
+								"CRM Organization", HUBSPOT_COMPANY_ID_FIELD, "789"
+							)
+							result = handle_company_created(hubspot_company_id="789")
+							self.assertIsNone(result)
+							mock_enqueue.assert_called_once()
+							args, kwargs = mock_enqueue.call_args
+							self.assertTrue(args[0].endswith(".handle_company_created"))
+							self.assertEqual(args[1], COMPANY_TYPE_ID)
+							self.assertEqual(args[2], "789")
+							self.assertEqual(kwargs["hubspot_company_id"], "789")
+							self.assertEqual(kwargs["attempt"], 1)
 
 	def test_hubspot_rate_limit_exhausted_re_enqueues(self):
 		"""HubSpotRateLimitExhausted raised internally re-enqueues via decorator."""
 		with patch("ivm.integrations.hubspot.company_handler.lookup_or_create") as mock_lookup:
 			with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-				with patch("ivm.integrations.hubspot.company_handler.frappe.enqueue") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
-						mock_lookup.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=10.0)
-						result = handle_company_created(hubspot_company_id="999")
-						self.assertIsNone(result)
-						mock_enqueue.assert_called_once()
+				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+						with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
+							mock_lookup.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=10.0)
+							result = handle_company_created(hubspot_company_id="999")
+							self.assertIsNone(result)
+							mock_enqueue.assert_called_once()
 
 	def test_generic_exception_logs_error_and_does_not_propagate(self):
 		"""Generic Exception logs error via frappe.log_error and does not propagate."""
@@ -185,12 +193,15 @@ class TestHandleCompanyUpdated(FrappeTestCase):
 		"""HubSpotRateLimitExhausted raised internally re-enqueues via decorator."""
 		with patch("ivm.integrations.hubspot.company_handler.frappe.db.get_value") as mock_get_value:
 			with patch("ivm.integrations.hubspot.company_handler.set_acting_user"):
-				with patch("ivm.integrations.hubspot.company_handler.frappe.enqueue") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
-						mock_get_value.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=10.0)
-						result = handle_company_updated(hubspot_company_id="789")
-						self.assertIsNone(result)
-						mock_enqueue.assert_called_once()
+				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+						with patch("ivm.integrations.hubspot.company_handler.frappe.logger"):
+							mock_get_value.side_effect = api.HubSpotRateLimitExhausted(
+								retry_after_seconds=10.0
+							)
+							result = handle_company_updated(hubspot_company_id="789")
+							self.assertIsNone(result)
+							mock_enqueue.assert_called_once()
 
 	def test_generic_exception_logs_error_and_does_not_propagate(self):
 		"""Generic Exception logs error via frappe.log_error and does not propagate."""

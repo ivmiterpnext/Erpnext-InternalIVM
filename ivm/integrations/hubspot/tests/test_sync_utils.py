@@ -11,6 +11,7 @@ from ivm.integrations.hubspot.sync_utils import (
 	apply_field_map,
 	bucket_employee_count,
 	coerce_value,
+	enqueue_sync,
 	lookup_or_create,
 	retry_via_reenqueue,
 	save_doc,
@@ -21,58 +22,72 @@ from ivm.integrations.hubspot.sync_utils import (
 class TestRetryViaReenqueue(FrappeTestCase):
 	"""retry_via_reenqueue decorator"""
 
-	def test_returns_value_on_success(self):
-		"""Decorator passes through return value on success and never calls enqueue."""
+	def test_requires_exactly_one_of_object_type_id_or_type_kwarg(self):
+		"""Decorator construction rejects neither-or-both of object_type_id/type_kwarg."""
+		with self.assertRaises(ValueError):
+			retry_via_reenqueue(id_kwarg="deal_id")
+		with self.assertRaises(ValueError):
+			retry_via_reenqueue(id_kwarg="deal_id", object_type_id="0-3", type_kwarg="type_id")
 
-		@retry_via_reenqueue()
-		def stub_func(value: int) -> int:
+	def test_returns_value_on_success(self):
+		"""Decorator passes through return value on success and never calls enqueue_sync."""
+
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id")
+		def stub_func(value: int, attempt: int = 0) -> int:
 			return value * 2
 
-		with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
+		with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
 			result = stub_func(value=5)
 			self.assertEqual(result, 10)
 			mock_enqueue.assert_not_called()
 
 	def test_reenqueues_on_concurrent_create_conflict(self):
-		"""Decorator catches ConcurrentCreateConflict and re-enqueues."""
+		"""Decorator catches ConcurrentCreateConflict and re-enqueues via enqueue_sync."""
 
-		@retry_via_reenqueue()
-		def stub_func(deal_id: str) -> None:
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id")
+		def stub_func(deal_id: str, attempt: int = 0) -> None:
 			raise ConcurrentCreateConflict("CRM Deal", "hubspot_deal_id", deal_id)
 
-		with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
-			result = stub_func(deal_id="123")
-			self.assertIsNone(result)
-			mock_enqueue.assert_called_once()
-			call_args = mock_enqueue.call_args
-			self.assertEqual(call_args[0][0], f"{stub_func.__module__}.stub_func")
-			self.assertEqual(call_args[1]["queue"], "long")
-			self.assertEqual(call_args[1]["deal_id"], "123")
+		with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+			with patch("ivm.integrations.hubspot.sync_utils.time.sleep") as mock_sleep:
+				result = stub_func(deal_id="123")
+				self.assertIsNone(result)
+				mock_sleep.assert_called_once()
+				mock_enqueue.assert_called_once()
+				call_args = mock_enqueue.call_args
+				self.assertEqual(call_args[0][0], f"{stub_func.__module__}.stub_func")
+				self.assertEqual(call_args[0][1], "0-3")
+				self.assertEqual(call_args[0][2], "123")
+				self.assertEqual(call_args[1]["deal_id"], "123")
+				self.assertEqual(call_args[1]["attempt"], 1)
 
-	def test_reenqueues_on_rate_limit_exhausted(self):
-		"""Decorator catches HubSpotRateLimitExhausted and re-enqueues."""
+	def test_reenqueues_on_rate_limit_exhausted_with_dynamic_type_kwarg(self):
+		"""Decorator catches HubSpotRateLimitExhausted and resolves object_type_id from type_kwarg."""
 
-		@retry_via_reenqueue()
-		def stub_func(company_id: str) -> None:
-			raise api.HubSpotRateLimitExhausted(retry_after_seconds=30.0)
+		@retry_via_reenqueue(type_kwarg="object_type_id", id_kwarg="company_id")
+		def stub_func(object_type_id: str, company_id: str, attempt: int = 0) -> None:
+			raise api.HubSpotRateLimitExhausted(retry_after_seconds=90.0)
 
-		with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
-			result = stub_func(company_id="456")
-			self.assertIsNone(result)
-			mock_enqueue.assert_called_once()
-			call_args = mock_enqueue.call_args
-			self.assertEqual(call_args[0][0], f"{stub_func.__module__}.stub_func")
-			self.assertEqual(call_args[1]["queue"], "long")
-			self.assertEqual(call_args[1]["company_id"], "456")
+		with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+			with patch("ivm.integrations.hubspot.sync_utils.time.sleep") as mock_sleep:
+				result = stub_func(object_type_id="0-2", company_id="456")
+				self.assertIsNone(result)
+				# retry_after_seconds (90) is capped at 30
+				mock_sleep.assert_called_once_with(30)
+				mock_enqueue.assert_called_once()
+				call_args = mock_enqueue.call_args
+				self.assertEqual(call_args[0][1], "0-2")
+				self.assertEqual(call_args[0][2], "456")
+				self.assertEqual(call_args[1]["company_id"], "456")
 
 	def test_does_not_catch_unrelated_exception(self):
 		"""Decorator does not catch exceptions outside the default tuple."""
 
-		@retry_via_reenqueue()
-		def stub_func() -> None:
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id")
+		def stub_func(attempt: int = 0) -> None:
 			raise ValueError("Something went wrong")
 
-		with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
+		with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
 			with self.assertRaises(ValueError):
 				stub_func()
 			mock_enqueue.assert_not_called()
@@ -80,26 +95,111 @@ class TestRetryViaReenqueue(FrappeTestCase):
 	def test_respects_custom_exception_tuple(self):
 		"""Decorator respects custom exceptions parameter."""
 
-		@retry_via_reenqueue(exceptions=(ValueError,))
-		def stub_func_custom() -> None:
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id", exceptions=(ValueError,))
+		def stub_func_custom(deal_id: str = "1", attempt: int = 0) -> None:
 			raise ValueError("Custom exception")
 
-		with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
-			result = stub_func_custom()
-			self.assertIsNone(result)
-			mock_enqueue.assert_called_once()
+		with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+			with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+				result = stub_func_custom()
+				self.assertIsNone(result)
+				mock_enqueue.assert_called_once()
 
 	def test_custom_exceptions_excludes_default(self):
 		"""When custom exceptions are specified, defaults are excluded."""
 
-		@retry_via_reenqueue(exceptions=(ValueError,))
-		def stub_func_exclude() -> None:
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id", exceptions=(ValueError,))
+		def stub_func_exclude(deal_id: str = "1", attempt: int = 0) -> None:
 			raise api.HubSpotRateLimitExhausted(retry_after_seconds=30.0)
 
-		with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
+		with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
 			with self.assertRaises(api.HubSpotRateLimitExhausted):
 				stub_func_exclude()
 			mock_enqueue.assert_not_called()
+
+	def test_gives_up_after_max_attempts(self):
+		"""After the final allowed attempt, logs to the Error Log and does not re-enqueue."""
+
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id", max_attempts=3)
+		def stub_func(deal_id: str, attempt: int = 0) -> None:
+			raise api.HubSpotRateLimitExhausted(retry_after_seconds=5.0)
+
+		with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+			with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+				with patch("ivm.integrations.hubspot.sync_utils.frappe.log_error") as mock_log_error:
+					result = stub_func(deal_id="1", attempt=2)
+					self.assertIsNone(result)
+					mock_enqueue.assert_not_called()
+					mock_log_error.assert_called_once()
+
+	def test_requires_keyword_only_call(self):
+		"""Positional args raise TypeError instead of being silently dropped on re-enqueue."""
+
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id")
+		def stub_func(deal_id: str, attempt: int = 0) -> None:
+			return None
+
+		with self.assertRaises(TypeError):
+			stub_func("123")
+
+
+class TestEnqueueSync(FrappeTestCase):
+	"""enqueue_sync dedup helper"""
+
+	def test_enqueues_new_primary_job_when_nothing_in_flight(self):
+		"""No existing job for this record -> enqueues a new primary job."""
+		with patch("ivm.integrations.hubspot.sync_utils.get_job_status", return_value=None):
+			with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
+				result = enqueue_sync("some.module.func", "0-3", "123", deal_id="123")
+				self.assertEqual(result, "queued")
+				mock_enqueue.assert_called_once()
+				_, kwargs = mock_enqueue.call_args
+				self.assertEqual(kwargs["job_id"], "hubspot_sync_0-3_123")
+				self.assertTrue(kwargs["deduplicate"])
+				self.assertEqual(kwargs["queue"], "long")
+				self.assertEqual(kwargs["deal_id"], "123")
+				self.assertEqual(kwargs["attempt"], 0)
+
+	def test_skips_when_primary_job_is_queued(self):
+		"""A queued primary job -> skip; it'll pick up the latest state when it runs."""
+		from frappe.utils.background_jobs import JobStatus
+
+		with patch("ivm.integrations.hubspot.sync_utils.get_job_status", return_value=JobStatus.QUEUED):
+			with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
+				result = enqueue_sync("some.module.func", "0-3", "123", deal_id="123")
+				self.assertEqual(result, "skipped")
+				mock_enqueue.assert_not_called()
+
+	def test_enqueues_followup_when_primary_job_is_running(self):
+		"""A running primary job -> enqueue a single deduplicated follow-up job."""
+		from frappe.utils.background_jobs import JobStatus
+
+		with patch("ivm.integrations.hubspot.sync_utils.get_job_status", return_value=JobStatus.STARTED):
+			with patch(
+				"ivm.integrations.hubspot.sync_utils.frappe.enqueue", return_value=MagicMock()
+			) as mock_enqueue:
+				result = enqueue_sync("some.module.func", "0-3", "123", deal_id="123")
+				self.assertEqual(result, "followup")
+				mock_enqueue.assert_called_once()
+				_, kwargs = mock_enqueue.call_args
+				self.assertEqual(kwargs["job_id"], "hubspot_sync_0-3_123_again")
+
+	def test_followup_enqueue_returning_none_reports_skipped(self):
+		"""If frappe.enqueue's own dedup guard silently declines the follow-up, report 'skipped'."""
+		from frappe.utils.background_jobs import JobStatus
+
+		with patch("ivm.integrations.hubspot.sync_utils.get_job_status", return_value=JobStatus.STARTED):
+			with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue", return_value=None):
+				result = enqueue_sync("some.module.func", "0-3", "123", deal_id="123")
+				self.assertEqual(result, "skipped")
+
+	def test_attempt_is_forwarded(self):
+		"""The attempt counter is forwarded to frappe.enqueue for the retry decorator to read back."""
+		with patch("ivm.integrations.hubspot.sync_utils.get_job_status", return_value=None):
+			with patch("ivm.integrations.hubspot.sync_utils.frappe.enqueue") as mock_enqueue:
+				enqueue_sync("some.module.func", "0-3", "123", attempt=2, deal_id="123")
+				_, kwargs = mock_enqueue.call_args
+				self.assertEqual(kwargs["attempt"], 2)
 
 
 class TestCoerceValue(FrappeTestCase):

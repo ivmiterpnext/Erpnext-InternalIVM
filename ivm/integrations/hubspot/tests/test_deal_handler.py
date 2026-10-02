@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from ivm.integrations.hubspot.constants import DEAL_TYPE_ID
 from ivm.integrations.hubspot.deal_handler import (
 	_apply_client_id,
 	_apply_deal_owner,
@@ -364,14 +365,20 @@ class TestHandleDealCreated(FrappeTestCase):
 		"""ConcurrentCreateConflict raised internally -> re-enqueued via decorator"""
 		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
 			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
-				with patch("ivm.integrations.hubspot.deal_handler.frappe.enqueue") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
-						mock_lookup.side_effect = ConcurrentCreateConflict(
-							"CRM Deal", "custom_hubspot_deal_id", "12345"
-						)
-						# Should not raise, decorator catches and re-enqueues
-						handle_deal_created(hubspot_deal_id="12345")
-						mock_enqueue.assert_called_once()
+				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
+							mock_lookup.side_effect = ConcurrentCreateConflict(
+								"CRM Deal", "custom_hubspot_deal_id", "12345"
+							)
+							# Should not raise, decorator catches and re-enqueues
+							handle_deal_created(hubspot_deal_id="12345")
+							mock_enqueue.assert_called_once()
+							args, kwargs = mock_enqueue.call_args
+							self.assertTrue(args[0].endswith(".handle_deal_created"))
+							self.assertEqual(args[1], DEAL_TYPE_ID)
+							self.assertEqual(args[2], "12345")
+							self.assertEqual(kwargs["attempt"], 1)
 
 	def test_hubspot_rate_limit_exhausted_re_enqueues(self):
 		"""api.HubSpotRateLimitExhausted raised internally -> re-enqueued via decorator"""
@@ -379,12 +386,13 @@ class TestHandleDealCreated(FrappeTestCase):
 
 		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
 			with patch("ivm.integrations.hubspot.deal_handler.lookup_or_create") as mock_lookup:
-				with patch("ivm.integrations.hubspot.deal_handler.frappe.enqueue") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
-						mock_lookup.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
-						# Should not raise, decorator catches and re-enqueues
-						handle_deal_created(hubspot_deal_id="12345")
-						mock_enqueue.assert_called_once()
+				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
+							mock_lookup.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
+							# Should not raise, decorator catches and re-enqueues
+							handle_deal_created(hubspot_deal_id="12345")
+							mock_enqueue.assert_called_once()
 
 	def test_generic_exception_logged_not_propagated(self):
 		"""Generic Exception logged via frappe.log_error, does not propagate"""
@@ -431,14 +439,15 @@ class TestHandleDealUpdated(FrappeTestCase):
 		"""ConcurrentCreateConflict raised internally -> re-enqueued via decorator"""
 		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
 			with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists") as mock_ensure:
-				with patch("ivm.integrations.hubspot.deal_handler.frappe.enqueue") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
-						mock_ensure.side_effect = ConcurrentCreateConflict(
-							"CRM Deal", "custom_hubspot_deal_id", "12345"
-						)
-						# Should not raise, decorator catches and re-enqueues
-						handle_deal_updated(hubspot_deal_id="12345")
-						mock_enqueue.assert_called_once()
+				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
+							mock_ensure.side_effect = ConcurrentCreateConflict(
+								"CRM Deal", "custom_hubspot_deal_id", "12345"
+							)
+							# Should not raise, decorator catches and re-enqueues
+							handle_deal_updated(hubspot_deal_id="12345")
+							mock_enqueue.assert_called_once()
 
 	def test_hubspot_rate_limit_exhausted_re_enqueues(self):
 		"""api.HubSpotRateLimitExhausted raised internally -> re-enqueued via decorator"""
@@ -446,12 +455,13 @@ class TestHandleDealUpdated(FrappeTestCase):
 
 		with patch("ivm.integrations.hubspot.deal_handler.set_acting_user"):
 			with patch("ivm.integrations.hubspot.deal_handler.ensure_deal_exists") as mock_ensure:
-				with patch("ivm.integrations.hubspot.deal_handler.frappe.enqueue") as mock_enqueue:
-					with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
-						mock_ensure.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
-						# Should not raise, decorator catches and re-enqueues
-						handle_deal_updated(hubspot_deal_id="12345")
-						mock_enqueue.assert_called_once()
+				with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger"):
+							mock_ensure.side_effect = api.HubSpotRateLimitExhausted(retry_after_seconds=60)
+							# Should not raise, decorator catches and re-enqueues
+							handle_deal_updated(hubspot_deal_id="12345")
+							mock_enqueue.assert_called_once()
 
 	def test_generic_exception_logged_not_propagated(self):
 		"""Generic Exception logged via frappe.log_error, does not propagate"""

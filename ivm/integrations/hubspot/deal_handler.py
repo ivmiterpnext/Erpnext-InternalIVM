@@ -10,6 +10,7 @@ from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
 	CONTACT_FIELD_MAP,
 	DEAL_FIELD_MAP,
+	DEAL_TYPE_ID,
 	DEALSTAGE_TO_STATUS,
 	HUBSPOT_COMPANY_ID_FIELD,
 	HUBSPOT_DEAL_ID_FIELD,
@@ -134,10 +135,11 @@ DEAL_TRANSFORMS = {
 }
 
 
-@retry_via_reenqueue()
+@retry_via_reenqueue(object_type_id=DEAL_TYPE_ID, id_kwarg="hubspot_deal_id")
 def handle_deal_created(
 	hubspot_deal_id: int | str,
 	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
 	"""Create a CRM Deal from a newly created HubSpot deal and sync all data."""
 	set_acting_user(hubspot_user_id)
@@ -164,10 +166,11 @@ def handle_deal_created(
 		)
 
 
-@retry_via_reenqueue()
+@retry_via_reenqueue(object_type_id=DEAL_TYPE_ID, id_kwarg="hubspot_deal_id")
 def handle_deal_updated(
 	hubspot_deal_id: int | str,
 	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
 	"""Sync a HubSpot deal's current state to the matching CRM Deal.
 

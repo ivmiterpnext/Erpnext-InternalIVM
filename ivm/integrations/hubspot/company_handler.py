@@ -15,6 +15,7 @@ from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
 	COMPANY_ADDRESS_PROPERTIES,
 	COMPANY_FIELD_MAP,
+	COMPANY_TYPE_ID,
 	HUBSPOT_COMPANY_ID_FIELD,
 	HUBSPOT_INDUSTRY_LABELS,
 )
@@ -70,10 +71,11 @@ COMPANY_TRANSFORMS: dict[str, Any] = {
 }
 
 
-@retry_via_reenqueue()
+@retry_via_reenqueue(object_type_id=COMPANY_TYPE_ID, id_kwarg="hubspot_company_id")
 def handle_company_created(
 	hubspot_company_id: int | str,
 	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
 	"""Create a CRM Organization from a newly created HubSpot company and sync fields."""
 	set_acting_user(hubspot_user_id)
@@ -99,10 +101,15 @@ def handle_company_created(
 		)
 
 
-@retry_via_reenqueue(exceptions=(api.HubSpotRateLimitExhausted,))
+@retry_via_reenqueue(
+	object_type_id=COMPANY_TYPE_ID,
+	id_kwarg="hubspot_company_id",
+	exceptions=(api.HubSpotRateLimitExhausted,),
+)
 def handle_company_updated(
 	hubspot_company_id: int | str,
 	hubspot_user_id: int | str | None = None,
+	attempt: int = 0,
 ) -> None:
 	"""Sync a HubSpot company's current state to the matching CRM Organization."""
 	set_acting_user(hubspot_user_id)

@@ -1,11 +1,13 @@
 """Generic sync utilities for HubSpot to Frappe document synchronization."""
 
 import functools
+import time
 from collections.abc import Callable
 from typing import Any
 
 import frappe
 from frappe.utils import flt
+from frappe.utils.background_jobs import JobStatus, get_job_status
 
 from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import HUBSPOT_USER
@@ -33,19 +35,87 @@ class ConcurrentCreateConflict(Exception):
 		super().__init__(f"Concurrent create conflict on {doctype} ({hubspot_id_field}={hubspot_id})")
 
 
-def retry_via_reenqueue(
-	exceptions: tuple[type[Exception], ...] = (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted),
-) -> Callable:
-	"""Decorator for HubSpot webhook entry points (keyword-args only).
+def enqueue_sync(
+	method: str,
+	object_type_id: str,
+	object_id: str,
+	*,
+	attempt: int = 0,
+	**kwargs: Any,
+) -> str:
+	"""Enqueue a HubSpot sync job, deduplicated per ``(object_type_id, object_id)``.
 
-	On a matching exception, logs a warning and re-enqueues the same
-	function (by dotted ``module.func`` path) with the same kwargs on the
-	'long' queue, instead of propagating. Callers must invoke the wrapped
-	function with keyword arguments only, since the re-enqueue call
-	forwards **kwargs verbatim. The decorated function's own body must let
-	any exception in *exceptions* propagate (i.e. not swallow it in its
-	own except-Exception block) for this to work.
+	Two job ids are used per record: a primary job and a single "again"
+	follow-up. This guarantees at most one pending re-sync beyond whatever
+	is currently running for that record, so a change that arrives while a
+	sync is already in flight is never silently dropped — it either waits
+	behind the queued job (which will read the latest HubSpot state when it
+	runs) or behind a single follow-up job.
+
+	Returns ``"skipped"`` if a job for this record is already queued,
+	``"followup"`` if the primary job is currently running and a follow-up
+	was queued, or ``"queued"`` if a new primary job was enqueued.
 	"""
+	primary_id = f"hubspot_sync_{object_type_id}_{object_id}"
+	status = get_job_status(primary_id)
+
+	if status == JobStatus.QUEUED:
+		return "skipped"
+
+	if status == JobStatus.STARTED:
+		followup_id = f"{primary_id}_again"
+		job = frappe.enqueue(
+			method,
+			queue="long",
+			job_id=followup_id,
+			deduplicate=True,
+			attempt=attempt,
+			**kwargs,
+		)
+		return "followup" if job else "skipped"
+
+	frappe.enqueue(
+		method,
+		queue="long",
+		job_id=primary_id,
+		deduplicate=True,
+		attempt=attempt,
+		**kwargs,
+	)
+	return "queued"
+
+
+def retry_via_reenqueue(
+	*,
+	id_kwarg: str,
+	object_type_id: str | None = None,
+	type_kwarg: str | None = None,
+	exceptions: tuple[type[Exception], ...] = (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted),
+	max_attempts: int = 5,
+) -> Callable:
+	"""Decorator for HubSpot sync entry points (keyword-args only).
+
+	On a matching exception, re-enqueues the same function through
+	:func:`enqueue_sync` (so it still participates in per-record dedup)
+	after a capped delay, up to *max_attempts* attempts total. After the
+	final attempt, logs to the Error Log and stops — nothing retries it
+	further; the next change to the record in HubSpot (webhook or the
+	reconciliation job) will try again from scratch.
+
+	Exactly one of *object_type_id* (a fixed HubSpot object type ID) or
+	*type_kwarg* (the name of the kwarg carrying a dynamic type ID — e.g.
+	for the machine-type handlers, which share one function across 5 object
+	types) must be given. *id_kwarg* names the kwarg carrying the HubSpot
+	object ID. The decorated function must accept an ``attempt: int = 0``
+	keyword argument (it doesn't need to use it).
+
+	Callers must invoke the wrapped function with keyword arguments only.
+	The decorated function's own body must let any exception in
+	*exceptions* propagate (i.e. not swallow it in its own except-Exception
+	block) for this to work.
+	"""
+	if bool(object_type_id) == bool(type_kwarg):
+		raise ValueError("retry_via_reenqueue requires exactly one of object_type_id or type_kwarg")
 
 	def decorator(func: Callable) -> Callable:
 		@functools.wraps(func)
@@ -56,16 +126,35 @@ def retry_via_reenqueue(
 					f"but @retry_via_reenqueue requires keyword-only calls "
 					f"(positional args are silently dropped on re-enqueue)."
 				)
+			attempt = kwargs.get("attempt", 0)
 			try:
 				return func(*args, **kwargs)
 			except exceptions as e:
+				if attempt + 1 >= max_attempts:
+					frappe.log_error(
+						title=f"HubSpot sync gave up: {func.__module__}.{func.__name__}",
+						message=(
+							f"{type(e).__name__} after {attempt + 1} attempt(s). kwargs={kwargs}\n\n"
+							f"{frappe.get_traceback(with_context=True)}"
+						),
+					)
+					return None
+
+				delay = min(getattr(e, "retry_after_seconds", None) or 5, 30)
 				frappe.logger(_LOG).warning(
-					f"HubSpot: {type(e).__name__} in {func.__name__}({kwargs}) — re-enqueueing"
+					f"HubSpot: {type(e).__name__} in {func.__name__}({kwargs}) — "
+					f"retrying in {delay}s (attempt {attempt + 1}/{max_attempts})"
 				)
-				frappe.enqueue(
+				time.sleep(delay)
+
+				resolved_type_id = object_type_id or str(kwargs.get(type_kwarg))
+				resolved_object_id = str(kwargs.get(id_kwarg))
+				new_kwargs = {**kwargs, "attempt": attempt + 1}
+				enqueue_sync(
 					f"{func.__module__}.{func.__name__}",
-					queue="long",
-					**kwargs,
+					resolved_type_id,
+					resolved_object_id,
+					**new_kwargs,
 				)
 			return None
 
