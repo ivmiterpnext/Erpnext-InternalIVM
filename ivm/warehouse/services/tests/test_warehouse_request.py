@@ -164,6 +164,31 @@ class TestGetLinkedDocs(ERPNextTestSuite):
 		result = get_warehouse_request_linked_docs(wr.name)
 		self.assertTrue(result["pick_list_submitted"])
 
+	def test_delivery_note_found_without_pick_list(self):
+		"""Delivery Note lookup must run even when the Warehouse Request has no pick_list at all."""
+		wr = _make_warehouse_request()
+		dn = frappe.get_doc(
+			{
+				"doctype": "Delivery Note",
+				"customer": "_Test Customer",
+				"company": COMPANY,
+				"custom_related_warehouse_request": wr.name,
+				"items": [
+					{
+						"item_code": make_item().name,
+						"qty": 1,
+						"rate": 10,
+						"warehouse": WAREHOUSE,
+					}
+				],
+			}
+		)
+		dn.insert(ignore_permissions=True)
+
+		result = get_warehouse_request_linked_docs(wr.name)
+		self.assertFalse(result["pick_list"])
+		self.assertEqual(result["delivery_note"], dn.name)
+
 
 class TestResetPickList(ERPNextTestSuite):
 	"""reset_warehouse_request_pick_list"""

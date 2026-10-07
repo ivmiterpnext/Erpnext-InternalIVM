@@ -3,33 +3,33 @@
 
 const MAX_RFID_SETTINGS_ROWS = 5;
 
-frappe.ui.form.on('Warehouse Request', {
-	setup: function(frm) {
-		frm.set_query('source_build_request', function() {
+frappe.ui.form.on("Warehouse Request", {
+	setup: function (frm) {
+		frm.set_query("source_build_request", function () {
 			return {
 				filters: {
 					related_project: frm.doc.related_project,
-					request_reason: ['like', 'Build%'],
-					status: 'Crated - Ready to Ship'
-				}
+					request_reason: ["like", "Build%"],
+					status: "Crated - Ready to Ship",
+				},
 			};
 		});
 	},
 
-	onload: function(frm) {
+	onload: function (frm) {
 		if (!frm.is_new()) {
 			frm._server_status = frm.doc.status;
 		}
 	},
 
-	refresh: function(frm) {
+	refresh: function (frm) {
 		toggle_rfid_add_row(frm);
 		if (!frm._machine_details) {
 			frm._machine_details = new ivm.EmbeddedForm({
 				parent_form: frm,
-				html_field_name: 'machine_details_html',
-				embedded_doctype_field: 'source_detail_doctype',
-				dynamic_link_field: 'source_detail_row',
+				html_field_name: "machine_details_html",
+				embedded_doctype_field: "source_detail_doctype",
+				dynamic_link_field: "source_detail_row",
 				readOnly: true,
 				extra_condition: () => frm.doc.schema_version >= 2,
 				custom_renderers: {
@@ -40,30 +40,41 @@ frappe.ui.form.on('Warehouse Request', {
 		// Rendering/clearing on every refresh is now handled automatically by
 		// EmbeddedForm's internal frm.refresh hook.
 
-		if (!frm.is_new() && frm.doc.schema_version >= 2 && (frm.doc.request_reason || '').includes('Build')) {
+		if (
+			!frm.is_new() &&
+			frm.doc.schema_version >= 2 &&
+			(frm.doc.request_reason || "").includes("Build")
+		) {
 			frappe.call({
-				method: 'ivm.warehouse.services.warehouse_request.get_equipment_info_task',
+				method: "ivm.warehouse.services.warehouse_request.get_equipment_info_task",
 				args: { warehouse_request: frm.doc.name },
-				callback: function(r) {
+				callback: function (r) {
 					if (r.message) {
-						frm.add_custom_button(__('View ICS Task'), function() {
-							frappe.set_route('Form', 'Task', r.message);
-						}, __('View'));
+						frm.add_custom_button(
+							__("View ICS Task"),
+							function () {
+								frappe.set_route("Form", "Task", r.message);
+							},
+							__("View")
+						);
 					} else {
-						frm.add_custom_button(__('Send Equipment Info to ICS'), function() {
+						frm.add_custom_button(__("Send Equipment Info to ICS"), function () {
 							frappe.call({
-								method: 'ivm.warehouse.services.warehouse_request.send_equipment_info_to_ics',
+								method: "ivm.warehouse.services.warehouse_request.send_equipment_info_to_ics",
 								args: { warehouse_request: frm.doc.name },
-								callback: function(res) {
+								callback: function (res) {
 									if (res.message) {
-										frappe.show_alert({ message: __('Equipment info sent to ICS'), indicator: 'green' });
+										frappe.show_alert({
+											message: __("Equipment info sent to ICS"),
+											indicator: "green",
+										});
 										frm.reload_doc();
 									}
-								}
+								},
 							});
 						});
 					}
-				}
+				},
 			});
 		}
 
@@ -72,135 +83,155 @@ frappe.ui.form.on('Warehouse Request', {
 		// Update the cached server status on every refresh (which fires after save too)
 		frm._server_status = frm.doc.status;
 
-		var is_pick_request = frm.doc.request_reason.includes('Build') || frm.doc.request_reason == 'Shipping Request';
+		var is_pick_request =
+			frm.doc.request_reason.includes("Build") ||
+			frm.doc.request_reason == "Shipping Request";
 		if (!is_pick_request) return;
 
-		// Non-inventory shipments skip the Item Scanner — just show a Delivery Note button if one exists
-		if (frm.doc.request_reason == 'Shipping Request' && frm.doc.non_inventory_shipment) {
-			frappe.db.get_value('Delivery Note',
-				{custom_related_warehouse_request: frm.doc.name, docstatus: ['!=', 2]},
-				'name',
-				function(r) {
-					if (r && r.name) {
-						frm.add_custom_button(__('Delivery Note'), function() {
-							frappe.set_route('Form', 'Delivery Note', r.name);
-						}, __('View'));
-					}
-				}
-			);
-			return;
-		}
-
-		// Shipping Requests linked to a Build skip the Item Scanner —
-		// just show a Delivery Note button if one exists
-		if (frm.doc.request_reason == 'Shipping Request' && frm.doc.source_build_request) {
-			frappe.db.get_value('Delivery Note',
-				{custom_related_warehouse_request: frm.doc.name, docstatus: ['!=', 2]},
-				'name',
-				function(r) {
-					if (r && r.name) {
-						frm.add_custom_button(__('Delivery Note'), function() {
-							frappe.set_route('Form', 'Delivery Note', r.name);
-						}, __('View'));
-					}
-				}
-			);
-			return;
-		}
+		// Non-inventory shipments, and Shipping Requests linked to a Build, skip the
+		// Item Scanner — just show a Delivery Note button if one exists.
+		var skip_item_scanner =
+			frm.doc.request_reason == "Shipping Request" &&
+			(frm.doc.non_inventory_shipment || frm.doc.source_build_request);
 
 		frappe.call({
-			method: 'ivm.warehouse.services.warehouse_request.get_warehouse_request_linked_docs',
+			method: "ivm.warehouse.services.warehouse_request.get_warehouse_request_linked_docs",
 			args: { warehouse_request: frm.doc.name },
-			callback: function(r) {
+			callback: function (r) {
 				if (!r.message) return;
 				var docs = r.message;
 
+				if (skip_item_scanner) {
+					if (docs.delivery_note) {
+						frm.add_custom_button(
+							__("Delivery Note"),
+							function () {
+								frappe.set_route("Form", "Delivery Note", docs.delivery_note);
+							},
+							__("View")
+						);
+					}
+					return;
+				}
+
 				if (!docs.pick_list) {
-					frm.add_custom_button(__('Begin Picking'), function() {
-						frappe.set_route('item_scanner', { warehouse_request: frm.doc.name });
-					}, __('Stock'));
+					frm.add_custom_button(
+						__("Begin Picking"),
+						function () {
+							frappe.set_route("item_scanner", { warehouse_request: frm.doc.name });
+						},
+						__("Stock")
+					);
 					return;
 				}
 
 				if (!docs.pick_list_submitted) {
-					frm.add_custom_button(__('Continue Picking'), function() {
-						frappe.set_route('item_scanner', { warehouse_request: frm.doc.name });
-					}, __('Stock'));
-					frm.add_custom_button(__('Reset Pick List'), function() {
-						frappe.confirm(
-							__('Delete the current draft Pick List and start fresh?'),
-							function() {
-								frappe.call({
-									method: 'ivm.warehouse.services.warehouse_request.reset_warehouse_request_pick_list',
-									args: { warehouse_request: frm.doc.name },
-									callback: function(res) {
-										if (res.message && res.message.success) {
-											frm.reload_doc();
-										} else {
-											frappe.msgprint(res.message && res.message.message || __('Could not reset pick list'));
-										}
-									}
-								});
-							}
-						);
-					}, __('Stock'));
+					frm.add_custom_button(
+						__("Continue Picking"),
+						function () {
+							frappe.set_route("item_scanner", { warehouse_request: frm.doc.name });
+						},
+						__("Stock")
+					);
+					frm.add_custom_button(
+						__("Reset Pick List"),
+						function () {
+							frappe.confirm(
+								__("Delete the current draft Pick List and start fresh?"),
+								function () {
+									frappe.call({
+										method: "ivm.warehouse.services.warehouse_request.reset_warehouse_request_pick_list",
+										args: { warehouse_request: frm.doc.name },
+										callback: function (res) {
+											if (res.message && res.message.success) {
+												frm.reload_doc();
+											} else {
+												frappe.msgprint(
+													(res.message && res.message.message) ||
+														__("Could not reset pick list")
+												);
+											}
+										},
+									});
+								}
+							);
+						},
+						__("Stock")
+					);
 					return;
 				}
 
-				frm.add_custom_button(__('Pick List'), function() {
-					frappe.set_route('Form', 'Pick List', docs.pick_list);
-				}, __('View'));
+				frm.add_custom_button(
+					__("Pick List"),
+					function () {
+						frappe.set_route("Form", "Pick List", docs.pick_list);
+					},
+					__("View")
+				);
 
 				if (docs.stock_entry) {
-					frm.add_custom_button(__('Stock Entry'), function() {
-						frappe.set_route('Form', 'Stock Entry', docs.stock_entry);
-					}, __('View'));
+					frm.add_custom_button(
+						__("Stock Entry"),
+						function () {
+							frappe.set_route("Form", "Stock Entry", docs.stock_entry);
+						},
+						__("View")
+					);
 				}
 
 				if (docs.delivery_note) {
-					frm.add_custom_button(__('Delivery Note'), function() {
-						frappe.set_route('Form', 'Delivery Note', docs.delivery_note);
-					}, __('View'));
+					frm.add_custom_button(
+						__("Delivery Note"),
+						function () {
+							frappe.set_route("Form", "Delivery Note", docs.delivery_note);
+						},
+						__("View")
+					);
 				}
-			}
+			},
 		});
 	},
 
-	non_inventory_shipment: function(frm) {
+	non_inventory_shipment: function (frm) {
 		if (!frm.doc.non_inventory_shipment || !frm.doc.pick_list) return;
 
-		frappe.db.get_value('Pick List', frm.doc.pick_list, 'docstatus').then(r => {
-			frm.set_value('non_inventory_shipment', 0);
+		frappe.db.get_value("Pick List", frm.doc.pick_list, "docstatus").then((r) => {
+			frm.set_value("non_inventory_shipment", 0);
 			if (r.message.docstatus === 1) {
-				frappe.msgprint(__('This Warehouse Request already has a submitted Pick List and cannot be marked as a Non-Inventory Shipment.'));
+				frappe.msgprint(
+					__(
+						"This Warehouse Request already has a submitted Pick List and cannot be marked as a Non-Inventory Shipment."
+					)
+				);
 			} else {
-				frappe.msgprint(__('A Pick List already exists for this Warehouse Request. Use "Reset Pick List" to delete it before marking this as a Non-Inventory Shipment.'));
+				frappe.msgprint(
+					__(
+						'A Pick List already exists for this Warehouse Request. Use "Reset Pick List" to delete it before marking this as a Non-Inventory Shipment.'
+					)
+				);
 			}
 		});
 	},
 
-	after_save: function(frm) {
-		if (!frm.doc.request_reason || !frm.doc.request_reason.includes('Build')) return;
-		if (frm.doc.status !== 'Crated - Ready to Ship') return;
+	after_save: function (frm) {
+		if (!frm.doc.request_reason || !frm.doc.request_reason.includes("Build")) return;
+		if (frm.doc.status !== "Crated - Ready to Ship") return;
 
 		// Only prompt if status actually changed to "Crated - Ready to Ship" on this save
-		if (frm._server_status === 'Crated - Ready to Ship') return;
+		if (frm._server_status === "Crated - Ready to Ship") return;
 
-		frappe.confirm(
-			__('Create a Shipping Request for this build?'),
-			function() {
-				frappe.call({
-					method: 'ivm.warehouse.services.warehouse_request.create_shipping_request_from_build',
-					args: { build_warehouse_request: frm.doc.name },
-					callback: function(r) {
-						if (r.message) {
-							frappe.set_route('Form', 'Warehouse Request', r.message);
-						}
+		frappe.confirm(__("Create a Shipping Request for this build?"), function () {
+			frappe.call({
+				method: "ivm.warehouse.services.warehouse_request.create_shipping_request_from_build",
+				args: { build_warehouse_request: frm.doc.name },
+				callback: function (r) {
+					if (r.message) {
+						frappe.set_route("Form", "Warehouse Request", r.message);
 					}
-				});
-			}
-		);
-	}
+				},
+			});
+		});
+	},
 });
 
 function toggle_rfid_add_row(frm) {
@@ -210,11 +241,11 @@ function toggle_rfid_add_row(frm) {
 	grid.refresh();
 }
 
-frappe.ui.form.on('Board RFID Settings', {
-	rfid_settings_add: function(frm) {
+frappe.ui.form.on("Board RFID Settings", {
+	rfid_settings_add: function (frm) {
 		toggle_rfid_add_row(frm);
 	},
-	rfid_settings_remove: function(frm) {
+	rfid_settings_remove: function (frm) {
 		toggle_rfid_add_row(frm);
-	}
+	},
 });

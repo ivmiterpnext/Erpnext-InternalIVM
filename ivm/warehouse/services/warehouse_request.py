@@ -210,23 +210,19 @@ def get_or_create_warehouse_request_pick_list(warehouse_request: str) -> dict:
 def get_warehouse_request_linked_docs(warehouse_request):
 	"""Return linked Pick List, Stock Entry, and Delivery Note in a single call."""
 	pick_list = frappe.db.get_value("Warehouse Request", warehouse_request, "pick_list")
-	if not pick_list:
-		return {"pick_list": None, "pick_list_submitted": False, "stock_entry": None, "delivery_note": None}
-
-	docstatus = frappe.db.get_value("Pick List", pick_list, "docstatus")
+	docstatus = frappe.db.get_value("Pick List", pick_list, "docstatus") if pick_list else None
 
 	stock_entry = None
-	delivery_note = None
-
-	if docstatus == 1:
+	if pick_list and docstatus == 1:
 		stock_entry = frappe.db.get_value(
 			"Stock Entry", {"pick_list": pick_list, "docstatus": ["!=", 2]}, "name"
 		)
-		delivery_note = frappe.db.get_value(
-			"Delivery Note",
-			{"custom_related_warehouse_request": warehouse_request, "docstatus": ["!=", 2]},
-			"name",
-		)
+
+	delivery_note = frappe.db.get_value(
+		"Delivery Note",
+		{"custom_related_warehouse_request": warehouse_request, "docstatus": ["!=", 2]},
+		"name",
+	)
 
 	return {
 		"pick_list": pick_list,

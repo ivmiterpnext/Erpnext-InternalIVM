@@ -83,6 +83,7 @@ fixtures = [
 					"Support",
 					"Warehouse",
 					"Technician",
+					"Warehouse Manager",
 				],
 			]
 		],
