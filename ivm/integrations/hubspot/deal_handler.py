@@ -11,6 +11,7 @@ from ivm.integrations.hubspot.constants import (
 	CONTACT_ADDRESS_PROPERTIES,
 	CONTACT_FIELD_MAP,
 	CONTACT_PROPERTIES,
+	CONTACT_TYPE_ID,
 	DEAL_FIELD_MAP,
 	DEAL_TYPE_ID,
 	DEALSTAGE_TO_STATUS,
@@ -451,7 +452,7 @@ def _sync_contacts(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 	if not contact_ids:
 		return
 
-	contacts: list[tuple[dict[str, Any], dict[str, Any]]] = []
+	contacts: list[tuple[str, dict[str, Any], dict[str, Any]]] = []
 
 	for contact_id in contact_ids:
 		try:
@@ -459,7 +460,7 @@ def _sync_contacts(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 			props = contact_data.get("properties", {})
 			mapped = {frappe_key: props.get(hs_key) or "" for hs_key, frappe_key in CONTACT_FIELD_MAP.items()}
 			address_props = {key: props.get(key) or "" for key in CONTACT_ADDRESS_PROPERTIES}
-			contacts.append((mapped, address_props))
+			contacts.append((str(contact_id), mapped, address_props))
 		except Exception:
 			frappe.log_error(
 				title=f"HubSpot: failed to fetch contact {contact_id} for deal {hubspot_deal_id}",
@@ -470,27 +471,49 @@ def _sync_contacts(hubspot_deal_id: int | str, crm_deal_name: str) -> None:
 		_ensure_contacts(crm_deal_name, contacts)
 
 
-def _ensure_contacts(crm_deal_name: str, contacts: list[tuple[dict[str, Any], dict[str, Any]]]) -> None:
-	"""Create Contact records (if needed) and link them to the CRM Deal."""
+def _ensure_contacts(crm_deal_name: str, contacts: list[tuple[str, dict[str, Any], dict[str, Any]]]) -> None:
+	"""Create Contact records (if needed) and link them to the CRM Deal.
+
+	Acquires a per-contact lock before each upsert to prevent races with
+	direct contact webhooks (which also sync the same Contact via sync_contact).
+	"""
 	from ivm.integrations.hubspot.contact_handler import upsert_contact
 
 	resolved: list[tuple[str, int]] = []
-	for idx, (entry, address_props) in enumerate(contacts):
-		try:
-			contact_name = upsert_contact(entry, address_props=address_props)
-		except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
-			raise
-		except Exception:
-			frappe.log_error(
-				title=f"HubSpot: failed to upsert contact for deal {crm_deal_name}",
-				message=frappe.get_traceback(with_context=True),
+	for idx, (contact_id, entry, address_props) in enumerate(contacts):
+		lock_key = frappe.cache.make_key(f"hubspot_sync_lock:{CONTACT_TYPE_ID}:{contact_id}")
+		lock = frappe.cache.lock(lock_key, timeout=1500, blocking_timeout=30)
+
+		if not lock.acquire():
+			frappe.logger("hubspot").warning(
+				f"HubSpot: could not acquire lock for contact {contact_id} "
+				f"(deal {crm_deal_name}) — skipping this cycle, will retry on next sync"
 			)
 			continue
 
-		if not contact_name:
-			continue
+		try:
+			try:
+				contact_name = upsert_contact(
+					entry, hubspot_contact_id=contact_id, address_props=address_props
+				)
+			except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+				raise
+			except Exception:
+				frappe.log_error(
+					title=f"HubSpot: failed to upsert contact for deal {crm_deal_name}",
+					message=frappe.get_traceback(with_context=True),
+				)
+				continue
 
-		resolved.append((contact_name, 1 if idx == 0 else 0))
+			if not contact_name:
+				continue
+
+			resolved.append((contact_name, 1 if idx == 0 else 0))
+		finally:
+			try:
+				lock.release()
+			except Exception:
+				pass
 
 	if not resolved:
 		return

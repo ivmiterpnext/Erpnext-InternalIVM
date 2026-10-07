@@ -661,23 +661,27 @@ class TestEnsureContacts(FrappeTestCase):
 		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
 			with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
 				with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
-					mock_upsert.side_effect = ["Contact-1", "Contact-2"]
-					mock_doc = MagicMock()
-					mock_doc.doctype = "CRM Deal"
-					mock_doc.name = "Deal-001"
-					mock_doc.get.return_value = []
-					mock_get_doc.return_value = mock_doc
-					contacts = [
-						{"first_name": "John", "last_name": "Doe"},
-						{"first_name": "Jane", "last_name": "Smith"},
-					]
-					_ensure_contacts("Deal-001", contacts)
-					self.assertEqual(mock_upsert.call_count, 2)
-					# Verify append was called with is_primary=1 for first, 0 for second
-					calls = mock_doc.append.call_args_list
-					self.assertEqual(len(calls), 2)
-					self.assertEqual(calls[0][0][1]["is_primary"], 1)
-					self.assertEqual(calls[1][0][1]["is_primary"], 0)
+					with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+						mock_upsert.side_effect = ["Contact-1", "Contact-2"]
+						mock_lock_obj = MagicMock()
+						mock_lock_obj.acquire.return_value = True
+						mock_lock.return_value = mock_lock_obj
+						mock_doc = MagicMock()
+						mock_doc.doctype = "CRM Deal"
+						mock_doc.name = "Deal-001"
+						mock_doc.get.return_value = []
+						mock_get_doc.return_value = mock_doc
+						contacts = [
+							("123", {"first_name": "John", "last_name": "Doe"}, {}),
+							("456", {"first_name": "Jane", "last_name": "Smith"}, {}),
+						]
+						_ensure_contacts("Deal-001", contacts)
+						self.assertEqual(mock_upsert.call_count, 2)
+						# Verify append was called with is_primary=1 for first, 0 for second
+						calls = mock_doc.append.call_args_list
+						self.assertEqual(len(calls), 2)
+						self.assertEqual(calls[0][0][1]["is_primary"], 1)
+						self.assertEqual(calls[1][0][1]["is_primary"], 0)
 
 	def test_one_contact_fails_upsert_others_processed(self):
 		"""One contact fails to upsert -> other contacts still processed"""
@@ -685,58 +689,70 @@ class TestEnsureContacts(FrappeTestCase):
 			with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
 				with patch("ivm.integrations.hubspot.deal_handler.frappe.log_error") as mock_log_error:
 					with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
-						mock_upsert.side_effect = [ValueError("upsert failed"), "Contact-2"]
-						mock_doc = MagicMock()
-						mock_doc.doctype = "CRM Deal"
-						mock_doc.name = "Deal-001"
-						mock_doc.get.return_value = []
-						mock_get_doc.return_value = mock_doc
-						contacts = [
-							{"first_name": "John", "last_name": "Doe"},
-							{"first_name": "Jane", "last_name": "Smith"},
-						]
-						_ensure_contacts("Deal-001", contacts)
-						mock_log_error.assert_called()
-						# Only second contact should be appended
-						self.assertEqual(mock_doc.append.call_count, 1)
+						with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+							mock_upsert.side_effect = [ValueError("upsert failed"), "Contact-2"]
+							mock_lock_obj = MagicMock()
+							mock_lock_obj.acquire.return_value = True
+							mock_lock.return_value = mock_lock_obj
+							mock_doc = MagicMock()
+							mock_doc.doctype = "CRM Deal"
+							mock_doc.name = "Deal-001"
+							mock_doc.get.return_value = []
+							mock_get_doc.return_value = mock_doc
+							contacts = [
+								("123", {"first_name": "John", "last_name": "Doe"}, {}),
+								("456", {"first_name": "Jane", "last_name": "Smith"}, {}),
+							]
+							_ensure_contacts("Deal-001", contacts)
+							mock_log_error.assert_called()
+							# Only second contact should be appended
+							self.assertEqual(mock_doc.append.call_count, 1)
 
 	def test_upsert_returns_none_skipped(self):
 		"""Contact upsert returns None -> skipped"""
 		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
 			with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
 				with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
-					mock_upsert.side_effect = [None, "Contact-2"]
-					mock_doc = MagicMock()
-					mock_doc.doctype = "CRM Deal"
-					mock_doc.name = "Deal-001"
-					mock_doc.get.return_value = []
-					mock_get_doc.return_value = mock_doc
-					contacts = [
-						{"first_name": "John", "last_name": "Doe"},
-						{"first_name": "Jane", "last_name": "Smith"},
-					]
-					_ensure_contacts("Deal-001", contacts)
-					# Only second contact should be appended
-					self.assertEqual(mock_doc.append.call_count, 1)
+					with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+						mock_upsert.side_effect = [None, "Contact-2"]
+						mock_lock_obj = MagicMock()
+						mock_lock_obj.acquire.return_value = True
+						mock_lock.return_value = mock_lock_obj
+						mock_doc = MagicMock()
+						mock_doc.doctype = "CRM Deal"
+						mock_doc.name = "Deal-001"
+						mock_doc.get.return_value = []
+						mock_get_doc.return_value = mock_doc
+						contacts = [
+							("123", {"first_name": "John", "last_name": "Doe"}, {}),
+							("456", {"first_name": "Jane", "last_name": "Smith"}, {}),
+						]
+						_ensure_contacts("Deal-001", contacts)
+						# Only second contact should be appended
+						self.assertEqual(mock_doc.append.call_count, 1)
 
 	def test_duplicate_contact_not_re_added(self):
 		"""Contact already present in deal's child table (duplicate) -> not re-added"""
 		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
 			with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
 				with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
-					mock_upsert.return_value = "Contact-1"
-					mock_doc = MagicMock()
-					mock_doc.doctype = "CRM Deal"
-					mock_doc.name = "Deal-001"
-					# Simulate existing contact in child table
-					existing_row = MagicMock()
-					existing_row.contact = "Contact-1"
-					mock_doc.get.return_value = [existing_row]
-					mock_get_doc.return_value = mock_doc
-					contacts = [{"first_name": "John", "last_name": "Doe"}]
-					_ensure_contacts("Deal-001", contacts)
-					# Contact should not be appended since it already exists
-					mock_doc.append.assert_not_called()
+					with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+						mock_upsert.return_value = "Contact-1"
+						mock_lock_obj = MagicMock()
+						mock_lock_obj.acquire.return_value = True
+						mock_lock.return_value = mock_lock_obj
+						mock_doc = MagicMock()
+						mock_doc.doctype = "CRM Deal"
+						mock_doc.name = "Deal-001"
+						# Simulate existing contact in child table
+						existing_row = MagicMock()
+						existing_row.contact = "Contact-1"
+						mock_doc.get.return_value = [existing_row]
+						mock_get_doc.return_value = mock_doc
+						contacts = [("123", {"first_name": "John", "last_name": "Doe"}, {})]
+						_ensure_contacts("Deal-001", contacts)
+						# Contact should not be appended since it already exists
+						mock_doc.append.assert_not_called()
 
 	def test_empty_contacts_list_no_op(self):
 		"""Empty contacts list -> no-op"""
@@ -747,7 +763,113 @@ class TestEnsureContacts(FrappeTestCase):
 	def test_concurrent_conflict_propagates(self):
 		"""ConcurrentCreateConflict raised during upsert propagates out."""
 		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
-			mock_upsert.side_effect = ConcurrentCreateConflict("Contact", "hubspot_contact_id", "123")
-			contacts = [{"first_name": "John", "last_name": "Doe"}]
-			with self.assertRaises(ConcurrentCreateConflict):
-				_ensure_contacts("Deal-001", contacts)
+			with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+				mock_upsert.side_effect = ConcurrentCreateConflict("Contact", "hubspot_contact_id", "123")
+				mock_lock_obj = MagicMock()
+				mock_lock_obj.acquire.return_value = True
+				mock_lock.return_value = mock_lock_obj
+				contacts = [("123", {"first_name": "John", "last_name": "Doe"}, {})]
+				with self.assertRaises(ConcurrentCreateConflict):
+					_ensure_contacts("Deal-001", contacts)
+
+	def test_lock_acquired_and_released_on_happy_path(self):
+		"""Lock acquired, upsert called with hubspot_contact_id, lock released."""
+		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
+			with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
+				with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
+					with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+						mock_upsert.return_value = "Contact-1"
+						mock_lock_obj = MagicMock()
+						mock_lock_obj.acquire.return_value = True
+						mock_lock.return_value = mock_lock_obj
+						mock_doc = MagicMock()
+						mock_doc.doctype = "CRM Deal"
+						mock_doc.name = "Deal-001"
+						mock_doc.get.return_value = []
+						mock_get_doc.return_value = mock_doc
+
+						contacts = [("123", {"first_name": "John", "last_name": "Doe"}, {})]
+						_ensure_contacts("Deal-001", contacts)
+
+						# Verify lock was acquired
+						mock_lock_obj.acquire.assert_called_once()
+						# Verify upsert was called with hubspot_contact_id kwarg
+						mock_upsert.assert_called_once()
+						call_kwargs = mock_upsert.call_args[1]
+						self.assertEqual(call_kwargs.get("hubspot_contact_id"), "123")
+						# Verify lock was released
+						mock_lock_obj.release.assert_called_once()
+
+	def test_lock_busy_contact_skipped_rest_processed(self):
+		"""Lock busy on first contact -> skipped with warning, second contact processed."""
+		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
+			with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
+				with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
+					with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
+							mock_upsert.return_value = "Contact-2"
+							# First lock returns False (busy), second returns True
+							lock_obj_1 = MagicMock()
+							lock_obj_1.acquire.return_value = False
+							lock_obj_2 = MagicMock()
+							lock_obj_2.acquire.return_value = True
+							mock_lock.side_effect = [lock_obj_1, lock_obj_2]
+
+							mock_doc = MagicMock()
+							mock_doc.doctype = "CRM Deal"
+							mock_doc.name = "Deal-001"
+							mock_doc.get.return_value = []
+							mock_get_doc.return_value = mock_doc
+
+							contacts = [
+								("123", {"first_name": "John", "last_name": "Doe"}, {}),
+								("456", {"first_name": "Jane", "last_name": "Smith"}, {}),
+							]
+							_ensure_contacts("Deal-001", contacts)
+
+							# Verify warning was logged for skipped contact
+							mock_logger.return_value.warning.assert_called()
+							warning_call = mock_logger.return_value.warning.call_args[0][0]
+							self.assertIn("123", warning_call)
+							self.assertIn("skipping", warning_call)
+
+							# Verify upsert was only called once (for second contact)
+							self.assertEqual(mock_upsert.call_count, 1)
+							call_kwargs = mock_upsert.call_args[1]
+							self.assertEqual(call_kwargs.get("hubspot_contact_id"), "456")
+
+							# Verify only second contact was appended
+							self.assertEqual(mock_doc.append.call_count, 1)
+
+	def test_lock_released_even_on_upsert_exception(self):
+		"""Lock released in finally block even when upsert raises generic Exception."""
+		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
+			with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
+				with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
+					with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+						with patch("ivm.integrations.hubspot.deal_handler.frappe.log_error"):
+							mock_upsert.side_effect = [ValueError("upsert failed"), "Contact-2"]
+							lock_obj_1 = MagicMock()
+							lock_obj_1.acquire.return_value = True
+							lock_obj_2 = MagicMock()
+							lock_obj_2.acquire.return_value = True
+							mock_lock.side_effect = [lock_obj_1, lock_obj_2]
+
+							mock_doc = MagicMock()
+							mock_doc.doctype = "CRM Deal"
+							mock_doc.name = "Deal-001"
+							mock_doc.get.return_value = []
+							mock_get_doc.return_value = mock_doc
+
+							contacts = [
+								("123", {"first_name": "John", "last_name": "Doe"}, {}),
+								("456", {"first_name": "Jane", "last_name": "Smith"}, {}),
+							]
+							_ensure_contacts("Deal-001", contacts)
+
+							# Verify both locks were released (even though first upsert failed)
+							self.assertEqual(lock_obj_1.release.call_count, 1)
+							self.assertEqual(lock_obj_2.release.call_count, 1)
+
+							# Verify second contact was still processed
+							self.assertEqual(mock_doc.append.call_count, 1)
