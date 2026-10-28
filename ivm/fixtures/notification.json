@@ -21,7 +21,7 @@
   "message_type": "Markdown",
   "method": null,
   "minutes_offset": 0,
-  "modified": "2023-10-03 11:12:06.439360",
+   "modified": "2026-10-28 00:00:00.000000",
   "module": null,
   "name": "Warehouse Request Resolved/Closed Notification",
   "notification_message": null,
@@ -33,7 +33,7 @@
    {
     "bcc": null,
     "cc": null,
-    "condition": "\"ivminc.com\" in doc.created_by",
+     "condition": "\"ivminc.com\" in (doc.owner or \"\")",
     "receiver_by_document_field": "owner",
     "receiver_by_role": ""
    }
