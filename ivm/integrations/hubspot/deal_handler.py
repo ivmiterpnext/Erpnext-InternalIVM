@@ -523,6 +523,9 @@ def _ensure_contacts(crm_deal_name: str, contacts: list[tuple[str, dict[str, Any
 		for contact_name, is_primary in resolved:
 			if contact_name in existing:
 				continue
+			if is_primary:
+				for row in d.get("contacts") or []:
+					row.is_primary = 0
 			d.append("contacts", {"contact": contact_name, "is_primary": is_primary})
 			existing.add(contact_name)
 
