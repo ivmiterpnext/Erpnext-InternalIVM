@@ -1,3 +1,5 @@
+import re
+
 import frappe
 
 from ivm.support.utils import fetch_customer_name_and_contact
@@ -59,3 +61,26 @@ def on_update(doc, method):
 			frappe.db.commit()
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "ivm.support.event_handlers.communication.on_update error")
+
+
+def sanitize_malformed_cc_quotes(doc, method):
+	for field in ("recipients", "cc", "bcc"):
+		value = doc.get(field)
+		if value:
+			doc.set(field, _strip_stray_quotes(value))
+
+
+def _strip_stray_quotes(email_str):
+	placeholders = []
+
+	def protect(match):
+		placeholders.append(match.group(0))
+		return f"\x00{len(placeholders) - 1}\x00"
+
+	protected = re.sub(r'(?:(?<=^)|(?<=,))(\s*"[^"]*"\s*<[^>]+>)', protect, email_str)
+	cleaned = protected.replace('"', "")
+
+	for i, original in enumerate(placeholders):
+		cleaned = cleaned.replace(f"\x00{i}\x00", original)
+
+	return cleaned

@@ -230,7 +230,7 @@ app_include_css = [
 
 app_include_js = [
 	# "/assets/ivm/js/workspace.js","/assets/ivm/js/awesome_bar.js",
-	"/assets/ivm/js/utils.js",
+	"/assets/ivm/js/sidebar_filters.js",
 	"/assets/ivm/js/embedded_form.js",
 	"/assets/ivm/js/chatbox_widget.js",
 	"/assets/ivm/js/barcode_scanner_override.js",
@@ -344,6 +344,7 @@ doc_events = {
 		"before_validate": "ivm.client_portal.event_handlers.user.enforce_portal_user_roles",
 	},
 	"Communication": {
+		"before_validate": "ivm.support.event_handlers.communication.sanitize_malformed_cc_quotes",
 		"on_update": "ivm.support.event_handlers.communication.on_update",
 	},
 	"Item": {"before_save": "ivm.warehouse.event_handlers.item.before_save"},
