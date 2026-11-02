@@ -72,7 +72,7 @@ class WarehouseRequest(Document):
 		stock_entry = frappe.db.get_value(
 			"Stock Entry",
 			{"custom_warehouse_request": self.name, "docstatus": ["!=", 2]},
-			["name", "docstatus"],
+			["name", "docstatus", "stock_entry_type"],
 			as_dict=True,
 		)
 
@@ -87,6 +87,13 @@ class WarehouseRequest(Document):
 				"Cannot close this Shipping Request — Stock Entry "
 				f'<a href="/app/stock-entry/{stock_entry.name}">{stock_entry.name}</a> '
 				"is still in draft. Please submit it first."
+			)
+
+		if stock_entry.stock_entry_type != "Material Transfer":
+			frappe.throw(
+				"Cannot close this Shipping Request — linked Stock Entry "
+				f'<a href="/app/stock-entry/{stock_entry.name}">{stock_entry.name}</a> '
+				f'is a "{stock_entry.stock_entry_type}", not a "Material Transfer".'
 			)
 
 	def on_update(self):

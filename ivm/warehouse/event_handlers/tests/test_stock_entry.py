@@ -117,15 +117,45 @@ def _make_user_with_role(email, first_name, role_name):
 	return user_doc
 
 
-class TestAfterInsert(ERPNextTestSuite):
-	@patch("ivm.warehouse.event_handlers.stock_entry.enqueue_create_notification")
-	def test_wrong_stock_entry_type_not_called(self, mock_enqueue):
-		"""stock_entry_type != 'Material Transfer' → not called."""
+class TestValidateCustomWarehouseRequestType(ERPNextTestSuite):
+	"""validate(): Stock Entries linked via custom_warehouse_request must be Material Transfer"""
+
+	def test_throws_when_type_is_not_material_transfer(self):
 		item = make_item()
 		_seed_stock(item.name)
 		wr = _make_warehouse_request(request_reason="Shipping Request")
 
-		_make_stock_entry(item.name, 5, stock_entry_type="Material Issue", wr_name=wr.name)
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			_make_stock_entry(item.name, 5, stock_entry_type="Material Issue", wr_name=wr.name)
+		self.assertIn("Material Transfer", str(ctx.exception))
+
+	def test_passes_when_type_is_material_transfer(self):
+		item = make_item()
+		_seed_stock(item.name)
+		wr = _make_warehouse_request(request_reason="Shipping Request")
+
+		se = _make_stock_entry(item.name, 5, stock_entry_type="Material Transfer", wr_name=wr.name)
+		self.assertTrue(se.name)
+
+	def test_passes_when_no_warehouse_request_linked_regardless_of_type(self):
+		item = make_item()
+		_seed_stock(item.name)
+
+		se = _make_stock_entry(item.name, 5, stock_entry_type="Material Issue")
+		self.assertTrue(se.name)
+
+
+class TestAfterInsert(ERPNextTestSuite):
+	@patch("ivm.warehouse.event_handlers.stock_entry.enqueue_create_notification")
+	def test_wrong_stock_entry_type_blocked_by_validate(self, mock_enqueue):
+		"""stock_entry_type != 'Material Transfer' with custom_warehouse_request set →
+		blocked entirely by the validate() hook, so after_insert never fires."""
+		item = make_item()
+		_seed_stock(item.name)
+		wr = _make_warehouse_request(request_reason="Shipping Request")
+
+		with self.assertRaises(frappe.ValidationError):
+			_make_stock_entry(item.name, 5, stock_entry_type="Material Issue", wr_name=wr.name)
 
 		mock_enqueue.assert_not_called()
 
@@ -237,13 +267,15 @@ class TestAfterInsert(ERPNextTestSuite):
 
 class TestOnSubmit(ERPNextTestSuite):
 	@patch("ivm.warehouse.event_handlers.stock_entry.enqueue_create_notification")
-	def test_wrong_stock_entry_type_not_called(self, mock_enqueue):
-		"""stock_entry_type != 'Material Transfer' → not called."""
+	def test_wrong_stock_entry_type_blocked_by_validate(self, mock_enqueue):
+		"""stock_entry_type != 'Material Transfer' with custom_warehouse_request set →
+		blocked entirely by the validate() hook, never reaches submission."""
 		item = make_item()
 		_seed_stock(item.name)
 		wr = _make_warehouse_request(request_reason="Shipping Request")
 
-		_make_stock_entry(item.name, 5, stock_entry_type="Material Issue", wr_name=wr.name)
+		with self.assertRaises(frappe.ValidationError):
+			_make_stock_entry(item.name, 5, stock_entry_type="Material Issue", wr_name=wr.name)
 
 		mock_enqueue.assert_not_called()
 

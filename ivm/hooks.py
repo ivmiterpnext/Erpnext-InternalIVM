@@ -361,6 +361,7 @@ doc_events = {
 		# "after_insert": "ivm.deployments.event_handlers.project.after_insert",
 	},
 	"Stock Entry": {
+		"validate": "ivm.warehouse.event_handlers.stock_entry.validate",
 		"after_insert": "ivm.warehouse.event_handlers.stock_entry.after_insert",
 		"on_submit": "ivm.warehouse.event_handlers.stock_entry.on_submit",
 	},

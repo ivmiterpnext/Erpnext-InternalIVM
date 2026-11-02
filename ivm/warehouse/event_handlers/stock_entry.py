@@ -1,6 +1,27 @@
 import frappe
 from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification
 
+from ivm.warehouse.services.delivery_note import AUTOMATION_USER
+
+
+def validate(doc, method=None):
+	"""Reject Stock Entries linked to a Warehouse Request with the wrong type.
+
+	custom_warehouse_request is only meaningful when paired with a Material
+	Transfer -- that's the only type get_stock_entry_items_from_warehouse_request()
+	recognizes when sourcing a Delivery Note's line items. Any other type left
+	linked here would pass Warehouse Request's own close-validation (which only
+	checks docstatus, not type) while silently producing zero shippable items.
+	"""
+	if not doc.custom_warehouse_request:
+		return
+	if doc.stock_entry_type != "Material Transfer":
+		frappe.throw(
+			f"Stock Entry linked to Warehouse Request {doc.custom_warehouse_request} "
+			f'must be a "Material Transfer" (got "{doc.stock_entry_type}"). '
+			"Clear the Warehouse Request link if this entry is not part of that shipment/build."
+		)
+
 
 def after_insert(doc, method=None):
 	"""Notify Stock Managers when a Material Transfer is created for a Build or Shipping Request."""
@@ -30,6 +51,7 @@ def after_insert(doc, method=None):
 			["name", "in", stock_managers],
 			["enabled", "=", 1],
 			["name", "!=", frappe.session.user],
+			["name", "!=", AUTOMATION_USER],
 		],
 		pluck="name",
 	)

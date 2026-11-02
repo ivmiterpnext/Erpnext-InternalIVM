@@ -1,5 +1,7 @@
 """Integration tests for ivm.warehouse.services.delivery_note"""
 
+from unittest.mock import patch
+
 import frappe
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -359,7 +361,7 @@ class TestCreateDeliveryNoteNoItems(ERPNextTestSuite):
 		super().setUp()
 		_set_default_company()
 
-	def test_logs_error_and_returns_none_when_no_items(self):
+	def test_throws_when_no_items(self):
 		customer = _make_customer()
 
 		wr = _make_warehouse_request(
@@ -367,8 +369,9 @@ class TestCreateDeliveryNoteNoItems(ERPNextTestSuite):
 			non_inventory_shipment=0,
 		)
 
-		result = create_delivery_note_from_warehouse_request(wr.name)
-		self.assertIsNone(result)
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			create_delivery_note_from_warehouse_request(wr.name)
+		self.assertIn("No stock entry items found", str(ctx.exception))
 
 	def test_no_delivery_note_created_when_no_items(self):
 		customer = _make_customer()
@@ -378,7 +381,8 @@ class TestCreateDeliveryNoteNoItems(ERPNextTestSuite):
 			non_inventory_shipment=0,
 		)
 
-		create_delivery_note_from_warehouse_request(wr.name)
+		with self.assertRaises(frappe.ValidationError):
+			create_delivery_note_from_warehouse_request(wr.name)
 
 		dn_count = frappe.db.count(
 			"Delivery Note",
@@ -459,3 +463,135 @@ class TestCreateDeliveryNoteCompanyResolution(ERPNextTestSuite):
 		dn_name = create_delivery_note_from_warehouse_request(wr.name)
 		dn = frappe.get_doc("Delivery Note", dn_name)
 		self.assertEqual(dn.company, COMPANY)
+
+
+class TestCreateDeliveryNoteUserElevation(ERPNextTestSuite):
+	"""create_delivery_note_from_warehouse_request — runs as automation@ivminc.com regardless of caller"""
+
+	def setUp(self):
+		super().setUp()
+		_set_default_company()
+		self._original_user = frappe.session.user
+
+	def tearDown(self):
+		frappe.set_user(self._original_user)
+		super().tearDown()
+
+	def _make_low_privilege_user(self):
+		email = "low_privilege_wr_user@test.com"
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": "LowPrivilege",
+					"send_welcome_email": 0,
+				}
+			).insert(ignore_permissions=True)
+		return email
+
+	def test_succeeds_when_triggering_user_lacks_item_permission(self):
+		customer = _make_customer()
+		item = make_item()
+		_seed_stock(item.name)
+
+		pl_name = create_pick_list(COMPANY)
+		add_item_to_pick_list(pl_name, item.name, WAREHOUSE, 5)
+
+		wr = _make_warehouse_request(customer=customer.name)
+
+		pl = frappe.get_doc("Pick List", pl_name)
+		pl.submit()
+
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=5,
+			from_warehouse=WAREHOUSE,
+			to_warehouse=TARGET_WAREHOUSE,
+			company=COMPANY,
+			stock_entry_type="Material Transfer",
+			do_not_submit=True,
+		)
+		se.pick_list = pl_name
+		se.custom_warehouse_request = wr.name
+		se.submit()
+
+		low_privilege_user = self._make_low_privilege_user()
+		frappe.set_user(low_privilege_user)
+
+		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+
+		self.assertTrue(dn_name)
+		self.assertTrue(frappe.db.exists("Delivery Note", dn_name))
+		self.assertEqual(frappe.session.user, low_privilege_user)
+
+	def test_restores_session_user_after_success(self):
+		customer = _make_customer()
+		item = make_item()
+		_seed_stock(item.name)
+
+		pl_name = create_pick_list(COMPANY)
+		add_item_to_pick_list(pl_name, item.name, WAREHOUSE, 5)
+
+		wr = _make_warehouse_request(customer=customer.name)
+
+		pl = frappe.get_doc("Pick List", pl_name)
+		pl.submit()
+
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=5,
+			from_warehouse=WAREHOUSE,
+			to_warehouse=TARGET_WAREHOUSE,
+			company=COMPANY,
+			stock_entry_type="Material Transfer",
+			do_not_submit=True,
+		)
+		se.pick_list = pl_name
+		se.custom_warehouse_request = wr.name
+		se.submit()
+
+		low_privilege_user = self._make_low_privilege_user()
+		frappe.set_user(low_privilege_user)
+
+		create_delivery_note_from_warehouse_request(wr.name)
+
+		self.assertEqual(frappe.session.user, low_privilege_user)
+
+	def test_restores_session_user_after_exception(self):
+		customer = _make_customer()
+		item = make_item()
+		_seed_stock(item.name)
+
+		pl_name = create_pick_list(COMPANY)
+		add_item_to_pick_list(pl_name, item.name, WAREHOUSE, 5)
+
+		wr = _make_warehouse_request(customer=customer.name)
+
+		pl = frappe.get_doc("Pick List", pl_name)
+		pl.submit()
+
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=5,
+			from_warehouse=WAREHOUSE,
+			to_warehouse=TARGET_WAREHOUSE,
+			company=COMPANY,
+			stock_entry_type="Material Transfer",
+			do_not_submit=True,
+		)
+		se.pick_list = pl_name
+		se.custom_warehouse_request = wr.name
+		se.submit()
+
+		low_privilege_user = self._make_low_privilege_user()
+		frappe.set_user(low_privilege_user)
+
+		with patch(
+			"ivm.warehouse.services.delivery_note.frappe.new_doc",
+			side_effect=RuntimeError("boom"),
+		):
+			with self.assertRaises(RuntimeError):
+				create_delivery_note_from_warehouse_request(wr.name)
+
+		self.assertEqual(frappe.session.user, low_privilege_user)

@@ -110,6 +110,8 @@ frappe.ui.form.on("Warehouse Request", {
 							},
 							__("View")
 						);
+					} else if (frm.doc.status === "Closed") {
+						add_create_delivery_note_button(frm);
 					}
 					return;
 				}
@@ -187,6 +189,8 @@ frappe.ui.form.on("Warehouse Request", {
 						},
 						__("View")
 					);
+				} else if (frm.doc.status === "Closed") {
+					add_create_delivery_note_button(frm);
 				}
 			},
 		});
@@ -233,6 +237,24 @@ frappe.ui.form.on("Warehouse Request", {
 		});
 	},
 });
+
+function add_create_delivery_note_button(frm) {
+	frm.add_custom_button(
+		__("Create Delivery Note"),
+		function () {
+			frappe.call({
+				method: "ivm.warehouse.services.delivery_note.create_delivery_note_from_warehouse_request",
+				args: { warehouse_request_name: frm.doc.name },
+				freeze: true,
+				freeze_message: __("Creating Delivery Note..."),
+				callback: function () {
+					frm.reload_doc();
+				},
+			});
+		},
+		__("Stock")
+	);
+}
 
 function toggle_rfid_add_row(frm) {
 	var grid = frm.fields_dict.rfid_settings.grid;

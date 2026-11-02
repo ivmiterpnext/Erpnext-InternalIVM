@@ -251,6 +251,21 @@ class TestValidateClosedStatus(ERPNextTestSuite):
 			wr.save(ignore_permissions=True)
 		self.assertEqual(wr.status, "Closed")
 
+	def test_closed_wrong_stock_entry_type_throws(self):
+		"""A submitted Stock Entry linked via custom_warehouse_request that isn't a
+		Material Transfer must block Closed -- simulates historical/orphaned data
+		(e.g. WR-11766) that predates the Stock Entry validate() hook preventing
+		this combination from being created going forward. stock_entry_type is
+		flipped via a direct db write (bypassing Stock Entry's own validate) since
+		that hook now makes it impossible to create this state through the ORM."""
+		wr, se = _make_shipping_wr_with_material_transfer(submit_stock_entry=True)
+		frappe.db.set_value("Stock Entry", se.name, "stock_entry_type", "Material Issue")
+		wr.reload()
+		wr.status = "Closed"
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			wr.save(ignore_permissions=True)
+		self.assertIn("Material Transfer", str(ctx.exception))
+
 
 class TestOnUpdateAutoCreateDeliveryNote(ERPNextTestSuite):
 	"""on_update: auto-create Delivery Note on transition to Closed"""

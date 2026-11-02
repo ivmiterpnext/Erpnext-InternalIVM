@@ -2,7 +2,13 @@ import frappe
 
 from ivm.warehouse.services.stock_entry import get_stock_entry_items_from_warehouse_request
 
+# Dedicated service account used to bypass ERPNext's explicit Item.check_permission()
+# call inside get_item_details.py, which runs regardless of a parent doc's
+# ignore_permissions flag. Created by ivm.warehouse.patches.create_automation_user.
+AUTOMATION_USER = "automation@ivminc.com"
 
+
+@frappe.whitelist()
 def create_delivery_note_from_warehouse_request(warehouse_request_name):
 	"""
 	Automatically create and submit a Delivery Note for a Shipping Request.
@@ -10,7 +16,8 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
 	If the Shipping Request has a `source_build_request`, items are pulled from
 	a Build WR's submitted Stock Entry, otherwise from the Shipping Request's own Stock Entries.
 
-	Returns the Delivery Note name, or None if no items were found.
+	Returns the Delivery Note name. Raises if no items were found and the
+	Warehouse Request is not marked as a non-inventory shipment.
 	"""
 	existing_dn = frappe.db.get_value(
 		"Delivery Note",
@@ -51,12 +58,11 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
 				}
 			]
 		else:
-			frappe.log_error(
-				title="Delivery Note Auto-Creation Skipped",
-				message=f"No stock entry items found for Warehouse Request {warehouse_request_name}. "
-				"Delivery Note was not created.",
+			frappe.throw(
+				f"No stock entry items found for Warehouse Request {warehouse_request_name}. "
+				"Cannot create a Delivery Note.",
+				title="Delivery Note Auto-Creation Failed",
 			)
-			return None
 
 	company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value(
 		"Global Defaults", "default_company"
@@ -70,40 +76,45 @@ def create_delivery_note_from_warehouse_request(warehouse_request_name):
 			title="Missing Customer",
 		)
 
-	dn = frappe.new_doc("Delivery Note")
-	dn.company = company
-	dn.customer = customer
-	dn.custom_related_warehouse_request = warehouse_request_name
+	previous_user = frappe.session.user
+	frappe.set_user(AUTOMATION_USER)
+	try:
+		dn = frappe.new_doc("Delivery Note")
+		dn.company = company
+		dn.customer = customer
+		dn.custom_related_warehouse_request = warehouse_request_name
 
-	for item_data in items:
-		dn.append(
-			"items",
-			{
-				"item_code": item_data["item_code"],
-				"item_name": item_data["item_name"],
-				"description": item_data.get("description") or item_data["item_name"],
-				"qty": item_data["qty"],
-				"uom": item_data["uom"],
-				"stock_uom": item_data.get("stock_uom") or item_data["uom"],
-				"conversion_factor": item_data.get("conversion_factor", 1),
-				"warehouse": item_data.get("warehouse"),
-				"rate": item_data.get("rate", 0),
-			},
+		for item_data in items:
+			dn.append(
+				"items",
+				{
+					"item_code": item_data["item_code"],
+					"item_name": item_data["item_name"],
+					"description": item_data.get("description") or item_data["item_name"],
+					"qty": item_data["qty"],
+					"uom": item_data["uom"],
+					"stock_uom": item_data.get("stock_uom") or item_data["uom"],
+					"conversion_factor": item_data.get("conversion_factor", 1),
+					"warehouse": item_data.get("warehouse"),
+					"rate": item_data.get("rate", 0),
+				},
+			)
+
+		dn.insert(ignore_permissions=True)
+		dn.submit()
+
+		frappe.msgprint(
+			f'Delivery Note <a href="/app/delivery-note/{dn.name}">{dn.name}</a> '
+			"has been created and submitted automatically.",
+			title="Delivery Note Created",
+			indicator="green",
 		)
 
-	dn.insert(ignore_permissions=True)
-	dn.submit()
+		if wr.source_build_request:
+			build_wr = frappe.get_doc("Warehouse Request", wr.source_build_request)
+			build_wr.status = "Closed"
+			build_wr.save(ignore_permissions=True)
 
-	frappe.msgprint(
-		f'Delivery Note <a href="/app/delivery-note/{dn.name}">{dn.name}</a> '
-		"has been created and submitted automatically.",
-		title="Delivery Note Created",
-		indicator="green",
-	)
-
-	if wr.source_build_request:
-		build_wr = frappe.get_doc("Warehouse Request", wr.source_build_request)
-		build_wr.status = "Closed"
-		build_wr.save(ignore_permissions=True)
-
-	return dn.name
+		return dn.name
+	finally:
+		frappe.set_user(previous_user)
