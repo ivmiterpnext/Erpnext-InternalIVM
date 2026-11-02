@@ -280,6 +280,24 @@ def _sync_note(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
 		frappe.logger(_LOG).info(f"Synced HubSpot note {engagement_id} → FCRM Note {doc.name}")
 
 
+_PHONE_PATTERN = re.compile(r"\+?\d[\d\s\-().]{5,}\d")
+
+
+def _sanitize_phone(raw: str | None) -> str:
+	"""Extract a phone-shaped token from a raw HubSpot value, discarding any
+	leading contact-name text some integrations (e.g. Nooks) prepend to
+	hs_call_to_number/hs_call_from_number. Falls back to "Unknown" if no
+	phone-shaped substring is found, matching the existing fallback used
+	for empty values.
+	"""
+	if not raw:
+		return "Unknown"
+	match = _PHONE_PATTERN.search(raw)
+	if not match:
+		return "Unknown"
+	return match.group(0).strip()
+
+
 def _sync_call(engagement_id: str, props: dict[str, Any], crm_deal_name: str) -> None:
 	"""Create or update a CRM Call Log from a HubSpot call engagement."""
 
@@ -307,8 +325,8 @@ def _sync_call(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
 	status_raw = (props.get("hs_call_status") or "").upper()
 	status = CALL_STATUS_MAP.get(status_raw, "Completed")
 
-	from_number = props.get("hs_call_from_number") or ""
-	to_number = props.get("hs_call_to_number") or ""
+	from_number = _sanitize_phone(props.get("hs_call_from_number"))
+	to_number = _sanitize_phone(props.get("hs_call_to_number"))
 
 	duration_ms = props.get("hs_call_duration")
 	duration_secs = 0
@@ -331,8 +349,8 @@ def _sync_call(engagement_id: str, props: dict[str, Any], crm_deal_name: str) ->
 		doc.telephony_medium = "Manual"
 		doc.set(HUBSPOT_ENGAGEMENT_ID_FIELD, engagement_id)
 
-		doc.set("from", from_number or "Unknown")
-		doc.to = to_number or "Unknown"
+		doc.set("from", from_number)
+		doc.to = to_number
 
 		if owner_email:
 			if call_type == "Outgoing":

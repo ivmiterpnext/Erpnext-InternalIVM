@@ -81,6 +81,19 @@ class TestRetryViaReenqueue(FrappeTestCase):
 				self.assertEqual(call_args[0][2], "456")
 				self.assertEqual(call_args[1]["company_id"], "456")
 
+	def test_reenqueues_on_timestamp_mismatch_with_dynamic_type_kwarg(self):
+		"""Decorator catches TimestampMismatchError by default and re-enqueues via enqueue_sync."""
+
+		@retry_via_reenqueue(object_type_id="0-3", id_kwarg="deal_id")
+		def stub_func(deal_id: str, attempt: int = 0) -> None:
+			raise frappe.exceptions.TimestampMismatchError("test mismatch")
+
+		with patch("ivm.integrations.hubspot.sync_utils.enqueue_sync") as mock_enqueue:
+			with patch("ivm.integrations.hubspot.sync_utils.time.sleep"):
+				result = stub_func(deal_id="789")
+				self.assertIsNone(result)
+				mock_enqueue.assert_called_once()
+
 	def test_does_not_catch_unrelated_exception(self):
 		"""Decorator does not catch exceptions outside the default tuple."""
 

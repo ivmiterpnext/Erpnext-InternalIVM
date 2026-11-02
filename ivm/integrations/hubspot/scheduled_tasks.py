@@ -23,6 +23,8 @@ API cost per run
 - Total for a quiet hour with 200 open deals and no new replies: **2 API calls**
 """
 
+import time
+
 import frappe
 
 from ivm.integrations.hubspot import activity_handler, api
@@ -35,6 +37,32 @@ from ivm.integrations.hubspot.constants import (
 _LOG = "hubspot"
 
 _CLOSED_STATUSES = frozenset({"Won", "Lost"})
+_RATE_LIMIT_MAX_ATTEMPTS = 3
+
+
+def _get_engagement_with_rate_limit_retry(
+	engagement_type: str, engagement_id: str, properties: list[str]
+) -> dict:
+	"""Call api.get_engagement, retrying in-process on a 429 up to
+	_RATE_LIMIT_MAX_ATTEMPTS times (sleeping the suggested delay between
+	attempts) before letting HubSpotRateLimitExhausted propagate to the
+	caller's existing error handling.
+	"""
+	last_exc: api.HubSpotRateLimitExhausted | None = None
+	for attempt in range(_RATE_LIMIT_MAX_ATTEMPTS):
+		try:
+			return api.get_engagement(engagement_type, engagement_id, properties)
+		except api.HubSpotRateLimitExhausted as e:
+			last_exc = e
+			if attempt + 1 >= _RATE_LIMIT_MAX_ATTEMPTS:
+				raise
+			frappe.logger(_LOG).warning(
+				f"HubSpot inbound email sync: rate limited fetching email "
+				f"{engagement_id} (attempt {attempt + 1}/{_RATE_LIMIT_MAX_ATTEMPTS}) — "
+				f"retrying in {e.retry_after_seconds}s"
+			)
+			time.sleep(e.retry_after_seconds)
+	raise last_exc  # pragma: no cover - loop always returns or raises above
 
 
 def sync_inbound_emails() -> None:
@@ -118,7 +146,7 @@ def sync_inbound_emails() -> None:
 def _sync_one_email(email_id: str, crm_deal_names: list[str]) -> None:
 	"""Fetch and sync a single new email engagement to its associated deals."""
 	try:
-		data = api.get_engagement(ENGAGEMENT_TYPE_EMAILS, email_id, EMAIL_PROPERTIES)
+		data = _get_engagement_with_rate_limit_retry(ENGAGEMENT_TYPE_EMAILS, email_id, EMAIL_PROPERTIES)
 		props = data.get("properties", {})
 		if "createdAt" not in props and data.get("createdAt"):
 			props["_createdAt"] = data["createdAt"]

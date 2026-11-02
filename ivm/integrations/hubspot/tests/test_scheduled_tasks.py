@@ -5,10 +5,51 @@ from unittest.mock import MagicMock, patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.scheduled_tasks import (
+	_get_engagement_with_rate_limit_retry,
 	_sync_one_email,
 	sync_inbound_emails,
 )
+
+
+class TestGetEngagementWithRateLimitRetry(FrappeTestCase):
+	"""_get_engagement_with_rate_limit_retry bounded in-process retry"""
+
+	def test_succeeds_first_try_no_sleep(self):
+		"""Success on first attempt -> returns result, no sleep."""
+		expected = {"properties": {"hs_email_subject": "Hi"}}
+		with patch("ivm.integrations.hubspot.scheduled_tasks.api.get_engagement", return_value=expected):
+			with patch("ivm.integrations.hubspot.scheduled_tasks.time.sleep") as mock_sleep:
+				result = _get_engagement_with_rate_limit_retry("emails", "email-1", ["hs_email_subject"])
+				self.assertEqual(result, expected)
+				mock_sleep.assert_not_called()
+
+	def test_rate_limited_once_then_succeeds(self):
+		"""One 429 then success -> sleeps once, returns result."""
+		expected = {"properties": {"hs_email_subject": "Hi"}}
+		with patch(
+			"ivm.integrations.hubspot.scheduled_tasks.api.get_engagement",
+			side_effect=[api.HubSpotRateLimitExhausted(retry_after_seconds=4.0), expected],
+		):
+			with patch("ivm.integrations.hubspot.scheduled_tasks.time.sleep") as mock_sleep:
+				result = _get_engagement_with_rate_limit_retry("emails", "email-1", ["hs_email_subject"])
+				self.assertEqual(result, expected)
+				mock_sleep.assert_called_once_with(4.0)
+
+	def test_rate_limited_every_time_raises_after_max_attempts(self):
+		"""Persistent 429 -> raises after _RATE_LIMIT_MAX_ATTEMPTS, sleeps between attempts only."""
+		from ivm.integrations.hubspot import scheduled_tasks
+
+		with patch(
+			"ivm.integrations.hubspot.scheduled_tasks.api.get_engagement",
+			side_effect=api.HubSpotRateLimitExhausted(retry_after_seconds=5.0),
+		) as mock_get:
+			with patch("ivm.integrations.hubspot.scheduled_tasks.time.sleep") as mock_sleep:
+				with self.assertRaises(api.HubSpotRateLimitExhausted):
+					_get_engagement_with_rate_limit_retry("emails", "email-1", ["hs_email_subject"])
+				self.assertEqual(mock_get.call_count, scheduled_tasks._RATE_LIMIT_MAX_ATTEMPTS)
+				self.assertEqual(mock_sleep.call_count, scheduled_tasks._RATE_LIMIT_MAX_ATTEMPTS - 1)
 
 
 class TestSyncInboundEmails(FrappeTestCase):

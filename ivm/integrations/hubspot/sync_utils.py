@@ -113,6 +113,7 @@ def retry_via_reenqueue(
 		ConcurrentCreateConflict,
 		api.HubSpotRateLimitExhausted,
 		SyncLockBusy,
+		frappe.exceptions.TimestampMismatchError,
 	),
 	max_attempts: int = 5,
 ) -> Callable:
@@ -124,6 +125,13 @@ def retry_via_reenqueue(
 	final attempt, logs to the Error Log and stops — nothing retries it
 	further; the next change to the record in HubSpot (webhook or the
 	reconciliation job) will try again from scratch.
+
+	TimestampMismatchError (raised by save_doc once its own internal
+	reload-retry budget is exhausted — see save_doc below) is included in the
+	default tuple so high-concurrency record collisions (e.g. a HubSpot
+	contact/company shared across multiple deals synced in the same batch)
+	get additional job-level retries spread over time, rather than
+	hard-failing the RQ job immediately.
 
 	A per-record lock prevents the primary and "_again" followup jobs from
 	running concurrently on the same record. If SyncLockBusy triggers a

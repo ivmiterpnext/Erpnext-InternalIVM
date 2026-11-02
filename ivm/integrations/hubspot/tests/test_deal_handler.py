@@ -16,6 +16,7 @@ from ivm.integrations.hubspot.deal_handler import (
 	_apply_pipeline,
 	_apply_status,
 	_ensure_contacts,
+	_is_lost_status,
 	_resolve_or_provision_org,
 	_sync_contacts,
 	_sync_deal_core,
@@ -153,24 +154,58 @@ class TestApplyLostReason(FrappeTestCase):
 
 	def test_empty_value_no_op(self):
 		"""Empty value is no-op, nothing set"""
-		doc = SimpleNamespace()
+		doc = SimpleNamespace(status=None)
 		_apply_lost_reason(doc, "")
 		self.assertFalse(hasattr(doc, "lost_reason"))
 		self.assertFalse(hasattr(doc, "lost_notes"))
 
 	def test_none_value_no_op(self):
 		"""None value is no-op, nothing set"""
-		doc = SimpleNamespace()
+		doc = SimpleNamespace(status=None)
 		_apply_lost_reason(doc, None)
 		self.assertFalse(hasattr(doc, "lost_reason"))
 		self.assertFalse(hasattr(doc, "lost_notes"))
 
 	def test_whitespace_only_no_op(self):
 		"""Whitespace-only value is no-op"""
-		doc = SimpleNamespace()
+		doc = SimpleNamespace(status=None)
 		_apply_lost_reason(doc, "   ")
 		self.assertFalse(hasattr(doc, "lost_reason"))
 		self.assertFalse(hasattr(doc, "lost_notes"))
+
+	def test_empty_value_with_lost_status_defaults_to_other(self):
+		"""Empty value + Lost-type status -> lost_reason 'Other' with placeholder note"""
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.get_cached_value", return_value="Lost"):
+			doc = SimpleNamespace(status="Lost Status")
+			_apply_lost_reason(doc, "")
+			self.assertEqual(doc.lost_reason, "Other")
+			self.assertEqual(doc.lost_notes, "No reason provided by HubSpot")
+
+	def test_empty_value_with_non_lost_status_no_op(self):
+		"""Empty value + non-Lost status -> lost_reason not set"""
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.get_cached_value", return_value="Open"):
+			doc = SimpleNamespace(status="Discovery")
+			_apply_lost_reason(doc, None)
+			self.assertFalse(hasattr(doc, "lost_reason"))
+			self.assertFalse(hasattr(doc, "lost_notes"))
+
+
+class TestIsLostStatus(FrappeTestCase):
+	"""_is_lost_status helper"""
+
+	def test_lost_type_returns_true(self):
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.get_cached_value", return_value="Lost"):
+			self.assertTrue(_is_lost_status("Lost Status"))
+
+	def test_non_lost_type_returns_false(self):
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.get_cached_value", return_value="Open"):
+			self.assertFalse(_is_lost_status("Discovery"))
+
+	def test_falsy_status_returns_false_without_db_call(self):
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.get_cached_value") as mock_get:
+			self.assertFalse(_is_lost_status(None))
+			self.assertFalse(_is_lost_status(""))
+			mock_get.assert_not_called()
 
 
 class TestApplyPipeline(FrappeTestCase):

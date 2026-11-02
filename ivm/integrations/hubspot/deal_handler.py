@@ -46,13 +46,29 @@ def _apply_lost_reason(doc: Any, value: Any) -> None:
 
 	Attempts case-insensitive matching against existing CRM Lost Reason
 	records.  Falls back to "Other" with the raw value in ``lost_notes``
-	if no match is found.  Only applies when the deal status is "Lost".
-	"""
-	if not value:
-		return
+	if no match is found.
 
-	value_str = str(value).strip()
+	If HubSpot's closed_lost_reason is empty but doc.status (set earlier
+	in the same field-map pass by _apply_status, since "dealstage" is
+	ordered before "closed_lost_reason" in DEAL_FIELD_MAP) maps to a
+	Lost-type CRM Deal Status, falls back to "Other" with an explanatory
+	note instead of leaving lost_reason unset — CRM Deal's own
+	validate_lost_reason() mandates lost_reason whenever status-type is
+	"Lost", so leaving it unset here would make every subsequent save of
+	this deal fail permanently (observed: 51 stuck deals in production
+	where HubSpot reps never recorded a loss reason).
+	"""
+	value_str = str(value).strip() if value else ""
+
 	if not value_str:
+		if _is_lost_status(doc.status):
+			doc.lost_reason = "Other"
+			doc.lost_notes = "No reason provided by HubSpot"
+			frappe.logger("hubspot").info(
+				f"HubSpot closed_lost_reason was empty for a deal mapped to Lost "
+				f"status '{doc.status}' — set lost_reason to 'Other' with a "
+				f"placeholder note so the save doesn't fail validation"
+			)
 		return
 
 	# Build a case-insensitive lookup of existing lost reasons
@@ -69,6 +85,13 @@ def _apply_lost_reason(doc: Any, value: Any) -> None:
 			f"HubSpot closed_lost_reason '{value_str}' did not match any "
 			f"CRM Lost Reason — set to 'Other' with lost_notes"
 		)
+
+
+def _is_lost_status(status: str | None) -> bool:
+	"""True if the given CRM Deal status name is of type 'Lost' per CRM Deal Status."""
+	if not status:
+		return False
+	return frappe.get_cached_value("CRM Deal Status", status, "type") == "Lost"
 
 
 def _apply_pipeline(doc: Any, value: Any) -> None:

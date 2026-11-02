@@ -69,6 +69,7 @@ SAFETY_LAG_MINUTES = 5
 _PAGE_SIZE = 100
 _MAX_PAGES_PER_TYPE = 100  # 100 * 100 = 10,000 = HubSpot's search result cap
 _INTER_PAGE_SLEEP_SECONDS = 0.25
+_RATE_LIMIT_MAX_ATTEMPTS = 3
 
 _STANDARD_SEARCH_PATHS: dict[str, str] = {
 	DEAL_TYPE_ID: "deals",
@@ -89,6 +90,35 @@ def _search_path(object_type_id: str) -> str:
 	if object_type_id in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID:
 		return ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID[object_type_id]
 	return object_type_id
+
+
+def _search_objects_with_rate_limit_retry(
+	search_path: str,
+	filters: list[dict[str, str]],
+	*,
+	after: str | None,
+	limit: int,
+) -> dict:
+	"""Call api.search_objects, retrying in-process on a 429 up to
+	_RATE_LIMIT_MAX_ATTEMPTS times (sleeping the suggested delay between
+	attempts) before letting HubSpotRateLimitExhausted propagate to the
+	caller's existing per-object-type error isolation.
+	"""
+	last_exc: api.HubSpotRateLimitExhausted | None = None
+	for attempt in range(_RATE_LIMIT_MAX_ATTEMPTS):
+		try:
+			return api.search_objects(search_path, filters, after=after, limit=limit)
+		except api.HubSpotRateLimitExhausted as e:
+			last_exc = e
+			if attempt + 1 >= _RATE_LIMIT_MAX_ATTEMPTS:
+				raise
+			frappe.logger(_LOG).warning(
+				f"HubSpot reconciler: rate limited on {search_path} search "
+				f"(attempt {attempt + 1}/{_RATE_LIMIT_MAX_ATTEMPTS}) — "
+				f"retrying in {e.retry_after_seconds}s"
+			)
+			time.sleep(e.retry_after_seconds)
+	raise last_exc  # pragma: no cover - loop always returns or raises above
 
 
 def _last_modified_property(object_type_id: str) -> str:
@@ -173,7 +203,7 @@ def _reconcile_object_type(object_type_id: str, checkpoint_epoch_ms: int) -> dic
 	after = None
 
 	for _page in range(_MAX_PAGES_PER_TYPE):
-		response = api.search_objects(search_path, filters, after=after, limit=_PAGE_SIZE)
+		response = _search_objects_with_rate_limit_retry(search_path, filters, after=after, limit=_PAGE_SIZE)
 
 		for row in response.get("results", []):
 			object_id = row.get("id")

@@ -10,6 +10,7 @@ from ivm.integrations.hubspot.activity_handler import (
 	_create_calendar_note,
 	_normalize_email_list,
 	_parse_timestamp,
+	_sanitize_phone,
 	_strip_quoted_reply,
 	_sync_attachments,
 	_sync_call,
@@ -269,6 +270,25 @@ class TestSyncNote(FrappeTestCase):
 		_sync_note("eng_123", props, "Deal-001")
 
 		mock_sync_attach.assert_not_called()
+
+
+class TestSanitizePhone(FrappeTestCase):
+	"""_sanitize_phone helper"""
+
+	def test_clean_number_unchanged(self):
+		self.assertEqual(_sanitize_phone("+13134321102"), "+13134321102")
+
+	def test_strips_leading_contact_name(self):
+		self.assertEqual(_sanitize_phone("sergio Martinez +15868734134"), "+15868734134")
+
+	def test_none_returns_unknown(self):
+		self.assertEqual(_sanitize_phone(None), "Unknown")
+
+	def test_empty_string_returns_unknown(self):
+		self.assertEqual(_sanitize_phone(""), "Unknown")
+
+	def test_no_digits_returns_unknown(self):
+		self.assertEqual(_sanitize_phone("No Answer"), "Unknown")
 
 
 class TestSyncCall(FrappeTestCase):

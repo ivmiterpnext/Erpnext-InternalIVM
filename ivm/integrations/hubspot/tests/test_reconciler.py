@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, now_datetime
 
-from ivm.integrations.hubspot import reconciler, routing
+from ivm.integrations.hubspot import api, reconciler, routing
 from ivm.integrations.hubspot.constants import (
 	BIN_TYPE_ID,
 	COMPANY_TYPE_ID,
@@ -279,6 +279,43 @@ class TestSearchPath(FrappeTestCase):
 	def test_custom_object_type_returns_unchanged(self):
 		"""Custom object type ID → returns unchanged"""
 		self.assertEqual(reconciler._search_path(SMARTSTATION_TYPE_ID), SMARTSTATION_TYPE_ID)
+
+
+class TestSearchObjectsWithRateLimitRetry(FrappeTestCase):
+	"""_search_objects_with_rate_limit_retry bounded in-process retry"""
+
+	def test_succeeds_first_try_no_sleep(self):
+		"""Success on first attempt -> returns result, no sleep."""
+		expected = {"results": [{"id": "1"}], "paging": {}}
+		with patch("ivm.integrations.hubspot.reconciler.api.search_objects", return_value=expected):
+			with patch("ivm.integrations.hubspot.reconciler.time.sleep") as mock_sleep:
+				result = reconciler._search_objects_with_rate_limit_retry("deals", [], after=None, limit=100)
+				self.assertEqual(result, expected)
+				mock_sleep.assert_not_called()
+
+	def test_rate_limited_once_then_succeeds(self):
+		"""One 429 then success -> sleeps once, returns result."""
+		expected = {"results": [{"id": "1"}], "paging": {}}
+		with patch(
+			"ivm.integrations.hubspot.reconciler.api.search_objects",
+			side_effect=[api.HubSpotRateLimitExhausted(retry_after_seconds=7.0), expected],
+		):
+			with patch("ivm.integrations.hubspot.reconciler.time.sleep") as mock_sleep:
+				result = reconciler._search_objects_with_rate_limit_retry("deals", [], after=None, limit=100)
+				self.assertEqual(result, expected)
+				mock_sleep.assert_called_once_with(7.0)
+
+	def test_rate_limited_every_time_raises_after_max_attempts(self):
+		"""Persistent 429 -> raises after _RATE_LIMIT_MAX_ATTEMPTS, sleeps between attempts only."""
+		with patch(
+			"ivm.integrations.hubspot.reconciler.api.search_objects",
+			side_effect=api.HubSpotRateLimitExhausted(retry_after_seconds=5.0),
+		) as mock_search:
+			with patch("ivm.integrations.hubspot.reconciler.time.sleep") as mock_sleep:
+				with self.assertRaises(api.HubSpotRateLimitExhausted):
+					reconciler._search_objects_with_rate_limit_retry("deals", [], after=None, limit=100)
+				self.assertEqual(mock_search.call_count, reconciler._RATE_LIMIT_MAX_ATTEMPTS)
+				self.assertEqual(mock_sleep.call_count, reconciler._RATE_LIMIT_MAX_ATTEMPTS - 1)
 
 
 class TestToEpochMs(FrappeTestCase):
