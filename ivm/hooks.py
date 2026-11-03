@@ -36,6 +36,7 @@ fixtures = [
 	},
 	"Connectivity Type",
 	"Card Reader Type",
+	"Bin Size",
 	{
 		"dt": "List View Settings",
 		"filters": [["name", "in", ["Issue", "Project", "Warehouse Request", "Version", "Lead"]]],

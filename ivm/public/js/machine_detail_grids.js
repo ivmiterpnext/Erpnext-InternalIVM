@@ -19,10 +19,35 @@ function setupMachineDetailGrids(frm, tableFieldnames) {
 	});
 }
 
+let _binSizeOptionsPromise = null;
+const FALLBACK_BIN_SIZES = ["4", "8", "12", "20"];
+
+function getBinSizeOptions() {
+	if (!_binSizeOptionsPromise) {
+		_binSizeOptionsPromise = frappe
+			.call({
+				method: "frappe.client.get_list",
+				args: {
+					doctype: "Bin Size",
+					filters: { enabled: 1 },
+					fields: ["bin_size"],
+					limit_page_length: 0,
+				},
+			})
+			.then((r) => {
+				const sizes = (r.message || []).map((d) => d.bin_size);
+				sizes.sort((a, b) => Number(a) - Number(b));
+				return sizes.length ? sizes : FALLBACK_BIN_SIZES;
+			})
+			.catch(() => FALLBACK_BIN_SIZES);
+	}
+	return _binSizeOptionsPromise;
+}
+
 /**
  * Inject the bins editor UI into a SmartLocker or SmartSync child table row.
  */
-function injectBinsEditor(frm, cdt, cdn) {
+async function injectBinsEditor(frm, cdt, cdn) {
 	const $wrapper = cur_frm?.cur_grid?.grid_form?.wrapper;
 	if (!$wrapper || $wrapper.find(".ivm-bins-injected").length) return;
 
@@ -36,6 +61,8 @@ function injectBinsEditor(frm, cdt, cdn) {
 	} catch (e) {
 		console.warn("Failed to parse bins_data", row.bins_data, e);
 	}
+
+	const binSizeOptions = await getBinSizeOptions();
 
 	$container.html(`
 		<table class="table table-bordered table-sm mb-2">
@@ -89,7 +116,7 @@ function injectBinsEditor(frm, cdt, cdn) {
 
 	function lastRowSize() {
 		const $rows = $container.find(".ivm-bin-row");
-		return $rows.length ? $rows.last().find(".ivm-bin-size").val() : "4";
+		return $rows.length ? $rows.last().find(".ivm-bin-size").val() : binSizeOptions[0] || "4";
 	}
 
 	function setNumberState($row, isStorage) {
@@ -119,14 +146,19 @@ function injectBinsEditor(frm, cdt, cdn) {
           <option value="PWR">PWR</option>
         </select></td>
         <td><input type="text" inputmode="numeric" class="form-control form-control-sm ivm-bin-number" /></td>
-        <td><select class="form-control form-control-sm ivm-bin-size">
-          <option>4</option><option>8</option><option>12</option>
-        </select></td>
+        <td><select class="form-control form-control-sm ivm-bin-size"></select></td>
         <td class="ivm-remove-bin-td"><button class="btn btn-xs btn-danger ivm-remove-bin">&times;</button></td>
       </tr>
     `);
 		$row.find(".ivm-bin-type").val(type);
-		$row.find(".ivm-bin-size").val(isNew ? lastRowSize() : bin.bin_size || "4");
+		binSizeOptions.forEach((size) => {
+			$row.find(".ivm-bin-size").append(
+				`<option>${frappe.utils.escape_html(String(size))}</option>`
+			);
+		});
+		$row.find(".ivm-bin-size").val(
+			isNew ? lastRowSize() : bin.bin_size || binSizeOptions[0] || "4"
+		);
 		const binNum = isNew && type === "Storage" ? nextBinNumber() : bin.bin_number || "";
 		$row.find(".ivm-bin-number").val(binNum).data("saved", String(binNum));
 		setNumberState($row, type === "Storage");
