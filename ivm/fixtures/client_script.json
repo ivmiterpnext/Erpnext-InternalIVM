@@ -229,5 +229,16 @@
   "name": "icorp-test-button",
   "script": "frappe.ui.form.on('Item', {\n    refresh(frm) {\n        frm.add_custom_button(__('Test iCorpAPI'), function() {\n            frappe.call({\n                method: 'icorp-dev-api-test',\n                callback: function(r) {\n                    frappe.msgprint({\n                        title: __('iCorpAPI Test Result'),\n                        message: '<pre>' + JSON.stringify(r.message, null, 2) + '</pre>',\n                        indicator: 'green'\n                    });\n                },\n                error: function(r) {\n                    frappe.msgprint({\n                        title: __('iCorpAPI Test Failed'),\n                        message: '<pre>' + JSON.stringify(r, null, 2) + '</pre>',\n                        indicator: 'red'\n                    });\n                }\n            });\n        });\n    }\n});",
   "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Stock Reconciliation",
+  "enabled": 1,
+  "modified": "2026-11-04 09:40:55.549056",
+  "module": "IVM",
+  "name": "Stock Reconciliation Opening Stock Valuation Fallback",
+  "script": "frappe.ui.form.on(\"Stock Reconciliation Item\", {\n    warehouse(frm, cdt, cdn) {\n        ivm.fallback_valuation_rate_to_item(frm, cdt, cdn);\n    },\n    item_code(frm, cdt, cdn) {\n        ivm.fallback_valuation_rate_to_item(frm, cdt, cdn);\n    },\n});\n\nwindow.ivm = window.ivm || {};\nivm.fallback_valuation_rate_to_item = function (frm, cdt, cdn) {\n    if (frm.doc.purpose !== \"Opening Stock\") return;\n\n    const row = frappe.get_doc(cdt, cdn);\n    if (!row.item_code || !row.warehouse) return;\n    if (flt(row.valuation_rate) || flt(row.current_valuation_rate)) return;\n\n    frappe.db.get_value(\"Item\", row.item_code, \"valuation_rate\").then((r) => {\n        const rate = flt(r.message && r.message.valuation_rate);\n        if (!rate) return;\n        frappe.model.set_value(cdt, cdn, \"valuation_rate\", rate);\n        frappe.model.set_value(cdt, cdn, \"amount\", flt(row.qty) * rate);\n    });\n};\n",
+  "view": "Form"
  }
 ]
