@@ -23,7 +23,7 @@ from ivm.integrations.hubspot.deal_handler import (
 	ensure_deal_exists,
 	sync_deal,
 )
-from ivm.integrations.hubspot.sync_utils import ConcurrentCreateConflict
+from ivm.integrations.hubspot.sync_utils import ConcurrentCreateConflict, SyncLockBusy
 
 
 class TestResolveOrProvisionOrg(FrappeTestCase):
@@ -807,6 +807,92 @@ class TestEnsureContacts(FrappeTestCase):
 				with self.assertRaises(ConcurrentCreateConflict):
 					_ensure_contacts("Deal-001", contacts)
 
+	def _run_with_upsert_error(self, error, upsert_side_effects=None):
+		"""Patch upsert_contact to raise `error` and the lock to acquire; return (mock lock, contacts)
+		so tests can assert on release()."""
+		patcher_upsert = patch("ivm.integrations.hubspot.contact_handler.upsert_contact")
+		patcher_lock = patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock")
+		mock_upsert = patcher_upsert.start()
+		mock_lock = patcher_lock.start()
+		self.addCleanup(patcher_upsert.stop)
+		self.addCleanup(patcher_lock.stop)
+		mock_upsert.side_effect = error
+		mock_lock_obj = MagicMock()
+		mock_lock_obj.acquire.return_value = True
+		mock_lock.return_value = mock_lock_obj
+		contacts = [("123", {"first_name": "John", "last_name": "Doe"}, {})]
+		return mock_lock_obj, contacts
+
+	def test_timestamp_mismatch_propagates_and_releases_lock(self):
+		"""TimestampMismatchError from upsert propagates (for sync_deal's retry_via_reenqueue), lock released."""
+		lock_obj, contacts = self._run_with_upsert_error(frappe.exceptions.TimestampMismatchError("x"))
+		with self.assertRaises(frappe.exceptions.TimestampMismatchError):
+			_ensure_contacts("Deal-001", contacts)
+		lock_obj.release.assert_called_once()
+
+	def test_sync_lock_busy_propagates_and_releases_lock(self):
+		"""SyncLockBusy from upsert propagates (not swallowed), lock released."""
+		lock_obj, contacts = self._run_with_upsert_error(SyncLockBusy("Contact", "123"))
+		with self.assertRaises(SyncLockBusy):
+			_ensure_contacts("Deal-001", contacts)
+		lock_obj.release.assert_called_once()
+
+	def test_rate_limit_and_concurrent_conflict_still_propagate_and_release_lock(self):
+		"""Pre-existing re-raise types still propagate, and the lock is still released for each."""
+		from ivm.integrations.hubspot.api import HubSpotRateLimitExhausted
+
+		cases = [
+			ConcurrentCreateConflict("Contact", "hubspot_contact_id", "123"),
+			HubSpotRateLimitExhausted(5),
+		]
+		for error in cases:
+			with self.subTest(error=type(error).__name__):
+				lock_obj, contacts = self._run_with_upsert_error(error)
+				with self.assertRaises(type(error)):
+					_ensure_contacts("Deal-001", contacts)
+				lock_obj.release.assert_called_once()
+
+	def test_lock_acquire_failure_raises_sync_lock_busy_without_release(self):
+		"""lock.acquire() returning False raises SyncLockBusy (not a silent skip), and release() is
+		NOT called: nothing was acquired, so there is nothing to release."""
+		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
+			with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+				mock_lock_obj = MagicMock()
+				mock_lock_obj.acquire.return_value = False
+				mock_lock.return_value = mock_lock_obj
+				contacts = [("123", {"first_name": "John", "last_name": "Doe"}, {})]
+				with self.assertRaises(SyncLockBusy) as ctx:
+					_ensure_contacts("Deal-001", contacts)
+				self.assertEqual(ctx.exception.object_id, "123")
+				mock_upsert.assert_not_called()
+				mock_lock_obj.release.assert_not_called()
+
+	def test_generic_error_is_logged_and_loop_continues(self):
+		"""A plain exception is logged and that contact skipped; the next contact is still processed."""
+		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
+			with patch("ivm.integrations.hubspot.deal_handler.frappe.log_error") as mock_log_error:
+				with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
+					with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
+						with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
+							mock_upsert.side_effect = [ValueError("boom"), "Contact-2"]
+							mock_lock_obj = MagicMock()
+							mock_lock_obj.acquire.return_value = True
+							mock_lock.return_value = mock_lock_obj
+							mock_doc = MagicMock()
+							mock_doc.get.return_value = []
+							mock_get_doc.return_value = mock_doc
+							contacts = [
+								("123", {"first_name": "John", "last_name": "Doe"}, {}),
+								("456", {"first_name": "Jane", "last_name": "Smith"}, {}),
+							]
+							_ensure_contacts("Deal-001", contacts)
+
+							self.assertEqual(mock_upsert.call_count, 2)
+							mock_log_error.assert_called_once()
+							self.assertEqual(mock_lock_obj.release.call_count, 2)
+							mock_doc.append.assert_called_once()
+							self.assertEqual(mock_doc.append.call_args[0][1]["contact"], "Contact-2")
+
 	def test_lock_acquired_and_released_on_happy_path(self):
 		"""Lock acquired, upsert called with hubspot_contact_id, lock released."""
 		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
@@ -835,46 +921,39 @@ class TestEnsureContacts(FrappeTestCase):
 						# Verify lock was released
 						mock_lock_obj.release.assert_called_once()
 
-	def test_lock_busy_contact_skipped_rest_processed(self):
-		"""Lock busy on first contact -> skipped with warning, second contact processed."""
+	def test_lock_busy_contact_raises_and_rest_not_processed(self):
+		"""Lock busy on first contact -> SyncLockBusy propagates to the whole-deal retry. The first
+		contact is never upserted, its lock is never released (never acquired), and the second contact
+		is not reached in this attempt; the re-enqueued deal sync processes the full list again."""
 		with patch("ivm.integrations.hubspot.contact_handler.upsert_contact") as mock_upsert:
 			with patch("ivm.integrations.hubspot.deal_handler.frappe.get_doc") as mock_get_doc:
 				with patch("ivm.integrations.hubspot.deal_handler.save_doc"):
 					with patch("ivm.integrations.hubspot.deal_handler.frappe.cache.lock") as mock_lock:
-						with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
-							mock_upsert.return_value = "Contact-2"
-							# First lock returns False (busy), second returns True
-							lock_obj_1 = MagicMock()
-							lock_obj_1.acquire.return_value = False
-							lock_obj_2 = MagicMock()
-							lock_obj_2.acquire.return_value = True
-							mock_lock.side_effect = [lock_obj_1, lock_obj_2]
+						mock_upsert.return_value = "Contact-2"
+						# First lock returns False (busy), second returns True
+						lock_obj_1 = MagicMock()
+						lock_obj_1.acquire.return_value = False
+						lock_obj_2 = MagicMock()
+						lock_obj_2.acquire.return_value = True
+						mock_lock.side_effect = [lock_obj_1, lock_obj_2]
 
-							mock_doc = MagicMock()
-							mock_doc.doctype = "CRM Deal"
-							mock_doc.name = "Deal-001"
-							mock_doc.get.return_value = []
-							mock_get_doc.return_value = mock_doc
+						mock_doc = MagicMock()
+						mock_doc.doctype = "CRM Deal"
+						mock_doc.name = "Deal-001"
+						mock_doc.get.return_value = []
+						mock_get_doc.return_value = mock_doc
 
-							contacts = [
-								("123", {"first_name": "John", "last_name": "Doe"}, {}),
-								("456", {"first_name": "Jane", "last_name": "Smith"}, {}),
-							]
+						contacts = [
+							("123", {"first_name": "John", "last_name": "Doe"}, {}),
+							("456", {"first_name": "Jane", "last_name": "Smith"}, {}),
+						]
+						with self.assertRaises(SyncLockBusy):
 							_ensure_contacts("Deal-001", contacts)
 
-							# Verify warning was logged for skipped contact
-							mock_logger.return_value.warning.assert_called()
-							warning_call = mock_logger.return_value.warning.call_args[0][0]
-							self.assertIn("123", warning_call)
-							self.assertIn("skipping", warning_call)
-
-							# Verify upsert was only called once (for second contact)
-							self.assertEqual(mock_upsert.call_count, 1)
-							call_kwargs = mock_upsert.call_args[1]
-							self.assertEqual(call_kwargs.get("hubspot_contact_id"), "456")
-
-							# Verify only second contact was appended
-							self.assertEqual(mock_doc.append.call_count, 1)
+						mock_upsert.assert_not_called()
+						lock_obj_1.release.assert_not_called()
+						lock_obj_2.acquire.assert_not_called()
+						mock_doc.append.assert_not_called()
 
 	def test_lock_released_even_on_upsert_exception(self):
 		"""Lock released in finally block even when upsert raises generic Exception."""

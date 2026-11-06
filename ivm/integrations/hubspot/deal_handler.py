@@ -22,6 +22,7 @@ from ivm.integrations.hubspot.constants import (
 )
 from ivm.integrations.hubspot.sync_utils import (
 	ConcurrentCreateConflict,
+	SyncLockBusy,
 	apply_field_map,
 	enqueue_sync,
 	lookup_or_create,
@@ -136,18 +137,22 @@ def _apply_client_id(doc: Any, value: Any) -> None:
 
 	HubSpot stores the iCorp numeric client ID in the ``client_id`` property
 	(e.g. ``"1042"``).  ``custom_customer`` is a Link → Customer field, so
-	we must look up the Customer whose ``icorp_client_id`` matches before
+	we must look up the Customer this iCorp client is assigned to before
 	writing the value, otherwise Frappe silently discards the raw numeric string.
+	Looks up via the iCorp Client Link record (its name IS the iCorp client ID),
+	rather than the legacy Customer.icorp_client_id field -- a Customer can have
+	more than one of its own iCorp clients, so this also resolves cases the old
+	single-value field never could.
 	"""
 	if not value:
 		return
-	customer_name = frappe.db.get_value("Customer", {"icorp_client_id": str(value)}, "name")
+	customer_name = frappe.db.get_value("iCorp Client Link", str(value), "customer")
 	if customer_name:
 		doc.custom_customer = customer_name
 	else:
 		frappe.logger("hubspot").warning(
-			f"HubSpot client_id '{value}' did not match any Customer "
-			f"(icorp_client_id) — skipping custom_customer"
+			f"HubSpot client_id '{value}' did not match any assigned iCorp Client Link "
+			f"— skipping custom_customer"
 		)
 
 
@@ -499,6 +504,23 @@ def _ensure_contacts(crm_deal_name: str, contacts: list[tuple[str, dict[str, Any
 
 	Acquires a per-contact lock before each upsert to prevent races with
 	direct contact webhooks (which also sync the same Contact via sync_contact).
+
+	Exception handling: ConcurrentCreateConflict, HubSpotRateLimitExhausted,
+	TimestampMismatchError and SyncLockBusy are re-raised, and so is a failure to
+	acquire a contact's lock (SyncLockBusy is raised instead of skipping the contact).
+	They propagate out of
+	this function to sync_deal's @retry_via_reenqueue, which re-enqueues the WHOLE
+	deal sync (sync_deal re-runs _sync_deal_core -> _sync_contacts -> this function
+	from the top, re-fetching every contact). Consequence: when one contact hits
+	one of these, the contacts after it in the list are NOT processed in this
+	attempt, and nothing from this call is linked to the deal (the link step runs
+	only after the loop). A fresh full retry is intended in that case. Any other
+	exception is logged to the Error Log and that contact is skipped (continue);
+	the remaining contacts are still processed.
+
+	The per-contact lock is released (finally) whenever it was acquired, whether
+	the exception propagates or not. If the lock could not be acquired, no lock is
+	held, so nothing is released and SyncLockBusy propagates immediately.
 	"""
 	from ivm.integrations.hubspot.contact_handler import upsert_contact
 
@@ -508,18 +530,21 @@ def _ensure_contacts(crm_deal_name: str, contacts: list[tuple[str, dict[str, Any
 		lock = frappe.cache.lock(lock_key, timeout=1500, blocking_timeout=30)
 
 		if not lock.acquire():
-			frappe.logger("hubspot").warning(
-				f"HubSpot: could not acquire lock for contact {contact_id} "
-				f"(deal {crm_deal_name}) — skipping this cycle, will retry on next sync"
-			)
-			continue
+			# Nothing was acquired, so there is no lock to release here: this raise
+			# happens before the try/finally below on purpose.
+			raise SyncLockBusy(CONTACT_TYPE_ID, contact_id)
 
 		try:
 			try:
 				contact_name = upsert_contact(
 					entry, hubspot_contact_id=contact_id, address_props=address_props
 				)
-			except (ConcurrentCreateConflict, api.HubSpotRateLimitExhausted):
+			except (
+				ConcurrentCreateConflict,
+				api.HubSpotRateLimitExhausted,
+				frappe.exceptions.TimestampMismatchError,
+				SyncLockBusy,
+			):
 				raise
 			except Exception:
 				frappe.log_error(
