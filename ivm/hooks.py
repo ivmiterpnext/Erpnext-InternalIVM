@@ -218,7 +218,7 @@ fixtures = [
 	{"dt": "Assignment Rule", "filters": [["name", "=", "Warehouse Request Assignment"]]},
 	{
 		"dt": "Notification",
-		"filters": [["name", "in", ["Shipping Warehouse", "Warehouse Request Resolved/Closed Notification"]]],
+		"filters": [["is_standard", "=", 0]],
 	},
 ]
 
