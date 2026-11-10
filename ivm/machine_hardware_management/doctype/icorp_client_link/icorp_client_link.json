@@ -1,0 +1,252 @@
+{
+ "actions": [],
+ "autoname": "field:icorp_client_id",
+ "creation": "2026-10-07 16:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+   "field_order": [
+    "icorp_client_id",
+    "client_name",
+    "display_label",
+    "is_active",
+    "column_break_identity",
+    "is_partner_client",
+    "parent_client",
+    "section_break_location_counts",
+    "sv_location_count_active",
+    "column_break_counts",
+    "sv_machine_count_active",
+    "section_break_assignment",
+    "customer",
+    "assignment_source",
+    "review_status",
+    "section_break_proposal",
+    "match_status",
+    "proposed_customer",
+    "parent_customer",
+    "has_multiple_customer_candidates",
+    "duplicate_name_siblings",
+    "match_evidence",
+    "child_clients_html",
+    "related_customers"
+   ],
+ "fields": [
+  {
+   "fieldname": "icorp_client_id",
+   "fieldtype": "Data",
+   "label": "iCorp Client ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "display_label",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Display Label",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Active in iCorp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_identity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_partner_client",
+   "fieldtype": "Check",
+   "label": "Flagged as Partner in iCorp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "parent_client",
+   "fieldtype": "Link",
+   "label": "Parent Client (iCorp)",
+   "options": "iCorp Client Link",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_location_counts",
+   "fieldtype": "Section Break",
+   "label": "iCorp Activity"
+  },
+  {
+   "default": "0",
+   "fieldname": "sv_location_count_active",
+   "fieldtype": "Int",
+   "label": "Active Locations",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_counts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "sv_machine_count_active",
+   "fieldtype": "Int",
+   "label": "Active Machines",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_assignment",
+   "fieldtype": "Section Break",
+   "label": "Frappe Assignment"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+    {
+     "fieldname": "assignment_source",
+     "fieldtype": "Select",
+     "label": "Assignment Source",
+     "options": "\nManual decision\nConfirmed match\nProject evidence\nName match\nProvisioning\nCustomer record\nCustomer form",
+     "read_only": 1
+    },
+  {
+   "default": "",
+   "fieldname": "review_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Review Status",
+   "options": "\nNeeds match\nPossible duplicates\nMerge pending\nReady to accept\nDone",
+   "read_only": 1
+  },
+   {
+    "fieldname": "section_break_proposal",
+    "fieldtype": "Section Break",
+    "label": "Proposed Match (for review)"
+   },
+   {
+    "fieldname": "match_status",
+    "fieldtype": "Select",
+    "in_list_view": 1,
+    "in_standard_filter": 1,
+    "label": "Evidence",
+    "options": "\nconfirmed\nproject_only\nexisting_field_only\nname_exact_only\nname_fuzzy_only\nconflict\nassigned_manually\npartner_suspect\nunmatched",
+    "read_only": 1
+   },
+  {
+   "fieldname": "proposed_customer",
+   "fieldtype": "Link",
+   "label": "Proposed Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "parent_customer",
+   "fieldtype": "Data",
+   "label": "Parent's Customer",
+   "read_only": 1,
+   "description": "Which Customer this client's iCorp parent currently belongs to, if any \u2014 shown so a 'project_only' proposal pointing at the same name can be recognized as the partner, not the end customer."
+  },
+  {
+   "default": "0",
+   "fieldname": "has_multiple_customer_candidates",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Multiple Customer Candidates",
+   "read_only": 1,
+   "description": "True when Related Customers below has more than one row \u2014 surfaced as a list-view flag, since list views can't summarize child-table rows directly."
+  },
+  {
+   "fieldname": "duplicate_name_siblings",
+   "fieldtype": "Small Text",
+   "label": "Other Active iCorp Clients With This Same Name",
+   "read_only": 1,
+   "description": "Other ACTIVE iCorp clients sharing this exact name \u2014 a live naming collision inside iCorp itself, worth checking before assigning either one. Inactive duplicates are not shown here; they're historical, not actionable."
+  },
+   {
+    "fieldname": "match_evidence",
+    "fieldtype": "Small Text",
+    "label": "Match Evidence",
+    "read_only": 1
+   },
+   {
+    "fieldname": "child_clients_html",
+    "fieldtype": "HTML",
+    "label": "Child Clients",
+    "hidden": 1
+   },
+    {
+     "cannot_add_rows": 1,
+     "cannot_delete_rows": 1,
+     "fieldname": "related_customers",
+     "fieldtype": "Table",
+     "label": "Related Customers",
+     "options": "iCorp Client Link Customer Candidate",
+     "description": "Customers the evidence or a similar name points at. Set Decision on each row: one 'This client's Customer', 'Duplicate - merge in' for duplicates of it, 'Different company' for the rest, then save."
+    }
+ ],
+ "grid_page_length": 50,
+  "index_web_pages_for_search": 1,
+  "links": [],
+     "modified": "2026-10-08 21:00:00.000000",
+  "modified_by": "Administrator",
+ "module": "Machine Hardware Management",
+ "name": "iCorp Client Link",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+    "share": 1,
+    "write": 1
+   },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects User",
+   "select": 1,
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects Manager",
+   "select": 1,
+   "share": 1
+  }
+  ],
+ "row_format": "Dynamic",
+ "search_fields": "client_name",
+  "show_title_field_in_link": 0,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "display_label",
+ "track_changes": 1
+}

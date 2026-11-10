@@ -1,0 +1,30 @@
+customer_name,customer_type,customer_group,territory,source_client_id,note
+Westmor,Company,Individual,All Territories,1671,
+Spectro,Company,Individual,All Territories,1618,
+Ventia Pty Limited,Company,Commercial,All Territories,1486,
+Thompson Safety,Company,Commercial,All Territories,1602,
+Merck & Co.,Company,Commercial,All Territories,1679,
+Reslife,Company,Commercial,All Territories,1403,
+Province Healthcare,Company,Commercial,All Territories,92,
+GH Metals,Company,Commercial,All Territories,1484,
+Eriks,Company,Commercial,All Territories,1675,
+Ametek,Company,Commercial,All Territories,1587,
+Adrian Steel,Company,Commercial,All Territories,1545,
+"Auris Health, Inc.",Company,Commercial,All Territories,1593,
+(Intego) Integración de Tecnología para Tu Negocio,Company,Commercial,All Territories,1645,
+Hayden Industrial,Company,Commercial,All Territories,1719,
+Technip Energies,Company,Commercial,All Territories,1313,
+Heritage Interiors,Company,Commercial,All Territories,1608,
+"Kijero, LLC.",Company,Commercial,All Territories,1610,
+Princess Cruise Lines,Company,Commercial,All Territories,1654,
+Tate & Lyle Ingredients Americas Inc,Company,Commercial,All Territories,526,
+Sam's Club,Company,Commercial,All Territories,1646,
+Apogee Velocity Glass TX,Company,Commercial,All Territories,1231,"Wesco Distribution (client 665) is only the distributor/partner, not the same company; no existing Customer matches this site"
+Emotiv,Company,Commercial,All Territories,1742,partner-managed by Safety Source (client 955); end customer has no Customer record yet
+Nucor Steel,Company,Commercial,All Territories,1716,distinct from the existing disabled 'Nucor Fastener' (different division); partner-managed by American Welding & Gas
+Oxford University Press,Company,Commercial,All Territories,1741,partner-managed by Cognizant (client 1245)
+Sargent Metals,Company,Commercial,All Territories,1734,partner-managed by TRUMPF (client 1483)
+Sig Sauer,Company,Commercial,All Territories,1765,partner-managed by Bell Techlogix (client 1426)
+AAA,Company,Commercial,All Territories,1737,no existing Customer; distinct from the unrelated disabled 'AAA Cooper Transportation (TV)'
+"PC Specialists, Inc, d/b/a Technology Integration Group",Company,Commercial,All Territories,1596,no existing Customer; using the full registered name from iCorp
+Worldwide TechServices,Company,Commercial,All Territories,1744,"no existing Customer; appears as a managing-partner master on AAA's clients but is itself a real, separate end customer"
