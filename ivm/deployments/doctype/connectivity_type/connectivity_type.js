@@ -1,8 +1,7 @@
 // Copyright (c) 2023, korecent and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Connectivity Type', {
+frappe.ui.form.on("Connectivity Type", {
 	// refresh: function(frm) {
-
 	// }
 });

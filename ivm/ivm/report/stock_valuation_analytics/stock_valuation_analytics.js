@@ -59,7 +59,9 @@ frappe.query_reports["Stock Valuation Analytics"] = {
 			typeof datatable.bodyRenderer.renderFooter === "function" &&
 			!datatable.bodyRenderer.__ivm_disable_total_patched
 		) {
-			const original_render_footer = datatable.bodyRenderer.renderFooter.bind(datatable.bodyRenderer);
+			const original_render_footer = datatable.bodyRenderer.renderFooter.bind(
+				datatable.bodyRenderer
+			);
 			datatable.bodyRenderer.renderFooter = function () {
 				original_render_footer();
 				datatable.datamanager

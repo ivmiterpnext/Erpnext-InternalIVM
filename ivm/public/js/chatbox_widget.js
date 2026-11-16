@@ -111,7 +111,8 @@ $(document).on("app_ready", function () {
 				removeTyping();
 				setInputEnabled(true);
 				if (r && r.message) {
-					const reply = r.message.reply || r.message.response || JSON.stringify(r.message);
+					const reply =
+						r.message.reply || r.message.response || JSON.stringify(r.message);
 					appendMessage(reply, "bot");
 				} else {
 					appendMessage("No response received.", "error");
