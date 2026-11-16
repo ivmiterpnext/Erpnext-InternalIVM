@@ -18,7 +18,7 @@ COMPANY = "_Test Company"
 WAREHOUSE = "_Test Warehouse - _TC"
 TARGET_WAREHOUSE = "_Test Warehouse 1 - _TC"
 
-_DN_PATCH_TARGET = "ivm.warehouse.services.delivery_note.create_delivery_note_from_warehouse_request"
+_DN_PATCH_TARGET = "ivm.warehouse.services.delivery_note._create_and_submit_delivery_note"
 
 
 def _set_default_company():

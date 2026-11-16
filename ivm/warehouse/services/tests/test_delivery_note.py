@@ -7,7 +7,10 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
-from ivm.warehouse.services.delivery_note import create_delivery_note_from_warehouse_request
+from ivm.warehouse.services.delivery_note import (
+	_create_and_submit_delivery_note,
+	create_delivery_note_from_warehouse_request,
+)
 from ivm.warehouse.services.pick_list import add_item_to_pick_list, create_pick_list
 
 COMPANY = "_Test Company"
@@ -148,7 +151,7 @@ class TestCreateDeliveryNoteNormalFlow(ERPNextTestSuite):
 		se.custom_warehouse_request = wr.name
 		se.submit()
 
-		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		dn_name = _create_and_submit_delivery_note(wr.name)
 		self.assertTrue(dn_name)
 
 		dn = frappe.get_doc("Delivery Note", dn_name)
@@ -185,7 +188,7 @@ class TestCreateDeliveryNoteNormalFlow(ERPNextTestSuite):
 		se.custom_warehouse_request = wr.name
 		se.submit()
 
-		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		dn_name = _create_and_submit_delivery_note(wr.name)
 		self.assertIsInstance(dn_name, str)
 		self.assertTrue(frappe.db.exists("Delivery Note", dn_name))
 
@@ -223,8 +226,8 @@ class TestCreateDeliveryNoteExistingDN(ERPNextTestSuite):
 		se.custom_warehouse_request = wr.name
 		se.submit()
 
-		first_dn_name = create_delivery_note_from_warehouse_request(wr.name)
-		second_dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		first_dn_name = _create_and_submit_delivery_note(wr.name)
+		second_dn_name = _create_and_submit_delivery_note(wr.name)
 
 		self.assertEqual(first_dn_name, second_dn_name)
 
@@ -254,10 +257,10 @@ class TestCreateDeliveryNoteExistingDN(ERPNextTestSuite):
 		se.custom_warehouse_request = wr.name
 		se.submit()
 
-		first_dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		first_dn_name = _create_and_submit_delivery_note(wr.name)
 
 		frappe.clear_messages()
-		second_dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		second_dn_name = _create_and_submit_delivery_note(wr.name)
 
 		messages = frappe.get_message_log()
 		self.assertTrue(any("already exists" in str(msg) for msg in messages))
@@ -280,7 +283,7 @@ class TestCreateDeliveryNoteSourceBuildRequest(ERPNextTestSuite):
 			source_build_request=build_wr.name,
 		)
 
-		dn_name = create_delivery_note_from_warehouse_request(shipping_wr.name)
+		dn_name = _create_and_submit_delivery_note(shipping_wr.name)
 		self.assertTrue(dn_name)
 
 		dn = frappe.get_doc("Delivery Note", dn_name)
@@ -296,7 +299,7 @@ class TestCreateDeliveryNoteSourceBuildRequest(ERPNextTestSuite):
 			source_build_request=build_wr.name,
 		)
 
-		create_delivery_note_from_warehouse_request(shipping_wr.name)
+		_create_and_submit_delivery_note(shipping_wr.name)
 
 		build_wr.reload()
 		self.assertEqual(build_wr.status, "Closed")
@@ -319,7 +322,7 @@ class TestCreateDeliveryNoteNonInventory(ERPNextTestSuite):
 			notes="Test non-inventory shipment",
 		)
 
-		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		dn_name = _create_and_submit_delivery_note(wr.name)
 		self.assertTrue(dn_name)
 
 		dn = frappe.get_doc("Delivery Note", dn_name)
@@ -337,7 +340,7 @@ class TestCreateDeliveryNoteNonInventory(ERPNextTestSuite):
 			notes=notes_text,
 		)
 
-		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		dn_name = _create_and_submit_delivery_note(wr.name)
 		dn = frappe.get_doc("Delivery Note", dn_name)
 		self.assertEqual(dn.items[0].description, notes_text)
 
@@ -349,7 +352,7 @@ class TestCreateDeliveryNoteNonInventory(ERPNextTestSuite):
 			non_inventory_shipment=1,
 		)
 
-		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		dn_name = _create_and_submit_delivery_note(wr.name)
 		dn = frappe.get_doc("Delivery Note", dn_name)
 		self.assertIn("Non-inventory shipment", dn.items[0].description)
 
@@ -370,7 +373,7 @@ class TestCreateDeliveryNoteNoItems(ERPNextTestSuite):
 		)
 
 		with self.assertRaises(frappe.ValidationError) as ctx:
-			create_delivery_note_from_warehouse_request(wr.name)
+			_create_and_submit_delivery_note(wr.name)
 		self.assertIn("No stock entry items found", str(ctx.exception))
 
 	def test_no_delivery_note_created_when_no_items(self):
@@ -382,7 +385,7 @@ class TestCreateDeliveryNoteNoItems(ERPNextTestSuite):
 		)
 
 		with self.assertRaises(frappe.ValidationError):
-			create_delivery_note_from_warehouse_request(wr.name)
+			_create_and_submit_delivery_note(wr.name)
 
 		dn_count = frappe.db.count(
 			"Delivery Note",
@@ -424,7 +427,7 @@ class TestCreateDeliveryNoteNoCustomer(ERPNextTestSuite):
 		se.submit()
 
 		with self.assertRaises(frappe.ValidationError):
-			create_delivery_note_from_warehouse_request(wr.name)
+			_create_and_submit_delivery_note(wr.name)
 
 
 class TestCreateDeliveryNoteCompanyResolution(ERPNextTestSuite):
@@ -460,7 +463,7 @@ class TestCreateDeliveryNoteCompanyResolution(ERPNextTestSuite):
 		se.custom_warehouse_request = wr.name
 		se.submit()
 
-		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		dn_name = _create_and_submit_delivery_note(wr.name)
 		dn = frappe.get_doc("Delivery Note", dn_name)
 		self.assertEqual(dn.company, COMPANY)
 
@@ -519,7 +522,7 @@ class TestCreateDeliveryNoteUserElevation(ERPNextTestSuite):
 		low_privilege_user = self._make_low_privilege_user()
 		frappe.set_user(low_privilege_user)
 
-		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+		dn_name = _create_and_submit_delivery_note(wr.name)
 
 		self.assertTrue(dn_name)
 		self.assertTrue(frappe.db.exists("Delivery Note", dn_name))
@@ -554,7 +557,7 @@ class TestCreateDeliveryNoteUserElevation(ERPNextTestSuite):
 		low_privilege_user = self._make_low_privilege_user()
 		frappe.set_user(low_privilege_user)
 
-		create_delivery_note_from_warehouse_request(wr.name)
+		_create_and_submit_delivery_note(wr.name)
 
 		self.assertEqual(frappe.session.user, low_privilege_user)
 
@@ -592,6 +595,84 @@ class TestCreateDeliveryNoteUserElevation(ERPNextTestSuite):
 			side_effect=RuntimeError("boom"),
 		):
 			with self.assertRaises(RuntimeError):
-				create_delivery_note_from_warehouse_request(wr.name)
+				_create_and_submit_delivery_note(wr.name)
 
 		self.assertEqual(frappe.session.user, low_privilege_user)
+
+
+class TestCreateDeliveryNoteFromWarehouseRequestPermissionGate(ERPNextTestSuite):
+	"""create_delivery_note_from_warehouse_request (public wrapper) — Warehouse Manager role gate"""
+
+	def setUp(self):
+		super().setUp()
+		_set_default_company()
+		self._original_user = frappe.session.user
+		self.addCleanup(lambda: frappe.set_user(self._original_user))
+
+	def _make_user(self, email, first_name, role_name=None):
+		if not frappe.db.exists("User", email):
+			user_doc = frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": first_name,
+					"send_welcome_email": 0,
+				}
+			)
+			user_doc.insert(ignore_permissions=True)
+		else:
+			user_doc = frappe.get_doc("User", email)
+		if role_name:
+			user_doc.add_roles(role_name)
+		return user_doc
+
+	def _make_ready_shipping_wr(self, customer):
+		"""Shipping Request WR with a pick list + submitted Material Transfer,
+		ready for Delivery Note creation."""
+		item = make_item()
+		_seed_stock(item.name)
+
+		pl_name = create_pick_list(COMPANY)
+		add_item_to_pick_list(pl_name, item.name, WAREHOUSE, 5)
+
+		wr = _make_warehouse_request(customer=customer.name)
+
+		pl = frappe.get_doc("Pick List", pl_name)
+		pl.submit()
+
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=5,
+			from_warehouse=WAREHOUSE,
+			to_warehouse=TARGET_WAREHOUSE,
+			company=COMPANY,
+			stock_entry_type="Material Transfer",
+			do_not_submit=True,
+		)
+		se.pick_list = pl_name
+		se.custom_warehouse_request = wr.name
+		se.submit()
+
+		return wr
+
+	def test_raises_permission_error_without_warehouse_manager_role(self):
+		customer = _make_customer()
+		wr = self._make_ready_shipping_wr(customer)
+
+		low_privilege_user = self._make_user("no_wm_role_user@test.com", "NoWmRole").name
+		frappe.set_user(low_privilege_user)
+
+		with self.assertRaises(frappe.PermissionError):
+			create_delivery_note_from_warehouse_request(wr.name)
+
+	def test_succeeds_with_warehouse_manager_role(self):
+		customer = _make_customer()
+		wr = self._make_ready_shipping_wr(customer)
+
+		wm_user = self._make_user("wm_role_user@test.com", "WmRole", role_name="Warehouse Manager").name
+		frappe.set_user(wm_user)
+
+		dn_name = create_delivery_note_from_warehouse_request(wr.name)
+
+		self.assertTrue(dn_name)
+		self.assertTrue(frappe.db.exists("Delivery Note", dn_name))

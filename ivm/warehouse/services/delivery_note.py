@@ -11,13 +11,41 @@ AUTOMATION_USER = "automation@ivminc.com"
 @frappe.whitelist()
 def create_delivery_note_from_warehouse_request(warehouse_request_name):
 	"""
-	Automatically create and submit a Delivery Note for a Shipping Request.
+	Public, permission-gated entry point for manually creating a Delivery Note
+	from a Warehouse Request (the "Create Delivery Note" button).
+
+	Restricted to the Warehouse Manager role (Administrator always exempt, per
+	standard Frappe superuser convention). This gate is deliberately NOT applied
+	inside _create_and_submit_delivery_note itself, because that function is also
+	called internally by WarehouseRequest.on_update() whenever a Shipping Request
+	transitions to "Closed" — that automatic path must keep working regardless of
+	which user's save triggered it, so the role check only lives in this public
+	wrapper, not in the shared implementation.
+	"""
+	if frappe.session.user != "Administrator" and "Warehouse Manager" not in frappe.get_roles():
+		frappe.throw(
+			"Only users with the Warehouse Manager role can manually create a Delivery Note.",
+			frappe.PermissionError,
+		)
+
+	return _create_and_submit_delivery_note(warehouse_request_name)
+
+
+def _create_and_submit_delivery_note(warehouse_request_name):
+	"""
+	Create and submit a Delivery Note for a Shipping Request (or, when invoked
+	directly, any Warehouse Request with resolvable stock entry items).
 
 	If the Shipping Request has a `source_build_request`, items are pulled from
 	a Build WR's submitted Stock Entry, otherwise from the Shipping Request's own Stock Entries.
 
 	Returns the Delivery Note name. Raises if no items were found and the
 	Warehouse Request is not marked as a non-inventory shipment.
+
+	Not whitelisted and has no permission gate of its own — this is the shared
+	implementation called both by the role-checked public wrapper above and by
+	WarehouseRequest.on_update()'s automatic trigger, which must remain usable by
+	any user who closes a Shipping Request, not just Warehouse Managers.
 	"""
 	existing_dn = frappe.db.get_value(
 		"Delivery Note",

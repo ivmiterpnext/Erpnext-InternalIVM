@@ -239,6 +239,8 @@ frappe.ui.form.on("Warehouse Request", {
 });
 
 function add_create_delivery_note_button(frm) {
+	if (!frappe.user.has_role("Warehouse Manager")) return;
+
 	frm.add_custom_button(
 		__("Create Delivery Note"),
 		function () {

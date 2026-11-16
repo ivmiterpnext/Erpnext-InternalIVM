@@ -103,6 +103,6 @@ class WarehouseRequest(Document):
 
 		status_changed_to_closed = old_doc.status != "Closed" and self.status == "Closed"
 		if status_changed_to_closed and self.request_reason == "Shipping Request":
-			from ivm.warehouse.services.delivery_note import create_delivery_note_from_warehouse_request
+			from ivm.warehouse.services.delivery_note import _create_and_submit_delivery_note
 
-			create_delivery_note_from_warehouse_request(self.name)
+			_create_and_submit_delivery_note(self.name)
