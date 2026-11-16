@@ -61,3 +61,4 @@ ivm.patches.fix_customer_list_view_columns
 ivm.patches.fix_customer_group_and_dangling_primary_contact
 ivm.patches.delete_test_will_delete_soon_customer
 ivm.patches.drop_legacy_customer_fields
+ivm.patches.delete_stale_email_account_field_order_property_setter
