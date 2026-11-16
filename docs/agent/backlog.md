@@ -2,6 +2,35 @@
 
 Known gaps and open questions surfaced during other work (test coverage audits, gotcha investigation, etc.) that weren't in scope to fix at the time. Each entry is written so a fresh agent can pick it up without re-deriving the discovery from scratch — read the listed files first, then the "Open questions" before proposing a fix.
 
+## iCorp location + machine provisioning via Generate Build Requests (next increment after client attachment)
+
+**Context (2026-11-05):** Deployment Projects now carry a real `icorp_client_id` (Link → iCorp Client Link, replacing the old free-text `client_id`, which stays on the doctype — relabelled "Legacy Client ID", read-only, hidden) plus a derived `partner_customer`. Each machine detail row (SmartStation/SmartLocker/SmartSync/SmartVault/SmartCenter) also has an optional per-row `icorp_client_id` override. The next increment is teaching the "Generate Build Requests" buttons to actually create the missing machine (and its location) in iCorp, instead of only reporting it's missing.
+
+**Integration point:** `ivm/warehouse/services/warehouse_request.py::create_build_requests_from_detail_rows`. Today it only reads from iCorp — `fetch_machine()` is a GET, and if a row's machine isn't found there, the function returns it in a `failed` list and creates nothing (surfaced in `Project.js`'s `_generate_build_requests` as "The following machines were not found in iCorp..."). This is where "create the machine (and location) if missing" belongs.
+
+**iCorp API facts** (confirmed 2026-11 via `<base>/swagger/v1/swagger.json`, fetched read-only using `ivm.integrations.icorp.api.get_icorp_auth()` headers):
+- `POST SV/Machine` has **no client field**. Required: `name`, `locationId`, `machineTypeId`, `machineStatusTypeCode`, `machinePurposeId`, `machineAuthorizationId`, `allowSkipJobCode`, `usingJobCode`, `useMachineTimezone`. A machine belongs to a *location*, not directly to a client.
+- `POST SV/Location` requires: `clientId`, `name`, `win32TimeZoneIndex`, `allowedVendsPerAuth`, `isAllowAnyoneVend`.
+
+**Evidence that one site needs one iCorp location per iCorp client:** live Vodafone data — "Vodafone - Utrecht" is location 2916 under client 1629 ("Vodafone - Enhanced Lockers") and a *separate* location 2926 under client 1636 ("Vodafone - SmartStations"). Same site name, different location IDs, because the locker machines and the station machines were put under two different iCorp clients for that one customer. This is why Project's per-row `icorp_client_id` override exists — a single deployment site can span more than one iCorp client.
+
+**Data gaps — nothing on Project or its detail child tables supplies these today:**
+| iCorp field | Status |
+|---|---|
+| `machinePurposeId` | Not captured. The detail row's `workflow` Select *might* map to it (values seen in live data: "Regular vending machine", "Auto Vend Machine") — unconfirmed. |
+| `machineAuthorizationId` | Not captured. Live sampled data was always "Badge authentication" — possibly a fixed default, unconfirmed. |
+| `win32TimeZoneIndex` (on the Location, not the machine) | Not captured anywhere. |
+| `allowedVendsPerAuth`, `isAllowAnyoneVend` (Location) | Not captured; likely safe to default. |
+
+**Known breakage to fix as part of this work:**
+- `ivm/deployments/services/create_machines_from_project.py` is non-functional: it references `project.location_id`, which doesn't exist on Project (its own comment flags this as a TODO), and it sets `Machine.client_id` (a Link → **Customer**, see `ivm/machine_hardware_management/doctype/machine/machine.json`) to an iCorp client ID string — a type mismatch / bug, not a design choice.
+
+**Planned direction (not yet built):** a "Deployment iCorp Location" child table on Project, columns `{icorp_client_id, icorp_location_id, location_name}`, populated by the provisioning flow — one row per distinct client actually used across that Project's detail rows, supporting split-client sites like Vodafone/Pfizer.
+
+**Where to find the swagger spec again:** `GET <ICORP_API_BASE_URL>/swagger/v1/swagger.json`, authenticated with the headers from `ivm.integrations.icorp.api.get_icorp_auth()` (same Azure AD ROPC flow as every other iCorp call in this app).
+
+---
+
 ## Two Warehouse Request "subject" Server Scripts silently overwrite explicitly-set values
 
 **Where to look first:**
@@ -19,54 +48,6 @@ Both scripts match any `request_reason` containing the substring `"Build"` (e.g.
 2. Two scripts currently have overlapping trigger conditions (both fire for any `"Build"` reason). Is that intentional (a deliberate "last one wins" fallback chain), or should one be removed/scoped down?
 3. Server Script execution order across two independently-created records on the same doctype event isn't something to assume is stable across environments — confirm what actually determines the order (idx? creation timestamp?) before relying on "Wrap Ready Subject always wins" as a fact rather than an observation from one test run.
 4. Should this be scoped to `schema_version == 1` (legacy manual-entry flow) so `schema_version 2`'s explicit subject-setting isn't fought?
-
----
-
-## `create_projects_from_deal`'s duplicate-skip only works when `hubspot_site_id` is set
-
-**Where to look first:**
-- `ivm/deployments/services/provision_project_from_deal.py::_create_project_for_location` (~line 133):
-  ```python
-  if location.hubspot_site_id and frappe.db.exists("Project", {"custom_hubspot_deployment_site_id": location.hubspot_site_id}):
-      ...
-      return None
-  ```
-- `ivm/deployments/event_handlers/deal.py::on_update` — the only known current caller, invoked when a CRM Deal's `status` changes to `"Won"` (gated by `doc.has_value_changed("status")`, so a normal single Won-transition won't naturally trigger this twice).
-- `ivm/deployments/services/tests/test_provision_project_from_deal.py::TestDuplicateSkipByHubspotSiteId::test_no_hubspot_site_id_second_call_hits_duplicate_name` — the test that reproduces this (confirmed via direct reproduction, not speculation, 2026-09-16).
-
-**What's confirmed:**
-The dedup check is entirely gated on `location.hubspot_site_id` being truthy. If a Deployment Location has no `hubspot_site_id` (i.e. it was created manually in Frappe rather than synced from HubSpot), a second call to `create_projects_from_deal` for the same CRM Deal attempts to create another Project with an identical, deterministically-derived `project_name` (`f"{site_name} - {deal.get('custom_hubspot_deal_name') or deal.name}"`), which collides with `Project.project_name`'s unique constraint and raises `frappe.UniqueValidationError` instead of skipping gracefully like the `hubspot_site_id`-present path does.
-
-**Open questions for whoever picks this up:**
-1. How many existing Deployment Locations in dev/production lack a `hubspot_site_id` (manually created, non-HubSpot-synced)? If that number is non-trivial, this is a live risk, not just a theoretical one.
-2. Should the dedup fallback match on `(crm_deal, location_name)` or on the deterministic `project_name` itself when `hubspot_site_id` is absent, rather than only deduping when it's present?
-3. Is there any caller today — besides the once-per-Won-transition `on_update` handler — that could invoke `create_projects_from_deal` twice for the same deal (a retry path, a manual "regenerate deployments" action, a bulk migration/backfill script)? Search before assuming this is purely theoretical.
-
----
-
-## Tier 3 test coverage — untested event handlers & utils in core modules
-
-Next batch of the test-coverage audit (Tier 1 and Tier 2 are done — see `ivm/*/doctype/*/test_*.py` and `ivm/*/services/tests/test_*.py` for established patterns and conventions to follow). Same scope as Tier 2: core operational modules only. `machine_hardware_management` and `ivm/integrations/` remain excluded.
-
-**Files and functions to cover:**
-
-- `ivm/deployments/event_handlers/project.py` — `before_validate`, `validate` (and its private helper `_link_crm_deal`), `after_insert`. (`_update_due_dates` now has focused coverage in `ivm/deployments/event_handlers/tests/test_project.py` — the table-driven due-date logic and its per-field error handling are tested; `before_validate`/`validate`'s status-restore behavior, `_link_crm_deal`, and `after_insert` remain uncovered.)
-- `ivm/deployments/event_handlers/deal_notes.py` — `get_notes`, `add_note`, `edit_note`, `delete_note`
-- `ivm/warehouse/event_handlers/stock_entry.py` — `after_insert`, `on_submit`
-- `ivm/support/event_handlers/communication.py` — `on_update`
-- `ivm/support/overrides.py` — `CustomEmailAccount.send_auto_reply`
-- `ivm/support/utils.py` — `fetch_customer_name_and_contact`
-- `ivm/overrides/realtime_permission.py` — `has_permission`
-- `ivm/client_portal/event_handlers/service_quote.py` — `on_submit`
-- `ivm/client_portal/utils/home_page.py` — `get_website_user_home_page`
-- `ivm/client_portal/utils/notifications.py` — `notify_assigned_rep`
-
-**Known traps from Tier 1/2, worth checking for before assuming a test failure means the code is wrong:**
-- Fields with `fetch_from` set (e.g. `Service Quote.sales_representative` ← `crm_deal.deal_owner`) get silently overwritten on save if the source field is empty — check any Link field's JSON for `fetch_from` before asserting on it.
-- Some fields that look like booleans are actually Select fields with `"Yes"/"No"` string options (e.g. `Project.coi_required`), not Checkboxes — check `fieldtype`/`options` in the doctype JSON first.
-- `before_save`/`before_insert` hooks and Server Scripts can silently rewrite a field you just set — e.g. `ivm.warehouse.event_handlers.item.before_save` auto-adds `item_code` as a barcode on every Item save; two Server Scripts on Warehouse Request overwrite `subject` for any "Build"-containing `request_reason` (see the entry above in this file).
-- `frappe.sendmail()` requires a configured outgoing Email Account even in test mode on `test.local` — mock `frappe.sendmail` rather than asserting against a real Email Queue entry.
-- Link fields (e.g. `industry` on CRM Organization) require an existing record of that linked doctype, not a freeform string — check `options` on the field before passing an arbitrary value.
 
 ---
 
@@ -206,3 +187,56 @@ session to an accidental duplicate).
 5. Regenerate new project's webhooks with `--active=true` and upload (subscriptions on).
 
 No parallel-run period — v1 signature verification (SHA-256 client-secret+body) works as soon as `hubspot_client_secret` holds the new app's secret, so the switch is atomic.
+
+---
+
+## Orphaned Contact Dynamic Link rows (parent Contact missing)
+
+**Context (2026-11-11):** 3,277 `Dynamic Link` rows on dev.local have `parenttype = Contact` but no existing parent Contact. Example: Customer "Airbus" → parent "Airbus (TV)-Airbus (TV)". Likely left behind by customer consolidation merges/disables and the 2023 import.
+
+- Code reading Contact links must tolerate these. `get_customer_contacts` now does (fixed 2026-11-11, see `icorp_client_link.py`).
+- Candidate cleanup: patch that deletes Dynamic Link rows whose parent Contact is missing. Check prod's count before acting.
+
+---
+
+## Dev-only leftover: Customer "Ferguson," with iCorp client 900007
+
+**Context (2026-11-11):** Customer "Ferguson," (trailing comma, likely duplicate of "Ferguson") is linked to dev iCorp client 900007 (`assignment_source` "Provisioning", created 2026-11-10) from the removed automatic iCorp provisioning.
+
+- Dev cleanup candidate: merge/delete the Customer and deactivate 900007 in dev iCorp.
+- Confirm prod has no equivalent before deploying.
+
+---
+
+## Dev iCorp client ID range (900000+)
+
+**Context (2026-11-11):** Dev iCorp assigns new client IDs in the 900000+ range (900001–900008 so far). Prod uses its own sequence. Confirm with iCorp owners before relying on either range.
+
+---
+
+## Teardown deploy: drop legacy Customer / CRM Deal / Project master-client and import fields
+
+**Context (2026-11):** Legacy fields are still on the doctypes. Remove them in one deploy, with their readers changed in the same commit.
+
+- **Drop `Customer.icorp_client_id`.** Remove the field from `ivm/ivm/custom/customer.json`, drop the DB column, and update its readers together: `apply_customer_record_ids`, `set_customer_icorp_client_ids`, and `dry_run.gather_existing_customer_icorp_ids` (`ivm/customer_consolidation/`).
+- **Finish `drop_customer_import_stat_fields`** (`ivm/customer_consolidation/patches/drop_customer_import_stat_fields.py`): remove its 14 fields from `customer.json` and `field_order`, delete the Accounts Audit report, clean up `ivm/public/js/doctype/Customer.js`, then register the patch.
+- **Drop the CRM Deal and Project `custom_master_*` fields.**
+  - Register `ivm.deployments.patches.drop_project_custom_master_customer` in `ivm/patches.txt`. It copies remaining `Project.custom_master_customer` into `partner_customer` (skipping rows where it equals the Project's `customer`), then drops the field and column. It was deliberately not registered in deploy 1 because `partner_customer` does not exist at patch time on prod.
+  - Also drop CRM Deal `custom_master_customer` / `custom_master_organization`. Prod has 0 values in both.
+- **Remove the `ivm/customer_consolidation/` package and the `iCorp Client Link` review fields** once the consolidation is complete and no longer needed.
+
+---
+
+## Re-Won duplicate guard keys on `project_name`
+
+**Where to look first:** `ivm/deployments/services/provision_project_from_deal.py::_create_project_for_location`. A re-Won deal is guarded by `custom_crm_deal` plus the generated `project_name` (`f"{site_name} - {deal name}"`).
+
+**Gap:** Project has no field linking it to its Deployment Location. If the location name or the deal's HubSpot name changes, the generated name changes and the guard is bypassed.
+
+**Proper fix:** add a real Project → Deployment Location link field and guard on that instead of on `project_name`.
+
+---
+
+## Workspace / Desktop Icon / Workspace Sidebar fixtures use name allowlists
+
+**Context:** `ivm/hooks.py` `fixtures` filters for `Workspace`, `Desktop Icon`, and `Workspace Sidebar` are name allowlists. A new workspace or desktop icon is not exported or synced until its name is added to those lists in `hooks.py`.

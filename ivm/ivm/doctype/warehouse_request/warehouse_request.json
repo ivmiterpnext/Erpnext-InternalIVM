@@ -273,7 +273,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "search_index": 1
   },
   {
    "fieldname": "due_date",

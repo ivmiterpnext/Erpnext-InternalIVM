@@ -7,9 +7,17 @@ import frappe
 from frappe.model.document import Document
 
 from ivm.customer_consolidation import decisions, merge_analysis
-from ivm.customer_consolidation.apply import create_missing_customers, execute_merges
+from ivm.customer_consolidation.apply import execute_merges
 from ivm.customer_consolidation.decisions import compute_review_status
+from ivm.deployments.services.deployment_clients import require_desk_customer_access
 from ivm.integrations.icorp.api import icorp_api_get
+from ivm.integrations.icorp.provisioning import (
+	build_contact_payload,
+	create_icorp_client_with_error,
+	create_icorp_contact_with_error,
+	get_contact_phone,
+	log_icorp_error,
+)
 
 
 class iCorpClientLink(Document):
@@ -62,6 +70,11 @@ class iCorpClientLink(Document):
 
 	def on_update(self):
 		if not _is_review_site():
+			return
+		if self.flags.live_assignment:
+			# Live operational assignments (Customer form add/remove/create) are not review
+			# decisions and must never be written back to the repo CSVs (e.g. a dev-only iCorp
+			# id would make prod's apply_on_migrate fail).
 			return
 		client_id = self.icorp_client_id
 		rows = [{"customer": r.customer, "role": r.role} for r in (self.get("related_customers") or [])]
@@ -155,6 +168,7 @@ def _write_decisions_for_client(client_id: str, customer: str, rows: list[dict])
 def icorp_client_query(doctype, txt, searchfield, start, page_len, filters):
 	"""set_query source for Project.client_id (and similar fields): clients belonging to a
 	specific Customer, matched against either the client id or its name."""
+	require_desk_customer_access()
 	customer = (filters or {}).get("customer")
 	conditions = []
 	values = {"txt": f"%{txt}%", "start": start, "page_len": page_len}
@@ -397,6 +411,138 @@ def remove_icorp_client_from_customer(client_id: str, customer: str) -> dict:
 	doc.save(ignore_permissions=True)
 
 	return {"client_id": client_id, "removed_from": customer}
+
+
+@frappe.whitelist()
+def get_customer_contacts(customer: str) -> list[dict]:
+	"""Every Contact linked to `customer` via Dynamic Link, with what iCorp would receive
+	for it: display name, primary email and primary phone (empty string when missing).
+	Used by the Customer form's "Create new in iCorp" dialog."""
+	_check_live_assignment_permission()
+	if not customer or not frappe.db.exists("Customer", customer):
+		return []
+
+	linked_names = set(
+		frappe.get_all(
+			"Dynamic Link",
+			filters={"parenttype": "Contact", "link_doctype": "Customer", "link_name": customer},
+			pluck="parent",
+		)
+	)
+	# Dynamic Link rows can outlive their parent Contact (orphans; 3,277 on dev.local), so only
+	# keep names that still exist as a Contact before loading any doc.
+	contact_names = (
+		frappe.get_all("Contact", filters={"name": ["in", list(linked_names)]}, pluck="name")
+		if linked_names
+		else []
+	)
+
+	out = []
+	for name in sorted(contact_names):
+		contact_doc = frappe.get_doc("Contact", name)
+		payload = build_contact_payload(contact_doc)
+		display_name = " ".join(
+			part for part in (contact_doc.first_name, contact_doc.last_name) if part
+		).strip()
+		out.append(
+			{
+				"name": name,
+				"display_name": display_name or name,
+				"email": payload["email_address"] or contact_doc.get("email_id") or "",
+				"phone": payload["phone1"],
+			}
+		)
+	out.sort(key=lambda c: c["display_name"].lower())
+	return out
+
+
+@frappe.whitelist()
+def create_icorp_client_for_customer(
+	customer: str, client_name: str, contact: str, partner_client_id: str | None = None
+) -> dict:
+	"""Create a NEW client in iCorp for `customer` and link it to this Customer.
+
+	Creates the iCorp contact from the Frappe Contact, then the iCorp client, then the
+	iCorp Client Link (assignment_source "Customer form"). Every failure is thrown to
+	the user. If the contact is created but the client is not, the message names the
+	iCorp contact id so nothing is silently left behind.
+
+	partner_client_id: optional existing iCorp Client Link id that manages this client
+	(sent as the client's iCorp parent, and stored as parent_client).
+	"""
+	_check_live_assignment_permission()
+
+	if not frappe.db.exists("Customer", customer):
+		frappe.throw(f"Customer '{customer}' does not exist.")
+	if frappe.db.get_value("Customer", customer, "disabled"):
+		frappe.throw(f"Customer '{customer}' is disabled.")
+
+	client_name = (client_name or "").strip()
+	if not client_name:
+		frappe.throw("Client name is required.")
+
+	if not contact or not frappe.db.exists("Contact", contact):
+		frappe.throw("Select the primary Contact for this client.")
+	if not frappe.db.exists(
+		"Dynamic Link",
+		{"parenttype": "Contact", "parent": contact, "link_doctype": "Customer", "link_name": customer},
+	):
+		frappe.throw(
+			f"Contact '{contact}' is not linked to Customer '{customer}'. Link the Contact to the Customer first."
+		)
+
+	partner_client_id = str(partner_client_id).strip() if partner_client_id else ""
+	if partner_client_id and not frappe.db.exists("iCorp Client Link", partner_client_id):
+		frappe.throw(f"Managing partner iCorp client '{partner_client_id}' does not exist.")
+
+	contact_doc = frappe.get_doc("Contact", contact)
+	if not get_contact_phone(contact_doc):
+		frappe.throw(
+			f"iCorp requires at least one phone number on the contact. Add a phone number to {contact} first."
+		)
+
+	icorp_contact_id, contact_error = create_icorp_contact_with_error(contact_doc)
+	if icorp_contact_id is None:
+		frappe.throw(
+			f"iCorp rejected the contact '{contact}', so no client was created. "
+			f"iCorp said: {contact_error}. "
+			"See the Error Log entry 'iCorp: failed to create contact' for details."
+		)
+
+	icorp_client_id, client_error = create_icorp_client_with_error(
+		client_name,
+		icorp_contact_id,
+		partner_client_id=int(partner_client_id) if partner_client_id else None,
+	)
+	if icorp_client_id is None:
+		frappe.throw(
+			f"The iCorp contact (ID {icorp_contact_id}) was created, but the iCorp client "
+			f"'{client_name}' was not. iCorp said: {client_error}. Nothing was linked to Customer "
+			f"'{customer}'. The contact still exists in iCorp. "
+			"See the Error Log entry 'iCorp: failed to create client' for details."
+		)
+
+	client_id = str(icorp_client_id)
+	try:
+		_upsert_icorp_client_identity(client_id, {"name": client_name, "is_active": True})
+		doc = frappe.get_doc("iCorp Client Link", client_id)
+		doc.customer = customer
+		doc.assignment_source = "Customer form"
+		doc.parent_client = partner_client_id or None
+		doc.flags.live_assignment = True
+		doc.save(ignore_permissions=True)
+	except Exception:
+		log_icorp_error(
+			f"iCorp: client {client_id} created but Frappe link failed",
+			frappe.get_traceback(with_context=True),
+		)
+		frappe.throw(
+			f"iCorp client {client_id} ('{client_name}') was created in iCorp (contact ID "
+			f"{icorp_contact_id}), but linking it to Customer '{customer}' in Frappe failed. "
+			"See the Error Log for details."
+		)
+
+	return {"client_id": client_id, "customer": customer}
 
 
 @frappe.whitelist()

@@ -2,15 +2,15 @@
 confirmed merges, applies confirmed client-to-Customer assignments, and sets each Customer's
 master iCorp client where it's unambiguous.
 
-Entry points:
-  - run_apply_decisions(execute=False): manual, via `bench execute`. Defaults to a read-only
-    preview.
-  - apply_on_migrate(): hooked via `after_migrate`. Skips entirely if the decision files haven't
-    changed since the last successful run (tracked via a content hash in a Default Value). Logs
-    and continues on failure rather than blocking the migrate.
+Entry points (all called by the operator script ivm/customer_consolidation/run.py):
+  - run_apply_decisions(execute=False): defaults to a read-only preview.
+  - apply_on_migrate(): skips entirely if the decision files haven't changed since the last
+    successful run (tracked via a content hash in a Default Value). Raises on unexpected failure
+    or a partial apply.
 
 Execution of merges/assignments only ever acts on "pending" rows — anything already applied or
-invalid is skipped, which is what makes re-running this safe on every environment.
+invalid is skipped (invalid rows are reported with a reason), which is what makes re-running this
+safe on every environment.
 """
 
 import hashlib
@@ -128,6 +128,12 @@ def sync_icorp_client_links() -> dict:
 	"""Upsert identity fields (name, active, parent) for every iCorp client. Never touches
 	customer / assignment_source / proposed_customer / match_status / match_evidence — those are
 	Frappe-side decisions, not iCorp data."""
+	if not _icorp_is_configured():
+		frappe.logger("customer_consolidation").info(
+			"sync_icorp_client_links skipped: iCorp API credentials are not configured on this site."
+		)
+		return
+
 	clients = fetch_icorp_clients()
 	created, updated = 0, 0
 
@@ -617,9 +623,10 @@ def disable_decided_customers(dry_run: bool = True) -> list[dict]:
 
 def execute_merges(dry_run: bool = False, merges: list[dict] | None = None) -> list[dict]:
 	"""Execute every "pending" merge from customer_merges.csv (or the given `merges` rows, for
-	testing) with no unresolved field conflicts. Already-applied and invalid rows are skipped.
-	Each merge commits independently; a failure rolls back just that one merge and is reported,
-	it doesn't stop the rest."""
+	testing) with no unresolved field conflicts. Already-applied rows are skipped. Invalid rows are
+	skipped too, but are included in the results with a "reason", and (outside dry_run) summarized
+	in a single Error Log entry per run. Each merge commits independently; a failure rolls back
+	just that one merge and is reported, it doesn't stop the rest."""
 	customers = gather_customers()
 	existing_customers = {c["name"] for c in customers}
 	if merges is None:
@@ -627,14 +634,22 @@ def execute_merges(dry_run: bool = False, merges: list[dict] | None = None) -> l
 	validated = decisions.validate_customer_merges(merges, existing_customers)
 
 	results = []
+	invalid_rows = []
 	pending_total = sum(1 for row in validated if row["status"] == "pending")
 	for row in validated:
 		merge_from, merge_into, status = row["merge_from"], row["merge_into"], row["status"]
 
 		if status != "pending":
-			results.append(
-				{"merge_from": merge_from, "merge_into": merge_into, "status": status, "action": "skipped"}
-			)
+			result = {
+				"merge_from": merge_from,
+				"merge_into": merge_into,
+				"status": status,
+				"action": "skipped",
+			}
+			if status == "invalid":
+				result["reason"] = "; ".join(row["errors"])
+				invalid_rows.append(result)
+			results.append(result)
 			continue
 
 		field_types = merge_analysis.get_customer_field_types()
@@ -754,91 +769,72 @@ def execute_merges(dry_run: bool = False, merges: list[dict] | None = None) -> l
 	if pending_total:
 		print(f"[consolidation] execute_merges: {pending_total} pending merge(s) processed", flush=True)  # noqa: T201
 
+	if not dry_run:
+		_log_invalid_rows("merge", invalid_rows)
+
 	return results
 
 
-def _merge_is_satisfied(merge_result: dict) -> bool:
-	"""True if a row from execute_merges() means the merge is done: it ran successfully this run
-	(action "merged", or "would_merge" in preview), or it was already applied on a prior run
-	(status "already_applied", the same classification decisions.validate_customer_merges gives).
-	Blocked, invalid, errored, or still-pending rows are not satisfied."""
-	if merge_result.get("action") in ("merged", "would_merge"):
-		return True
-	return merge_result.get("status") == "already_applied"
+def _log_invalid_rows(kind: str, invalid_rows: list[dict]) -> None:
+	"""One Error Log entry per run summarizing every invalid row of `kind`, so invalid decisions are
+	visible without one Error Log entry per row. No-op if there are none."""
+	if not invalid_rows:
+		return
+	frappe.log_error(
+		title=f"Customer consolidation: {len(invalid_rows)} invalid {kind} row(s) skipped",
+		message=frappe.as_json(invalid_rows),
+	)
 
 
-def rename_customers_from_csv(execute: bool = False, merge_results: list[dict] | None = None) -> list[dict]:
+def rename_customers_from_csv(execute: bool = False) -> list[dict]:
 	"""Rename every "approved" Customer in customer_renames.csv to its proposed_name, in file order.
-	Non-approved rows (needs_research, etc.) are skipped.
-
-	Dependency gate: a row with depends_on_merge set is only attempted if its current_name is the
-	merge_into of a merge that is satisfied per `merge_results` (the return value of execute_merges):
-	succeeded this run, or already applied on a prior run. Otherwise it's reported as action
-	"blocked" and never attempted. Preview (execute=False) counts merges reported as "would_merge"
-	as succeeded, and labels such rows
-	"would_rename_pending_merge". A merge already applied on a prior run (status "already_applied")
-	also satisfies the gate. Calling with merge_results=None blocks every dependent row that still
-	has its current_name.
+	Only rows whose CSV status is "approved" are considered (needs_research, etc. are skipped).
+	The depends_on_merge column is ignored. Each approved row is classified by
+	decisions.validate_customer_renames:
+	  - "pending": current_name exists, proposed_name doesn't -- renamed (or "would_rename" in preview)
+	  - "already_applied": current_name doesn't exist, proposed_name does -- nothing to do
+	  - "invalid": neither name exists, both exist, or proposed_name is empty -- reported with a reason
 
 	execute=False is a read-only preview. Each executed rename commits independently with a
 	savepoint; a failure rolls back just that row, is logged, and doesn't stop the rest. After a
 	successful DB rename, string references to the old name are repointed to the new name in
 	customer_merges.csv (merge_into), icorp_client_assignments.csv (customer),
 	customer_distinct_pairs.csv (customer_a/customer_b), and record_reassignments.csv
-	(from_customer/to_customer). That CSV rewrite is best-effort and separate: if it fails, the DB rename stands and a warning (csv_warning) is logged
-	and returned rather than rolling back the rename.
+	(from_customer/to_customer). That CSV rewrite only runs when
+	frappe.conf.customer_consolidation_review_site is truthy; on every other site the rename is
+	applied to the DB only. The CSV rewrite is best-effort: if it fails, the DB rename stands and a
+	warning (csv_warning) is logged and returned rather than rolling back the rename.
 
-	Not wired into apply_on_migrate: renames are only ever executed by an explicit run."""
-	satisfied_merge_targets = {
-		r.get("merge_into") for r in (merge_results or []) if r.get("merge_into") and _merge_is_satisfied(r)
-	}
+	Called by the operator script ivm/customer_consolidation/run.py."""
+	existing_customers = {c["name"] for c in gather_customers()}
+	rename_rows = decisions.validate_customer_renames(decisions.load_customer_renames(), existing_customers)
+	review_site = bool(frappe.conf.get("customer_consolidation_review_site"))
 
 	results = []
 
-	for row in decisions.load_customer_renames():
+	for row in rename_rows:
 		current = row["current_name"]
 		proposed = (row.get("proposed_name") or "").strip()
 		status = (row.get("status") or "").strip()
-		depends_on_merge = (row.get("depends_on_merge") or "").strip()
 		base = {"current_name": current, "proposed_name": proposed, "status": status}
-		if depends_on_merge:
-			base["depends_on_merge"] = True
 
 		if status != "approved":
 			results.append({**base, "action": "skipped"})
 			continue
 
-		if not proposed:
-			results.append({**base, "action": "invalid", "error": "proposed_name is empty"})
+		if row["rename_status"] == "invalid":
+			results.append({**base, "action": "invalid", "reason": row["reason"]})
 			continue
 
-		if not frappe.db.exists("Customer", current):
-			# Rename already happened on a prior run (or the name is simply gone).
-			action = "already_applied" if frappe.db.exists("Customer", proposed) else "missing"
-			results.append({**base, "action": action})
-			continue
-
-		if depends_on_merge and current not in satisfied_merge_targets:
-			results.append(
-				{
-					**base,
-					"action": "blocked",
-					"error": "blocked: dependent merge did not succeed",
-					"depends_on": current,
-				}
-			)
-			continue
-
-		if proposed != current and frappe.db.exists("Customer", proposed):
-			results.append({**base, "action": "invalid", "error": f"'{proposed}' already exists"})
+		if row["rename_status"] == "already_applied":
+			results.append({**base, "action": "already_applied"})
 			continue
 
 		if not execute:
-			preview_action = "would_rename_pending_merge" if depends_on_merge else "would_rename"
 			results.append(
 				{
 					**base,
-					"action": preview_action,
+					"action": "would_rename",
 					"csv_rewrites": decisions.rewrite_customer_references(current, proposed, dry_run=True),
 				}
 			)
@@ -859,6 +855,10 @@ def rename_customers_from_csv(execute: bool = False, merge_results: list[dict] |
 			continue
 
 		# DB rename is committed and is the source of truth from here on.
+		if not review_site:
+			results.append({**base, "action": "renamed", "csv_rewrites": {}})
+			continue
+
 		try:
 			csv_rewrites = decisions.rewrite_customer_references(current, proposed)
 			results.append({**base, "action": "renamed", "csv_rewrites": csv_rewrites})
@@ -881,7 +881,10 @@ def apply_record_reassignments(
 	(soon to be merged-away) Customer name is what `from_customer` is checked against, so running
 	this after the merge would make that check fail. Idempotent: already-moved rows are a no-op,
 	and a record whose current value is neither from_customer nor to_customer (someone changed it
-	since) is left alone and reported."""
+	since) is left alone and reported. Invalid rows are returned with a "reason" and (outside
+	dry_run) summarized in a single Error Log entry per run.
+
+	Called by the operator script ivm/customer_consolidation/run.py."""
 	customers = gather_customers()
 	existing_customers = {c["name"] for c in customers}
 
@@ -905,7 +908,15 @@ def apply_record_reassignments(
 		errs = row["errors"]
 
 		if errs:
-			results.append({"doctype": doctype, "name": name, "status": "invalid", "errors": errs})
+			results.append(
+				{
+					"doctype": doctype,
+					"name": name,
+					"status": "invalid",
+					"reason": "; ".join(errs),
+					"errors": errs,
+				}
+			)
 			continue
 
 		if not frappe.db.exists(doctype, name):
@@ -963,6 +974,7 @@ def apply_record_reassignments(
 		)
 
 	if not dry_run:
+		_log_invalid_rows("record reassignment", [r for r in results if r.get("status") == "invalid"])
 		frappe.db.commit()
 
 	return results
@@ -973,12 +985,25 @@ def apply_assignments(
 ) -> list[dict]:
 	"""Apply every valid row from icorp_client_assignments.csv (or the given `assignments` rows,
 	for testing) — always a deliberate human decision (typed into the CSV directly, or exported
-	from the Desk review workflow), so it always overwrites whatever customer was there before."""
+	from the Desk review workflow), so it always overwrites whatever customer was there before.
+
+	An iCorp Client Link whose assignment_source is "Customer form" is live Customer-form data and
+	is never overwritten here: such rows are reported as action "skipped_live". A row whose link
+	already points at the resolved customer is reported as "already_applied" and not written (in
+	both preview and execute). Invalid rows are returned with a "reason" and (outside dry_run)
+	summarized in a single Error Log entry per run.
+
+	Called by the operator script ivm/customer_consolidation/run.py."""
 	customers = gather_customers()
 	existing_customers = {c["name"] for c in customers}
-	icorp_client_ids = {
-		row["icorp_client_id"] for row in frappe.get_all("iCorp Client Link", fields=["icorp_client_id"])
+	icorp_links = frappe.get_all(
+		"iCorp Client Link", fields=["icorp_client_id", "assignment_source", "customer"]
+	)
+	icorp_client_ids = {row["icorp_client_id"] for row in icorp_links}
+	customer_form_client_ids = {
+		row["icorp_client_id"] for row in icorp_links if row["assignment_source"] == "Customer form"
 	}
+	current_customer_by_client = {row["icorp_client_id"]: row["customer"] or "" for row in icorp_links}
 
 	if merges is None:
 		merges = decisions.load_customer_merges()
@@ -997,7 +1022,18 @@ def apply_assignments(
 		client_id, customer, errs = row["client_id"], row["resolved_customer"], row["errors"]
 
 		if errs:
-			results.append({"client_id": client_id, "status": "invalid", "errors": errs})
+			results.append(
+				{"client_id": client_id, "status": "invalid", "reason": "; ".join(errs), "errors": errs}
+			)
+			continue
+
+		if client_id in customer_form_client_ids:
+			results.append({"client_id": client_id, "customer": customer, "action": "skipped_live"})
+			continue
+
+		if current_customer_by_client.get(client_id) == customer:
+			# Already assigned to the resolved customer: nothing to write, in preview or execute.
+			results.append({"client_id": client_id, "customer": customer, "action": "already_applied"})
 			continue
 
 		if dry_run:
@@ -1010,6 +1046,7 @@ def apply_assignments(
 		results.append({"client_id": client_id, "customer": customer, "action": "assigned"})
 
 	if not dry_run:
+		_log_invalid_rows("assignment", [r for r in results if r.get("status") == "invalid"])
 		frappe.db.commit()
 
 	return results
@@ -1170,7 +1207,7 @@ def run_apply_decisions(execute: bool = False, sync_first: bool = True) -> dict:
 			"customer_creations": create_missing_customers(dry_run=True),
 			"record_reassignments": apply_record_reassignments(dry_run=True),
 			"merges": merge_preview,
-			"customer_renames": rename_customers_from_csv(execute=False, merge_results=merge_preview),
+			"customer_renames": rename_customers_from_csv(execute=False),
 			"customer_record_ids": apply_customer_record_ids(dry_run=True),
 			"assignments": apply_assignments(dry_run=True),
 			"customer_icorp_client_ids": set_customer_icorp_client_ids(dry_run=True),
@@ -1183,9 +1220,8 @@ def run_apply_decisions(execute: bool = False, sync_first: bool = True) -> dict:
 	customer_record_id_results = apply_customer_record_ids(dry_run=False)
 	assignment_results = apply_assignments(dry_run=False)
 	customer_icorp_client_id_results = set_customer_icorp_client_ids(dry_run=False)
-	# Renames run after merges (so depends_on_merge rows target the survivor) and after assignments
-	# (which still reference pre-rename names in icorp_client_assignments.csv).
-	rename_results = rename_customers_from_csv(execute=True, merge_results=merge_results)
+	# Renames run after merges and assignments (which still reference pre-rename names in the CSVs).
+	rename_results = rename_customers_from_csv(execute=True)
 	refresh_match_proposals()
 
 	return {
@@ -1217,12 +1253,12 @@ def _decisions_file_hash() -> str:
 
 
 def apply_on_migrate() -> None:
-	"""Hooked via `after_migrate`. Skips entirely if the decision files (including
-	customer_renames.csv) are unchanged since the last successful run. Syncs from iCorp FIRST so a
-	first-ever deploy's iCorp Client Link table is populated before assignments are validated
-	against it — otherwise every assignment row would fail "client does not exist" and silently
-	never retry. Renames run right after merges (so a depends_on_merge rename sees this run's merge
-	results) and only for "approved" rows.
+	"""Called by the operator script ivm/customer_consolidation/run.py. Skips entirely if the
+	decision files (including customer_renames.csv) are unchanged since the last successful run.
+	Syncs from iCorp FIRST so a first-ever deploy's iCorp Client Link table is populated before
+	assignments are validated against it — otherwise every assignment row would fail "client does
+	not exist" and silently never retry. Renames run right after merges and only for "approved"
+	rows.
 
 	Fails the migrate (does not swallow the error) on any exception, any blocked/errored merge,
 	any failed/blocked rename, or any invalid assignment/record-reassignment/customer-creation —
@@ -1272,7 +1308,7 @@ def apply_on_migrate() -> None:
 		_log_phase("execute_merges", t0)
 
 		t0 = time.monotonic()
-		rename_results = rename_customers_from_csv(execute=True, merge_results=merge_results)
+		rename_results = rename_customers_from_csv(execute=True)
 		_log_phase("rename_customers_from_csv", t0)
 
 		t0 = time.monotonic()
@@ -1304,7 +1340,7 @@ def apply_on_migrate() -> None:
 		skipped_merges = [
 			r for r in merge_results if r.get("action") == "error" or r.get("status") == "blocked"
 		]
-		skipped_renames = [r for r in rename_results if r.get("action") in ("error", "blocked")]
+		skipped_renames = [r for r in rename_results if r.get("action") == "error"]
 		invalid_assignments = [r for r in assignment_results if r.get("status") == "invalid"]
 		# Rows whose ONLY problem is "this iCorp client isn't in this environment's iCorp Client Link
 		# table yet" are expected, environment-dependent, and not retriable by anything this function
@@ -1409,10 +1445,11 @@ def _disable_file_hash() -> str:
 
 
 def apply_customer_disables_on_migrate() -> None:
-	"""Hooked via `after_migrate`, independently of apply_on_migrate's hash gate. Skips entirely
-	if customers_to_disable.csv is unchanged since the last successful run. Does not save the hash
-	if any row errored, so the next migrate retries automatically.
-	8
+	"""Called by the operator script ivm/customer_consolidation/run.py, independently of
+	apply_on_migrate's hash gate. Skips entirely if customers_to_disable.csv is unchanged since the
+	last successful run. Does not save the hash if any row errored, so the next run retries
+	automatically.
+
 	pending_merge is not treated as a problem — it's expected steady-state for customers queued
 	for deletion that are also pending a merge (the merge takes precedence)."""
 	current_hash = _disable_file_hash()

@@ -10,10 +10,31 @@ assigned to a different, end Customer).
 import re
 
 import frappe
+from frappe import _
+
+
+def require_desk_customer_access() -> None:
+	"""Allow only Desk (System) users who can read Customer or Project.
+
+	Guest and Website (portal) users are always denied. The Project and Customer forms are
+	used by Projects roles, which can read Projects but not Customers, so either permission
+	is enough. Internal callers (provisioning, validation) use the unchecked helpers below.
+	"""
+	user = frappe.session.user
+	if user == "Guest" or frappe.get_cached_value("User", user, "user_type") != "System User":
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	if not (frappe.has_permission("Customer", "read") or frappe.has_permission("Project", "read")):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 
 @frappe.whitelist()
 def get_deployable_clients(customer: str | None = None) -> list[dict]:
+	"""Whitelisted: the iCorp clients a Customer may deploy under (see _deployable_clients)."""
+	require_desk_customer_access()
+	return _deployable_clients(customer)
+
+
+def _deployable_clients(customer: str | None = None) -> list[dict]:
 	"""Return active iCorp Client Links deployable for this Customer: its own
 	clients (customer == customer) plus clients it manages as a partner
 	(parent_client's customer == customer, but the client's own customer is
@@ -74,12 +95,42 @@ def get_deployable_clients(customer: str | None = None) -> list[dict]:
 
 
 @frappe.whitelist()
+def get_customer_client_summary(customer: str | None = None) -> dict:
+	"""Whitelisted: see _customer_client_summary."""
+	require_desk_customer_access()
+	return _customer_client_summary(customer)
+
+
+def _customer_client_summary(customer: str | None = None) -> dict:
+	"""Report which iCorp Client Links this Customer owns (customer == customer),
+	split by is_active. Used to explain why _deployable_clients() is empty:
+	inactive-only (reactivate in iCorp) vs no client at all.
+
+	Returns {"active": [link ids], "inactive": [link ids]}, both sorted by id.
+	"""
+	if not customer:
+		return {"active": [], "inactive": []}
+
+	rows = frappe.get_all(
+		"iCorp Client Link",
+		filters={"customer": customer},
+		fields=["name", "is_active"],
+		order_by="name asc",
+	)
+	return {
+		"active": [r.name for r in rows if r.is_active],
+		"inactive": [r.name for r in rows if not r.is_active],
+	}
+
+
+@frappe.whitelist()
 def deployable_client_query(doctype, txt, searchfield, start, page_len, filters):
 	"""set_query source for Project.icorp_client_id and the per-row
 	icorp_client_id fields on the machine detail child tables.
 
 	filters: {"customer": <Customer name>, "own_only": 0|1 (optional)}
 	"""
+	require_desk_customer_access()
 	filters = frappe.parse_json(filters) if isinstance(filters, str) else (filters or {})
 	customer = filters.get("customer")
 	own_only = filters.get("own_only")
@@ -87,7 +138,7 @@ def deployable_client_query(doctype, txt, searchfield, start, page_len, filters)
 	if not customer:
 		return []
 
-	rows = get_deployable_clients(customer)
+	rows = _deployable_clients(customer)
 	if own_only:
 		rows = [r for r in rows if r["group"] == "own"]
 

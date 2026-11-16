@@ -255,7 +255,29 @@ class TestSyncCompany(FrappeTestCase):
 
 								_sync_company("123", "HS-123")
 
-								mock_get.assert_called_once()
-								mock_apply.assert_called_once()
-								mock_save.assert_called_once()
-								mock_addr.assert_called_once()
+				mock_get.assert_called_once()
+				mock_apply.assert_called_once()
+				mock_save.assert_called_once()
+				mock_addr.assert_called_once()
+
+
+class TestCompanySyncNeverWritesCustomerLink(FrappeTestCase):
+	"""HubSpot company sync must never write the Customer link fields on CRM Organization."""
+
+	_LINK_FIELDS = ("custom_customer", "custom_customer_assignment_source")
+
+	def test_link_fields_not_mapped_from_hubspot(self):
+		from ivm.integrations.hubspot.constants import COMPANY_FIELD_MAP
+
+		mapped_targets = set(COMPANY_FIELD_MAP.values())
+		for field in self._LINK_FIELDS:
+			self.assertNotIn(field, mapped_targets)
+
+	def test_company_handler_source_never_references_link_fields(self):
+		import inspect
+
+		from ivm.integrations.hubspot import company_handler
+
+		source = inspect.getsource(company_handler)
+		for field in self._LINK_FIELDS:
+			self.assertNotIn(field, source)

@@ -1,11 +1,28 @@
 """Integration tests for ivm.client_portal.services.deployments"""
 
+import random
+
 import frappe
 from erpnext.tests.utils import ERPNextTestSuite
 
 from ivm.client_portal.services.deployments import get_deployments_for_user
 
 TEST_USER = "test@example.com"
+
+
+def _make_icorp_client_link(customer):
+	"""Deployment Projects require icorp_client_id (see _validate_icorp_client_id)."""
+	doc = frappe.get_doc(
+		{
+			"doctype": "iCorp Client Link",
+			"icorp_client_id": str(random.randint(900_000_000, 999_999_999)),
+			"client_name": f"Test Client {frappe.generate_hash(length=6)}",
+			"customer": customer,
+			"is_active": 1,
+		}
+	)
+	doc.insert(ignore_permissions=True)
+	return doc.name
 
 
 def _make_contact_for_user(user, customer=None):
@@ -54,6 +71,7 @@ class TestGetDeploymentsForUser(ERPNextTestSuite):
 				"customer": customer.name,
 				"company": "_Test Company",
 				"project_type": "Deployment",
+				"icorp_client_id": _make_icorp_client_link(customer.name),
 			}
 		)
 		project.insert(ignore_permissions=True)

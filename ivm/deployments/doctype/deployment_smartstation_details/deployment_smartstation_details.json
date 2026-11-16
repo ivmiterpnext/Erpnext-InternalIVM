@@ -10,6 +10,7 @@
  "field_order": [
   "general_section",
   "machine_name",
+  "icorp_client_id",
   "smartscreen",
   "workflow",
    "serial_validation",
@@ -48,8 +49,14 @@
    "label": "Card Reader Type",
    "options": "Card Reader Type"
   },
-  {
-   "fieldname": "machine_name",
+   {
+     "fieldname": "icorp_client_id",
+     "fieldtype": "Link",
+     "label": "iCorp Client ID",
+    "options": "iCorp Client Link"
+   },
+   {
+    "fieldname": "machine_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Machine Name",

@@ -18,6 +18,13 @@ def execute():
 	run_backfill()
 
 
+def _valid_partner(candidate, project_customer):
+	"""Return candidate as a partner_customer, or None if blank or equal to the Project's own customer."""
+	if not candidate or candidate == project_customer:
+		return None
+	return candidate
+
+
 def run_backfill():
 	has_master_col = frappe.db.has_column("Project", "custom_master_customer")
 	fields = ["name", "customer", "client_id"]
@@ -49,11 +56,13 @@ def run_backfill():
 			if client_customer and row.customer and client_customer != row.customer:
 				status = "customer_mismatch"
 
-			partner = derive_partner(resolved_client)
-			if not partner and has_master_col and row.get("custom_master_customer"):
-				partner = row.get("custom_master_customer")
+			partner = _valid_partner(derive_partner(resolved_client), row.customer)
+			if not partner and has_master_col:
+				partner = _valid_partner(row.get("custom_master_customer"), row.customer)
 			if not partner and parsed["master"] and frappe.db.exists("iCorp Client Link", parsed["master"]):
-				partner = frappe.db.get_value("iCorp Client Link", parsed["master"], "customer")
+				partner = _valid_partner(
+					frappe.db.get_value("iCorp Client Link", parsed["master"], "customer"), row.customer
+				)
 
 			update_values = {"icorp_client_id": resolved_client}
 			if partner:

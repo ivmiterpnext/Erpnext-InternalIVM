@@ -1,5 +1,6 @@
 """Integration tests for ivm.deployments.event_handlers.project"""
 
+import random
 from unittest.mock import patch
 
 import frappe
@@ -41,10 +42,15 @@ def _make_project(
 	custom_hubspot_deal_id=None,
 	custom_crm_deal=None,
 ):
-	"""Create and insert a Project with specified parameters."""
+	"""Create and insert a Project with specified parameters.
+
+	project_type is left unset, so it takes the site default ("Deployment"), which
+	means the Deployment customer/iCorp rules apply: the Project gets a Customer
+	with one iCorp client so it validates like a real deployment."""
 	if not project_name:
 		project_name = f"Test Project {frappe.generate_hash(length=8)}"
 
+	customer, icorp_client_id = _make_customer_with_icorp_client()
 	doc = frappe.get_doc(
 		{
 			"doctype": "Project",
@@ -56,10 +62,28 @@ def _make_project(
 			"status": status or "Open",
 			"custom_hubspot_deal_id": custom_hubspot_deal_id,
 			"custom_crm_deal": custom_crm_deal,
+			"customer": customer,
+			"icorp_client_id": icorp_client_id,
 		}
 	)
 	doc.insert(ignore_permissions=True)
 	return doc
+
+
+def _make_customer_with_icorp_client():
+	"""A Customer with exactly one active own iCorp client, for Deployment Projects."""
+	customer = _make_customer(frappe.generate_hash(length=6))
+	client_id = str(random.randint(800_000_000, 899_999_999))
+	frappe.get_doc(
+		{
+			"doctype": "iCorp Client Link",
+			"icorp_client_id": client_id,
+			"client_name": f"Test Client {client_id}",
+			"customer": customer,
+			"is_active": 1,
+		}
+	).insert(ignore_permissions=True)
+	return customer, client_id
 
 
 class TestUpdateDueDates(ERPNextTestSuite):
@@ -460,3 +484,285 @@ class TestAfterInsert(ERPNextTestSuite):
 			call_args = mock_create.call_args
 			called_doc = call_args.args[0]
 			self.assertEqual(called_doc.name, doc.name)
+
+
+def _make_customer(name_suffix: str) -> str:
+	if not frappe.db.exists("Customer Group", "_Test Customer Group"):
+		frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": "_Test Customer Group",
+				"is_group": 0,
+			}
+		).insert(ignore_permissions=True)
+	customer = frappe.get_doc(
+		{
+			"doctype": "Customer",
+			"customer_name": f"Test Customer {name_suffix}",
+			"customer_type": "Company",
+			"customer_group": "_Test Customer Group",
+		}
+	)
+	customer.insert(ignore_permissions=True)
+	return customer.name
+
+
+def _make_icorp_client(icorp_client_id, customer=None, parent_client=None):
+	doc = frappe.get_doc(
+		{
+			"doctype": "iCorp Client Link",
+			"icorp_client_id": icorp_client_id,
+			"client_name": f"Test Client {icorp_client_id}",
+			"customer": customer,
+			"parent_client": parent_client,
+			"is_active": 1,
+		}
+	)
+	doc.insert(ignore_permissions=True)
+	return doc.name
+
+
+def _make_deployment_project(project_name=None, customer=None, icorp_client_id=None, stage=None):
+	if not project_name:
+		project_name = f"Test Deployment {frappe.generate_hash(length=8)}"
+	doc = frappe.get_doc(
+		{
+			"doctype": "Project",
+			"project_name": project_name,
+			"project_type": "Deployment",
+			"customer": customer,
+			"icorp_client_id": icorp_client_id,
+			"stage": stage,
+		}
+	)
+	return doc
+
+
+class TestValidateIcorpClientId(ERPNextTestSuite):
+	"""Test _validate_icorp_client_id, called from Project.validate()."""
+
+	def setUp(self):
+		super().setUp()
+		self._cleanup = []
+		if not frappe.db.exists("Company", "IVM"):
+			frappe.get_doc(
+				{
+					"doctype": "Company",
+					"company_name": "IVM",
+					"abbr": "IVM",
+					"default_currency": "USD",
+					"country": "United States",
+				}
+			).insert(ignore_permissions=True)
+
+	def tearDown(self):
+		for doctype, name in reversed(self._cleanup):
+			frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+		super().tearDown()
+
+	def _track(self, doctype, name):
+		self._cleanup.append((doctype, name))
+		return name
+
+	def test_new_deployment_without_client_throws(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"NoClient {uid}"))
+
+		doc = _make_deployment_project(customer=customer)
+		with self.assertRaises(frappe.ValidationError):
+			doc.insert(ignore_permissions=True)
+
+	def test_no_clients_message_links_to_customer(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"NoClientMsg {uid}"))
+
+		doc = _make_deployment_project(customer=customer)
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			doc.insert(ignore_permissions=True)
+
+		message = str(ctx.exception)
+		self.assertIn(frappe.utils.get_link_to_form("Customer", customer), message)
+		self.assertIn("has no iCorp client yet", message)
+		self.assertIn("Add one on the", message)
+		self.assertIn("Customer's iCorp tab</a>, then pick it here.", message)
+		self.assertIn(
+			frappe.utils.escape_html(frappe.utils.get_url_to_form("Customer", customer) + "#icorp_tab") + '"',
+			message,
+		)
+		self.assertNotIn("Add iCorp client", message)
+		self.assertNotIn("Select the iCorp Client for this deployment.", message)
+
+	def test_inactive_only_customer_message_names_inactive_client(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"InactiveOnly {uid}"))
+		client = self._track("iCorp Client Link", _make_icorp_client("100050", customer=customer))
+		frappe.db.set_value("iCorp Client Link", client, "is_active", 0)
+
+		doc = _make_deployment_project(customer=customer)
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			doc.insert(ignore_permissions=True)
+
+		message = str(ctx.exception)
+		self.assertIn(frappe.utils.get_link_to_form("Customer", customer), message)
+		self.assertIn("only has inactive iCorp clients (100050)", message)
+		self.assertIn("or add one on the", message)
+		self.assertIn("Customer's iCorp tab</a>, then pick it here.", message)
+		self.assertIn(
+			frappe.utils.escape_html(frappe.utils.get_url_to_form("Customer", customer) + "#icorp_tab") + '"',
+			message,
+		)
+		self.assertNotIn("Create new in iCorp", message)
+		self.assertNotIn("has no iCorp client yet", message)
+		self.assertNotIn("Select the iCorp Client for this deployment.", message)
+
+	def test_none_message_is_not_inactive_variant(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"NoneVariant {uid}"))
+
+		doc = _make_deployment_project(customer=customer)
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			doc.insert(ignore_permissions=True)
+
+		message = str(ctx.exception)
+		self.assertIn("has no iCorp client yet", message)
+		self.assertNotIn("only has inactive", message)
+
+	def test_customer_with_clients_but_none_selected_keeps_select_message(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"HasClients {uid}"))
+		self._track("iCorp Client Link", _make_icorp_client("100040", customer=customer))
+
+		doc = _make_deployment_project(customer=customer)
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			doc.insert(ignore_permissions=True)
+
+		self.assertIn("Select the iCorp Client for this deployment.", str(ctx.exception))
+
+	def test_deployment_without_customer_is_blocked(self):
+		doc = _make_deployment_project()
+		with self.assertRaises(frappe.ValidationError) as ctx:
+			doc.insert(ignore_permissions=True)
+
+		self.assertIn("Select the Customer for this deployment before saving.", str(ctx.exception))
+
+	def test_system_insert_without_customer_is_allowed(self):
+		"""create_projects_from_deal inserts with ignore_mandatory=True; that path must still work."""
+		doc = _make_deployment_project()
+		doc.insert(ignore_permissions=True, ignore_mandatory=True)
+		self._track("Project", doc.name)
+
+		self.assertFalse(doc.customer)
+		self.assertTrue(frappe.db.exists("Project", doc.name))
+
+	def test_legacy_project_without_client_saves_unchanged(self):
+		"""A pre-existing Deployment Project with no icorp_client_id, saved without
+		touching customer/icorp_client_id/stage, must NOT throw.
+
+		Simulates a record that existed before this validation existed: insert with
+		no customer (so validate()'s strict block never fires), then backdate the
+		customer directly via frappe.db.set_value -- a raw DB write that bypasses
+		validate() entirely, exactly like a record that predates this field."""
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"Legacy {uid}"))
+
+		doc = _make_deployment_project()
+		doc.insert(ignore_permissions=True, ignore_mandatory=True)
+		self._track("Project", doc.name)
+
+		frappe.db.set_value("Project", doc.name, "customer", customer)
+
+		# Fresh object (no ignore_mandatory flag left over from insert), saved as a user would.
+		doc = frappe.get_doc("Project", doc.name)
+		doc.save(ignore_permissions=True)
+		doc.reload()
+		self.assertFalse(doc.icorp_client_id)
+		self.assertEqual(doc.customer, customer)
+
+	def test_managed_client_swaps_customer_and_sets_partner(self):
+		uid = frappe.generate_hash(length=6)
+		partner_customer = self._track("Customer", _make_customer(f"PartnerSwap {uid}"))
+		end_customer = self._track("Customer", _make_customer(f"EndSwap {uid}"))
+		parent = self._track("iCorp Client Link", _make_icorp_client("100001", customer=partner_customer))
+		managed_client = self._track(
+			"iCorp Client Link",
+			_make_icorp_client("100002", customer=end_customer, parent_client=parent),
+		)
+
+		doc = _make_deployment_project(customer=partner_customer, icorp_client_id=managed_client)
+		doc.insert(ignore_permissions=True)
+		self._track("Project", doc.name)
+
+		self.assertEqual(doc.customer, end_customer)
+		self.assertEqual(doc.partner_customer, partner_customer)
+
+	def test_row_client_from_different_customer_throws(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"RowCust {uid}"))
+		other_customer = self._track("Customer", _make_customer(f"OtherCust {uid}"))
+		own_client = self._track("iCorp Client Link", _make_icorp_client("100003", customer=customer))
+		other_client = self._track("iCorp Client Link", _make_icorp_client("100004", customer=other_customer))
+
+		doc = _make_deployment_project(customer=customer, icorp_client_id=own_client)
+		doc.append(
+			"custom_deployment_smartstation_details", {"machine_name": "M1", "icorp_client_id": other_client}
+		)
+
+		with self.assertRaises(frappe.ValidationError):
+			doc.insert(ignore_permissions=True)
+
+	def test_stage_leaving_waiting_assignment_without_client_throws(self):
+		"""Simulates a legacy record (see test_legacy_project_without_client_saves_unchanged
+		for why the fixture is built this way) sitting at stage='Waiting Assignment' with no
+		client, that then gets moved forward -- this is the one case where a legacy record
+		DOES get required to pick a client."""
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"StageCust {uid}"))
+
+		doc = _make_deployment_project(stage="Waiting Assignment")
+		doc.insert(ignore_permissions=True, ignore_mandatory=True)
+		self._track("Project", doc.name)
+
+		frappe.db.set_value("Project", doc.name, "customer", customer)
+
+		# Fresh object: the insert above left flags.ignore_mandatory set on `doc`.
+		doc = frappe.get_doc("Project", doc.name)
+		self.assertFalse(doc.icorp_client_id)
+		self.assertEqual(doc.stage, "Waiting Assignment")
+
+		doc.stage = "Assigned"
+		with self.assertRaises(frappe.ValidationError):
+			doc.save(ignore_permissions=True)
+
+	def test_blank_rows_inherit_project_client(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"RowInherit {uid}"))
+		c1 = self._track("iCorp Client Link", _make_icorp_client("100030", customer=customer))
+		self._track("iCorp Client Link", _make_icorp_client("100031", customer=customer))
+
+		doc = _make_deployment_project(customer=customer, icorp_client_id=c1)
+		doc.append("custom_deployment_smartstation_details", {"machine_name": "INH-1"})
+		doc.insert(ignore_permissions=True)
+		self._track("Project", doc.name)
+
+		self.assertEqual(doc.custom_deployment_smartstation_details[0].icorp_client_id, c1)
+
+	def test_rows_follow_project_client_change_but_keep_manual_overrides(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"RowFollow {uid}"))
+		c1 = self._track("iCorp Client Link", _make_icorp_client("100032", customer=customer))
+		c2 = self._track("iCorp Client Link", _make_icorp_client("100033", customer=customer))
+		c3 = self._track("iCorp Client Link", _make_icorp_client("100034", customer=customer))
+
+		doc = _make_deployment_project(customer=customer, icorp_client_id=c1)
+		doc.append("custom_deployment_smartstation_details", {"machine_name": "FOL-1"})
+		doc.append("custom_deployment_smartlocker_details", {"machine_name": "FOL-2", "icorp_client_id": c2})
+		doc.insert(ignore_permissions=True)
+		self._track("Project", doc.name)
+
+		doc.reload()
+		doc.icorp_client_id = c3
+		doc.save(ignore_permissions=True)
+		doc.reload()
+
+		self.assertEqual(doc.custom_deployment_smartstation_details[0].icorp_client_id, c3)
+		self.assertEqual(doc.custom_deployment_smartlocker_details[0].icorp_client_id, c2)

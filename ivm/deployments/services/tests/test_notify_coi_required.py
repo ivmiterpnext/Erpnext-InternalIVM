@@ -1,5 +1,6 @@
 """Integration tests for ivm.deployments.services.notify_coi_required"""
 
+import random
 from unittest.mock import patch
 
 import frappe
@@ -8,13 +9,39 @@ from erpnext.tests.utils import ERPNextTestSuite
 from ivm.deployments.services.notify_coi_required import send_notification
 
 
+def _deployment_customer_with_client():
+	"""Customer with one active own iCorp client, so a Deployment Project validates on save."""
+	uid = frappe.generate_hash(length=8)
+	customer = frappe.get_doc(
+		{
+			"doctype": "Customer",
+			"customer_name": f"Deployment Cust {uid}",
+			"customer_group": "_Test Customer Group",
+			"territory": "_Test Territory",
+		}
+	).insert(ignore_permissions=True)
+	client = frappe.get_doc(
+		{
+			"doctype": "iCorp Client Link",
+			"icorp_client_id": str(random.randint(700_000_000, 799_999_999)),
+			"client_name": f"Deployment Client {uid}",
+			"customer": customer.name,
+			"is_active": 1,
+		}
+	).insert(ignore_permissions=True)
+	return customer.name, client.name
+
+
 def _make_deployment(coi_required):
+	customer, client = _deployment_customer_with_client()
 	return frappe.get_doc(
 		{
 			"doctype": "Project",
 			"project_name": f"COI Test {frappe.generate_hash(length=6)}",
 			"company": "_Test Company",
 			"coi_required": coi_required,
+			"customer": customer,
+			"icorp_client_id": client,
 		}
 	).insert(ignore_permissions=True)
 

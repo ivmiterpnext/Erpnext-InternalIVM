@@ -84,9 +84,9 @@ def load_distinct_pairs(path: str | None = None) -> set[frozenset]:
 
 def load_customers_to_create(path: str | None = None) -> list[dict]:
 	"""Load customers_to_create.csv. Skip rows with no customer_name. Each row is a Customer to
-	create (by hand on dev via the "Create Customer..." button on iCorp Client Link, or on prod
-	automatically via apply_on_migrate) before assignments are applied, so a Customer created only
-	on one environment (e.g. by hand on dev) is reproduced on every other environment too."""
+	create (by hand on dev via the "Create Customer..." button on iCorp Client Link, or by the
+	operator script ivm/customer_consolidation/run.py) before assignments are applied, so a Customer
+	created only on one environment (e.g. by hand on dev) is reproduced on every other environment too."""
 	rows = _read_csv_rows(path or CUSTOMERS_TO_CREATE_PATH)
 	return [r for r in rows if r.get("customer_name")]
 
@@ -175,6 +175,46 @@ def load_customer_renames(path: str | None = None) -> list[dict]:
 	kept in the file as a to-do record and never executed."""
 	rows = _read_csv_rows(path or CUSTOMER_RENAMES_PATH)
 	return [r for r in rows if r.get("current_name")]
+
+
+def validate_customer_renames(rows: list[dict], existing_customers: set[str]) -> list[dict]:
+	"""Pure. Return a copy of each row with added "rename_status" and "reason" keys. The CSV's own
+	"status" column (approved / needs_research) is left untouched and is the gate for execution;
+	rename_status is computed from which Customer names currently exist, and is one of:
+	  - "pending": current_name exists and proposed_name doesn't -- rename still to do
+	  - "already_applied": current_name doesn't exist and proposed_name does -- already renamed
+	  - "invalid": current_name or proposed_name is empty, neither name exists, or both exist
+	A row whose proposed_name equals current_name is "already_applied" if that name exists,
+	otherwise "invalid". The depends_on_merge column is ignored."""
+	results = []
+
+	for row in rows:
+		current = (row.get("current_name") or "").strip()
+		proposed = (row.get("proposed_name") or "").strip()
+		current_exists = current in existing_customers
+		proposed_exists = proposed in existing_customers
+
+		if not current:
+			rename_status, reason = "invalid", "current_name is empty"
+		elif not proposed:
+			rename_status, reason = "invalid", "proposed_name is empty"
+		elif proposed == current:
+			if current_exists:
+				rename_status, reason = "already_applied", ""
+			else:
+				rename_status, reason = "invalid", f"'{current}' does not exist"
+		elif current_exists and proposed_exists:
+			rename_status, reason = "invalid", f"both '{current}' and '{proposed}' exist"
+		elif current_exists:
+			rename_status, reason = "pending", ""
+		elif proposed_exists:
+			rename_status, reason = "already_applied", ""
+		else:
+			rename_status, reason = "invalid", f"neither '{current}' nor '{proposed}' exists"
+
+		results.append({**row, "rename_status": rename_status, "reason": reason})
+
+	return results
 
 
 def validate_record_reassignments(

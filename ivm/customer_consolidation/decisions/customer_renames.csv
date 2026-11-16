@@ -5,7 +5,6 @@ HUD,U.S. Department of Housing and Urban Development,high,well-known government 
 SGWS,Southern Glazer's Wine & Spirits,high,well-known distributor acronym; no existing twin,approved,,
 UKG,UKG Inc.,high,corroborated by Contact email domain ukg.com,approved,,
 WMATA,Washington Metropolitan Area Transit Authority,high,well-known government agency acronym; no existing twin,approved,,
-USPS,United States Postal Service,high,corroborated by Contact email domain usps.com; no existing twin found despite checking,approved,,
 USAA,United Services Automobile Association,high,duplicate merges (USAA Financial Services / USAA Real Estate Company) already applied into this record; no keep-as-acronym precedent found,approved,,
 PROS,"PROS Holdings, Inc.",medium,corroborated by Customer.website = pros.com,approved,,
 PTC,PTC Inc.,medium,this is PTC's own current formal legal name already -- minimal clarity gain; flagging for final confirmation,approved,,

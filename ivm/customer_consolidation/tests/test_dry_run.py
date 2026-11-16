@@ -652,6 +652,7 @@ class TestGatherFunctions(ERPNextTestSuite):
 				"doctype": "Project",
 				"project_name": f"TestProj_{frappe.generate_hash(length=8)}",
 				"customer": cust_name,
+				"project_type": "Internal",
 				"client_id": "1234",
 			}
 		).insert(ignore_permissions=True)

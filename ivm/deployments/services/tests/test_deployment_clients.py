@@ -7,7 +7,9 @@ import frappe
 from erpnext.tests.utils import ERPNextTestSuite
 
 from ivm.deployments.services.deployment_clients import (
+	deployable_client_query,
 	derive_partner,
+	get_customer_client_summary,
 	get_deployable_clients,
 	parse_project_client_ids,
 )
@@ -241,6 +243,64 @@ class TestDerivePartner(ERPNextTestSuite):
 		self.assertIsNone(derive_partner_client(None))
 
 
+class TestGetCustomerClientSummary(ERPNextTestSuite):
+	def setUp(self):
+		super().setUp()
+		self._cleanup_names = []
+
+	def tearDown(self):
+		for doctype, name in reversed(self._cleanup_names):
+			frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+		super().tearDown()
+
+	def _track(self, doctype, name):
+		self._cleanup_names.append((doctype, name))
+		return name
+
+	def test_no_clients_returns_empty_lists(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"SumNone {uid}"))
+
+		self.assertEqual(get_customer_client_summary(customer), {"active": [], "inactive": []})
+		# Deployable list is empty too -- this is the "no client yet" case.
+		self.assertEqual(get_deployable_clients(customer), [])
+
+	def test_inactive_only_reports_inactive_ids(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"SumInactive {uid}"))
+		inactive = self._track("iCorp Client Link", _make_client(_rand_id(), customer=customer, is_active=0))
+
+		summary = get_customer_client_summary(customer)
+
+		self.assertEqual(summary, {"active": [], "inactive": [inactive]})
+		# Inactive clients stay unselectable.
+		self.assertEqual(get_deployable_clients(customer), [])
+
+	def test_active_and_inactive_split(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"SumMixed {uid}"))
+		active = self._track("iCorp Client Link", _make_client(_rand_id(), customer=customer))
+		inactive = self._track("iCorp Client Link", _make_client(_rand_id(), customer=customer, is_active=0))
+
+		summary = get_customer_client_summary(customer)
+
+		self.assertEqual(summary["active"], [active])
+		self.assertEqual(summary["inactive"], [inactive])
+
+	def test_other_customers_clients_not_counted(self):
+		uid = frappe.generate_hash(length=6)
+		customer = self._track("Customer", _make_customer(f"SumScope {uid}"))
+		other = self._track("Customer", _make_customer(f"SumOther {uid}"))
+		self._track("iCorp Client Link", _make_client(_rand_id(), customer=other, is_active=0))
+
+		self.assertEqual(get_customer_client_summary(customer), {"active": [], "inactive": []})
+
+	def test_blank_customer_returns_empty_lists(self):
+		empty = {"active": [], "inactive": []}
+		self.assertEqual(get_customer_client_summary(""), empty)
+		self.assertEqual(get_customer_client_summary(None), empty)
+
+
 class TestParseProjectClientIds(ERPNextTestSuite):
 	def test_empty_and_none_and_whitespace(self):
 		for value in ("", None, "   "):
@@ -283,3 +343,70 @@ class TestParseProjectClientIds(ERPNextTestSuite):
 		result = parse_project_client_ids("abc")
 		self.assertEqual(result["status"], "malformed")
 		self.assertIsNone(result["primary"])
+
+
+class TestWhitelistedAccess(ERPNextTestSuite):
+	"""Whitelisted client lookups are for Desk users only: Guest and Website users are denied."""
+
+	def setUp(self):
+		super().setUp()
+		self.addCleanup(frappe.set_user, "Administrator")
+
+	def _user(self, email, user_type, roles=()):
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": "Test",
+				"user_type": user_type,
+				"send_welcome_email": 0,
+				"roles": [{"role": r} for r in roles],
+			}
+		).insert(ignore_permissions=True)
+		self.addCleanup(lambda: frappe.delete_doc("User", user.name, force=True, ignore_permissions=True))
+		return user.name
+
+	def _calls(self):
+		from ivm.machine_hardware_management.doctype.icorp_client_link.icorp_client_link import (
+			icorp_client_query,
+		)
+
+		customer = "WHITELIST-CUST"
+		return {
+			"get_deployable_clients": lambda: get_deployable_clients(customer),
+			"get_customer_client_summary": lambda: get_customer_client_summary(customer),
+			"deployable_client_query": lambda: deployable_client_query(
+				"iCorp Client Link", "", "name", 0, 20, {"customer": customer}
+			),
+			"icorp_client_query": lambda: icorp_client_query(
+				"iCorp Client Link", "", "name", 0, 20, {"customer": customer}
+			),
+		}
+
+	def test_website_user_denied_on_every_whitelisted_lookup(self):
+		email = f"portal-{frappe.generate_hash(length=6)}@example.com"
+		self._user(email, "Website User")
+		frappe.set_user(email)
+		for name, call in self._calls().items():
+			with self.subTest(method=name):
+				with self.assertRaises(frappe.PermissionError):
+					call()
+
+	def test_guest_denied(self):
+		frappe.set_user("Guest")
+		for name, call in self._calls().items():
+			with self.subTest(method=name):
+				with self.assertRaises(frappe.PermissionError):
+					call()
+
+	def test_projects_user_allowed_on_project_form_lookups(self):
+		email = f"projuser-{frappe.generate_hash(length=6)}@example.com"
+		self._user(email, "System User", roles=["Projects User"])
+		frappe.set_user(email)
+		self.assertEqual(get_deployable_clients(""), [])
+		self.assertEqual(get_customer_client_summary(""), {"active": [], "inactive": []})
+
+	def test_administrator_allowed(self):
+		frappe.set_user("Administrator")
+		self.assertEqual(get_deployable_clients(""), [])
+		self.assertEqual(get_customer_client_summary(""), {"active": [], "inactive": []})

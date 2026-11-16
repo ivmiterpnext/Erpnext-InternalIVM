@@ -12,6 +12,12 @@ import frappe
 from frappe.utils import add_days, today
 
 from ivm.deals.constants import SKIP_CHILD_FIELDS
+from ivm.deployments.services.deployment_clients import (
+	_deployable_clients,
+	derive_partner,
+	derive_partner_client,
+)
+from ivm.integrations.hubspot.customer_resolution import resolve_deal_customer
 
 _LOG = "deployments"
 
@@ -19,7 +25,6 @@ DEAL_TO_PROJECT_FIELDS: dict[str, str] = {
 	"custom_machine_ownership_status": "machine_ownership_status",
 	"custom_opportunity_term": "opportunity_term",
 	"deal_owner": "sales_rep",
-	"custom_master_customer": "custom_master_customer",
 }
 
 LOCATION_TO_PROJECT_FIELDS: dict[str, str] = {
@@ -97,12 +102,25 @@ def create_projects_from_deal(crm_deal_name: str) -> list[str]:
 	# Build deal-level field values once; shared across all Projects.
 	deal_fields = _copy_flat_fields(deal, DEAL_TO_PROJECT_FIELDS)
 
-	customer_name = deal.get("custom_customer")
+	# The deal's own Client can be disabled or conflict with its organization, so use the
+	# Customer resolution returns (enabled only). None means create Projects with a blank Customer.
+	customer_name = resolve_deal_customer(deal)
 	if customer_name:
 		deal_fields["customer"] = customer_name
-		icorp_client_id = frappe.db.get_value("Customer", customer_name, "icorp_client_id")
-		if icorp_client_id:
-			deal_fields["client_id"] = icorp_client_id
+		candidates = _deployable_clients(customer_name)
+		own = [c for c in candidates if c["group"] == "own"]
+		chosen_client = own[0]["name"] if len(own) == 1 else None
+
+		partner = None
+		partner_client = None
+		if chosen_client:
+			deal_fields["icorp_client_id"] = chosen_client
+			partner = derive_partner(chosen_client)
+			partner_client = derive_partner_client(chosen_client)
+		if partner:
+			deal_fields["partner_customer"] = partner
+		if partner_client:
+			deal_fields["partner_icorp_client_id"] = partner_client
 
 	contacts = deal.get("contacts") or []
 	primary_contact = next((r for r in contacts if r.is_primary), contacts[0] if contacts else None)
@@ -145,15 +163,25 @@ def _create_project_for_location(
 
 	site_name = location.location_name or location_name
 	start_date = location.target_ship_date or today()
+	project_name = f"{site_name} - {deal.get('custom_hubspot_deal_name') or deal.name}"
+
+	# Project has no field linking back to its Deployment Location, so a re-Won deal is guarded
+	# by the generated project_name: a Project of this deal with the same name already exists.
+	if frappe.db.exists("Project", {"custom_crm_deal": deal.name, "project_name": project_name}):
+		frappe.logger(_LOG).info(
+			f"Deployment '{project_name}' already exists for CRM Deal {deal.name}, skipping Deployment Location {location_name}"
+		)
+		return None
 
 	project = frappe.new_doc("Project")
 	project.update(
 		{
-			"project_name": f"{site_name} - {deal.get('custom_hubspot_deal_name') or deal.name}",
+			"project_name": project_name,
 			"project_type": "Deployment",
 			"stage": "Waiting Assignment",
 			"expected_start_date": start_date,
 			"expected_end_date": add_days(start_date, 56),
+			"custom_crm_deal": deal.name,
 			"custom_hubspot_deal_id": deal.get("custom_hubspot_deal_id") or "",
 			"custom_hubspot_deployment_site_id": location.hubspot_site_id or "",
 			**deal_fields,

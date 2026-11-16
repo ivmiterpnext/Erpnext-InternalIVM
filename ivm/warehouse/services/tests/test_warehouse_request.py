@@ -336,16 +336,31 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 				"customer_name": frappe.generate_hash(length=10),
 				"customer_group": "_Test Customer Group",
 				"territory": "_Test Territory",
-				"icorp_client_id": "TEST-CLIENT-ID",
 			}
 		)
 		customer.insert(ignore_permissions=True)
+
+		client = frappe.get_doc(
+			{
+				"doctype": "iCorp Client Link",
+				"icorp_client_id": "100020",
+				"client_name": "Test Client 100020",
+				"customer": customer.name,
+				"is_active": 1,
+			}
+		)
+		client.insert(ignore_permissions=True)
+		self.addCleanup(
+			lambda: frappe.delete_doc("iCorp Client Link", client.name, force=True, ignore_permissions=True)
+		)
 
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
 				"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
+				"project_type": "Deployment",
 				"customer": customer.name,
+				"icorp_client_id": client.name,
 				"company": COMPANY,
 			}
 		)
@@ -386,17 +401,32 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 				"customer_name": frappe.generate_hash(length=10),
 				"customer_group": "_Test Customer Group",
 				"territory": "_Test Territory",
-				"icorp_client_id": "TEST-CLIENT-SKIP",
 			}
 		)
 		customer.insert(ignore_permissions=True)
+
+		client = frappe.get_doc(
+			{
+				"doctype": "iCorp Client Link",
+				"icorp_client_id": "100021",
+				"client_name": "Test Client 100021",
+				"customer": customer.name,
+				"is_active": 1,
+			}
+		)
+		client.insert(ignore_permissions=True)
+		self.addCleanup(
+			lambda: frappe.delete_doc("iCorp Client Link", client.name, force=True, ignore_permissions=True)
+		)
 
 		machine_name = f"MACH-{frappe.generate_hash(length=6)}"
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
 				"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
+				"project_type": "Deployment",
 				"customer": customer.name,
+				"icorp_client_id": client.name,
 				"company": COMPANY,
 			}
 		)
@@ -428,16 +458,31 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 				"customer_name": frappe.generate_hash(length=10),
 				"customer_group": "_Test Customer Group",
 				"territory": "_Test Territory",
-				"icorp_client_id": "TEST-CLIENT-FAIL",
 			}
 		)
 		customer.insert(ignore_permissions=True)
+
+		client = frappe.get_doc(
+			{
+				"doctype": "iCorp Client Link",
+				"icorp_client_id": "100022",
+				"client_name": "Test Client 100022",
+				"customer": customer.name,
+				"is_active": 1,
+			}
+		)
+		client.insert(ignore_permissions=True)
+		self.addCleanup(
+			lambda: frappe.delete_doc("iCorp Client Link", client.name, force=True, ignore_permissions=True)
+		)
 
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
 				"project_name": f"Test Project - {frappe.generate_hash(length=6)}",
+				"project_type": "Deployment",
 				"customer": customer.name,
+				"icorp_client_id": client.name,
 				"company": COMPANY,
 			}
 		)
@@ -457,6 +502,8 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 		self.assertIn("WILL-FAIL", result["failed"])
 
 	def test_no_customer_raises(self):
+		# Legacy-style Deployment with no Customer. A user can't save one any more, so the
+		# fixture bypasses the Customer requirement (ignore_mandatory) to model the old data.
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
@@ -464,13 +511,14 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 				"company": COMPANY,
 			}
 		)
-		project.insert(ignore_permissions=True)
+		project.insert(ignore_permissions=True, ignore_mandatory=True)
 		project.append(
 			"custom_deployment_smartstation_details",
 			{
 				"machine_name": "MACH-NO-CUST",
 			},
 		)
+		project.flags.ignore_mandatory = True
 		project.save(ignore_permissions=True)
 
 		with self.assertRaises(frappe.ValidationError):

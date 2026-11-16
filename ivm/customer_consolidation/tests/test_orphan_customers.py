@@ -50,6 +50,7 @@ class TestFindOrphanCustomers(ERPNextTestSuite):
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
+				"project_type": "Internal",
 				"project_name": f"TestProj_{frappe.generate_hash(length=8)}",
 				"customer": customer.name,
 			}
@@ -220,6 +221,7 @@ class TestCountLinksForAllCustomers(ERPNextTestSuite):
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
+				"project_type": "Internal",
 				"project_name": f"TestProj_{frappe.generate_hash(length=8)}",
 				"customer": customer.name,
 			}
@@ -264,6 +266,7 @@ class TestCountLinksForAllCustomers(ERPNextTestSuite):
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
+				"project_type": "Internal",
 				"project_name": f"TestProj_{frappe.generate_hash(length=8)}",
 				"customer": customer.name,
 			}

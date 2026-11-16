@@ -13,6 +13,7 @@ afterward, so this file can still exercise the patch's duplicate-handling
 logic even on a site where the constraint it depends on is already live.
 """
 
+import random
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
@@ -96,16 +97,42 @@ def _ensure_company():
 		).insert(ignore_permissions=True)
 
 
+def _deployment_customer_with_client():
+	"""Customer with one active own iCorp client, so a Deployment Project validates on save."""
+	uid = frappe.generate_hash(length=8)
+	customer = frappe.get_doc(
+		{
+			"doctype": "Customer",
+			"customer_name": f"Deployment Cust {uid}",
+			"customer_group": "_Test Customer Group",
+			"territory": "_Test Territory",
+		}
+	).insert(ignore_permissions=True)
+	client = frappe.get_doc(
+		{
+			"doctype": "iCorp Client Link",
+			"icorp_client_id": str(random.randint(700_000_000, 799_999_999)),
+			"client_name": f"Deployment Client {uid}",
+			"customer": customer.name,
+			"is_active": 1,
+		}
+	).insert(ignore_permissions=True)
+	return customer.name, client.name
+
+
 def _make_project(crm_deal):
-	"""Create a Project linked to a CRM Deal."""
+	"""Create a Project linked to a CRM Deal (a Deployment, so it carries a Customer and iCorp client)."""
 	_ensure_company()
 	uid = frappe.generate_hash(length=8)
+	customer, client = _deployment_customer_with_client()
 	doc = frappe.get_doc(
 		{
 			"doctype": "Project",
 			"project_name": f"Proj {uid}",
 			"company": "IVM",
 			"custom_crm_deal": crm_deal,
+			"customer": customer,
+			"icorp_client_id": client,
 		}
 	)
 	doc.insert(ignore_permissions=True)

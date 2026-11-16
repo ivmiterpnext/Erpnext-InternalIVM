@@ -1,5 +1,6 @@
 """Tests for ivm.integrations.hubspot.deal_handler"""
 
+from contextlib import ExitStack, contextmanager
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -59,18 +60,15 @@ class TestResolveOrProvisionOrg(FrappeTestCase):
 					self.assertIsNone(result)
 					mock_logger.assert_called()
 
-	def test_uses_custom_company_label_in_logging(self):
-		"""Custom company_label is used in log messages."""
+	def test_logs_when_provisioning_company(self):
+		"""A missing CRM Organization is provisioned and the lookup is logged."""
 		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.company_handler._sync_company_core"):
+			with patch("ivm.integrations.hubspot.company_handler._sync_company_core") as mock_sync:
 				with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
 					mock_get_value.return_value = None
-					_resolve_or_provision_org(
-						"999",
-						"master link on deal X",
-						company_label="master company",
-					)
-					# Verify logger was called (exact message format is implementation detail)
+					mock_sync.return_value = "ORG-1"
+					result = _resolve_or_provision_org("999", "organization link on deal X")
+					self.assertEqual(result, "ORG-1")
 					mock_logger.assert_called()
 
 
@@ -338,12 +336,30 @@ class TestApplyClientId(FrappeTestCase):
 	"""_apply_client_id field transform"""
 
 	def test_matching_customer_found_by_icorp_client_id(self):
-		"""Matching Customer found by icorp_client_id sets doc.custom_customer"""
+		"""Matching enabled Customer found by icorp_client_id sets blank doc.custom_customer"""
 		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			mock_get_value.return_value = "Customer-001"
-			doc = SimpleNamespace()
+			mock_get_value.side_effect = ["Customer-001", 0]  # client link -> customer, customer.disabled
+			doc = SimpleNamespace(custom_customer=None)
 			_apply_client_id(doc, "1042")
 			self.assertEqual(doc.custom_customer, "Customer-001")
+
+	def test_existing_client_never_overwritten(self):
+		"""A Client already set on the deal is kept; no lookup is made"""
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
+			doc = SimpleNamespace(custom_customer="Keep-Me")
+			_apply_client_id(doc, "1042")
+			self.assertEqual(doc.custom_customer, "Keep-Me")
+			mock_get_value.assert_not_called()
+
+	def test_disabled_customer_skipped_and_logged(self):
+		"""A matching but disabled Customer is not written; the skip is logged"""
+		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
+			with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
+				mock_get_value.side_effect = ["Disabled-Cust", 1]
+				doc = SimpleNamespace(custom_customer=None)
+				_apply_client_id(doc, "1042")
+				self.assertIsNone(doc.custom_customer)
+				mock_logger.assert_called()
 
 	def test_no_matching_customer_logs_warning(self):
 		"""No matching Customer logs warning, does not set"""
@@ -392,190 +408,104 @@ class TestSyncDealEntry(FrappeTestCase):
 					sync_deal("12345")
 
 
+_DH = "ivm.integrations.hubspot.deal_handler"
+
+
+@contextmanager
+def _core_mocks(companies_return=("company-1", None), companies_side_effect=None):
+	"""Patch every collaborator _sync_deal_core calls. Yields a dict of mocks by short name."""
+	targets = {
+		"get_deal": f"{_DH}.api.get_deal",
+		"get_companies": f"{_DH}.api.get_deal_company_ids_by_role",
+		"sync_org": f"{_DH}._sync_organization",
+		"sync_contacts": f"{_DH}._sync_contacts",
+		"sync_fields": f"{_DH}._sync_deal_fields",
+	}
+	with ExitStack() as stack:
+		mocks = {name: stack.enter_context(patch(target)) for name, target in targets.items()}
+		mocks["get_deal"].return_value = {"properties": {}}
+		if companies_side_effect is not None:
+			mocks["get_companies"].side_effect = companies_side_effect
+		else:
+			mocks["get_companies"].return_value = companies_return
+		yield mocks
+
+
 class TestSyncDealCore(FrappeTestCase):
 	"""_sync_deal_core orchestration function"""
 
-	def test_normal_flow_calls_all_sync_steps(self):
-		"""Normal flow calls api.get_deal, _sync_organization, _sync_master_organization, _sync_contacts, _sync_deal_fields"""
-		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
-			with patch(
-				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
-			) as mock_get_companies:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_organization") as mock_sync_org:
-					with patch(
-						"ivm.integrations.hubspot.deal_handler._sync_master_organization"
-					) as mock_sync_master:
-						with patch(
-							"ivm.integrations.hubspot.deal_handler._sync_contacts"
-						) as mock_sync_contacts:
-							with patch(
-								"ivm.integrations.hubspot.deal_handler._sync_deal_fields"
-							) as mock_sync_fields:
-								mock_get_deal.return_value = {"properties": {}}
-								mock_get_companies.return_value = ("company-1", "company-2")
-								_sync_deal_core("12345", "Deal-001")
-								mock_get_deal.assert_called_once()
-								mock_sync_org.assert_called_once()
-								mock_sync_master.assert_called_once()
-								mock_sync_contacts.assert_called_once()
-								mock_sync_fields.assert_called_once()
+	def test_normal_flow_calls_org_contacts_and_fields_with_primary_company(self):
+		"""Normal flow syncs organization (primary company only), contacts and deal fields."""
+		with _core_mocks(companies_return=("company-1", "company-2")) as m:
+			_sync_deal_core("12345", "Deal-001")
+			m["get_deal"].assert_called_once()
+			m["sync_org"].assert_called_once_with("12345", "Deal-001", "company-1")
+			m["sync_contacts"].assert_called_once()
+			m["sync_fields"].assert_called_once()
 
 	def test_sync_organization_exception_logged_and_suppressed(self):
 		"""_sync_organization raises -> logged and suppressed, subsequent steps still execute"""
-		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
-			with patch(
-				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
-			) as mock_get_companies:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_organization") as mock_sync_org:
-					with patch(
-						"ivm.integrations.hubspot.deal_handler._sync_master_organization"
-					) as mock_sync_master:
-						with patch(
-							"ivm.integrations.hubspot.deal_handler._sync_contacts"
-						) as mock_sync_contacts:
-							with patch(
-								"ivm.integrations.hubspot.deal_handler._sync_deal_fields"
-							) as mock_sync_fields:
-								with patch(
-									"ivm.integrations.hubspot.deal_handler.frappe.log_error"
-								) as mock_log_error:
-									mock_get_deal.return_value = {"properties": {}}
-									mock_get_companies.return_value = ("company-1", "company-2")
-									mock_sync_org.side_effect = ValueError("org sync failed")
-									_sync_deal_core("12345", "Deal-001")
-									mock_log_error.assert_called()
-									mock_sync_master.assert_called_once()
-									mock_sync_contacts.assert_called_once()
-									mock_sync_fields.assert_called_once()
+		with _core_mocks() as m, patch(f"{_DH}.frappe.log_error") as mock_log_error:
+			m["sync_org"].side_effect = ValueError("org sync failed")
+			_sync_deal_core("12345", "Deal-001")
+			mock_log_error.assert_called()
+			m["sync_contacts"].assert_called_once()
+			m["sync_fields"].assert_called_once()
 
 	def test_sync_contacts_exception_logged_and_suppressed(self):
 		"""_sync_contacts raises -> logged and suppressed, _sync_deal_fields still executes"""
-		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
-			with patch(
-				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
-			) as mock_get_companies:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_organization"):
-					with patch("ivm.integrations.hubspot.deal_handler._sync_master_organization"):
-						with patch(
-							"ivm.integrations.hubspot.deal_handler._sync_contacts"
-						) as mock_sync_contacts:
-							with patch(
-								"ivm.integrations.hubspot.deal_handler._sync_deal_fields"
-							) as mock_sync_fields:
-								with patch(
-									"ivm.integrations.hubspot.deal_handler.frappe.log_error"
-								) as mock_log_error:
-									mock_get_deal.return_value = {"properties": {}}
-									mock_get_companies.return_value = ("company-1", "company-2")
-									mock_sync_contacts.side_effect = ValueError("contacts sync failed")
-									_sync_deal_core("12345", "Deal-001")
-									mock_log_error.assert_called()
-									mock_sync_fields.assert_called_once()
+		with _core_mocks() as m, patch(f"{_DH}.frappe.log_error") as mock_log_error:
+			m["sync_contacts"].side_effect = ValueError("contacts sync failed")
+			_sync_deal_core("12345", "Deal-001")
+			mock_log_error.assert_called()
+			m["sync_fields"].assert_called_once()
 
 	def test_sync_deal_fields_exception_propagates(self):
 		"""_sync_deal_fields raises -> propagates out of _sync_deal_core (NOT wrapped in try/except)"""
-		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
-			with patch(
-				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
-			) as mock_get_companies:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_organization"):
-					with patch("ivm.integrations.hubspot.deal_handler._sync_master_organization"):
-						with patch("ivm.integrations.hubspot.deal_handler._sync_contacts"):
-							with patch(
-								"ivm.integrations.hubspot.deal_handler._sync_deal_fields"
-							) as mock_sync_fields:
-								mock_get_deal.return_value = {"properties": {}}
-								mock_get_companies.return_value = ("company-1", "company-2")
-								mock_sync_fields.side_effect = ValueError("fields sync failed")
-								with self.assertRaises(ValueError):
-									_sync_deal_core("12345", "Deal-001")
+		with _core_mocks() as m:
+			m["sync_fields"].side_effect = ValueError("fields sync failed")
+			with self.assertRaises(ValueError):
+				_sync_deal_core("12345", "Deal-001")
 
 	def test_get_deal_company_ids_exception_logged_and_suppressed(self):
-		"""get_deal_company_ids_by_role raises -> logged, None values passed to sync functions"""
-		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
-			with patch(
-				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
-			) as mock_get_companies:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_organization") as mock_sync_org:
-					with patch(
-						"ivm.integrations.hubspot.deal_handler._sync_master_organization"
-					) as mock_sync_master:
-						with patch("ivm.integrations.hubspot.deal_handler._sync_contacts"):
-							with patch("ivm.integrations.hubspot.deal_handler._sync_deal_fields"):
-								with patch(
-									"ivm.integrations.hubspot.deal_handler.frappe.log_error"
-								) as mock_log_error:
-									mock_get_deal.return_value = {"properties": {}}
-									mock_get_companies.side_effect = ValueError("company fetch failed")
-									_sync_deal_core("12345", "Deal-001")
-									mock_log_error.assert_called()
-									# Verify None values passed
-									mock_sync_org.assert_called_once_with("12345", "Deal-001", None)
-									mock_sync_master.assert_called_once_with("12345", "Deal-001", None)
+		"""get_deal_company_ids_by_role raises -> logged, None passed to organization sync"""
+		with (
+			_core_mocks(companies_side_effect=ValueError("company fetch failed")) as m,
+			patch(f"{_DH}.frappe.log_error") as mock_log_error,
+		):
+			_sync_deal_core("12345", "Deal-001")
+			mock_log_error.assert_called()
+			m["sync_org"].assert_called_once_with("12345", "Deal-001", None)
 
 	def test_won_with_no_location_triggers_inline_site_sync(self):
 		"""When deal status becomes Won and no Deployment Location exists, inline site sync is triggered."""
-		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
-			with patch(
-				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
-			) as mock_get_companies:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_organization"):
-					with patch("ivm.integrations.hubspot.deal_handler._sync_master_organization"):
-						with patch("ivm.integrations.hubspot.deal_handler._sync_contacts"):
-							with patch("ivm.integrations.hubspot.deal_handler._sync_deal_fields"):
-								with patch(
-									"ivm.integrations.hubspot.deal_handler.frappe.db.get_value"
-								) as mock_get_value:
-									with patch(
-										"ivm.integrations.hubspot.deal_handler.frappe.db.exists"
-									) as mock_exists:
-										with patch(
-											"ivm.integrations.hubspot.deal_handler.api.get_deal_deployment_site_ids"
-										) as mock_get_sites:
-											with patch(
-												"ivm.integrations.hubspot.deployment_site_handler._sync_site_core"
-											) as mock_sync_site:
-												mock_get_deal.return_value = {
-													"properties": {"dealstage": "closedwon"}
-												}
-												mock_get_companies.return_value = (None, None)
-												mock_get_value.return_value = (
-													"Discovery"  # Current status != Won
-												)
-												mock_exists.return_value = False  # No Deployment Location
-												mock_get_sites.return_value = ["site-1", "site-2"]
-												_sync_deal_core("12345", "Deal-001")
-												self.assertEqual(mock_sync_site.call_count, 2)
-												mock_sync_site.assert_any_call(
-													"site-1", "Deal-001", trigger_deal_sync=False
-												)
-												mock_sync_site.assert_any_call(
-													"site-2", "Deal-001", trigger_deal_sync=False
-												)
+		with _core_mocks(companies_return=(None, None)) as m:
+			with (
+				patch(f"{_DH}.frappe.db.get_value") as mock_get_value,
+				patch(f"{_DH}.frappe.db.exists") as mock_exists,
+				patch(f"{_DH}.api.get_deal_deployment_site_ids") as mock_get_sites,
+				patch("ivm.integrations.hubspot.deployment_site_handler._sync_site_core") as mock_sync_site,
+			):
+				m["get_deal"].return_value = {"properties": {"dealstage": "closedwon"}}
+				mock_get_value.return_value = "Discovery"  # Current status != Won
+				mock_exists.return_value = False  # No Deployment Location
+				mock_get_sites.return_value = ["site-1", "site-2"]
+				_sync_deal_core("12345", "Deal-001")
+				self.assertEqual(mock_sync_site.call_count, 2)
+				mock_sync_site.assert_any_call("site-1", "Deal-001", trigger_deal_sync=False)
+				mock_sync_site.assert_any_call("site-2", "Deal-001", trigger_deal_sync=False)
 
 	def test_already_won_skips_inline_site_sync(self):
 		"""When deal is already Won, inline site sync is skipped."""
-		with patch("ivm.integrations.hubspot.deal_handler.api.get_deal") as mock_get_deal:
-			with patch(
-				"ivm.integrations.hubspot.deal_handler.api.get_deal_company_ids_by_role"
-			) as mock_get_companies:
-				with patch("ivm.integrations.hubspot.deal_handler._sync_organization"):
-					with patch("ivm.integrations.hubspot.deal_handler._sync_master_organization"):
-						with patch("ivm.integrations.hubspot.deal_handler._sync_contacts"):
-							with patch("ivm.integrations.hubspot.deal_handler._sync_deal_fields"):
-								with patch(
-									"ivm.integrations.hubspot.deal_handler.frappe.db.get_value"
-								) as mock_get_value:
-									with patch(
-										"ivm.integrations.hubspot.deployment_site_handler._sync_site_core"
-									) as mock_sync_site:
-										mock_get_deal.return_value = {
-											"properties": {"dealstage": "closedwon"}
-										}
-										mock_get_companies.return_value = (None, None)
-										mock_get_value.return_value = "Won"  # Already Won
-										_sync_deal_core("12345", "Deal-001")
-										mock_sync_site.assert_not_called()
+		with _core_mocks(companies_return=(None, None)) as m:
+			with (
+				patch(f"{_DH}.frappe.db.get_value") as mock_get_value,
+				patch("ivm.integrations.hubspot.deployment_site_handler._sync_site_core") as mock_sync_site,
+			):
+				m["get_deal"].return_value = {"properties": {"dealstage": "closedwon"}}
+				mock_get_value.return_value = "Won"  # Already Won
+				_sync_deal_core("12345", "Deal-001")
+				mock_sync_site.assert_not_called()
 
 
 class TestSyncContacts(FrappeTestCase):

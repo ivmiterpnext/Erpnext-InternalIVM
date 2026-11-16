@@ -57,3 +57,7 @@ ivm.patches.cleanup_module_tags_on_non_ivm_customizations
 ivm.patches.dedupe_workspace_shortcuts
 ivm.patches.remove_solution_selection_doctypes
 ivm.warehouse.patches.create_automation_user
+ivm.patches.fix_customer_list_view_columns
+ivm.patches.fix_customer_group_and_dangling_primary_contact
+ivm.patches.delete_test_will_delete_soon_customer
+ivm.patches.drop_legacy_customer_fields

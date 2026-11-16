@@ -172,6 +172,15 @@ class TestApplyOnMigrateRetry(ERPNextTestSuite):
 			"note",
 		]
 		record_reassignments_header = ["doctype", "name", "field", "from_customer", "to_customer", "evidence"]
+		renames_header = [
+			"current_name",
+			"proposed_name",
+			"confidence",
+			"evidence",
+			"status",
+			"depends_on_merge",
+			"notes",
+		]
 
 		merge_dicts = _as_rows(merges_header, merges_rows)
 		assignment_dicts = _as_rows(assignments_header, assignment_rows)
@@ -204,6 +213,8 @@ class TestApplyOnMigrateRetry(ERPNextTestSuite):
 			"CUSTOMER_DISTINCT_PAIRS_PATH": (pairs_header, pairs_rows),
 			"CUSTOMERS_TO_CREATE_PATH": (customers_to_create_header, customers_to_create_rows),
 			"RECORD_REASSIGNMENTS_PATH": (record_reassignments_header, record_reassignment_rows),
+			# Empty on purpose: apply_on_migrate would otherwise read the real customer_renames.csv.
+			"CUSTOMER_RENAMES_PATH": (renames_header, []),
 		}.items():
 			with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False, newline="") as f:
 				writer = csv.writer(f)
@@ -240,7 +251,11 @@ class TestApplyOnMigrateRetry(ERPNextTestSuite):
 		apply_module.fetch_icorp_clients = lambda: []
 		self.addCleanup(lambda: setattr(apply_module, "fetch_icorp_clients", original_fetch))
 
-		apply_module.apply_on_migrate()
+		with (
+			patch.object(apply_module, "_icorp_is_configured", return_value=True),
+			self.assertRaises(frappe.ValidationError),
+		):
+			apply_module.apply_on_migrate()
 
 		self.assertTrue(frappe.db.exists("Customer", survivor.name))
 		self.assertTrue(frappe.db.exists("Customer", loser.name))
@@ -262,7 +277,11 @@ class TestApplyOnMigrateRetry(ERPNextTestSuite):
 		apply_module.fetch_icorp_clients = lambda: []
 		self.addCleanup(lambda: setattr(apply_module, "fetch_icorp_clients", original_fetch))
 
-		apply_module.apply_on_migrate()
+		with (
+			patch.object(apply_module, "_icorp_is_configured", return_value=True),
+			self.assertRaises(frappe.ValidationError),
+		):
+			apply_module.apply_on_migrate()
 
 		saved_hash = frappe.db.get_default(_APPLIED_HASH_KEY)
 		self.assertNotEqual(saved_hash, apply_module._decisions_file_hash())
@@ -280,7 +299,8 @@ class TestApplyOnMigrateRetry(ERPNextTestSuite):
 		apply_module.fetch_icorp_clients = lambda: []
 		self.addCleanup(lambda: setattr(apply_module, "fetch_icorp_clients", original_fetch))
 
-		apply_module.apply_on_migrate()
+		with patch.object(apply_module, "_icorp_is_configured", return_value=True):
+			apply_module.apply_on_migrate()
 
 		saved_hash = frappe.db.get_default(_APPLIED_HASH_KEY)
 		self.assertEqual(saved_hash, apply_module._decisions_file_hash())
@@ -356,6 +376,54 @@ class TestExecuteMerges(ERPNextTestSuite):
 		self.assertEqual(results[0]["status"], "already_applied")
 		self.assertEqual(results[0]["action"], "skipped")
 
+	def test_invalid_merges_included_with_reason_and_logged_once(self):
+		# merge_into doesn't exist either, so these are genuinely invalid (not already_applied)
+		target = f"Ghost Target {frappe.generate_hash(length=8)}"
+		merges = [
+			{
+				"merge_from": "Ghost A",
+				"merge_into": target,
+				"evidence": "",
+				"merge_considerations": "",
+				"field_resolutions": "",
+			},
+			{
+				"merge_from": "Ghost B",
+				"merge_into": target,
+				"evidence": "",
+				"merge_considerations": "",
+				"field_resolutions": "",
+			},
+		]
+
+		with patch.object(frappe, "log_error") as log_error:
+			results = execute_merges(merges=merges)
+
+		self.assertEqual([r["status"] for r in results], ["invalid", "invalid"])
+		self.assertEqual([r["action"] for r in results], ["skipped", "skipped"])
+		self.assertIn("does not exist", results[0]["reason"])
+		self.assertIn("does not exist", results[1]["reason"])
+		log_error.assert_called_once()
+
+	def test_invalid_merges_in_preview_included_but_not_logged(self):
+		target = f"Ghost Target {frappe.generate_hash(length=8)}"
+		merges = [
+			{
+				"merge_from": "Ghost A",
+				"merge_into": target,
+				"evidence": "",
+				"merge_considerations": "",
+				"field_resolutions": "",
+			},
+		]
+
+		with patch.object(frappe, "log_error") as log_error:
+			results = execute_merges(dry_run=True, merges=merges)
+
+		self.assertEqual(results[0]["status"], "invalid")
+		self.assertIn("does not exist", results[0]["reason"])
+		log_error.assert_not_called()
+
 	def test_unknown_field_resolution_is_skipped_not_fatal(self):
 		survivor = _make_customer("SurvivorSkipRes", website="")
 		losing = _make_customer("LosingSkipRes", website="https://example.com")
@@ -400,6 +468,56 @@ class TestApplyAssignments(ERPNextTestSuite):
 		results = apply_assignments(assignments=assignments, merges=[])
 
 		self.assertEqual(results[0]["status"], "invalid")
+		self.assertIn("does not exist", results[0]["reason"])
+
+	def test_customer_form_source_is_skipped_live(self):
+		customer = _make_customer("AssignLive")
+		link = _make_icorp_client_link()
+		frappe.db.set_value("iCorp Client Link", link.name, "assignment_source", "Customer form")
+
+		assignments = [{"client_id": link.icorp_client_id, "customer": customer.name, "evidence": "test"}]
+		results = apply_assignments(assignments=assignments, merges=[])
+
+		self.assertEqual(results[0]["action"], "skipped_live")
+		updated = frappe.db.get_value(
+			"iCorp Client Link", link.name, ["customer", "assignment_source"], as_dict=True
+		)
+		self.assertFalse(updated["customer"])
+		self.assertEqual(updated["assignment_source"], "Customer form")
+
+	def test_already_assigned_to_same_customer_is_already_applied_and_not_written(self):
+		customer = _make_customer("AssignAlreadyApplied")
+		link = _make_icorp_client_link(customer=customer.name)
+		frappe.db.set_value("iCorp Client Link", link.name, "assignment_source", "Customer record")
+
+		assignments = [{"client_id": link.icorp_client_id, "customer": customer.name, "evidence": "test"}]
+
+		preview = apply_assignments(dry_run=True, assignments=assignments, merges=[])
+		self.assertEqual(preview[0]["action"], "already_applied")
+
+		executed = apply_assignments(dry_run=False, assignments=assignments, merges=[])
+		self.assertEqual(executed[0]["action"], "already_applied")
+
+		# no-op: assignment_source must not be rewritten to "Manual decision"
+		updated = frappe.db.get_value(
+			"iCorp Client Link", link.name, ["customer", "assignment_source"], as_dict=True
+		)
+		self.assertEqual(updated["customer"], customer.name)
+		self.assertEqual(updated["assignment_source"], "Customer record")
+
+	def test_invalid_assignments_logged_once_per_run(self):
+		customer = _make_customer("AssignLogOnce")
+		assignments = [
+			{"client_id": "nonexistent-1", "customer": customer.name, "evidence": ""},
+			{"client_id": "nonexistent-2", "customer": customer.name, "evidence": ""},
+		]
+
+		with patch.object(frappe, "log_error") as log_error:
+			results = apply_assignments(assignments=assignments, merges=[])
+
+		self.assertEqual([r["status"] for r in results], ["invalid", "invalid"])
+		self.assertTrue(all(r["reason"] for r in results))
+		log_error.assert_called_once()
 
 
 class TestApplyRecordReassignments(ERPNextTestSuite):
@@ -499,6 +617,7 @@ class TestApplyRecordReassignments(ERPNextTestSuite):
 		]
 		results = apply_record_reassignments(rows=rows, merges=[])
 		self.assertEqual(results[0]["status"], "invalid")
+		self.assertIn("does not exist", results[0]["reason"])
 
 
 class TestSetCustomerIcorpClientIds(ERPNextTestSuite):
@@ -697,6 +816,7 @@ class TestPartnerSuspectDetection(ERPNextTestSuite):
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
+				"project_type": "Internal",
 				"project_name": f"TestProj_{frappe.generate_hash(length=8)}",
 				"customer": partner.name,
 				"client_id": child_link.icorp_client_id,
@@ -740,6 +860,7 @@ class TestPartnerSuspectDetection(ERPNextTestSuite):
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
+				"project_type": "Internal",
 				"project_name": f"TestProj_{frappe.generate_hash(length=8)}",
 				"customer": partner.name,
 				"client_id": parent_link.icorp_client_id,
@@ -870,7 +991,7 @@ class TestSetRelatedCustomers(ERPNextTestSuite):
 			"iCorp Client Link Customer Candidate",
 			{"parent": link.icorp_client_id, "customer": candidate.name},
 			"role",
-			"Merge into survivor",
+			"Duplicate - merge in",
 		)
 
 		# simulate a routine refresh re-running with the same candidates
@@ -878,7 +999,7 @@ class TestSetRelatedCustomers(ERPNextTestSuite):
 
 		rows = self._related_rows(link.icorp_client_id)
 		candidate_row = next(r for r in rows if r["customer"] == candidate.name)
-		self.assertEqual(candidate_row["role"], "Merge into survivor")
+		self.assertEqual(candidate_row["role"], "Duplicate - merge in")
 
 	def test_activity_summary_reflects_counts(self):
 		customer = _make_customer("ActivityTest")
@@ -1198,6 +1319,7 @@ class TestDisableDecidedCustomers(ERPNextTestSuite):
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
+				"project_type": "Internal",
 				"project_name": f"TestProj_{frappe.generate_hash(length=8)}",
 				"customer": customer.name,
 			}
@@ -1308,6 +1430,7 @@ class TestApplyCustomerDeletionsOnMigrate(ERPNextTestSuite):
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
+				"project_type": "Internal",
 				"project_name": f"TestProj_{frappe.generate_hash(length=8)}",
 				"customer": customer.name,
 			}
@@ -1520,11 +1643,27 @@ class TestApplyCustomerDeletionsOnMigrate(ERPNextTestSuite):
 
 
 class TestRenameCustomersFromCsv(ERPNextTestSuite):
-	"""rename_customers_from_csv: dependency gate, status skipping, and CSV cross-reference rewrite.
+	"""rename_customers_from_csv: approved-only gate, per-row rename_status, review-site-gated CSV
+	cross-reference rewrite. depends_on_merge is ignored.
 
 	Every decision-file path is patched to a temp file (the functions read the module attributes
-	live), so nothing here touches the real repo CSVs. The execute test does a real rename, which
+	live), so nothing here touches the real repo CSVs. The execute tests do a real rename, which
 	commits, so the renamed Customer is deleted in addCleanup."""
+
+	def _set_review_site(self, value):
+		original = frappe.conf.get("customer_consolidation_review_site")
+		if value is None:
+			frappe.conf.pop("customer_consolidation_review_site", None)
+		else:
+			frappe.conf.customer_consolidation_review_site = value
+
+		def _restore():
+			if original is None:
+				frappe.conf.pop("customer_consolidation_review_site", None)
+			else:
+				frappe.conf.customer_consolidation_review_site = original
+
+		self.addCleanup(_restore)
 
 	def _temp_csv(self, module_attr, header, rows):
 		import ivm.customer_consolidation.decisions as decisions_module
@@ -1564,28 +1703,89 @@ class TestRenameCustomersFromCsv(ERPNextTestSuite):
 
 		self.assertEqual(results[0]["action"], "skipped")
 
-	def test_depends_row_blocked_when_merge_not_satisfied(self):
-		survivor = _make_customer("RenameDepBlocked").name
-		self._rename_rows([[survivor, "Renamed Survivor", "high", "x", "approved", "true", ""]])
+	def test_depends_on_merge_column_is_ignored(self):
+		survivor = _make_customer("RenameDepIgnored").name
+		self._rename_rows([[survivor, "Renamed Ignored", "high", "x", "approved", "true", ""]])
 
-		failed = [{"merge_from": "X", "merge_into": survivor, "status": "blocked", "action": "skipped"}]
-		results = rename_customers_from_csv(execute=False, merge_results=failed)
+		results = rename_customers_from_csv(execute=False)
 
-		self.assertEqual(results[0]["action"], "blocked")
-		self.assertEqual(results[0]["depends_on"], survivor)
+		self.assertEqual(results[0]["action"], "would_rename")
+		self.assertNotIn("depends_on", results[0])
 
-	def test_depends_row_proceeds_when_merge_already_applied_on_prior_run(self):
-		survivor = _make_customer("RenameDepPrior").name
-		self._rename_rows([[survivor, "Renamed Prior", "high", "x", "approved", "true", ""]])
+	def test_pending_when_current_exists_and_proposed_does_not(self):
+		current = _make_customer("RenamePending").name
+		self._rename_rows(
+			[[current, f"Pending Target {frappe.generate_hash(length=8)}", "high", "x", "approved", "", ""]]
+		)
 
-		prior = [
-			{"merge_from": "X", "merge_into": survivor, "status": "already_applied", "action": "skipped"}
-		]
-		results = rename_customers_from_csv(execute=False, merge_results=prior)
+		results = rename_customers_from_csv(execute=False)
 
-		self.assertEqual(results[0]["action"], "would_rename_pending_merge")
+		self.assertEqual(results[0]["action"], "would_rename")
+
+	def test_already_applied_when_only_proposed_exists(self):
+		proposed = _make_customer("RenameAlready").name
+		self._rename_rows(
+			[[f"GoneOld_{frappe.generate_hash(length=8)}", proposed, "high", "x", "approved", "", ""]]
+		)
+
+		results = rename_customers_from_csv(execute=False)
+
+		self.assertEqual(results[0]["action"], "already_applied")
+
+	def test_invalid_with_reason_when_neither_name_exists(self):
+		missing = f"NoSuchCustomer_{frappe.generate_hash(length=8)}"
+		self._rename_rows([[missing, "Also Missing Inc", "high", "x", "approved", "", ""]])
+
+		results = rename_customers_from_csv(execute=False)
+
+		self.assertEqual(results[0]["action"], "invalid")
+		self.assertIn("neither", results[0]["reason"])
+
+	def test_invalid_with_reason_when_both_names_exist(self):
+		current = _make_customer("RenameBothA").name
+		proposed = _make_customer("RenameBothB").name
+		self._rename_rows([[current, proposed, "high", "x", "approved", "", ""]])
+
+		results = rename_customers_from_csv(execute=False)
+
+		self.assertEqual(results[0]["action"], "invalid")
+		self.assertIn("both", results[0]["reason"])
+
+	def test_execute_without_review_site_renames_db_only(self):
+		self._set_review_site(None)
+		old = _make_customer("RenameDbOnly").name
+		new = f"RenamedDbOnly_{frappe.generate_hash(length=8)}"
+		self.addCleanup(
+			lambda: frappe.delete_doc("Customer", new, force=True, ignore_permissions=True)
+			if frappe.db.exists("Customer", new)
+			else None
+		)
+
+		self._rename_rows([[old, new, "high", "x", "approved", "", ""]])
+		merges = self._temp_csv(
+			"CUSTOMER_MERGES_PATH",
+			[
+				"merge_from",
+				"merge_into",
+				"evidence",
+				"merge_considerations",
+				"field_resolutions",
+				"source_client_id",
+			],
+			[["SomeDup", old, "x", "", "", ""]],
+		)
+
+		results = rename_customers_from_csv(execute=True)
+
+		match = next(r for r in results if r["current_name"] == old)
+		self.assertEqual(match["action"], "renamed")
+		self.assertEqual(match["csv_rewrites"], {})
+		self.assertTrue(frappe.db.exists("Customer", new))
+		with open(merges, encoding="utf-8", newline="") as f:
+			self.assertEqual(list(csv.reader(f))[1][1], old)
 
 	def test_execute_rename_rewrites_references_in_all_four_decision_files(self):
+		self._set_review_site(1)
 		old = _make_customer("RenameOld").name
 		new = f"RenamedNew_{frappe.generate_hash(length=8)}"
 		self.addCleanup(

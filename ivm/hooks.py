@@ -402,13 +402,18 @@ doc_events = {
 		"on_update": "ivm.integrations.wiki.content_webhook.on_wiki_document_update",
 	},
 	"CRM Deal": {
-		"on_update": "ivm.deployments.event_handlers.deal.on_update",
+		"on_update": [
+			"ivm.deployments.event_handlers.deal.on_update",
+			"ivm.integrations.hubspot.customer_resolution.on_deal_customer_set",
+			"ivm.integrations.hubspot.customer_resolution.on_deal_status_leaves_won",
+		],
 		"before_test_insert": "ivm.deployments.event_handlers.deal.ensure_deployment_location_for_test",
 	},
 	"Project": {
 		"before_validate": "ivm.deployments.event_handlers.project.before_validate",
 		"validate": "ivm.deployments.event_handlers.project.validate",
 		# "after_insert": "ivm.deployments.event_handlers.project.after_insert",
+		"on_update": "ivm.integrations.hubspot.customer_resolution.on_project_customer_set",
 	},
 	"Stock Entry": {
 		"validate": "ivm.warehouse.event_handlers.stock_entry.validate",
@@ -417,6 +422,16 @@ doc_events = {
 	},
 	"Service Quote": {
 		"on_submit": "ivm.client_portal.event_handlers.service_quote.on_submit",
+	},
+	"Customer": {
+		"onload": [
+			"ivm.customer_consolidation.customer_form.load_icorp_clients",
+			"ivm.integrations.hubspot.customer_resolution.load_hubspot_companies",
+		],
+	},
+	"CRM Organization": {
+		"validate": "ivm.integrations.hubspot.customer_resolution.validate_org",
+		"on_update": "ivm.integrations.hubspot.customer_resolution.on_org_customer_set",
 	},
 }
 
@@ -441,9 +456,9 @@ scheduler_events = {
 	# "all": [
 	# "ivm.tasks.all"
 	# ],
-	# "daily": [
-	# "ivm.tasks.daily"
-	# ],
+	"daily": [
+		"ivm.customer_consolidation.apply.sync_icorp_client_links",
+	],
 	"hourly": [
 		# Catch inbound reply emails that HubSpot does not surface via webhooks.
 		"ivm.integrations.hubspot.scheduled_tasks.sync_inbound_emails",

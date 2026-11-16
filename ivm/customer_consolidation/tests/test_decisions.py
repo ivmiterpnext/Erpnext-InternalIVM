@@ -15,6 +15,7 @@ from ivm.customer_consolidation.decisions import (
 	upsert_distinct_pairs,
 	validate_client_assignments,
 	validate_customer_merges,
+	validate_customer_renames,
 	validate_record_reassignments,
 )
 from ivm.customer_consolidation.dry_run import build_client_customer_matches
@@ -186,6 +187,50 @@ class TestValidateRecordReassignments(ERPNextTestSuite):
 		)
 		self.assertEqual(results[0]["errors"], [])
 		self.assertEqual(results[0]["resolved_field"], "account")
+
+
+class TestValidateCustomerRenames(ERPNextTestSuite):
+	"""validate_customer_renames"""
+
+	def _row(self, current, proposed, depends_on_merge=""):
+		return {
+			"current_name": current,
+			"proposed_name": proposed,
+			"status": "approved",
+			"depends_on_merge": depends_on_merge,
+		}
+
+	def test_pending_when_current_exists_and_proposed_does_not(self):
+		results = validate_customer_renames([self._row("A", "B")], {"A"})
+		self.assertEqual(results[0]["rename_status"], "pending")
+		self.assertEqual(results[0]["reason"], "")
+
+	def test_already_applied_when_only_proposed_exists(self):
+		results = validate_customer_renames([self._row("Gone", "B")], {"B"})
+		self.assertEqual(results[0]["rename_status"], "already_applied")
+
+	def test_invalid_when_neither_exists(self):
+		results = validate_customer_renames([self._row("A", "B")], set())
+		self.assertEqual(results[0]["rename_status"], "invalid")
+		self.assertIn("neither", results[0]["reason"])
+
+	def test_invalid_when_both_exist(self):
+		results = validate_customer_renames([self._row("A", "B")], {"A", "B"})
+		self.assertEqual(results[0]["rename_status"], "invalid")
+		self.assertIn("both", results[0]["reason"])
+
+	def test_invalid_when_proposed_empty(self):
+		results = validate_customer_renames([self._row("A", "")], {"A"})
+		self.assertEqual(results[0]["rename_status"], "invalid")
+		self.assertIn("proposed_name is empty", results[0]["reason"])
+
+	def test_depends_on_merge_does_not_affect_status(self):
+		results = validate_customer_renames([self._row("A", "B", depends_on_merge="true")], {"A"})
+		self.assertEqual(results[0]["rename_status"], "pending")
+
+	def test_csv_status_column_left_untouched(self):
+		results = validate_customer_renames([self._row("A", "B")], {"A"})
+		self.assertEqual(results[0]["status"], "approved")
 
 
 class TestApplyMergeMap(ERPNextTestSuite):

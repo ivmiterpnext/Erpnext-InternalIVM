@@ -1,5 +1,7 @@
 """Integration tests for ivm.warehouse.services.pick_list"""
 
+import random
+
 import frappe
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -40,6 +42,29 @@ def _seed_stock(item_code, warehouse=WAREHOUSE, qty=100, rate=10):
 		stock_entry_type="Material Receipt",
 	)
 	se.submit()
+
+
+def _deployment_customer_with_client():
+	"""Customer with one active own iCorp client, so a Deployment Project validates on save."""
+	uid = frappe.generate_hash(length=8)
+	customer = frappe.get_doc(
+		{
+			"doctype": "Customer",
+			"customer_name": f"Deployment Cust {uid}",
+			"customer_group": "_Test Customer Group",
+			"territory": "_Test Territory",
+		}
+	).insert(ignore_permissions=True)
+	client = frappe.get_doc(
+		{
+			"doctype": "iCorp Client Link",
+			"icorp_client_id": str(random.randint(700_000_000, 799_999_999)),
+			"client_name": f"Deployment Client {uid}",
+			"customer": customer.name,
+			"is_active": 1,
+		}
+	).insert(ignore_permissions=True)
+	return customer.name, client.name
 
 
 class TestCreatePickList(ERPNextTestSuite):
@@ -373,11 +398,14 @@ class TestGetRelatedProject(ERPNextTestSuite):
 
 	def test_returns_project_when_warehouse_request_links_pick_list(self):
 		name = create_pick_list(COMPANY)
+		customer, client = _deployment_customer_with_client()
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
 				"project_name": "Test Project For Pick List Cost Export",
 				"company": COMPANY,
+				"customer": customer,
+				"icorp_client_id": client,
 			}
 		).insert(ignore_permissions=True)
 		wr = frappe.get_doc(
@@ -451,11 +479,14 @@ class TestResolvePickListLabel(ERPNextTestSuite):
 
 	def test_falls_back_to_related_project_when_no_machine_name(self):
 		name = create_pick_list(COMPANY)
+		customer, client = _deployment_customer_with_client()
 		project = frappe.get_doc(
 			{
 				"doctype": "Project",
 				"project_name": "Test Project For Pick List Label",
 				"company": COMPANY,
+				"customer": customer,
+				"icorp_client_id": client,
 			}
 		).insert(ignore_permissions=True)
 		wr = frappe.get_doc(

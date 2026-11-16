@@ -1,11 +1,11 @@
-"""One-time removal of 13 Customer fields that were typed in during the 2023 Salesforce import
+"""One-time removal of 14 Customer fields that were typed in during the 2023 Salesforce import
 and are no longer read by anything except the Customer form itself (checked: no Server Script,
 Client Script, report, print format, number card, dashboard chart, or fetch_from reads any of
 them). Backs up every non-empty value to a CSV in private files before dropping anything, copies
 total_client_employees into employees where employees is blank (employees is kept current by
 provisioning and stays), then deletes the Custom Field records, the unused Accounts Audit report,
 and the database columns. Safe to run repeatedly — each step checks first and is a no-op once
-done. Registered in patches.txt (post_model_sync)."""
+done. NOT registered in patches.txt."""
 
 import csv
 import os

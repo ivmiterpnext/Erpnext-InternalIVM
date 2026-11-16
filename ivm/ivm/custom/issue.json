@@ -3580,7 +3580,7 @@
    "read_only_depends_on": null,
    "report_hide": 0,
    "reqd": 0,
-   "search_index": 0,
+   "search_index": 1,
    "set_only_once": 0,
    "show_dashboard": 0,
    "sort_options": 0,

@@ -6,7 +6,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 from ivm.deployments.services.provision_project_from_deal import create_projects_from_deal
 
 
-def _make_deal(organization=None, custom_customer=None, custom_master_customer=None, contacts=None):
+def _make_deal(organization=None, custom_customer=None, contacts=None):
 	"""Helper to create a CRM Deal for testing"""
 	if not frappe.db.exists("CRM Deal Status", "Qualification"):
 		frappe.get_doc({"doctype": "CRM Deal Status", "status": "Qualification"}).insert(
@@ -18,7 +18,6 @@ def _make_deal(organization=None, custom_customer=None, custom_master_customer=N
 			"status": "Qualification",
 			"organization": organization,
 			"custom_customer": custom_customer,
-			"custom_master_customer": custom_master_customer,
 			"contacts": contacts or [],
 			"custom_hubspot_deal_name": f"Test Deal {frappe.generate_hash(length=8)}",
 		}
@@ -42,8 +41,8 @@ def _make_location(deal_name, hubspot_site_id=None, wrap_type=None, locale=None,
 	return doc
 
 
-class TestMasterCustomerProvisioning(ERPNextTestSuite):
-	"""Test that CRM Deal's custom_master_customer is carried to created Projects"""
+class TestWonDealProjectPartner(ERPNextTestSuite):
+	"""Projects get a partner only from an iCorp parent client, never from a HubSpot master link"""
 
 	@classmethod
 	def setUpClass(cls):
@@ -60,8 +59,8 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 				}
 			).insert(ignore_permissions=True)
 
-	def test_master_customer_carried_to_project(self):
-		"""Master customer from deal should be set on created project"""
+	def test_master_customer_not_used_as_partner(self):
+		"""A deal's legacy master customer is not written to the created Project as partner"""
 		# Ensure a non-group customer group exists
 		if not frappe.db.exists("Customer Group", "_Test Customer Group"):
 			frappe.get_doc(
@@ -83,15 +82,6 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 			}
 		).insert(ignore_permissions=True)
 
-		master_customer = frappe.get_doc(
-			{
-				"doctype": "Customer",
-				"customer_name": f"Master Client {uid}",
-				"customer_type": "Company",
-				"customer_group": "_Test Customer Group",
-			}
-		).insert(ignore_permissions=True)
-
 		# Create a CRM Deal Status (required for deal creation)
 		if not frappe.db.exists("CRM Deal Status", "Won"):
 			frappe.get_doc(
@@ -108,10 +98,21 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 				"doctype": "CRM Deal",
 				"status": "Qualification",
 				"custom_customer": primary_customer.name,
-				"custom_master_customer": master_customer.name,
 				"custom_hubspot_deal_name": f"Deal {uid}",
 			}
 		).insert(ignore_permissions=True)
+
+		# Legacy master link still present on the deal: it must not become the Project's partner
+		master_customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": f"Master Client {uid}",
+				"customer_type": "Company",
+				"customer_group": "_Test Customer Group",
+			}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("CRM Deal", deal.name, "custom_master_customer", master_customer.name)
+		deal.reload()
 
 		# Create a Deployment Location linked to the deal
 		frappe.get_doc(
@@ -126,17 +127,17 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 		deal.status = "Won"
 		deal.save(ignore_permissions=True)
 
-		# Verify the created project has the master customer
+		# Verify the created project has no partner
 		projects = frappe.db.get_list(
 			"Project",
 			filters={"customer": primary_customer.name, "project_type": "Deployment"},
-			fields=["name", "custom_master_customer"],
+			fields=["name", "partner_customer"],
 		)
 		self.assertEqual(len(projects), 1)
-		self.assertEqual(projects[0]["custom_master_customer"], master_customer.name)
+		self.assertFalse(projects[0]["partner_customer"])
 
-	def test_no_master_customer_leaves_field_empty(self):
-		"""Project should have empty custom_master_customer when deal has none"""
+	def test_no_icorp_client_leaves_partner_empty(self):
+		"""Project has empty partner_customer when the Customer has no iCorp client"""
 		# Ensure a non-group customer group exists
 		if not frappe.db.exists("Customer Group", "_Test Customer Group"):
 			frappe.get_doc(
@@ -168,7 +169,7 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 				}
 			).insert(ignore_permissions=True)
 
-		# Create a CRM Deal WITHOUT custom_master_customer (status not Won yet)
+		# Create a CRM Deal (status not Won yet)
 		deal = frappe.get_doc(
 			{
 				"doctype": "CRM Deal",
@@ -191,17 +192,17 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 		deal.status = "Won"
 		deal.save(ignore_permissions=True)
 
-		# Verify the created project has empty custom_master_customer
+		# Verify the created project has empty partner_customer
 		projects = frappe.db.get_list(
 			"Project",
 			filters={"customer": primary_customer.name, "project_type": "Deployment"},
-			fields=["name", "custom_master_customer"],
+			fields=["name", "partner_customer"],
 		)
 		self.assertEqual(len(projects), 1)
-		self.assertFalse(projects[0]["custom_master_customer"])
+		self.assertFalse(projects[0]["partner_customer"])
 
-	def test_master_customer_applied_to_all_locations(self):
-		"""Master customer should be applied to all projects created from multiple locations"""
+	def test_all_locations_get_projects_without_partner(self):
+		"""Every Project created from multiple locations gets no partner when no iCorp client is set"""
 		# Ensure a non-group customer group exists
 		if not frappe.db.exists("Customer Group", "_Test Customer Group"):
 			frappe.get_doc(
@@ -223,15 +224,6 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 			}
 		).insert(ignore_permissions=True)
 
-		master_customer = frappe.get_doc(
-			{
-				"doctype": "Customer",
-				"customer_name": f"Master Client 2 {uid}",
-				"customer_type": "Company",
-				"customer_group": "_Test Customer Group",
-			}
-		).insert(ignore_permissions=True)
-
 		# Create a CRM Deal Status
 		if not frappe.db.exists("CRM Deal Status", "Won"):
 			frappe.get_doc(
@@ -248,7 +240,6 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 				"doctype": "CRM Deal",
 				"status": "Qualification",
 				"custom_customer": primary_customer.name,
-				"custom_master_customer": master_customer.name,
 				"custom_hubspot_deal_name": f"Deal {uid}",
 			}
 		).insert(ignore_permissions=True)
@@ -274,15 +265,15 @@ class TestMasterCustomerProvisioning(ERPNextTestSuite):
 		deal.status = "Won"
 		deal.save(ignore_permissions=True)
 
-		# Verify both created projects have the master customer
+		# Verify both created projects have no partner
 		projects = frappe.db.get_list(
 			"Project",
 			filters={"customer": primary_customer.name, "project_type": "Deployment"},
-			fields=["name", "custom_master_customer"],
+			fields=["name", "partner_customer"],
 		)
 		self.assertEqual(len(projects), 2)
 		for project in projects:
-			self.assertEqual(project["custom_master_customer"], master_customer.name)
+			self.assertFalse(project["partner_customer"])
 
 
 class TestFlatFieldMapping(ERPNextTestSuite):
@@ -348,14 +339,13 @@ class TestPrimaryContactAndCustomerCopying(ERPNextTestSuite):
 		project = frappe.get_doc("Project", created[0])
 		self.assertEqual(project.contact_name, contact.name)
 
-	def test_customer_and_icorp_client_id_copied(self):
+	def test_customer_copied_onto_project(self):
 		customer = frappe.get_doc(
 			{
 				"doctype": "Customer",
 				"customer_name": frappe.generate_hash(length=10),
 				"customer_group": "_Test Customer Group",
 				"territory": "_Test Territory",
-				"icorp_client_id": "ICORP-999",
 			}
 		)
 		customer.insert(ignore_permissions=True)
@@ -366,7 +356,43 @@ class TestPrimaryContactAndCustomerCopying(ERPNextTestSuite):
 		created = create_projects_from_deal(deal.name)
 		project = frappe.get_doc("Project", created[0])
 		self.assertEqual(project.customer, customer.name)
-		self.assertEqual(project.client_id, "ICORP-999")
+
+	def test_icorp_client_id_auto_populated_when_customer_has_single_client(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": frappe.generate_hash(length=10),
+				"customer_group": "_Test Customer Group",
+				"territory": "_Test Territory",
+			}
+		)
+		customer.insert(ignore_permissions=True)
+		self.addCleanup(
+			lambda: frappe.delete_doc("Customer", customer.name, force=True, ignore_permissions=True)
+		)
+
+		client = frappe.get_doc(
+			{
+				"doctype": "iCorp Client Link",
+				"icorp_client_id": "100010",
+				"client_name": "Test Deal Client",
+				"customer": customer.name,
+				"is_active": 1,
+			}
+		)
+		client.insert(ignore_permissions=True)
+		self.addCleanup(
+			lambda: frappe.delete_doc("iCorp Client Link", client.name, force=True, ignore_permissions=True)
+		)
+
+		deal = _make_deal()
+		frappe.db.set_value("CRM Deal", deal.name, "custom_customer", customer.name)
+		_make_location(deal.name)
+
+		created = create_projects_from_deal(deal.name)
+		project = frappe.get_doc("Project", created[0])
+		self.assertEqual(project.customer, customer.name)
+		self.assertEqual(project.icorp_client_id, "100010")
 
 
 class TestDuplicateSkipByHubspotSiteId(ERPNextTestSuite):
@@ -382,18 +408,31 @@ class TestDuplicateSkipByHubspotSiteId(ERPNextTestSuite):
 		second = create_projects_from_deal(deal.name)
 		self.assertEqual(len(second), 0)
 
-	def test_no_hubspot_site_id_second_call_hits_duplicate_name(self):
-		# The dup-skip check in _create_project_for_location is keyed
-		# entirely on hubspot_site_id. Without one, project_name is
-		# deterministic from site_name + deal name with nothing else to
-		# differentiate a second call, so it collides on Project's unique
-		# project_name constraint instead of skipping gracefully -- this
-		# documents that current, real limitation rather than a clean skip.
+	def test_no_hubspot_site_id_second_call_skips_same_named_project(self):
+		"""Without hubspot_site_id, a second call skips the location whose Project (same deal and
+		generated project_name) already exists, instead of colliding on the unique project_name."""
 		deal = _make_deal()
 		_make_location(deal.name)
 
 		first = create_projects_from_deal(deal.name)
 		self.assertEqual(len(first), 1)
 
-		with self.assertRaises(frappe.UniqueValidationError):
-			create_projects_from_deal(deal.name)
+		second = create_projects_from_deal(deal.name)
+		self.assertEqual(second, [])
+		self.assertEqual(frappe.db.count("Project", {"custom_crm_deal": deal.name}), 1)
+
+
+class TestCrmDealLinkOnProjects(ERPNextTestSuite):
+	"""Projects carry custom_crm_deal directly, without needing a HubSpot deal ID"""
+
+	def test_projects_created_without_hubspot_id_link_crm_deal(self):
+		deal = _make_deal()
+		self.assertFalse(deal.custom_hubspot_deal_id)
+		_make_location(deal.name)
+		_make_location(deal.name)
+
+		created = create_projects_from_deal(deal.name)
+
+		self.assertEqual(len(created), 2)
+		for name in created:
+			self.assertEqual(frappe.db.get_value("Project", name, "custom_crm_deal"), deal.name)

@@ -107,11 +107,11 @@ def create_build_requests_from_detail_rows(project_name: str, detail_table: str)
 	if not customer_name:
 		frappe.throw("Customer is not set on this Project. Cannot look up machines in iCorp.")
 
-	client_id = frappe.db.get_value("Customer", customer_name, "icorp_client_id")
-	if not client_id:
+	project_client_id = project.get("icorp_client_id")
+	if not project_client_id:
 		frappe.throw(
-			f'Customer "{customer_name}" does not have an iCorp Client ID. '
-			"Please set it on the Customer record before generating build requests."
+			"iCorp Client is not set on this deployment. "
+			"Please set it on the Project before generating build requests."
 		)
 
 	fields_to_copy = _COMMON_DETAIL_FIELDS + config.extra_fields
@@ -135,7 +135,8 @@ def create_build_requests_from_detail_rows(project_name: str, detail_table: str)
 			skipped += 1
 			continue
 
-		icorp_data = fetch_machine(machine_name, client_id)
+		row_client_id = row.get("icorp_client_id") or project_client_id
+		icorp_data = fetch_machine(machine_name, row_client_id)
 		if icorp_data is None:
 			failed.append(machine_name)
 			continue

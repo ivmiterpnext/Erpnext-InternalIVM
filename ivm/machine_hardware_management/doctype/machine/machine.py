@@ -14,16 +14,18 @@ from ivm.machine_hardware_management.utils.data_utils import set_attrs_from_dict
 def _resolve_customer_name(icorp_client_name):
 	"""Map an iCorp client name to a Frappe Customer name.
 
-	Tries an exact match first, then falls back to looking up by
-	icorp_client_id.  Returns the iCorp name as-is if no Customer is found
-	(the Link field will simply not resolve to a clickable link).
+	Tries an exact match first, then falls back to looking up the iCorp Client
+	Link record for this value (its name IS the iCorp client ID, when a numeric
+	value was passed instead of a Customer name) and reading its assigned
+	customer. Returns the iCorp name as-is if no Customer is found (the Link
+	field will simply not resolve to a clickable link).
 	"""
 	if not icorp_client_name:
 		return icorp_client_name
 	if frappe.db.exists("Customer", icorp_client_name):
 		return icorp_client_name
 	# Fallback: look up by iCorp client ID if a numeric value was passed
-	customer = frappe.db.get_value("Customer", {"icorp_client_id": icorp_client_name}, "name")
+	customer = frappe.db.get_value("iCorp Client Link", icorp_client_name, "customer")
 	return customer or icorp_client_name
 
 

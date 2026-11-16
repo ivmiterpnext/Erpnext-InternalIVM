@@ -609,7 +609,7 @@ client_id,customer,evidence
 1062,Apogee Viracon Owatonna MN,Manual decision
 930,"Apogee - TrueVue  Faribault, MN",Manual decision
 956,Magna,Manual decision
-1689,DXC - Philips,Manual decision
+1689,Philips,Manual decision
 1109,DXC,Manual decision
 1719,Hayden Industrial,Manual decision
 1011,DXC,Manual decision
@@ -847,8 +847,8 @@ client_id,customer,evidence
 1741,Oxford University Press,partner-managed by Cognizant (client 1245) (active-client review 2026-10-23)
 1734,Sargent Metals,partner-managed by TRUMPF (client 1483) (active-client review 2026-10-23)
 1765,Sig Sauer,partner-managed by Bell Techlogix (client 1426) (active-client review 2026-10-23)
-1737,AAA,no existing Customer; distinct from the unrelated disabled 'AAA Cooper Transportation (TV)' (active-client review 2026-10-23)
-1736,AAA,no existing Customer; distinct from the unrelated disabled 'AAA Cooper Transportation (TV)' (active-client review 2026-10-23)
+1737,Triple A,AAA iCorp client (master 1744); Triple A is the existing Customer (PROJ-1830/1831)
+1736,Triple A,AAA iCorp client (master 1744); Triple A is the existing Customer (PROJ-1830/1831)
 1596,"PC Specialists, Inc, d/b/a Technology Integration Group",no existing Customer; using the full registered name from iCorp (active-client review 2026-10-23)
 1744,Worldwide TechServices,"no existing Customer; appears as a managing-partner master on AAA's clients but is itself a real, separate end customer (active-client review 2026-10-23)"
 635,Conney Safety,exact name match to iCorp client 'Conney Safety Products' (inactive)
