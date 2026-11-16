@@ -172,13 +172,61 @@ fixtures = [
 		"dt": "Client Script",
 		"filters": [["module", "=", "IVM"]],
 	},
-	{"dt": "Workspace", "filters": [["module", "is", "not set"], ["app", "is", "not set"]]},
+	{
+		"dt": "Workspace",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Permission Change",
+					"Onboarding",
+					"Receivable",
+					"Offboarding",
+					"Reconfiguration",
+					"Change Request",
+					"Desktop Support",
+					"Support Queue",
+					"Vending Management",
+					"Clients",
+					"Warehouse Management",
+					"IT",
+					"Warehousing",
+					"Deployments",
+					"Warehouse Requests",
+				],
+			]
+		],
+	},
 	# NOTE: "Workspace Shortcut" is intentionally NOT declared as its own top-level
 	# fixture here. Workspace's own fixture export already embeds its full
 	# "shortcuts" child table via as_dict(), so a separate standalone declaration
 	# would cause every sync_fixtures() call to insert two full copies of every
 	# shortcut (see ivm.patches.dedupe_workspace_shortcuts for the historical fix).
-	{"dt": "Desktop Icon", "filters": [["standard", "=", 0]]},
+	{
+		"dt": "Desktop Icon",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Warehouse Requests",
+					"Vending Management",
+					"Support Queue",
+					"Desktop Support",
+					"Change Request",
+					"Reconfiguration",
+					"Offboarding",
+					"Receivable",
+					"Onboarding",
+					"Permission Change",
+					"IT",
+					"Warehousing",
+					"Deployments",
+				],
+			]
+		],
+	},
 	{
 		"dt": "Workspace Sidebar",
 		"filters": [
