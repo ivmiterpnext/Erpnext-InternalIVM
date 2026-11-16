@@ -214,16 +214,62 @@ No parallel-run period — v1 signature verification (SHA-256 client-secret+body
 
 ---
 
-## Teardown deploy: drop legacy Customer / CRM Deal / Project master-client and import fields
+## Teardown deploy: remove the customer consolidation package and its temporary scaffolding
 
-**Context (2026-11):** Legacy fields are still on the doctypes. Remove them in one deploy, with their readers changed in the same commit.
+**Precondition: do not start this until the prod consolidation run (`ivm.customer_consolidation.run.run_consolidation`, execute=True) has completed on prod with a clean `RESULT:` line, or with only expected/explained problem rows.** This deploy removes the tooling that run depends on.
 
-- **Drop `Customer.icorp_client_id`.** Remove the field from `ivm/ivm/custom/customer.json`, drop the DB column, and update its readers together: `apply_customer_record_ids`, `set_customer_icorp_client_ids`, and `dry_run.gather_existing_customer_icorp_ids` (`ivm/customer_consolidation/`).
-- **Finish `drop_customer_import_stat_fields`** (`ivm/customer_consolidation/patches/drop_customer_import_stat_fields.py`): remove its 14 fields from `customer.json` and `field_order`, delete the Accounts Audit report, clean up `ivm/public/js/doctype/Customer.js`, then register the patch.
+### 1. Relocate the permanent pieces out of `ivm/customer_consolidation/` first
+Two things still live in the package but are permanent, ongoing functionality — move them out before deleting the package, and update their two callers in `ivm/hooks.py`:
+- `sync_icorp_client_links` (apply.py) → new home, e.g. `ivm/integrations/icorp/client_sync.py`. Update the `scheduler_events.daily` entry in `hooks.py`.
+- `load_icorp_clients` (customer_form.py) → new home, e.g. `ivm/integrations/icorp/customer_form.py`. Update the `Customer.onload` entry in `hooks.py`.
+
+### 2. Delete dead code already sitting in `apply.py`
+`run.py`'s phases call the underlying functions (`execute_merges`, `apply_assignments`, etc.) directly and check status per-row; nothing calls the old hash-gated wrapper functions anymore. Delete, once confirmed unused:
+- `apply_on_migrate`, `apply_customer_disables_on_migrate`, `drop_legacy_customer_icorp_client_id` (full function bodies, apply.py)
+- The two hash constants/keys they manage: `_APPLIED_HASH_KEY` ("customer_consolidation_applied_hash") and `_DISABLE_APPLIED_HASH_KEY` ("customer_consolidation_disable_hash"), and `_decisions_file_hash()` if nothing else uses it.
+- Clear any leftover `Default` rows for those two keys on every site via a guarded one-off patch or manual `frappe.db.set_default(key, None)` (check first; dev.local had none as of 2026-11-15, but prod may have set them during earlier gated-migrate attempts before this redesign).
+
+### 3. Strip `icorp_client_link.py` down to its permanent operational methods
+Permanent (keep): `icorp_client_query`, `lookup_icorp_client`, `add_icorp_client_to_customer`, `remove_icorp_client_from_customer`, `get_child_clients`, `get_customer_contacts`, `create_icorp_client_for_customer`, `_check_live_assignment_permission`, `_fetch_icorp_client`, `_upsert_icorp_client_identity`, `_ensure_parent_client_synced`.
+
+Remove (review-only, confirmed present as of 2026-11-15): `_is_review_site`, `is_review_site`, `_as_list`, `bulk_accept_proposal`, `bulk_assign_customer`, `export_decisions`, `preview_pending_decisions`, `execute_pending_decisions`, `get_merge_conflicts`, `save_merge_resolutions`, `create_customer_for_client`, `_write_decisions_for_client`, and the `on_update` write-back call to it. Also remove the review-site validate guard (the block that throws "Decisions are made on the review site only" when `customer`/`related_customers` change outside `flags.live_assignment`).
+
+### 4. Remove the review-only schema from `iCorp Client Link`
+Fields to delete (confirmed present as of 2026-11-15): `section_break_proposal`, `review_status`, `match_status`, `proposed_customer`, `parent_customer`, `has_multiple_customer_candidates`, `duplicate_name_siblings`, `match_evidence`, `related_customers`. This needs a guarded patch (delete the Custom Field/DocField records, `sql_ddl` drop the columns — these are core fields on a custom doctype, confirm the right mechanism, not Custom Fields).
+Delete the `iCorp Client Link Customer Candidate` child doctype entirely (`ivm/machine_hardware_management/doctype/icorp_client_link_customer_candidate/`) — delete the DocType record and drop its table via a guarded patch.
+
+### 5. Strip the review-only UI
+`ivm/machine_hardware_management/doctype/icorp_client_link/icorp_client_link_list.js` and `icorp_client_link.js`: remove buttons/menu items wired to the whitelisted methods removed in step 3 (Accept proposal, Assign to Customer bulk action, Export decisions, Preview/Execute pending decisions, merge-conflict resolution UI, Create Customer for client).
+
+### 6. Delete the package
+`ivm/customer_consolidation/` in full: `apply.py`, `decisions.py`, `run.py`, `dry_run.py`, `merge_analysis.py`, `disposition.py`, `orphan_customers.py`, `unassigned_icorp_clients.py`, `customer_form.py` (after step 1 relocates what it needs), `decisions/*.csv`, `IcorpClients.csv`, `low_link_customers_report_2026-10-14.csv`, `tests/`, `patches/`.
+Remove the two remaining `ivm/hooks.py` references once step 1's relocation is done (there should be nothing else; confirmed only 2 lines reference `customer_consolidation` in hooks.py as of 2026-11-15).
+
+### 7. Site config / environment cleanup
+Remove `customer_consolidation_review_site` from `sites/dev.local/site_config.json` (confirmed set to `1` as of 2026-11-15). Confirm prod never had this key (it shouldn't — prod only ever runs the operator script, never the review UI).
+
+### 8. Field/column removals (unchanged from before, still applies)
+- **Drop `Customer.icorp_client_id`.** Remove the field from `ivm/ivm/custom/customer.json`, drop the DB column, and update its readers together: `apply_customer_record_ids`, `set_customer_icorp_client_ids`, and `dry_run.gather_existing_customer_icorp_ids` — all three are being deleted in step 6 anyway (they're in the package), so this is really just: confirm nothing outside the package reads `Customer.icorp_client_id` before dropping it, then drop the field + column via a guarded patch.
+- **Finish `drop_customer_import_stat_fields`**: remove its 14 fields from `customer.json` and `field_order`, delete the Accounts Audit report, clean up `ivm/public/js/doctype/Customer.js`, then register the patch. (This file lives in `ivm/customer_consolidation/patches/` — move it out before step 6 deletes the package, or recreate it as a standalone patch at this point instead.)
 - **Drop the CRM Deal and Project `custom_master_*` fields.**
-  - Register `ivm.deployments.patches.drop_project_custom_master_customer` in `ivm/patches.txt`. It copies remaining `Project.custom_master_customer` into `partner_customer` (skipping rows where it equals the Project's `customer`), then drops the field and column. It was deliberately not registered in deploy 1 because `partner_customer` does not exist at patch time on prod.
-  - Also drop CRM Deal `custom_master_customer` / `custom_master_organization`. Prod has 0 values in both.
-- **Remove the `ivm/customer_consolidation/` package and the `iCorp Client Link` review fields** once the consolidation is complete and no longer needed.
+  - Register `ivm.deployments.patches.drop_project_custom_master_customer` in `ivm/patches.txt`. It copies remaining `Project.custom_master_customer` into `partner_customer` (skipping rows where it equals the Project's `customer`), then drops the field and column. Deliberately not registered in deploy 1 because `partner_customer` doesn't exist at patch time on prod before deploy 1's `sync_customizations` runs; it exists by the time this teardown deploy's migrate runs.
+  - Also drop CRM Deal `custom_master_customer` / `custom_master_organization`. Prod had 0 values in both as of the 2026-11-15 rehearsal.
+
+### 9. Docs
+- **Shrink `docs/agent/customer-consolidation.md`** to a short historical note: what was done, decisions that still matter (Philips stays separate, "(TV)" meaning, the AAA/Triple A and USPS fixes), and the permanent model this left behind (`iCorp Client Link.customer`, `CRM Organization.custom_customer`, the HubSpot auto-learn/Deal-level-only design in `ivm/integrations/hubspot/customer_resolution.py`). Remove the runbook/script-usage sections — the script is gone.
+- **Update `CLAUDE.md`**: its "Fixtures" section still says the consolidation package was "still entirely uncommitted to git as of 2026-10-12" — now false (committed in `8f59fcd` and later), and the whole paragraph describing the restore-incident risk can be trimmed once the package no longer exists. Update the `docs/agent/customer-consolidation.md` one-line description in the reference-docs index to match its new shrunk content.
+- **Update `docs/agent/restore-from-prod.md`**: Gotcha 3 (the CSV-wipe risk) no longer applies once the package is deleted — note that at the top of the gotcha rather than deleting the incident writeup, since it's useful history.
+- **Add a `docs/agent/changelog.md` entry** for this teardown deploy: date, what was removed, link to this backlog entry's history.
+- Remove this backlog entry itself once the teardown deploy is actually done.
+
+### 10. Verification (dev, then test, then prod)
+- `grep -rn "customer_consolidation" ivm/` returns nothing except `docs/agent/` references.
+- `grep -rn "icorp_client_link_customer_candidate\|match_status\|review_status\|proposed_customer" ivm/machine_hardware_management/` returns nothing (watch for false positives against unrelated fields).
+- `bench migrate` clean on all three sites.
+- iCorp Client Link list/form still load; `lookup_icorp_client`, `add_icorp_client_to_customer`, `remove_icorp_client_from_customer`, `get_child_clients`, `get_customer_contacts`, `create_icorp_client_for_customer` all still work.
+- The daily iCorp sync job runs from its new location (`ivm.integrations.icorp.client_sync.sync_icorp_client_links` or wherever it lands).
+- The Customer form's iCorp tab still loads from its new location.
+- `SHOW COLUMNS FROM tabCustomer` has no `icorp_client_id` or any of the 14 import-stat fields; `SHOW COLUMNS FROM tabProject`/`tabCRM Deal` have no `custom_master_customer`/`custom_master_organization`.
 
 ---
 
