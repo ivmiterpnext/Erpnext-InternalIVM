@@ -1,8 +1,7 @@
 [
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"lNuHB4Rngj\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Permission Change List\",\"col\":3}}]",
+  "content": "[{\"id\": \"lNuHB4Rngj\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Permission Change List\", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -18,6 +17,7 @@
   "links": [],
   "modified": "2026-08-17 20:32:59.621141",
   "module": "Permission Change",
+  "module_onboarding": null,
   "name": "Permission Change",
   "number_cards": [],
   "parent_page": "IT",
@@ -42,13 +42,13 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Permission Change",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"iHkoP3NM1K\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Onboarding List\",\"col\":3}}]",
+  "content": "[{\"id\": \"iHkoP3NM1K\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Onboarding List\", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -64,6 +64,7 @@
   "links": [],
   "modified": "2026-08-17 20:32:59.620260",
   "module": "Onboarding",
+  "module_onboarding": null,
   "name": "Onboarding",
   "number_cards": [],
   "parent_page": "IT",
@@ -88,13 +89,13 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Onboarding",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"btk1Iiq2Xq\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Receivable List\",\"col\":3}}]",
+  "content": "[{\"id\": \"btk1Iiq2Xq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Receivable List\", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -110,6 +111,7 @@
   "links": [],
   "modified": "2026-08-17 20:32:59.622032",
   "module": "Receivable",
+  "module_onboarding": null,
   "name": "Receivable",
   "number_cards": [],
   "parent_page": "IT",
@@ -134,13 +136,13 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Receivable",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"RTEPlYHsdB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Offboarding List\",\"col\":3}}]",
+  "content": "[{\"id\": \"RTEPlYHsdB\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Offboarding List\", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -156,6 +158,7 @@
   "links": [],
   "modified": "2026-08-17 20:32:59.619375",
   "module": "Offboarding",
+  "module_onboarding": null,
   "name": "Offboarding",
   "number_cards": [],
   "parent_page": "IT",
@@ -180,13 +183,13 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Offboarding",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"tSP3c5f3i7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Reconfiguration List\",\"col\":3}}]",
+  "content": "[{\"id\": \"tSP3c5f3i7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Reconfiguration List\", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -202,6 +205,7 @@
   "links": [],
   "modified": "2026-08-17 20:32:59.622938",
   "module": "Reconfiguration",
+  "module_onboarding": null,
   "name": "Reconfiguration",
   "number_cards": [],
   "parent_page": "IT",
@@ -226,13 +230,13 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Reconfiguration",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"udYPpByLE2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Change Request List\",\"col\":3}}]",
+  "content": "[{\"id\": \"udYPpByLE2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Change Request List\", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -248,6 +252,7 @@
   "links": [],
   "modified": "2026-08-17 20:32:59.617470",
   "module": "Change Request",
+  "module_onboarding": null,
   "name": "Change Request",
   "number_cards": [],
   "parent_page": "IT",
@@ -272,13 +277,13 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Change Request",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"gBYtHP_hTe\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Desktop Support List\",\"col\":3}}]",
+  "content": "[{\"id\": \"gBYtHP_hTe\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Desktop Support List\", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -294,6 +299,7 @@
   "links": [],
   "modified": "2026-08-17 20:32:59.618427",
   "module": "Desktop Support",
+  "module_onboarding": null,
   "name": "Desktop Support",
   "number_cards": [],
   "parent_page": "IT",
@@ -318,13 +324,13 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Desktop Support",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"duoIy-6zYx\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Support List\",\"col\":3}}]",
+  "content": "[{\"id\": \"duoIy-6zYx\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support List\", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -340,6 +346,7 @@
   "links": [],
   "modified": "2026-08-17 20:32:59.623827",
   "module": "Support Queue",
+  "module_onboarding": null,
   "name": "Support Queue",
   "number_cards": [],
   "parent_page": "IT",
@@ -364,18 +371,18 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Support Queue",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [
    {
     "chart_name": "Open Vending Management",
     "label": "Open Vending Management"
    }
   ],
-  "content": "[{\"id\":\"1wUDABfGCM\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Open Vending Management\",\"col\":12}},{\"id\":\"z82-_197Ey\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"lb4fjgNRJ4\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Vending Management</b></span>\",\"col\":12}},{\"id\":\"xfO5eTrcz4\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"My Open VM Tickets\",\"col\":4}},{\"id\":\"ZqQ7vPTUvw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Vending Management \",\"col\":4}},{\"id\":\"0N9ugLaCON\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"All Vending Management\",\"col\":4}}]",
+  "content": "[{\"id\": \"1wUDABfGCM\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Open Vending Management\", \"col\": 12}}, {\"id\": \"z82-_197Ey\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"lb4fjgNRJ4\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eVending Management\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"xfO5eTrcz4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Open VM Tickets\", \"col\": 4}}, {\"id\": \"ZqQ7vPTUvw\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Vending Management \", \"col\": 4}}, {\"id\": \"0N9ugLaCON\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"All Vending Management\", \"col\": 4}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -391,6 +398,7 @@
   "links": [],
   "modified": "2026-06-30 06:54:31.301275",
   "module": "Vending Management",
+  "module_onboarding": null,
   "name": "Vending Management",
   "number_cards": [],
   "parent_page": "",
@@ -443,13 +451,13 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Vending Management",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"iqomQoORvo\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"62gEVB7Skt\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Clients\",\"col\":12}},{\"id\":\"AMMEMpC1Wh\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"SXPhK_Y1ud\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Contacts\",\"col\":12}}]",
+  "content": "[{\"id\": \"iqomQoORvo\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"62gEVB7Skt\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Clients\", \"col\": 12}}, {\"id\": \"AMMEMpC1Wh\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"SXPhK_Y1ud\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Contacts\", \"col\": 12}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -616,6 +624,7 @@
   ],
   "modified": "2026-06-30 06:54:31.274526",
   "module": "Clients",
+  "module_onboarding": null,
   "name": "Clients",
   "number_cards": [],
   "parent_page": "",
@@ -636,13 +645,13 @@
   "roles": [],
   "sequence_id": 35.0,
   "shortcuts": [],
+  "standard": 0,
   "title": "Clients",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
-  "content": "[{\"id\":\"G6rRROSGhk\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>S&amp;I Management Dashboard</b></span>\",\"col\":12}},{\"id\":\"h6BwPQUlIU\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"atONJkd9A1\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"My Warehouse Requests\",\"col\":3}},{\"id\":\"TiJZsxUi1d\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"All Open Warehouse Requests\",\"col\":3}},{\"id\":\"VudF1hYZ3o\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Warehouse Request\",\"col\":3}},{\"id\":\"NHrKhH6wmf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"All Warehouse Requests\",\"col\":3}},{\"id\":\"SvGI_DayIy\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"YiVdnV-mhL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Employee Queues</b></span>\",\"col\":12}},{\"id\":\"v8kbeKQDlz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Monte McCarroll\",\"col\":3}},{\"id\":\"RfZYiQZTz2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Will Ott\",\"col\":3}},{\"id\":\"phVmMTUqZq\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sean Whitaker\",\"col\":3}},{\"id\":\"72A_iQrP-Y\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"CDyAEkrO_Z\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports</b></span>\",\"col\":12}},{\"id\":\"dsYf-LD1AB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Weekly Equipment Report \",\"col\":3}}]",
+  "content": "[{\"id\": \"G6rRROSGhk\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eS&amp;I Management Dashboard\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"h6BwPQUlIU\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"atONJkd9A1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Warehouse Requests\", \"col\": 3}}, {\"id\": \"TiJZsxUi1d\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"All Open Warehouse Requests\", \"col\": 3}}, {\"id\": \"VudF1hYZ3o\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Create Warehouse Request\", \"col\": 3}}, {\"id\": \"NHrKhH6wmf\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"All Warehouse Requests\", \"col\": 3}}, {\"id\": \"SvGI_DayIy\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"YiVdnV-mhL\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eEmployee Queues\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"v8kbeKQDlz\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Monte McCarroll\", \"col\": 3}}, {\"id\": \"RfZYiQZTz2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Will Ott\", \"col\": 3}}, {\"id\": \"phVmMTUqZq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sean Whitaker\", \"col\": 3}}, {\"id\": \"72A_iQrP-Y\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"CDyAEkrO_Z\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eReports\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"dsYf-LD1AB\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Weekly Equipment Report \", \"col\": 3}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -658,6 +667,7 @@
   "links": [],
   "modified": "2026-06-30 06:54:31.251022",
   "module": "Warehouse Management",
+  "module_onboarding": null,
   "name": "Warehouse Management",
   "number_cards": [],
   "parent_page": "Warehouse Requests",
@@ -787,11 +797,11 @@
     "url": "https://portal.ivminc.com/app/warehouse-request/view/report/S%26I%20Monte"
    }
   ],
+  "standard": 0,
   "title": "Warehouse Management",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [],
   "content": "[]",
   "custom_blocks": [],
@@ -809,6 +819,7 @@
   "links": [],
   "modified": "2026-06-29 08:52:00.999132",
   "module": "IT",
+  "module_onboarding": null,
   "name": "IT",
   "number_cards": [],
   "parent_page": null,
@@ -818,18 +829,18 @@
   "roles": [],
   "sequence_id": 0.0,
   "shortcuts": [],
+  "standard": 0,
   "title": "IT",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [
    {
     "chart_name": "Stock Value by Item Group",
     "label": "Stock Value by Item Group"
    }
   ],
-  "content": "[{\"id\":\"1cdTNYy-TO\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Stock Value by Item Group\",\"col\":12}},{\"id\":\"WKeeHLcyXI\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Stock Value\",\"col\":4}},{\"id\":\"6nVoOHuy5w\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Warehouses\",\"col\":4}},{\"id\":\"OUex5VED7d\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Active Items\",\"col\":4}},{\"id\":\"3SmmwBbOER\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Masters &amp; Reports</b></span>\",\"col\":12}},{\"id\":\"OAGNH9njt7\",\"type\":\"card\",\"data\":{\"card_name\":\"Items Catalogue\",\"col\":4}},{\"id\":\"jF9eKz0qr0\",\"type\":\"card\",\"data\":{\"card_name\":\"Stock Transactions\",\"col\":4}},{\"id\":\"tyTnQo-MIS\",\"type\":\"card\",\"data\":{\"card_name\":\"Stock Reports\",\"col\":4}},{\"id\":\"dJaJw6YNPU\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"rQf5vK4N_T\",\"type\":\"card\",\"data\":{\"card_name\":\"Serial No and Batch\",\"col\":4}},{\"id\":\"7oM7hFL4v8\",\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"id\":\"ve3L6ZifkB\",\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":4}},{\"id\":\"8Kfvu3umw7\",\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":4}}]",
+  "content": "[{\"id\": \"1cdTNYy-TO\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Stock Value by Item Group\", \"col\": 12}}, {\"id\": \"WKeeHLcyXI\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Stock Value\", \"col\": 4}}, {\"id\": \"6nVoOHuy5w\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Warehouses\", \"col\": 4}}, {\"id\": \"OUex5VED7d\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Active Items\", \"col\": 4}}, {\"id\": \"3SmmwBbOER\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eMasters &amp; Reports\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"OAGNH9njt7\", \"type\": \"card\", \"data\": {\"card_name\": \"Items Catalogue\", \"col\": 4}}, {\"id\": \"jF9eKz0qr0\", \"type\": \"card\", \"data\": {\"card_name\": \"Stock Transactions\", \"col\": 4}}, {\"id\": \"tyTnQo-MIS\", \"type\": \"card\", \"data\": {\"card_name\": \"Stock Reports\", \"col\": 4}}, {\"id\": \"dJaJw6YNPU\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"rQf5vK4N_T\", \"type\": \"card\", \"data\": {\"card_name\": \"Serial No and Batch\", \"col\": 4}}, {\"id\": \"7oM7hFL4v8\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools\", \"col\": 4}}, {\"id\": \"ve3L6ZifkB\", \"type\": \"card\", \"data\": {\"card_name\": \"Key Reports\", \"col\": 4}}, {\"id\": \"8Kfvu3umw7\", \"type\": \"card\", \"data\": {\"card_name\": \"Other Reports\", \"col\": 4}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -1911,6 +1922,7 @@
   ],
   "modified": "2026-06-30 09:09:44",
   "module": "Warehousing",
+  "module_onboarding": null,
   "name": "Warehousing",
   "number_cards": [
    {
@@ -2046,18 +2058,18 @@
     "url": null
    }
   ],
+  "standard": 0,
   "title": "Warehousing",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [
    {
     "chart_name": "Completed Projects",
     "label": "Completed Projects"
    }
   ],
-  "content": "[{\"id\":\"7Mbx6I5JUf\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"fVYsju6dB9\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Completed Projects\",\"col\":12}},{\"id\":\"67w8up7H_0\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Open Projects\",\"col\":4}},{\"id\":\"IFEYSadaYc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Non Completed Tasks\",\"col\":4}},{\"id\":\"VqbqxA0YL1\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Working Hours\",\"col\":4}},{\"id\":\"oGhjvYjfv-\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"TdsgJyG3EI\",\"type\":\"card\",\"data\":{\"card_name\":\"Projects\",\"col\":4}},{\"id\":\"nIc0iyvf1T\",\"type\":\"card\",\"data\":{\"card_name\":\"Time Tracking\",\"col\":4}},{\"id\":\"8G1if4jsQ7\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"o7qTNRXZI8\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+  "content": "[{\"id\": \"7Mbx6I5JUf\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"fVYsju6dB9\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Completed Projects\", \"col\": 12}}, {\"id\": \"67w8up7H_0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Projects\", \"col\": 4}}, {\"id\": \"IFEYSadaYc\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Non Completed Tasks\", \"col\": 4}}, {\"id\": \"VqbqxA0YL1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Working Hours\", \"col\": 4}}, {\"id\": \"oGhjvYjfv-\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eReports &amp; Masters\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"TdsgJyG3EI\", \"type\": \"card\", \"data\": {\"card_name\": \"Projects\", \"col\": 4}}, {\"id\": \"nIc0iyvf1T\", \"type\": \"card\", \"data\": {\"card_name\": \"Time Tracking\", \"col\": 4}}, {\"id\": \"8G1if4jsQ7\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"o7qTNRXZI8\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -2329,6 +2341,7 @@
   ],
   "modified": "2026-06-30 15:16:10",
   "module": "Deployments (Custom)",
+  "module_onboarding": null,
   "name": "Deployments",
   "number_cards": [
    {
@@ -2351,18 +2364,18 @@
   "roles": [],
   "sequence_id": 0.0,
   "shortcuts": [],
+  "standard": 0,
   "title": "Deployments",
   "type": "Workspace"
  },
  {
-  "app": null,
   "charts": [
    {
     "chart_name": "Open Warehouse Requests",
     "label": "Open Warehouse Requests"
    }
   ],
-  "content": "[{\"id\":\"sgyESuuWS2\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Open Warehouse Requests\",\"col\":12}},{\"id\":\"SYIfwnhD42\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"G6rRROSGhk\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Warehouse Requests</b></span>\",\"col\":12}},{\"id\":\"wjueTn4Bn1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"XCAzK1Od1r\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"My Assigned Warehouse Requests\",\"col\":4}},{\"id\":\"VudF1hYZ3o\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Warehouse Request\",\"col\":4}}]",
+  "content": "[{\"id\": \"sgyESuuWS2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Open Warehouse Requests\", \"col\": 12}}, {\"id\": \"SYIfwnhD42\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"G6rRROSGhk\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eWarehouse Requests\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"wjueTn4Bn1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"XCAzK1Od1r\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Assigned Warehouse Requests\", \"col\": 4}}, {\"id\": \"VudF1hYZ3o\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Create Warehouse Request\", \"col\": 4}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -2378,6 +2391,7 @@
   "links": [],
   "modified": "2026-06-30 06:54:31.487500",
   "module": "Warehouse Requests",
+  "module_onboarding": null,
   "name": "Warehouse Requests",
   "number_cards": [],
   "parent_page": "",
@@ -2416,6 +2430,7 @@
     "url": "https://portal.ivminc.com/app/warehouse-request/new-warehouse-request"
    }
   ],
+  "standard": 0,
   "title": "Warehouse Requests",
   "type": "Workspace"
  }
