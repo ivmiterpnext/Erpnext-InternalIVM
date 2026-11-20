@@ -9,7 +9,7 @@ essentially any Customer save:
    on save whenever `customer_group` points at a group-type node, so ~98.6% of this org's
    Customers currently cannot be saved/edited/disabled through the UI at all.
 
-   `create_missing_customers()` in ivm.customer_consolidation.apply already defaults new
+   `create_missing_customers()` in the since-removed consolidation apply module already defaults new
    customer creations to "Commercial" for exactly this reason (see docs/agent/restore-from-prod.md
    Gotcha 4) — this patch applies the same default retroactively to existing customers.
 
