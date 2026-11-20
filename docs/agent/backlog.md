@@ -227,3 +227,27 @@ No parallel-run period — v1 signature verification (SHA-256 client-secret+body
 ## Workspace / Desktop Icon / Workspace Sidebar fixtures use name allowlists
 
 **Context:** `ivm/hooks.py` `fixtures` filters for `Workspace`, `Desktop Icon`, and `Workspace Sidebar` are name allowlists. A new workspace or desktop icon is not exported or synced until its name is added to those lists in `hooks.py`.
+
+---
+
+## Customer.icorp_client_id still load-bearing — cannot be dropped until HubSpot backfill is rewired
+
+**Context (2026-11-20):** During the customer-consolidation teardown, `Customer.icorp_client_id` was assumed to be read only inside the now-deleted `customer_consolidation` package. It is not. `ivm/integrations/hubspot/patches/backfill_deals_from_hubspot.py` still reads and writes it:
+- `_ensure_customer_linked()` resolves a Won HubSpot deal's `client_id` property to a Customer via `frappe.db.get_value("Customer", {"icorp_client_id": hs_client_id}, "name")` (line ~193), then falls back to `_build_icorp_client_map()` (iCorp `Client` API, matched by name) and backfills `Customer.icorp_client_id` when missing (line ~200).
+- The patch is written to be re-run manually (resume after HubSpot rate-limit stops, backfill newly created deals), so it is not dead code just because it lives under `patches/`.
+
+**Confirmed facts:**
+- `ivm/patches.txt` line 25 registers `ivm.integrations.hubspot.patches.backfill_deals_from_hubspot`, so it auto-runs once per site through Patch Log on `bench migrate`. Manual `bench execute ...backfill_deals_from_hubspot.execute` runs are re-runs on top of that one-shot.
+- The live Deal-level resolver already uses the permanent model. `ivm/integrations/hubspot/deal_handler.py::_apply_client_id` (lines ~135-156) does `frappe.db.get_value("iCorp Client Link", str(value), "customer")`, since the Link's name is the iCorp client ID. The backfill does not call it.
+- Correction to the original plan: `ivm/integrations/hubspot/customer_resolution.py` does **not** use `iCorp Client Link`. It resolves through `CRM Deal.custom_customer` / `CRM Organization.custom_customer` only. The reusable iCorp-link lookup is the one in `deal_handler.py::_apply_client_id`, which is private and tied to the deal doc. Extract it into a shared function before the backfill calls it.
+
+**Before `Customer.icorp_client_id` can be dropped:**
+1. Rewire `_ensure_customer_linked` to resolve via `iCorp Client Link` (extract a shared helper from `deal_handler.py::_apply_client_id`; do not duplicate the query).
+2. Decide whether the `_build_icorp_client_map()` name-match fallback is still needed once every Won deal's `client_id` has an `iCorp Client Link`. If yes, keep it; if no, remove it.
+3. Remove the `Customer.icorp_client_id` writes from the patch and update its module docstring (it still describes the Customer-field model).
+4. Check `ivm/integrations/hubspot/tests/test_deal_handler.py::test_matching_customer_found_by_icorp_client_id` (line ~338), which still asserts the Customer-field lookup.
+
+**Open questions (need the app owner):**
+1. Is this backfill still re-run periodically, or was it a point-in-time 2026-01-01+ backfill that is effectively done? If done, it can be left as historical code and the field drop can proceed without rewiring, provided the patch is never re-executed.
+2. Are there future re-run plans (new HubSpot deals created after the last run, or another rate-limit resume)? If yes, rewiring is required before the drop.
+3. Does prod's Patch Log show `backfill_deals_from_hubspot` as applied? If not, the first `bench migrate` on prod would run it against the field being dropped.
