@@ -64,3 +64,4 @@ ivm.patches.drop_legacy_customer_fields
 ivm.patches.delete_stale_email_account_field_order_property_setter
 ivm.patches.scope_down_email_service_accounts_and_remove_dormant_users
 ivm.patches.trim_email_service_accounts_to_inbox_user_only
+ivm.patches.drop_icorp_client_link_review_fields

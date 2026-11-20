@@ -19,16 +19,7 @@
     "section_break_assignment",
     "customer",
     "assignment_source",
-    "review_status",
-    "section_break_proposal",
-    "match_status",
-    "proposed_customer",
-    "parent_customer",
-    "has_multiple_customer_candidates",
-    "duplicate_name_siblings",
-    "match_evidence",
-    "child_clients_html",
-    "related_customers"
+    "child_clients_html"
    ],
  "fields": [
   {
@@ -122,81 +113,12 @@
      "options": "\nManual decision\nConfirmed match\nProject evidence\nName match\nProvisioning\nCustomer record\nCustomer form",
      "read_only": 1
     },
-  {
-   "default": "",
-   "fieldname": "review_status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Review Status",
-   "options": "\nNeeds match\nPossible duplicates\nMerge pending\nReady to accept\nDone",
-   "read_only": 1
-  },
-   {
-    "fieldname": "section_break_proposal",
-    "fieldtype": "Section Break",
-    "label": "Proposed Match (for review)"
-   },
-   {
-    "fieldname": "match_status",
-    "fieldtype": "Select",
-    "in_list_view": 1,
-    "in_standard_filter": 1,
-    "label": "Evidence",
-    "options": "\nconfirmed\nproject_only\nexisting_field_only\nname_exact_only\nname_fuzzy_only\nconflict\nassigned_manually\npartner_suspect\nunmatched",
-    "read_only": 1
-   },
-  {
-   "fieldname": "proposed_customer",
-   "fieldtype": "Link",
-   "label": "Proposed Customer",
-   "options": "Customer",
-   "read_only": 1
-  },
-  {
-   "fieldname": "parent_customer",
-   "fieldtype": "Data",
-   "label": "Parent's Customer",
-   "read_only": 1,
-   "description": "Which Customer this client's iCorp parent currently belongs to, if any \u2014 shown so a 'project_only' proposal pointing at the same name can be recognized as the partner, not the end customer."
-  },
-  {
-   "default": "0",
-   "fieldname": "has_multiple_customer_candidates",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Has Multiple Customer Candidates",
-   "read_only": 1,
-   "description": "True when Related Customers below has more than one row \u2014 surfaced as a list-view flag, since list views can't summarize child-table rows directly."
-  },
-  {
-   "fieldname": "duplicate_name_siblings",
-   "fieldtype": "Small Text",
-   "label": "Other Active iCorp Clients With This Same Name",
-   "read_only": 1,
-   "description": "Other ACTIVE iCorp clients sharing this exact name \u2014 a live naming collision inside iCorp itself, worth checking before assigning either one. Inactive duplicates are not shown here; they're historical, not actionable."
-  },
-   {
-    "fieldname": "match_evidence",
-    "fieldtype": "Small Text",
-    "label": "Match Evidence",
-    "read_only": 1
-   },
    {
     "fieldname": "child_clients_html",
     "fieldtype": "HTML",
     "label": "Child Clients",
     "hidden": 1
-   },
-    {
-     "cannot_add_rows": 1,
-     "cannot_delete_rows": 1,
-     "fieldname": "related_customers",
-     "fieldtype": "Table",
-     "label": "Related Customers",
-     "options": "iCorp Client Link Customer Candidate",
-     "description": "Customers the evidence or a similar name points at. Set Decision on each row: one 'This client's Customer', 'Duplicate - merge in' for duplicates of it, 'Different company' for the rest, then save."
-    }
+   }
  ],
  "grid_page_length": 50,
   "index_web_pages_for_search": 1,
