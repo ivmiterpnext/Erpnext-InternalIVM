@@ -23,7 +23,6 @@ import time
 import frappe
 
 from ivm.customer_consolidation.apply import (
-	_icorp_is_configured,
 	apply_assignments,
 	apply_customer_record_ids,
 	apply_record_reassignments,
@@ -32,9 +31,9 @@ from ivm.customer_consolidation.apply import (
 	execute_merges,
 	rename_customers_from_csv,
 	set_customer_icorp_client_ids,
-	sync_icorp_client_links,
 )
 from ivm.deployments.patches.backfill_project_icorp_client import run_backfill
+from ivm.integrations.icorp.client_sync import _icorp_is_configured, sync_icorp_client_links
 
 # Statuses that count as a failure for the execute-mode raise.
 PROBLEM_STATUSES = ("invalid", "blocked", "error")

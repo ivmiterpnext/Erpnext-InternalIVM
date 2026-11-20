@@ -426,7 +426,7 @@ doc_events = {
 	},
 	"Customer": {
 		"onload": [
-			"ivm.customer_consolidation.customer_form.load_icorp_clients",
+			"ivm.integrations.icorp.customer_form.load_icorp_clients",
 			"ivm.integrations.hubspot.customer_resolution.load_hubspot_companies",
 		],
 	},
@@ -458,7 +458,7 @@ scheduler_events = {
 	# "ivm.tasks.all"
 	# ],
 	"daily": [
-		"ivm.customer_consolidation.apply.sync_icorp_client_links",
+		"ivm.integrations.icorp.client_sync.sync_icorp_client_links",
 	],
 	"hourly": [
 		# Catch inbound reply emails that HubSpot does not surface via webhooks.

@@ -23,13 +23,17 @@ from ivm.customer_consolidation import decisions, merge_analysis, orphan_custome
 from ivm.customer_consolidation.dry_run import (
 	build_client_customer_matches,
 	build_customer_coverage,
-	fetch_icorp_clients,
 	gather_customers,
 	gather_existing_customer_icorp_ids,
 	gather_project_rows,
 	normalize_customer_name,
 )
 from ivm.deployments.patches.backfill_project_icorp_client import run_backfill
+from ivm.integrations.icorp.client_sync import (
+	_icorp_is_configured,
+	fetch_icorp_clients,
+	sync_icorp_client_links,
+)
 
 _STOPWORDS = frozenset({"the", "of", "and"})
 _FIRST_TOKEN_MAX_FREQUENCY = 10
@@ -37,17 +41,6 @@ _JACCARD_MIN = 0.5
 _MAX_NAME_CANDIDATES = 10
 
 _APPLIED_HASH_KEY = "customer_consolidation_applied_hash"
-
-
-def _icorp_is_configured() -> bool:
-	"""True if this site has iCorp API credentials configured at all (site_config or
-	environment variable). Used to let apply_on_migrate skip cleanly, rather than
-	fail the migrate, on a site that was never set up to run this -- e.g. test.local,
-	which shares ivm's codebase with dev.local but has no iCorp credentials of its
-	own and isn't meant to run the consolidation."""
-	from ivm.integrations.keyvault import get_config_value
-
-	return bool(get_config_value("AZURE_KEYVAULT_URL")) and bool(get_config_value("ICORP_API_BASE_URL"))
 
 
 # Child tables on Customer whose rows Frappe's merge would otherwise silently delete along with
@@ -122,52 +115,6 @@ def create_missing_customers(dry_run: bool = False) -> list[dict]:
 		frappe.db.commit()
 
 	return results
-
-
-def sync_icorp_client_links() -> dict:
-	"""Upsert identity fields (name, active, parent) for every iCorp client. Never touches
-	customer / assignment_source / proposed_customer / match_status / match_evidence — those are
-	Frappe-side decisions, not iCorp data."""
-	if not _icorp_is_configured():
-		frappe.logger("customer_consolidation").info(
-			"sync_icorp_client_links skipped: iCorp API credentials are not configured on this site."
-		)
-		return
-
-	clients = fetch_icorp_clients()
-	created, updated = 0, 0
-
-	for client in clients:
-		client_id = str(client["id"])
-		display_label = f"({client_id}) {client.get('name') or ''}".strip()
-		values = {
-			"client_name": client.get("name") or "",
-			"display_label": display_label,
-			"is_active": 1 if client.get("is_active") else 0,
-			"is_partner_client": 1 if client.get("is_partner_client") else 0,
-			"sv_location_count_active": client.get("sv_location_count_active") or 0,
-			"sv_machine_count_active": client.get("sv_machine_count_active") or 0,
-		}
-
-		if frappe.db.exists("iCorp Client Link", client_id):
-			frappe.db.set_value("iCorp Client Link", client_id, values)
-			updated += 1
-		else:
-			doc = frappe.get_doc({"doctype": "iCorp Client Link", "icorp_client_id": client_id, **values})
-			doc.insert(ignore_permissions=True)
-			created += 1
-
-	# second pass: parent links, once every client row exists
-	for client in clients:
-		parent_id = client.get("partner_client_id")
-		client_id = str(client["id"])
-		parent_value = str(parent_id) if parent_id else ""
-		if parent_value and not frappe.db.exists("iCorp Client Link", parent_value):
-			parent_value = ""  # defensive: shouldn't happen, but don't link to a non-existent row
-		frappe.db.set_value("iCorp Client Link", client_id, "parent_client", parent_value)
-
-	frappe.db.commit()
-	return {"total": len(clients), "created": created, "updated": updated}
 
 
 def _icorp_client_links_as_dicts() -> list[dict]:

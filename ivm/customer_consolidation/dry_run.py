@@ -17,6 +17,7 @@ import frappe
 from frappe.utils import get_site_path
 
 from ivm.integrations.icorp.api import icorp_api_get
+from ivm.integrations.icorp.client_sync import fetch_icorp_clients
 
 _CUSTOMER_NAME_SUFFIXES = frozenset(
 	{
@@ -548,12 +549,6 @@ def build_dry_run_report(
 		"per_id_classification": per_id_classification,
 		"summary": summary,
 	}
-
-
-def fetch_icorp_clients() -> list[dict]:
-	"""GET Client?page=1&pageSize=5000 via icorp_api_get, return response["data"]."""
-	response = icorp_api_get("Client?page=1&pageSize=5000")
-	return response.get("data", [])
 
 
 def gather_project_rows() -> list[dict]:
