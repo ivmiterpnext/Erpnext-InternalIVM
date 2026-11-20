@@ -5,7 +5,7 @@ them). Backs up every non-empty value to a CSV in private files before dropping 
 total_client_employees into employees where employees is blank (employees is kept current by
 provisioning and stays), then deletes the Custom Field records, the unused Accounts Audit report,
 and the database columns. Safe to run repeatedly — each step checks first and is a no-op once
-done. NOT registered in patches.txt."""
+done. Registered in patches.txt."""
 
 import csv
 import os

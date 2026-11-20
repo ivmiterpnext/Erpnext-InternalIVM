@@ -17,10 +17,6 @@ frappe.ui.form.on("Customer", {
 				}
 			}
 		}
-		var sum =
-			parseInt(frm.doc.number_of_lockers_in_place) +
-			parseInt(frm.doc.number_of_machines_in_place);
-		frm.set_value("custom_total_pieces_of_equipment_in_place", sum);
 	},
 });
 
