@@ -285,6 +285,7 @@ app_include_js = [
 	"/assets/ivm/js/chatbox_widget.js",
 	"/assets/ivm/js/barcode_scanner_override.js",
 	"/assets/ivm/js/machine_detail_grids.js",
+	"/assets/ivm/js/frappe_overrides/email_recipient_parsing.js",
 ]
 
 # include js, css files in header of web template
