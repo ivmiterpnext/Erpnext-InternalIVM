@@ -109,14 +109,34 @@ class TestDealOnUpdate(ERPNextTestSuite):
 			mocks["resolve"].assert_not_called()
 			mocks["projects"].assert_not_called()
 
-	def test_throws_when_no_deployment_location(self):
+	def test_won_without_deployment_location_does_not_raise_and_persists(self):
 		_ensure_deal_status("Won")
 		deal = _make_deal(deal_type="New Business")
+		error_logs_before = frappe.db.count("Error Log")
 
-		with _mock_deal_services():
+		with _mock_deal_services() as mocks:
 			deal.status = "Won"
-			with self.assertRaises(frappe.ValidationError):
+			with patch("frappe.msgprint") as mock_msg:
 				deal.save(ignore_permissions=True)
+
+			# (1) no raise (reaching here proves it), (4) project creation still invoked, creates nothing
+			mocks["projects"].assert_called_once_with(deal.name)
+			matching = [
+				c for c in mock_msg.call_args_list if c.kwargs.get("title") == "No Deployment Locations"
+			]
+			self.assertTrue(matching)
+
+		# (2) the status change is persisted, not rolled back
+		self.assertEqual(frappe.db.get_value("CRM Deal", deal.name, "status"), "Won")
+		# (3) an Error Log entry was created
+		self.assertGreater(frappe.db.count("Error Log"), error_logs_before)
+		self.assertTrue(
+			frappe.get_all(
+				"Error Log",
+				filters={"method": ["like", f"%{deal.name}%"]},
+				limit=1,
+			)
+		)
 
 	def test_resolved_customer_applied_on_won_new_business(self):
 		_ensure_deal_status("Won")

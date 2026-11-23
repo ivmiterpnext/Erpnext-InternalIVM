@@ -14,23 +14,32 @@ from typing import Any
 
 import frappe
 
+from ivm.integrations.hubspot.sync_utils import save_doc
+
 _LOG = "ivm.deployments.provision_client"
 
 
 def _link_contact_to_customer(contact_doc: Any, customer_name: str) -> None:
-	"""Link a Frappe Contact to a Customer via the Contact's links child table."""
+	"""Link a Frappe Contact to a Customer via the Contact's links child table.
+
+	Uses save_doc's reload-and-retry pattern (not a bare .save()) because this
+	Contact may be concurrently modified by the HubSpot contact sync path
+	(contact_handler.upsert_contact) for the same record — without a retry,
+	that race surfaces as an unhandled TimestampMismatchError.
+	"""
+
+	def _apply_link(doc: Any) -> None:
+		for link in doc.get("links") or []:
+			if link.link_doctype == "Customer" and link.link_name == customer_name:
+				return
+		doc.append("links", {"link_doctype": "Customer", "link_name": customer_name})
+
 	for link in contact_doc.get("links") or []:
 		if link.link_doctype == "Customer" and link.link_name == customer_name:
 			return
 
-	contact_doc.append(
-		"links",
-		{
-			"link_doctype": "Customer",
-			"link_name": customer_name,
-		},
-	)
-	contact_doc.save(ignore_permissions=True)
+	_apply_link(contact_doc)
+	save_doc(contact_doc, "contact-customer-link", mutate=_apply_link)
 
 	frappe.logger(_LOG).info(f"Linked Contact '{contact_doc.name}' to Customer '{customer_name}'")
 

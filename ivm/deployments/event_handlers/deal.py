@@ -25,9 +25,19 @@ def on_update(doc: Document, method: str | None = None) -> None:
 		return
 
 	if not frappe.db.exists("Deployment Location", {"crm_deal": doc.name}):
-		frappe.throw(
-			"Cannot mark this deal as Won — no Deployment Locations are linked to it.",
+		frappe.log_error(
+			title=f"CRM Deal {doc.name} marked Won with no Deployment Locations",
+			message=(
+				f"Deal '{doc.name}' was marked Won but has no Deployment Locations linked. "
+				"Customer resolution and field sync proceeded; no deployments were created."
+			),
+		)
+		frappe.msgprint(
+			"This deal has no Deployment Locations linked — no deployments were created. "
+			"Link a Deployment Location to generate deployments.",
 			title="No Deployment Locations",
+			indicator="orange",
+			alert=True,
 		)
 
 	# Resolve the Customer before project creation so custom_customer is available.
