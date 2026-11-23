@@ -221,7 +221,6 @@ DEAL_FIELD_MAP: dict[str, str] = {
 	"machine_ownership_status": "custom_machine_ownership_status",
 	"opportunity_term": "custom_opportunity_term",
 	"hubspot_owner_id": "deal_owner",
-	"client_id": "custom_customer",
 }
 
 # HubSpot dealtype enum key → human-readable label stored in custom_deal_type

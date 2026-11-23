@@ -132,39 +132,6 @@ def _apply_deal_owner(doc: Any, value: Any) -> None:
 		)
 
 
-def _apply_client_id(doc: Any, value: Any) -> None:
-	"""Fill a blank ``custom_customer`` from HubSpot's numeric iCorp client ID.
-
-	HubSpot stores the iCorp numeric client ID in the ``client_id`` property
-	(e.g. ``"1042"``). ``custom_customer`` is a Link -> Customer field, so the
-	ID is resolved to the Customer that owns that iCorp Client Link (its name IS
-	the iCorp client ID). This only fills a blank Client: a Client that is already
-	set on the deal is never overwritten, and a Customer that is disabled is
-	skipped (logged), so the deal stays blank for a deployer to set.
-	"""
-	if not value:
-		return
-	if getattr(doc, "custom_customer", None):
-		return
-
-	customer_name = frappe.db.get_value("iCorp Client Link", str(value), "customer")
-	if not customer_name:
-		frappe.logger("hubspot").warning(
-			f"HubSpot client_id '{value}' did not match any assigned iCorp Client Link "
-			f"— skipping custom_customer"
-		)
-		return
-
-	if frappe.db.get_value("Customer", customer_name, "disabled"):
-		frappe.logger("hubspot").warning(
-			f"HubSpot client_id '{value}' maps to disabled Customer '{customer_name}' "
-			f"— skipping custom_customer"
-		)
-		return
-
-	doc.custom_customer = customer_name
-
-
 DEAL_TRANSFORMS = {
 	"deal_value": _apply_deal_value,
 	"status": _apply_status,
@@ -172,7 +139,6 @@ DEAL_TRANSFORMS = {
 	"custom_pipeline": _apply_pipeline,
 	"custom_deal_type": _apply_deal_type,
 	"deal_owner": _apply_deal_owner,
-	"custom_customer": _apply_client_id,
 }
 
 

@@ -5,10 +5,10 @@ Fetches all HubSpot deals with createdDate >= 2026-01-01 and syncs them
 into Frappe CRM. For deals already Won in HubSpot:
   - Does NOT trigger the on_update win logic (Customer provisioning,
     Project creation). Status is written via frappe.db.set_value after insert.
-  - Resolves custom_customer by matching HubSpot's client_id property to
-    Customer.icorp_client_id. Written via frappe.db.set_value only.
-  - If the matched Customer is missing icorp_client_id, looks it up from
-    iCorp's Client endpoint (read-only, no POST) and backfills it.
+  - Resolves custom_customer via the same CRM Organization-based model
+    customer_resolution.py uses for live deals (resolve_deal_customer ->
+    apply_deal_customer). Invoked directly because this patch bypasses
+    on_update hooks. Unresolved deals are left blank with a warning.
 
 Registered in patches.txt (post_model_sync, end of file) — runs automatically
 on migrate. Can also be run manually via:
@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import frappe
 
-from ivm.integrations.hubspot import api
+from ivm.integrations.hubspot import api, customer_resolution
 from ivm.integrations.hubspot.constants import (
 	DEAL_FIELD_MAP,
 	DEALSTAGE_TO_STATUS,
@@ -49,14 +49,12 @@ def execute() -> None:
 		hs_deals = _fetch_hubspot_deals(_SINCE_DATE)
 		print(f"Found {len(hs_deals)} deal(s) to process.")
 
-		icorp_client_map = _build_icorp_client_map()
-
 		created = skipped = errors = 0
 
 		for idx, hs_deal in enumerate(hs_deals, start=1):
 			hs_id = str(hs_deal["id"])
 			try:
-				was_created = _sync_one_deal(hs_id, hs_deal["properties"], icorp_client_map)
+				was_created = _sync_one_deal(hs_id, hs_deal["properties"])
 				if was_created:
 					created += 1
 				else:
@@ -126,7 +124,7 @@ def _fetch_hubspot_deals(since_date: str) -> list[dict]:
 	return results
 
 
-def _sync_one_deal(hs_id: str, properties: dict, icorp_client_map: dict[str, str]) -> bool:
+def _sync_one_deal(hs_id: str, properties: dict) -> bool:
 	"""Sync a single HubSpot deal. Returns True if a new CRM Deal was created."""
 	raw_stage = properties.get("dealstage") or ""
 	real_status = DEALSTAGE_TO_STATUS.get(raw_stage, "Discovery")
@@ -156,7 +154,7 @@ def _sync_one_deal(hs_id: str, properties: dict, icorp_client_map: dict[str, str
 		frappe.db.set_value("CRM Deal", doc.name, "status", real_status)
 
 	if is_won:
-		_ensure_customer_linked(doc.name, properties, icorp_client_map)
+		_ensure_customer_linked(doc.name)
 
 	return is_new
 
@@ -176,60 +174,26 @@ def _sync_deal_fields_no_win(crm_deal_name: str, properties: dict) -> None:
 	save_doc(deal, "deal")
 
 
-def _ensure_customer_linked(
-	crm_deal_name: str,
-	properties: dict,
-	icorp_client_map: dict[str, str],
-) -> None:
-	"""Resolve and write custom_customer for a Won deal via db.set_value only."""
+def _ensure_customer_linked(crm_deal_name: str) -> None:
+	"""Resolve and apply custom_customer for a Won deal via the same org-based model
+	customer_resolution.py uses for live deals, invoked directly since this patch
+	deliberately bypasses on_update hooks (see module docstring)."""
 	existing = frappe.db.get_value("CRM Deal", crm_deal_name, "custom_customer")
 	if existing and frappe.db.exists("Customer", existing):
 		return
 
-	hs_client_id = str(properties.get("client_id") or "").strip()
-	customer_name: str | None = None
-
-	if hs_client_id:
-		customer_name = frappe.db.get_value("Customer", {"icorp_client_id": hs_client_id}, "name")
-
-		if not customer_name:
-			icorp_client_name = icorp_client_map.get(hs_client_id)
-			if icorp_client_name:
-				customer_name = frappe.db.get_value("Customer", {"customer_name": icorp_client_name}, "name")
-				if customer_name:
-					frappe.db.set_value("Customer", customer_name, "icorp_client_id", hs_client_id)
-					print(f"  Backfilled icorp_client_id={hs_client_id} on Customer '{customer_name}'")
+	organization = frappe.db.get_value("CRM Deal", crm_deal_name, "organization")
+	# resolve_deal_customer uses attribute access (deal.name / deal.organization),
+	# so pass a _dict rather than a plain dict.
+	customer_name = customer_resolution.resolve_deal_customer(
+		frappe._dict(name=crm_deal_name, custom_customer=existing, organization=organization)
+	)
 
 	if customer_name:
-		frappe.db.set_value("CRM Deal", crm_deal_name, "custom_customer", customer_name)
+		customer_resolution.apply_deal_customer(crm_deal_name, customer_name)
 		print(f"  Linked Customer '{customer_name}' to Won deal {crm_deal_name}")
 	else:
 		print(
 			f"  WARNING: Won deal {crm_deal_name} — could not resolve Customer "
-			f"(HubSpot client_id='{hs_client_id}'). Set custom_customer manually."
+			f"via organization (organization={organization or 'none'}). Set custom_customer manually."
 		)
-
-
-def _build_icorp_client_map() -> dict[str, str]:
-	"""Fetch all iCorp clients once and return {icorp_id_str: client_name}.
-
-	Used to resolve a HubSpot client_id to a Customer name when
-	Customer.icorp_client_id has not yet been backfilled.
-	Returns an empty dict if the iCorp API is unreachable.
-	"""
-	from ivm.integrations.icorp import icorp_api_get
-
-	try:
-		data = icorp_api_get("Client?pageSize=9999&page=1")
-	except Exception:
-		frappe.log_error(
-			title="Backfill: could not fetch iCorp clients",
-			message=frappe.get_traceback(with_context=True),
-		)
-		print("  WARNING: iCorp Client API unreachable — icorp_client_id backfill skipped.")
-		return {}
-
-	items = data.get("data", [])
-	return {
-		str(item["id"]): str(item["name"]).strip() for item in items if item.get("id") and item.get("name")
-	}

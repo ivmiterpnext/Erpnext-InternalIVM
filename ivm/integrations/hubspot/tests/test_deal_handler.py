@@ -9,7 +9,6 @@ from frappe.tests.utils import FrappeTestCase
 
 from ivm.integrations.hubspot.constants import DEAL_TYPE_ID
 from ivm.integrations.hubspot.deal_handler import (
-	_apply_client_id,
 	_apply_deal_owner,
 	_apply_deal_type,
 	_apply_deal_value,
@@ -330,58 +329,6 @@ class TestApplyDealOwner(FrappeTestCase):
 		doc = SimpleNamespace()
 		_apply_deal_owner(doc, None)
 		self.assertFalse(hasattr(doc, "deal_owner"))
-
-
-class TestApplyClientId(FrappeTestCase):
-	"""_apply_client_id field transform"""
-
-	def test_matching_customer_found_by_icorp_client_id(self):
-		"""Matching enabled Customer found by icorp_client_id sets blank doc.custom_customer"""
-		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			mock_get_value.side_effect = ["Customer-001", 0]  # client link -> customer, customer.disabled
-			doc = SimpleNamespace(custom_customer=None)
-			_apply_client_id(doc, "1042")
-			self.assertEqual(doc.custom_customer, "Customer-001")
-
-	def test_existing_client_never_overwritten(self):
-		"""A Client already set on the deal is kept; no lookup is made"""
-		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			doc = SimpleNamespace(custom_customer="Keep-Me")
-			_apply_client_id(doc, "1042")
-			self.assertEqual(doc.custom_customer, "Keep-Me")
-			mock_get_value.assert_not_called()
-
-	def test_disabled_customer_skipped_and_logged(self):
-		"""A matching but disabled Customer is not written; the skip is logged"""
-		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
-				mock_get_value.side_effect = ["Disabled-Cust", 1]
-				doc = SimpleNamespace(custom_customer=None)
-				_apply_client_id(doc, "1042")
-				self.assertIsNone(doc.custom_customer)
-				mock_logger.assert_called()
-
-	def test_no_matching_customer_logs_warning(self):
-		"""No matching Customer logs warning, does not set"""
-		with patch("ivm.integrations.hubspot.deal_handler.frappe.db.get_value") as mock_get_value:
-			with patch("ivm.integrations.hubspot.deal_handler.frappe.logger") as mock_logger:
-				mock_get_value.return_value = None
-				doc = SimpleNamespace()
-				_apply_client_id(doc, "9999")
-				self.assertFalse(hasattr(doc, "custom_customer"))
-				mock_logger.assert_called()
-
-	def test_empty_value_no_op(self):
-		"""Empty value is no-op"""
-		doc = SimpleNamespace()
-		_apply_client_id(doc, "")
-		self.assertFalse(hasattr(doc, "custom_customer"))
-
-	def test_none_value_no_op(self):
-		"""None value is no-op"""
-		doc = SimpleNamespace()
-		_apply_client_id(doc, None)
-		self.assertFalse(hasattr(doc, "custom_customer"))
 
 
 class TestSyncDealEntry(FrappeTestCase):
