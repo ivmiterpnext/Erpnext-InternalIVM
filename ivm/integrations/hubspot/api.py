@@ -178,7 +178,7 @@ def get_custom_object(
 	params: dict[str, str] = {}
 	if properties:
 		params["properties"] = ",".join(properties)
-	return _get(f"/crm/v3/objects/{object_type_id}/{object_id}", params or None)
+	return _get(f"/crm/objects/2026-09/{object_type_id}/{object_id}", params or None)
 
 
 def get_deal(deal_id: int | str, properties: list[str] | None = None) -> dict[str, Any]:
@@ -216,7 +216,7 @@ def get_associated_ids(
 	"""Fetch association IDs for any object."""
 
 	res = _get(
-		f"/crm/v3/objects/{object_type}/{object_id}",
+		f"/crm/objects/2026-09/{object_type}/{object_id}",
 		params={"associations": association_type},
 	)
 	results = res.get("associations", {}).get(association_key, {}).get("results", [])
@@ -241,8 +241,8 @@ def get_deal_company_ids(deal_id: int | str) -> list[str]:
 
 
 def get_deal_company_associations(deal_id: int | str) -> list[dict[str, Any]]:
-	"""Fetch typed (v4) company associations for a deal, including label info."""
-	res = _get(f"/crm/v4/objects/deals/{deal_id}/associations/companies")
+	"""Fetch typed (2026-09) company associations for a deal, including label info."""
+	res = _get(f"/crm/objects/2026-09/deals/{deal_id}/associations/companies")
 	return [
 		{
 			"to_object_id": r.get("toObjectId"),
@@ -358,20 +358,20 @@ def get_engagement_deal_ids(engagement_type: str, engagement_id: int | str) -> l
 def get_deal_engagement_ids(deal_id: int | str, engagement_type: str) -> list[str]:
 	"""Fetch engagement IDs of *engagement_type* associated with a deal.
 
-	Uses the CRM v3 associations endpoint to get IDs for a given engagement
+	Uses the CRM 2026-09 associations endpoint to get IDs for a given engagement
 	type (``notes``, ``calls``, ``emails``, ``tasks``, ``meetings``).
 	"""
 	return get_associated_ids("deals", deal_id, engagement_type, engagement_type)
 
 
-# Batch size limit for the CRM v4 batch associations endpoint.
+# Batch size limit for the CRM 2026-09 batch associations endpoint.
 _BATCH_ASSOCIATIONS_CHUNK_SIZE = 100
 
 
 def get_deal_email_ids_batch(deal_ids: list[str]) -> dict[str, list[str]]:
 	"""Fetch email engagement IDs for multiple deals in a single API call.
 
-	Uses the CRM v4 batch associations endpoint, which accepts up to 100 deal
+	Uses the CRM 2026-09 batch associations endpoint, which accepts up to 100 deal
 	IDs per request.  Returns a dict mapping deal_id → list of email IDs.
 
 	This is the efficient alternative to calling ``get_deal_engagement_ids``
@@ -384,7 +384,7 @@ def get_deal_email_ids_batch(deal_ids: list[str]) -> dict[str, list[str]]:
 	for i in range(0, len(deal_ids), _BATCH_ASSOCIATIONS_CHUNK_SIZE):
 		chunk = deal_ids[i : i + _BATCH_ASSOCIATIONS_CHUNK_SIZE]
 		response = _post(
-			"/crm/v4/associations/deals/emails/batch/read",
+			"/crm/associations/2026-09/deals/emails/batch/read",
 			{"inputs": [{"id": did} for did in chunk]},
 		)
 		for entry in response.get("results", []):
@@ -411,18 +411,18 @@ def download_file(file_id: str) -> tuple[str, bytes] | None:
 
 	HIDDEN_PRIVATE files (the default for CRM email attachments) cannot be
 	downloaded via ``defaultHostingUrl`` or the legacy signed-url-redirect
-	endpoint.  The correct approach is the Files v3 ``/signed-url`` endpoint,
+	endpoint.  The correct approach is the Files 2026-09 ``/signed-url`` endpoint,
 	which returns a time-limited pre-signed CDN URL that works without auth.
 	"""
 	try:
-		meta = _get(f"/files/v3/files/{file_id}")
+		meta = _get(f"/files/2026-09/files/{file_id}")
 		name = meta.get("name", f"hubspot_file_{file_id}")
 		extension = meta.get("extension", "")
 		if extension and not name.endswith(f".{extension}"):
 			name = f"{name}.{extension}"
 
 		# Get a pre-signed download URL valid for this request.
-		signed = _get(f"/files/v3/files/{file_id}/signed-url")
+		signed = _get(f"/files/2026-09/files/{file_id}/signed-url")
 		cdn_url = signed.get("url")
 		if not cdn_url:
 			frappe.logger("hubspot").warning(f"No signed URL returned for HubSpot file {file_id}")
@@ -446,7 +446,7 @@ def get_owner_email(owner_id: int | str) -> str | None:
 	the same owner ID within a single worker process don't hit the API again.
 	"""
 	try:
-		data = _get(f"/crm/v3/owners/{owner_id}")
+		data = _get(f"/crm/owners/2026-09/{owner_id}")
 		return data.get("email") or None
 	except Exception:
 		frappe.logger("hubspot").warning(f"Could not resolve HubSpot owner {owner_id}")
@@ -458,7 +458,7 @@ def search_deals(
 	properties: list[str],
 	after: str | None = None,
 ) -> dict[str, Any]:
-	"""POST to /crm/v3/objects/deals/search with cursor-based pagination.
+	"""POST to /crm/objects/2026-09/deals/search with cursor-based pagination.
 
 	Args:
 	    filters: HubSpot filter dicts (combined into a single filterGroup).
@@ -474,7 +474,7 @@ def search_deals(
 	}
 	if after:
 		payload["after"] = after
-	return _post("/crm/v3/objects/deals/search", payload)
+	return _post("/crm/objects/2026-09/deals/search", payload)
 
 
 def search_contacts(
@@ -482,7 +482,7 @@ def search_contacts(
 	properties: list[str],
 	after: str | None = None,
 ) -> dict[str, Any]:
-	"""POST to /crm/v3/objects/contacts/search with cursor-based pagination.
+	"""POST to /crm/objects/2026-09/contacts/search with cursor-based pagination.
 
 	Args:
 	    filters: HubSpot filter dicts (combined into a single filterGroup).
@@ -498,7 +498,7 @@ def search_contacts(
 	}
 	if after:
 		payload["after"] = after
-	return _post("/crm/v3/objects/contacts/search", payload)
+	return _post("/crm/objects/2026-09/contacts/search", payload)
 
 
 def search_objects(
@@ -508,12 +508,12 @@ def search_objects(
 	limit: int = 100,
 	properties: list[str] | None = None,
 ) -> dict[str, Any]:
-	"""POST to /crm/v3/objects/{object_type}/search with cursor-based pagination.
+	"""POST to /crm/objects/2026-09/{object_type}/search with cursor-based pagination.
 
 	*object_type* is the HubSpot path segment: a standard object's plural
 	name ("deals", "contacts", "companies"), an engagement's plural name
 	("notes", "calls", "emails", "tasks", "meetings"), or a custom object's
-	numeric type ID (e.g. "2-230236986") — the v3 search endpoint accepts
+	numeric type ID (e.g. "2-230236986") — the 2026-09 search endpoint accepts
 	all three forms directly.
 
 	Args:
@@ -535,7 +535,7 @@ def search_objects(
 		payload["properties"] = properties
 	if after:
 		payload["after"] = after
-	return _post(f"/crm/v3/objects/{object_type}/search", payload)
+	return _post(f"/crm/objects/2026-09/{object_type}/search", payload)
 
 
 @frappe.whitelist()
