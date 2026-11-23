@@ -15,9 +15,39 @@ from ivm.integrations.icorp.provisioning import (
 )
 
 
+def _refresh_icorp_client_ids_cache(customer: str | None, exclude_name: str | None = None) -> None:
+	"""Recompute Customer.icorp_client_ids (comma-joined, active clients only) for one
+	customer. Called whenever an iCorp Client Link's customer assignment changes.
+
+	exclude_name: a Link being deleted (on_trash runs before its row is removed), so it
+	must be left out of the recomputed list."""
+	if not customer or not frappe.db.exists("Customer", customer):
+		return
+	filters = {"customer": customer, "is_active": 1}
+	if exclude_name:
+		filters["name"] = ["!=", exclude_name]
+	ids = frappe.get_all(
+		"iCorp Client Link",
+		filters=filters,
+		pluck="name",
+		order_by="name asc",
+	)
+	frappe.db.set_value("Customer", customer, "icorp_client_ids", ", ".join(ids))
+
+
 class iCorpClientLink(Document):
 	def before_save(self):
 		self.display_label = f"({self.icorp_client_id}) {self.client_name or ''}".strip()
+
+	def on_update(self):
+		_refresh_icorp_client_ids_cache(self.customer)
+		before = self.get_doc_before_save()
+		if before and before.customer and before.customer != self.customer:
+			_refresh_icorp_client_ids_cache(before.customer)
+
+	def on_trash(self):
+		if self.customer:
+			_refresh_icorp_client_ids_cache(self.customer, exclude_name=self.name)
 
 
 @frappe.whitelist()
