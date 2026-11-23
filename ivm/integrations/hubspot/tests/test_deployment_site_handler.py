@@ -6,10 +6,13 @@ from unittest.mock import MagicMock, patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from ivm.deals.constants import TABLE_LABELS
 from ivm.integrations.hubspot import api
-from ivm.integrations.hubspot.constants import DEPLOYMENT_SITE_TYPE_ID
+from ivm.integrations.hubspot.constants import DEPLOYMENT_SITE_TYPE_ID, SITE_COUNT_FIELD_MAP
 from ivm.integrations.hubspot.deployment_site_handler import (
+	_apply_placeholder_machine_counts,
 	_map_properties,
+	_parse_count,
 	_resolve_deal_for_site,
 	_sync_site_core,
 	_upsert_location_from_webhook,
@@ -17,6 +20,28 @@ from ivm.integrations.hubspot.deployment_site_handler import (
 	sync_machine,
 	sync_site,
 )
+
+
+class _FakeLocation:
+	"""Minimal stand-in for a Deployment Location doc: child tables as plain lists."""
+
+	def __init__(self, name="LOC-0001", tables=None):
+		self.name = name
+		self.location_name = None
+		self._tables = {k: list(v) for k, v in (tables or {}).items()}
+		self.insert = MagicMock()
+
+	def get(self, key, default=None):
+		return self._tables.get(key, default)
+
+	def set(self, key, value):
+		self._tables[key] = value
+
+	def append(self, key, row):
+		self._tables.setdefault(key, []).append(row)
+
+	def rows(self, key):
+		return self._tables.get(key, [])
 
 
 class TestMapProperties(FrappeTestCase):
@@ -171,7 +196,9 @@ class TestUpsertLocationFromWebhook(FrappeTestCase):
 			with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.get_doc") as mock_get_doc:
 				with patch("ivm.integrations.hubspot.deployment_site_handler.save_doc") as mock_save_doc:
 					with patch("ivm.integrations.hubspot.deployment_site_handler._apply_site_properties"):
-						with patch("ivm.integrations.hubspot.deployment_site_handler._apply_machine_data"):
+						with patch(
+							"ivm.integrations.hubspot.deployment_site_handler._apply_placeholder_machine_counts"
+						):
 							mock_get_value.return_value = "Location-001"
 							mock_doc = MagicMock()
 							mock_doc.doctype = "Deployment Location"
@@ -183,7 +210,6 @@ class TestUpsertLocationFromWebhook(FrappeTestCase):
 								"Deal-001",
 								"site-456",
 								{"site_location_name": "Site Name"},
-								{},
 							)
 
 							self.assertFalse(is_new)
@@ -196,7 +222,9 @@ class TestUpsertLocationFromWebhook(FrappeTestCase):
 		with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.db.get_value") as mock_get_value:
 			with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.new_doc") as mock_new_doc:
 				with patch("ivm.integrations.hubspot.deployment_site_handler._apply_site_properties"):
-					with patch("ivm.integrations.hubspot.deployment_site_handler._apply_machine_data"):
+					with patch(
+						"ivm.integrations.hubspot.deployment_site_handler._apply_placeholder_machine_counts"
+					):
 						mock_get_value.return_value = None
 						mock_doc = MagicMock()
 						mock_doc.doctype = "Deployment Location"
@@ -208,7 +236,6 @@ class TestUpsertLocationFromWebhook(FrappeTestCase):
 							"Deal-001",
 							"site-456",
 							{"site_location_name": "Site Name"},
-							{},
 						)
 
 						self.assertTrue(is_new)
@@ -222,7 +249,9 @@ class TestUpsertLocationFromWebhook(FrappeTestCase):
 		with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.db.get_value") as mock_get_value:
 			with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.new_doc") as mock_new_doc:
 				with patch("ivm.integrations.hubspot.deployment_site_handler._apply_site_properties"):
-					with patch("ivm.integrations.hubspot.deployment_site_handler._apply_machine_data"):
+					with patch(
+						"ivm.integrations.hubspot.deployment_site_handler._apply_placeholder_machine_counts"
+					):
 						mock_get_value.return_value = None
 						mock_doc = MagicMock()
 						mock_doc.doctype = "Deployment Location"
@@ -234,21 +263,20 @@ class TestUpsertLocationFromWebhook(FrappeTestCase):
 							"Deal-001",
 							"site-456",
 							{},
-							{},
 						)
 
 						self.assertEqual(mock_doc.location_name, "Site site-456")
 
-	def test_applies_site_properties_and_machine_data(self):
-		"""Site properties and machine data applied to location"""
+	def test_applies_site_properties_and_placeholder_counts(self):
+		"""Site properties and equipment-count placeholder rows applied to location"""
 		with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.db.get_value") as mock_get_value:
 			with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.new_doc") as mock_new_doc:
 				with patch(
 					"ivm.integrations.hubspot.deployment_site_handler._apply_site_properties"
 				) as mock_apply_props:
 					with patch(
-						"ivm.integrations.hubspot.deployment_site_handler._apply_machine_data"
-					) as mock_apply_machines:
+						"ivm.integrations.hubspot.deployment_site_handler._apply_placeholder_machine_counts"
+					) as mock_apply_counts:
 						mock_get_value.return_value = None
 						mock_doc = MagicMock()
 						mock_doc.doctype = "Deployment Location"
@@ -256,18 +284,16 @@ class TestUpsertLocationFromWebhook(FrappeTestCase):
 						mock_doc.location_name = "Site Name"
 						mock_new_doc.return_value = mock_doc
 
-						site_props = {"site_location_name": "Site Name"}
-						machines = {"smartstation_details": [{"machine_name": "SS-001"}]}
+						site_props = {"site_location_name": "Site Name", "smartstation_count": 2}
 
 						_upsert_location_from_webhook(
 							"Deal-001",
 							"site-456",
 							site_props,
-							machines,
 						)
 
 						mock_apply_props.assert_called_once_with(mock_doc, site_props)
-						mock_apply_machines.assert_called_once_with(mock_doc, machines)
+						mock_apply_counts.assert_called_once_with(mock_doc, site_props)
 
 
 class TestSyncSite(FrappeTestCase):
@@ -317,7 +343,7 @@ class TestSyncSiteCore(FrappeTestCase):
 	"""_sync_site_core function"""
 
 	def test_upserts_and_logs(self):
-		"""Fetches site data, upserts location, logs result"""
+		"""Fetches site data (properties + count props), upserts location, never fetches per-unit machines"""
 		with patch("ivm.integrations.hubspot.deployment_site_handler.api.get_custom_object") as mock_get_obj:
 			with patch(
 				"ivm.integrations.hubspot.deployment_site_handler._fetch_site_machines"
@@ -327,84 +353,71 @@ class TestSyncSiteCore(FrappeTestCase):
 				) as mock_upsert:
 					with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
 						mock_get_obj.return_value = {"properties": {"site_location_name": "Site A"}}
-						mock_fetch_machines.return_value = {}
 						mock_upsert.return_value = False  # Not new
 
 						_sync_site_core("site-456", "Deal-001", trigger_deal_sync=True)
 
 						mock_get_obj.assert_called_once()
-						mock_fetch_machines.assert_called_once_with("site-456")
-						mock_upsert.assert_called_once()
+						mock_fetch_machines.assert_not_called()
+						mock_upsert.assert_called_once_with(
+							"Deal-001",
+							"site-456",
+							{"site_location_name": "Site A"},
+						)
 
 	def test_new_location_with_trigger_enqueues_deal_sync(self):
 		"""New location created + trigger_deal_sync=True -> enqueues deal sync"""
 		with patch("ivm.integrations.hubspot.deployment_site_handler.api.get_custom_object") as mock_get_obj:
 			with patch(
-				"ivm.integrations.hubspot.deployment_site_handler._fetch_site_machines"
-			) as mock_fetch_machines:
+				"ivm.integrations.hubspot.deployment_site_handler._upsert_location_from_webhook"
+			) as mock_upsert:
 				with patch(
-					"ivm.integrations.hubspot.deployment_site_handler._upsert_location_from_webhook"
-				) as mock_upsert:
+					"ivm.integrations.hubspot.deployment_site_handler.frappe.db.get_value"
+				) as mock_get_value:
 					with patch(
-						"ivm.integrations.hubspot.deployment_site_handler.frappe.db.get_value"
-					) as mock_get_value:
-						with patch(
-							"ivm.integrations.hubspot.deployment_site_handler.enqueue_sync"
-						) as mock_enqueue:
-							with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
-								mock_get_obj.return_value = {"properties": {}}
-								mock_fetch_machines.return_value = {}
-								mock_upsert.return_value = True  # Is new
-								mock_get_value.return_value = "hs-deal-123"
+						"ivm.integrations.hubspot.deployment_site_handler.enqueue_sync"
+					) as mock_enqueue:
+						with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
+							mock_get_obj.return_value = {"properties": {}}
+							mock_upsert.return_value = True  # Is new
+							mock_get_value.return_value = "hs-deal-123"
 
-								_sync_site_core("site-456", "Deal-001", trigger_deal_sync=True)
+							_sync_site_core("site-456", "Deal-001", trigger_deal_sync=True)
 
-								mock_enqueue.assert_called_once()
-								args = mock_enqueue.call_args[0]
-								self.assertTrue(args[0].endswith(".sync_deal"))
-								self.assertEqual(args[2], "hs-deal-123")
+							mock_enqueue.assert_called_once()
+							args = mock_enqueue.call_args[0]
+							self.assertTrue(args[0].endswith(".sync_deal"))
+							self.assertEqual(args[2], "hs-deal-123")
 
 	def test_new_location_without_trigger_does_not_enqueue(self):
 		"""New location created but trigger_deal_sync=False -> no deal sync enqueue"""
 		with patch("ivm.integrations.hubspot.deployment_site_handler.api.get_custom_object") as mock_get_obj:
 			with patch(
-				"ivm.integrations.hubspot.deployment_site_handler._fetch_site_machines"
-			) as mock_fetch_machines:
-				with patch(
-					"ivm.integrations.hubspot.deployment_site_handler._upsert_location_from_webhook"
-				) as mock_upsert:
-					with patch(
-						"ivm.integrations.hubspot.deployment_site_handler.enqueue_sync"
-					) as mock_enqueue:
-						with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
-							mock_get_obj.return_value = {"properties": {}}
-							mock_fetch_machines.return_value = {}
-							mock_upsert.return_value = True  # Is new
+				"ivm.integrations.hubspot.deployment_site_handler._upsert_location_from_webhook"
+			) as mock_upsert:
+				with patch("ivm.integrations.hubspot.deployment_site_handler.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
+						mock_get_obj.return_value = {"properties": {}}
+						mock_upsert.return_value = True  # Is new
 
-							_sync_site_core("site-456", "Deal-001", trigger_deal_sync=False)
+						_sync_site_core("site-456", "Deal-001", trigger_deal_sync=False)
 
-							mock_enqueue.assert_not_called()
+						mock_enqueue.assert_not_called()
 
 	def test_existing_location_never_enqueues_even_with_trigger_true(self):
 		"""Existing location updated + trigger_deal_sync=True -> no deal sync enqueue"""
 		with patch("ivm.integrations.hubspot.deployment_site_handler.api.get_custom_object") as mock_get_obj:
 			with patch(
-				"ivm.integrations.hubspot.deployment_site_handler._fetch_site_machines"
-			) as mock_fetch_machines:
-				with patch(
-					"ivm.integrations.hubspot.deployment_site_handler._upsert_location_from_webhook"
-				) as mock_upsert:
-					with patch(
-						"ivm.integrations.hubspot.deployment_site_handler.enqueue_sync"
-					) as mock_enqueue:
-						with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
-							mock_get_obj.return_value = {"properties": {}}
-							mock_fetch_machines.return_value = {}
-							mock_upsert.return_value = False  # Not new
+				"ivm.integrations.hubspot.deployment_site_handler._upsert_location_from_webhook"
+			) as mock_upsert:
+				with patch("ivm.integrations.hubspot.deployment_site_handler.enqueue_sync") as mock_enqueue:
+					with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
+						mock_get_obj.return_value = {"properties": {}}
+						mock_upsert.return_value = False  # Not new
 
-							_sync_site_core("site-456", "Deal-001", trigger_deal_sync=True)
+						_sync_site_core("site-456", "Deal-001", trigger_deal_sync=True)
 
-							mock_enqueue.assert_not_called()
+						mock_enqueue.assert_not_called()
 
 	def test_no_blanket_exception_handling(self):
 		"""Exceptions propagate (no catch-all) per design rule R2"""
@@ -413,6 +426,195 @@ class TestSyncSiteCore(FrappeTestCase):
 
 			with self.assertRaises(ValueError):
 				_sync_site_core("site-456", "Deal-001", trigger_deal_sync=True)
+
+
+class TestParseCount(FrappeTestCase):
+	"""_parse_count defensive HubSpot count parsing"""
+
+	def test_none_returns_zero(self):
+		self.assertEqual(_parse_count(None, "smartlocker_count"), 0)
+
+	def test_empty_string_returns_zero_without_warning(self):
+		with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger") as mock_logger:
+			self.assertEqual(_parse_count("", "smartsync_count"), 0)
+			mock_logger.return_value.warning.assert_not_called()
+
+	def test_non_numeric_string_returns_zero_and_warns(self):
+		with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger") as mock_logger:
+			self.assertEqual(_parse_count("TBD", "smartlocker_count"), 0)
+			mock_logger.return_value.warning.assert_called_once()
+
+	def test_negative_or_fractional_returns_zero(self):
+		with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
+			self.assertEqual(_parse_count("-1", "smartsync_count"), 0)
+			self.assertEqual(_parse_count("2.5", "smartsync_count"), 0)
+
+	def test_numeric_string_and_int_parsed(self):
+		self.assertEqual(_parse_count("3", "smartlocker_count"), 3)
+		self.assertEqual(_parse_count(" 4 ", "smartsync_count"), 4)
+		self.assertEqual(_parse_count(2, "smartstation_count"), 2)
+
+
+class TestApplyPlaceholderMachineCounts(FrappeTestCase):
+	"""_apply_placeholder_machine_counts row generation"""
+
+	def test_new_location_generates_rows_for_all_five_tables(self):
+		"""Empty child tables + all five counts -> correctly named placeholder rows per table"""
+		loc = _FakeLocation()
+		props = {
+			"smartstation_count": 2,
+			"smartlocker_count": "3",
+			"smartsync_count": "1",
+			"smartvault_count": 2,
+			"smartcenter_count": 1,
+		}
+
+		_apply_placeholder_machine_counts(loc, props)
+
+		self.assertEqual(
+			[r["machine_name"] for r in loc.rows("smartstation_details")],
+			[f"{TABLE_LABELS['smartstation_details']} {i}" for i in (1, 2)],
+		)
+		self.assertEqual(
+			[r["machine_name"] for r in loc.rows("smartlocker_details")],
+			[f"{TABLE_LABELS['smartlocker_details']} {i}" for i in (1, 2, 3)],
+		)
+		self.assertEqual(
+			[r["machine_name"] for r in loc.rows("smartsync_details")],
+			[f"{TABLE_LABELS['smartsync_details']} 1"],
+		)
+		self.assertEqual(
+			[r["machine_name"] for r in loc.rows("smartvault_details")],
+			[f"{TABLE_LABELS['smartvault_details']} {i}" for i in (1, 2)],
+		)
+		self.assertEqual(
+			[r["machine_name"] for r in loc.rows("smartcenter_details")],
+			[f"{TABLE_LABELS['smartcenter_details']} 1"],
+		)
+
+	def test_existing_rows_kept_and_only_missing_rows_appended(self):
+		"""2 existing rows + incoming count 4 -> exactly 2 appended, numbered 3 and 4"""
+		loc = _FakeLocation(
+			tables={
+				"smartstation_details": [
+					{"machine_name": "Renamed A"},
+					{"machine_name": "Renamed B"},
+				]
+			}
+		)
+
+		_apply_placeholder_machine_counts(loc, {"smartstation_count": 4})
+
+		rows = loc.rows("smartstation_details")
+		self.assertEqual(len(rows), 4)
+		self.assertEqual(rows[0], {"machine_name": "Renamed A"})
+		self.assertEqual(rows[1], {"machine_name": "Renamed B"})
+		self.assertEqual(rows[2]["machine_name"], f"{TABLE_LABELS['smartstation_details']} 3")
+		self.assertEqual(rows[3]["machine_name"], f"{TABLE_LABELS['smartstation_details']} 4")
+
+	def test_lower_count_never_removes_rows_and_logs(self):
+		"""Existing rows > incoming count -> no rows removed or added, info logged"""
+		existing = [{"machine_name": f"Real {i}"} for i in range(3)]
+		loc = _FakeLocation(tables={"smartstation_details": existing})
+
+		with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger") as mock_logger:
+			_apply_placeholder_machine_counts(loc, {"smartstation_count": 2})
+
+			self.assertEqual(loc.rows("smartstation_details"), existing)
+			mock_logger.return_value.info.assert_called_once()
+
+	def test_equal_count_adds_and_removes_nothing(self):
+		"""Existing rows == incoming count -> no change"""
+		existing = [{"machine_name": "Real 1"}, {"machine_name": "Real 2"}]
+		loc = _FakeLocation(tables={"smartstation_details": existing})
+
+		_apply_placeholder_machine_counts(loc, {"smartstation_count": "2"})
+
+		self.assertEqual(loc.rows("smartstation_details"), existing)
+
+	def test_non_numeric_and_blank_counts_treated_as_zero(self):
+		"""'TBD', '', None on string/number counts -> no rows, no exception"""
+		loc = _FakeLocation()
+		props = {
+			"smartlocker_count": "TBD",
+			"smartsync_count": "",
+			"smartstation_count": None,
+		}
+
+		with patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"):
+			_apply_placeholder_machine_counts(loc, props)
+
+		self.assertEqual(loc.rows("smartlocker_details"), [])
+		self.assertEqual(loc.rows("smartsync_details"), [])
+		self.assertEqual(loc.rows("smartstation_details"), [])
+
+	def test_missing_count_properties_add_nothing(self):
+		"""Site with no count properties at all -> no child rows generated"""
+		loc = _FakeLocation()
+
+		_apply_placeholder_machine_counts(loc, {})
+
+		for child_table in SITE_COUNT_FIELD_MAP.values():
+			self.assertEqual(loc.rows(child_table), [])
+
+
+class TestSyncSiteCoreCountPlaceholders(FrappeTestCase):
+	"""End-to-end: _sync_site_core builds placeholder rows from count props, not per-unit machines"""
+
+	def test_count_props_drive_rows_and_machine_fetching_is_bypassed(self):
+		site_props = {
+			"site_location_name": "Site A",
+			"smartstation_count": 2,
+			"smartlocker_count": "1",
+			"smartsync_count": "",
+			"smartvault_count": 0,
+			"smartcenter_count": 1,
+		}
+		fake_loc = _FakeLocation()
+
+		with (
+			patch(
+				"ivm.integrations.hubspot.deployment_site_handler.api.get_custom_object",
+				return_value={"properties": site_props},
+			) as mock_get_obj,
+			patch(
+				"ivm.integrations.hubspot.deployment_site_handler._fetch_site_machines"
+			) as mock_fetch_machines,
+			patch(
+				"ivm.integrations.hubspot.deployment_site_handler._apply_machine_data"
+			) as mock_apply_machines,
+			patch("ivm.integrations.hubspot.deployment_site_handler._apply_site_properties"),
+			patch("ivm.integrations.hubspot.deployment_site_handler.frappe.db.get_value", return_value=None),
+			patch("ivm.integrations.hubspot.deployment_site_handler.frappe.new_doc", return_value=fake_loc),
+			patch("ivm.integrations.hubspot.deployment_site_handler.frappe.logger"),
+		):
+			_sync_site_core("site-456", "Deal-001", trigger_deal_sync=False)
+
+		# Count properties requested alongside the existing site properties
+		requested = mock_get_obj.call_args.kwargs["properties"]
+		for hs_property in SITE_COUNT_FIELD_MAP:
+			self.assertIn(hs_property, requested)
+
+		# Per-unit machine fetch/apply path is dead code now
+		mock_fetch_machines.assert_not_called()
+		mock_apply_machines.assert_not_called()
+
+		# Placeholder rows generated from counts
+		self.assertEqual(
+			[r["machine_name"] for r in fake_loc.rows("smartstation_details")],
+			[f"{TABLE_LABELS['smartstation_details']} {i}" for i in (1, 2)],
+		)
+		self.assertEqual(
+			[r["machine_name"] for r in fake_loc.rows("smartlocker_details")],
+			[f"{TABLE_LABELS['smartlocker_details']} 1"],
+		)
+		self.assertEqual(fake_loc.rows("smartsync_details"), [])
+		self.assertEqual(fake_loc.rows("smartvault_details"), [])
+		self.assertEqual(
+			[r["machine_name"] for r in fake_loc.rows("smartcenter_details")],
+			[f"{TABLE_LABELS['smartcenter_details']} 1"],
+		)
+		fake_loc.insert.assert_called_once_with(ignore_permissions=True)
 
 
 class TestSyncMachine(FrappeTestCase):

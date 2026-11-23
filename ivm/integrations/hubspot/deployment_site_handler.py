@@ -10,6 +10,7 @@ from typing import Any
 
 import frappe
 
+from ivm.deals.constants import TABLE_LABELS
 from ivm.integrations.hubspot import api
 from ivm.integrations.hubspot.constants import (
 	BIN_FIELD_MAP,
@@ -20,6 +21,7 @@ from ivm.integrations.hubspot.constants import (
 	MACHINE_TYPE_TO_CHILD_DOCTYPE,
 	MACHINE_TYPE_TO_CHILD_TABLE,
 	MACHINE_TYPES_WITH_BINS,
+	SITE_COUNT_FIELD_MAP,
 	SITE_FIELD_MAP,
 )
 from ivm.integrations.hubspot.sync_utils import (
@@ -77,7 +79,7 @@ def sync_site(
 	hubspot_site_id: int | str,
 	attempt: int = 0,
 ) -> None:
-	"""Re-sync a deployment site (properties + machines + bins) into its Deployment Location."""
+	"""Re-sync a deployment site (properties + equipment-count-driven placeholder rows) into its Deployment Location."""
 	set_acting_user()
 	site_id_str = str(hubspot_site_id)
 
@@ -109,16 +111,14 @@ def _sync_site_core(
 	site_data = api.get_custom_object(
 		DEPLOYMENT_SITE_TYPE_ID,
 		hubspot_site_id,
-		properties=list(SITE_FIELD_MAP.keys()),
+		properties=list(SITE_FIELD_MAP.keys()) + list(SITE_COUNT_FIELD_MAP.keys()),
 	)
 	properties = site_data.get("properties", {})
-	machines = _fetch_site_machines(hubspot_site_id)
 
 	is_new = _upsert_location_from_webhook(
 		crm_deal_name,
 		hubspot_site_id,
 		properties,
-		machines,
 	)
 	frappe.logger(_LOG).info(f"Synced deployment site {hubspot_site_id} to CRM Deal {crm_deal_name}")
 
@@ -255,13 +255,61 @@ def _apply_machine_data(
 				loc.append(child_table, row)
 
 
+def _parse_count(raw_value: Any, hs_property: str) -> int:
+	"""Parse a HubSpot count property defensively. Two of the five
+	(smartlocker_count, smartsync_count) are HubSpot *string* properties, not
+	number, so blank/non-numeric input is common and must never crash the
+	sync. Returns 0 on anything unparseable, logging a warning when the raw
+	value was non-empty but not a clean non-negative integer.
+	"""
+	if raw_value is None:
+		return 0
+	text = str(raw_value).strip()
+	if not text:
+		return 0
+	if not text.isdigit():
+		frappe.logger(_LOG).warning(
+			f"HubSpot property '{hs_property}' has non-numeric value '{raw_value}' — treating as 0"
+		)
+		return 0
+	return int(text)
+
+
+def _apply_placeholder_machine_counts(loc: Any, site_properties: dict[str, Any]) -> None:
+	"""Ensure each machine child table has at least as many rows as HubSpot's
+	per-type count property says it should, appending placeholder rows (never
+	removing existing ones) with sequential names continuing from the current
+	row count. Deployers rename placeholders to real machine details later.
+	"""
+	for hs_property, child_table in SITE_COUNT_FIELD_MAP.items():
+		target_count = _parse_count(site_properties.get(hs_property), hs_property)
+		existing_rows = loc.get(child_table) or []
+		current_count = len(existing_rows)
+
+		if target_count < current_count:
+			frappe.logger(_LOG).info(
+				f"Deployment Location {getattr(loc, 'name', None) or '(new)'}: "
+				f"{hs_property}={target_count} is less than the {current_count} existing "
+				f"row(s) already in {child_table} — leaving existing rows untouched"
+			)
+			continue
+		if target_count == current_count:
+			continue
+
+		label = TABLE_LABELS.get(child_table, child_table)
+		for i in range(current_count + 1, target_count + 1):
+			loc.append(child_table, {"machine_name": f"{label} {i}"})
+
+
 def _upsert_location_from_webhook(
 	crm_deal_name: str,
 	hubspot_site_id: str,
 	site_properties: dict[str, Any],
-	machines: dict[str, list[dict[str, Any]]],
 ) -> bool:
-	"""Create or update a Deployment Location from webhook data.
+	"""Create or update a Deployment Location from HubSpot site data.
+
+	Applies mapped site properties, then ensures each machine child table has
+	placeholder rows matching HubSpot's per-type equipment count properties.
 
 	Returns True if a new Deployment Location was created, False if updated.
 	"""
@@ -285,7 +333,7 @@ def _upsert_location_from_webhook(
 	if not loc.location_name:
 		loc.location_name = f"Site {hubspot_site_id}"
 
-	_apply_machine_data(loc, machines)
+	_apply_placeholder_machine_counts(loc, site_properties)
 
 	if existing_name:
 		save_doc(loc, "site")

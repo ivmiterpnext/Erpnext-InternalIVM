@@ -22,27 +22,10 @@ class TestGenerateWebhookSubscriptions(unittest.TestCase):
 		}
 
 		# Map type IDs to object type names (same logic as generator)
-		from ivm.integrations.hubspot.constants import (
-			BIN_ASSOCIATION_KEY,
-			BIN_TYPE_ID,
-			CALL_TYPE_ID,
-			COMPANY_TYPE_ID,
-			CONTACT_TYPE_ID,
-			DEAL_TYPE_ID,
-			DEPLOYMENT_SITE_ASSOCIATION_KEY,
-			DEPLOYMENT_SITE_TYPE_ID,
-			EMAIL_TYPE_ID,
-			MACHINE_TYPE_TO_ASSOCIATION_KEY,
-			MEETING_TYPE_ID,
-			NOTE_TYPE_ID,
-			SMARTCENTER_TYPE_ID,
-			SMARTLOCKER_TYPE_ID,
-			SMARTSTATION_TYPE_ID,
-			SMARTSYNC_TYPE_ID,
-			SMARTVAULT_TYPE_ID,
-			TASK_TYPE_ID,
-		)
+		from ivm.integrations.hubspot.constants import DEPLOYMENT_SITE_ASSOCIATION_KEY
 
+		# Per-unit machine and bin object types were disconnected from SYNC_TARGETS,
+		# so they no longer get object.creation subscriptions.
 		expected_names = {
 			"DEAL",
 			"CONTACT",
@@ -53,9 +36,7 @@ class TestGenerateWebhookSubscriptions(unittest.TestCase):
 			"TASK",
 			"MEETING_EVENT",
 			DEPLOYMENT_SITE_ASSOCIATION_KEY,
-			BIN_ASSOCIATION_KEY,
 		}
-		expected_names.update(MACHINE_TYPE_TO_ASSOCIATION_KEY.values())
 
 		self.assertEqual(creation_entries, expected_names)
 

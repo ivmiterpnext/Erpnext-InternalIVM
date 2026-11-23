@@ -78,21 +78,17 @@ class TestRoute(FrappeTestCase):
 		with patch("ivm.integrations.hubspot.routing.enqueue_sync", return_value="queued"):
 			self.assertEqual(routing.route(DEPLOYMENT_SITE_TYPE_ID, "5"), "enqueued")
 
-	def test_bin_always_enqueues_no_gate(self):
-		with patch("ivm.integrations.hubspot.routing.enqueue_sync", return_value="queued"):
-			self.assertEqual(routing.route(BIN_TYPE_ID, "11"), "enqueued")
+	def test_bin_is_unhandled_after_disconnect(self):
+		"""Bin object type removed from routing -> unhandled, nothing enqueued."""
+		with patch("ivm.integrations.hubspot.routing.enqueue_sync") as mock_enqueue:
+			self.assertEqual(routing.route(BIN_TYPE_ID, "11"), "unhandled")
+			mock_enqueue.assert_not_called()
 
-	def test_machine_kwargs_include_type_id(self):
-		"""A machine type's sync target closes over its own type ID."""
-		with patch("ivm.integrations.hubspot.routing.enqueue_sync", return_value="queued") as mock_enqueue:
-			routing.route(SMARTSTATION_TYPE_ID, "9")
-			mock_enqueue.assert_called_once_with(
-				"ivm.integrations.hubspot.deployment_site_handler.sync_machine",
-				SMARTSTATION_TYPE_ID,
-				"9",
-				machine_type_id=SMARTSTATION_TYPE_ID,
-				hubspot_machine_id="9",
-			)
+	def test_machine_is_unhandled_after_disconnect(self):
+		"""Per-unit machine object types removed from routing -> unhandled, nothing enqueued."""
+		with patch("ivm.integrations.hubspot.routing.enqueue_sync") as mock_enqueue:
+			self.assertEqual(routing.route(SMARTSTATION_TYPE_ID, "9"), "unhandled")
+			mock_enqueue.assert_not_called()
 
 	def test_engagement_kwargs_include_engagement_type_id(self):
 		"""An engagement type's sync target closes over its own type ID."""

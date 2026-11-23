@@ -17,7 +17,6 @@ from typing import NamedTuple
 import frappe
 
 from ivm.integrations.hubspot.constants import (
-	BIN_TYPE_ID,
 	COMPANY_TYPE_ID,
 	CONTACT_TYPE_ID,
 	DEAL_TYPE_ID,
@@ -25,7 +24,6 @@ from ivm.integrations.hubspot.constants import (
 	ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID,
 	HUBSPOT_COMPANY_ID_FIELD,
 	HUBSPOT_CONTACT_ID_FIELD,
-	MACHINE_TYPE_TO_CHILD_TABLE,
 )
 from ivm.integrations.hubspot.sync_utils import enqueue_sync
 
@@ -71,15 +69,6 @@ def _id_kwarg(key: str) -> Callable[[str], dict]:
 	return _builder
 
 
-def _machine_kwargs(machine_type_id: str) -> Callable[[str], dict]:
-	"""Return a kwargs builder for a specific machine type ID."""
-
-	def _builder(object_id: str) -> dict:
-		return {"machine_type_id": machine_type_id, "hubspot_machine_id": object_id}
-
-	return _builder
-
-
 def _engagement_kwargs(engagement_type_id: str) -> Callable[[str], dict]:
 	"""Return a kwargs builder for a specific engagement object type ID."""
 
@@ -110,19 +99,7 @@ SYNC_TARGETS: dict[str, SyncTarget] = {
 		kwargs_builder=_id_kwarg("hubspot_site_id"),
 		gate=_always,
 	),
-	BIN_TYPE_ID: SyncTarget(
-		method=f"{_HANDLER_PREFIX}.deployment_site_handler.sync_bin",
-		kwargs_builder=_id_kwarg("hubspot_bin_id"),
-		gate=_always,
-	),
 }
-
-for _machine_type_id in MACHINE_TYPE_TO_CHILD_TABLE:
-	SYNC_TARGETS[_machine_type_id] = SyncTarget(
-		method=f"{_HANDLER_PREFIX}.deployment_site_handler.sync_machine",
-		kwargs_builder=_machine_kwargs(_machine_type_id),
-		gate=_always,
-	)
 
 for _engagement_type_id in ENGAGEMENT_TYPE_BY_OBJECT_TYPE_ID:
 	SYNC_TARGETS[_engagement_type_id] = SyncTarget(

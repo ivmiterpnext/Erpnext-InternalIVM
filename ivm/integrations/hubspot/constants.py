@@ -263,14 +263,17 @@ CONTACT_PROPERTIES: list[str] = [*CONTACT_FIELD_MAP, *CONTACT_ADDRESS_PROPERTIES
 # HubSpot deployment site property to Deployment Location field
 SITE_FIELD_MAP: dict[str, str] = {
 	"site_location_name": "location_name",
-	"locale": "locale",
-	"ior": "ior",
-	"install_type": "install_type",
-	"expedited_delivery": "expedited_delivery",
-	"shipping_address": "shipping_address",
-	"billing_address": "billing_address",
-	"po_and_tracking": "po_and_tracking",
-	"wrap_type": "wrap_type",
+	"site_address": "shipping_address",
+}
+
+# HubSpot deployment site per-type equipment count property to the Deployment
+# Location child table it drives placeholder-row generation for.
+SITE_COUNT_FIELD_MAP: dict[str, str] = {
+	"smartstation_count": "smartstation_details",
+	"smartlocker_count": "smartlocker_details",
+	"smartsync_count": "smartsync_details",
+	"smartvault_count": "smartvault_details",
+	"smartcenter_count": "smartcenter_details",
 }
 
 # Shared fields common to most machine types
