@@ -556,7 +556,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "related_project.address",
+   "fetch_from": "related_project.custom_shipping_address",
    "fieldname": "shipping_address",
    "fieldtype": "Small Text",
    "label": "Shipping Address"

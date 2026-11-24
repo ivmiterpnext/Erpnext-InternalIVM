@@ -362,6 +362,7 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 				"customer": customer.name,
 				"icorp_client_id": client.name,
 				"company": COMPANY,
+				"custom_shipping_address": "1 Test Way, Testville",
 			}
 		)
 		project.insert(ignore_permissions=True)
@@ -428,6 +429,7 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 				"customer": customer.name,
 				"icorp_client_id": client.name,
 				"company": COMPANY,
+				"custom_shipping_address": "1 Test Way, Testville",
 			}
 		)
 		project.insert(ignore_permissions=True)
@@ -484,6 +486,7 @@ class TestCreateBuildRequestsFromDetailRows(ERPNextTestSuite):
 				"customer": customer.name,
 				"icorp_client_id": client.name,
 				"company": COMPANY,
+				"custom_shipping_address": "1 Test Way, Testville",
 			}
 		)
 		project.insert(ignore_permissions=True)

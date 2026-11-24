@@ -70,3 +70,5 @@ ivm.deployments.patches.drop_project_custom_master_customer
 ivm.patches.drop_crm_deal_master_customer_columns
 ivm.patches.backfill_customer_icorp_client_ids
 ivm.patches.drop_customer_icorp_client_id_column
+ivm.deployments.patches.drop_project_shipping_address_column
+ivm.patches.disable_legacy_ics_notifications

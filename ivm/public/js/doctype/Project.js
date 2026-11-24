@@ -50,12 +50,6 @@ frappe.ui.form.on("Project", {
 	},
 
 	onload: function (frm) {
-		frm.set_query("shipping_address", function () {
-			return {
-				filters: [["Address", "address_type", "=", "Shipping"]],
-			};
-		});
-
 		frm.set_query("icorp_client_id", () => ({
 			query: "ivm.deployments.services.deployment_clients.deployable_client_query",
 			filters: { customer: frm.doc.customer },
@@ -426,6 +420,14 @@ function updateSelectFieldOptions(frm, fieldname, optionsData) {
 }
 
 function _generate_build_requests(frm, detail_table, label) {
+	if (!frm.doc.custom_shipping_address) {
+		frappe.msgprint(
+			__(
+				"Shipping Address is not set on this Project. Please set it before generating build requests."
+			)
+		);
+		return;
+	}
 	const rows = frm.doc[detail_table] || [];
 	if (!rows.length) {
 		frappe.msgprint(__(`No ${label} rows found on this deployment.`));

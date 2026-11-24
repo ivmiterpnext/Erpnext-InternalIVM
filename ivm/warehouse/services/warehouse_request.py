@@ -113,6 +113,10 @@ def create_build_requests_from_detail_rows(project_name: str, detail_table: str)
 			"iCorp Client is not set on this deployment. "
 			"Please set it on the Project before generating build requests."
 		)
+	if not project.get("custom_shipping_address"):
+		frappe.throw(
+			"Shipping Address is not set on this Project. Please set it before generating build requests."
+		)
 
 	fields_to_copy = _COMMON_DETAIL_FIELDS + config.extra_fields
 
