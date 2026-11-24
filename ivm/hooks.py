@@ -385,6 +385,7 @@ jinja = {
 
 override_doctype_class = {
 	"Email Account": "ivm.support.overrides.CustomEmailAccount",
+	"Connected App": "ivm.overrides.connected_app_token_refresh.CustomConnectedApp",
 }
 # Document Events
 # ---------------
@@ -488,6 +489,7 @@ scheduler_events = {
 override_whitelisted_methods = {
 	"frappe.desk.search.get_value": "ivm.machine_hardware_management.overrides.virtual_get_value.virtual_get_value",
 	"frappe.realtime.has_permission": "ivm.overrides.realtime_permission.has_permission",
+	"frappe.integrations.doctype.connected_app.connected_app.callback": "ivm.overrides.connected_app_callback_lock.callback",
 }
 #
 # each overriding function accepts a `data` argument;
