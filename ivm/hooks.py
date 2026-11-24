@@ -395,7 +395,7 @@ doc_events = {
 		"before_validate": "ivm.client_portal.event_handlers.user.enforce_portal_user_roles",
 	},
 	"Communication": {
-		"before_validate": "ivm.support.event_handlers.communication.sanitize_malformed_cc_quotes",
+		"before_validate": "ivm.support.event_handlers.communication.sanitize_email_header_fields",
 		"on_update": "ivm.support.event_handlers.communication.on_update",
 	},
 	"Item": {"before_save": "ivm.warehouse.event_handlers.item.before_save"},

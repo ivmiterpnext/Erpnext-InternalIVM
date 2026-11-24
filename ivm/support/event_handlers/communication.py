@@ -6,6 +6,13 @@ from ivm.support.utils import fetch_customer_name_and_contact
 
 SUPPORT_ISSUE_TYPES = ["IT", "Support", "Receivable", "Reconfiguration", "Vending Management"]
 
+# RFC 5322 header folding: a line break followed by horizontal whitespace is a
+# continuation, not a real separator — collapse to a single space.
+_FOLDING_WHITESPACE_PATTERN = re.compile(r"[\r\n]+[ \t]+")
+# Defensive: collapse any leftover bare CR/LF not part of a proper fold too,
+# so a raw newline can never reach email.utils.getaddresses().
+_STRAY_NEWLINE_PATTERN = re.compile(r"[\r\n]+")
+
 
 def on_update(doc, method):
 	if doc.reference_doctype != "Issue":
@@ -63,11 +70,35 @@ def on_update(doc, method):
 		frappe.log_error(frappe.get_traceback(), "ivm.support.event_handlers.communication.on_update error")
 
 
-def sanitize_malformed_cc_quotes(doc, method):
+def sanitize_email_header_fields(doc, method):
+	"""before_validate hook: normalize recipients/cc/bcc before
+	Communication.validate() calls set_timeline_links() -> get_contacts()
+	-> email.utils.getaddresses().
+
+	Fixes two independent malformed-header classes seen in incoming mail:
+	1. RFC 5322 header folding left un-collapsed (continuation lines stored
+	   with the literal \\n/\\t still in the field), e.g.
+	   '"Danielle\\n Lanteigne" <d_lanteigne@ivminc.com>'. Python 3.13+'s
+	   stricter email.utils.getaddresses mis-splits these, producing a
+	   corrupted standalone token ('Danielle') that then fails Contact
+	   auto-creation's email validation.
+	2. Stray mismatched quotes not wrapping a full "Name" <addr> pair
+	   (pre-existing fix, logic unchanged, renamed only).
+
+	Order matters: unfold first, so _strip_stray_quotes operates on
+	single-line, already-sane input.
+	"""
 	for field in ("recipients", "cc", "bcc"):
 		value = doc.get(field)
 		if value:
-			doc.set(field, _strip_stray_quotes(value))
+			value = _unfold_header_whitespace(value)
+			value = _strip_stray_quotes(value)
+			doc.set(field, value)
+
+
+def _unfold_header_whitespace(email_str):
+	unfolded = _FOLDING_WHITESPACE_PATTERN.sub(" ", email_str)
+	return _STRAY_NEWLINE_PATTERN.sub(" ", unfolded)
 
 
 def _strip_stray_quotes(email_str):
