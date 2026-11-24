@@ -12,7 +12,7 @@ from ivm.machine_hardware_management.doctype.icorp_client_link.icorp_client_link
 def execute():
 	customers = frappe.get_all(
 		"iCorp Client Link",
-		filters={"customer": ["not in", ["", None]]},
+		filters={"customer": ["is", "set"]},
 		pluck="customer",
 		distinct=True,
 	)
