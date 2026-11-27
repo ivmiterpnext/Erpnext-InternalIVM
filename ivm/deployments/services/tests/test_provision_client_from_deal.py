@@ -1,6 +1,6 @@
 """Integration tests for ivm.deployments.services.provision_client_from_deal (contact helpers)"""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import frappe
 from erpnext.tests.utils import ERPNextTestSuite
@@ -9,6 +9,8 @@ from ivm.deployments.services.provision_client_from_deal import (
 	_link_contact_to_customer,
 	get_primary_contact,
 )
+from ivm.integrations.hubspot.constants import CONTACT_TYPE_ID
+from ivm.integrations.hubspot.sync_utils import SyncLockBusy
 
 
 def _ensure_deal_status(status):
@@ -99,6 +101,65 @@ class TestLinkContactToCustomer(ERPNextTestSuite):
 		_link_contact_to_customer(contact, customer)
 		_link_contact_to_customer(contact, customer)
 
+		fresh = frappe.get_doc("Contact", contact.name)
+		matches = [
+			link for link in fresh.links if link.link_doctype == "Customer" and link.link_name == customer
+		]
+		self.assertEqual(len(matches), 1)
+
+	def test_lock_busy_propagates_sync_lock_busy_and_does_not_save(self):
+		contact = _make_contact("Locked LCC")
+		contact.custom_hubspot_contact_id = "900001"
+		customer = _make_customer(f"Locked LCC Co {frappe.generate_hash(length=6)}").name
+		lock = MagicMock()
+		lock.acquire.return_value = False
+
+		with patch.object(frappe.cache, "lock", return_value=lock) as lock_factory:
+			with patch("ivm.deployments.services.provision_client_from_deal.save_doc") as save_mock:
+				with self.assertRaises(SyncLockBusy) as ctx:
+					_link_contact_to_customer(contact, customer)
+
+		self.assertEqual(ctx.exception.object_type_id, CONTACT_TYPE_ID)
+		self.assertEqual(ctx.exception.object_id, "900001")
+		lock_factory.assert_called_once()
+		lock.acquire.assert_called_once()
+		lock.release.assert_not_called()
+		save_mock.assert_not_called()
+
+	def test_locks_and_releases_around_link_when_hubspot_id_set(self):
+		contact = _make_contact("Locked OK LCC")
+		contact.custom_hubspot_contact_id = "900002"
+		customer = _make_customer(f"Locked OK LCC Co {frappe.generate_hash(length=6)}").name
+		lock = MagicMock()
+		lock.acquire.return_value = True
+		call_order = []
+		lock.acquire.side_effect = lambda: call_order.append("acquire") or True
+		lock.release.side_effect = lambda: call_order.append("release")
+
+		with patch.object(frappe.cache, "lock", return_value=lock) as lock_factory:
+			_link_contact_to_customer(contact, customer)
+
+		lock_factory.assert_called_once()
+		lock_key = lock_factory.call_args.args[0]
+		if isinstance(lock_key, bytes):
+			lock_key = lock_key.decode()
+		self.assertIn(f"hubspot_sync_lock:{CONTACT_TYPE_ID}:900002", lock_key)
+		self.assertEqual(call_order, ["acquire", "release"])
+
+		fresh = frappe.get_doc("Contact", contact.name)
+		matches = [
+			link for link in fresh.links if link.link_doctype == "Customer" and link.link_name == customer
+		]
+		self.assertEqual(len(matches), 1)
+
+	def test_no_lock_attempted_when_contact_has_no_hubspot_id(self):
+		contact = _make_contact("Non-HS LCC")
+		customer = _make_customer(f"Non-HS LCC Co {frappe.generate_hash(length=6)}").name
+
+		with patch.object(frappe.cache, "lock") as lock_factory:
+			_link_contact_to_customer(contact, customer)
+
+		lock_factory.assert_not_called()
 		fresh = frappe.get_doc("Contact", contact.name)
 		matches = [
 			link for link in fresh.links if link.link_doctype == "Customer" and link.link_name == customer
